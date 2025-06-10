@@ -1,250 +1,128 @@
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-# ASPY 🐳
+<p align="center">
+<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
 
-Este proyecto incluye:
+## How to run with docker
 
-- PHP 8.2 con Laravel
-- PostgreSQL 13
-- Nginx
-- PgAdmin 4
-- Soporte para frontend 
-
----
-
-## 📦 Requisitos
-
-- [Docker](https://www.docker.com/products/docker-desktop)
-- [Git](https://git-scm.com/)
-- [Composer](https://getcomposer.org/)
-- [Node.js & npm](https://nodejs.org/) (para compilar assets si usas Breeze/Jetstream)
-
----
-
-## 🚀 Clonado e inicialización
-
-```bash
-# 1. Clonar el repositorio
-git clone https://github.com/Aspy-Ecuador/Aspy
-cd aspy
-
-# 2. Levantar los servicios con Docker
-docker-compose up -d --build
-
-# 3. Ingresar al contenedor PHP (necesario para ejecutar comandos Artisan o Composer)
-docker-compose exec php bash
-```
-
----
-
-## 🧱 ¿Por qué usar el contenedor PHP?
-
-Laravel se ejecuta **dentro del contenedor PHP**, por eso debes usar:
-
-- `docker-compose exec php bash` para ingresar
-- `php artisan ...` desde ahí
-- `composer install`, `migrate`, `tinker`, etc. deben hacerse **dentro del contenedor**
-
-### Cuándo sí necesitas estar **dentro del contenedor**:
-- Para usar `php artisan`
-- Para instalar dependencias con `composer`
-- Para ejecutar seeders, migraciones, tinker
-- Para correr tests u otros comandos PHP
-
-### Cuándo puedes trabajar desde **tu máquina local**:
-- Editar archivos de código (Laravel, frontend)
-- Usar Git, VSCode, navegar en PgAdmin o el navegador web
-- Enviar requests con Postman o desde tu app React
-
----
-
-## ⚙️ Configuración de Laravel
-
-Dentro del contenedor PHP:
-
-```bash
-cd /var/www/aspy
-
-# Instalar dependencias
-composer install
-
-# Copiar .env si no existe
-cp .env.example .env
-
-# Generar clave
-php artisan key:generate
-
-# Ejecutar migraciones
-php artisan migrate
-
-#  Ejecutar seeders
-php artisan db:seed
-```
-
----
-
-## 🌐 Acceso a servicios
-
-| Servicio       | URL                           |
-|----------------|-------------------------------|
-| Laravel App    | http://localhost:8080         |
-| PgAdmin        | http://localhost:5050         |
-
-> **PgAdmin credenciales**:
-> - Email: `admin@admin.com`
-> - Password: `admin`
-
----
-
-## 🛡 Conexión a PostgreSQL desde PgAdmin
-
-1. Ir a http://localhost:5050
-2. Iniciar sesión
-3. Registrar un nuevo servidor con:
-
-| Campo                  | Valor           |
-|------------------------|-----------------|
-| Nombre/Dirección       | Aspy-DB         |
-| Host name / address    | `db`            |
-| Puerto                 | `5432`          |
-| Base de datos          | `laravel`       |
-| Usuario                | `postgres`      |
-| Contraseña             | `postgres`      |
-
-> ⚠️ La base `postgres` es administrativa. Laravel usa `laravel`.
-
----
-
-## 🧑‍💻 Desarrollo en Laravel
-
-### Crear rutas
-
-Edita el archivo `routes/web.php`:
-
-```php
-Route::get('/', function () {
-    return view('welcome');
-});
-```
-
-### Crear un controlador
-
-```bash
-php artisan make:controller HomeController
-```
-
-Y luego define la ruta:
-
-```php
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index']);
-```
-
-### Crear vistas
-
-Guarda archivos Blade en `resources/views`. Ejemplo: `home.blade.php`
-
-```php
-<!-- resources/views/home.blade.php -->
-<h1>Bienvenido a la página de inicio</h1>
-```
-
-### Crear modelos y migraciones
-
-```bash
-php artisan make:model Producto -m
-```
-
-Esto genera el modelo y la migración. Edita el archivo en `database/migrations/` y luego:
-
-```bash
-php artisan migrate
-```
-
----
-
-## 🔐 Rutas protegidas con Sanctum (API)
-
-### 1. Instalar Sanctum
-
-```bash
-composer require laravel/sanctum
-php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
-php artisan migrate
-```
-
-### 2. Middleware en `app/Http/Kernel.php`
-
-```php
-'api' => [
-    \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-    'throttle:api',
-    \Illuminate\Routing\Middleware\SubstituteBindings::class,
-],
-```
-
-### 3. Crear rutas en `routes/api.php`
-
-```php
-use App\Http\Controllers\AuthController;
-
-Route::post('/login', [AuthController::class, 'login']);
-Route::middleware('auth:sanctum')->get('/user', [AuthController::class, 'user']);
-Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
-```
-
-### 4. Desde React o Postman
-
-Envía un `POST /api/login` con email y password.  
-Luego usa el token recibido en las siguientes peticiones:
+You need to install docker & run the next command to boot up the server:
 
 ```
-Authorization: Bearer TU_TOKEN
+docker-compose up --build
 ```
 
----
+To delete the container & volumens
 
-## 🧼 Comandos útiles
+```
+docker-compose down -v
+```
 
-```bash
-# Ver contenedores activos
-docker ps
+In case you can't connect to the db, try this:
 
-# Ver logs
-docker logs aspy        # Laravel backend
-docker logs nginx       # Nginx
-docker logs aspy-db     # PostgreSQL
+```
+docker network inspect laravel
+docker exec -it aspy-pgadmin ping db
+```
 
-# Detener y reiniciar todo
+If doesn't ping, means there is no connection, TRY this (delete the folder data)
+```
+rmdir ../postgresql/data    
+```
+
+Reboot your containers
+```
 docker-compose down -v
 docker-compose up -d --build
-
-# Limpiar cachés de Laravel
-php artisan config:clear
-php artisan cache:clear
-php artisan view:clear
 ```
 
----
+Verify again the connection & try again doing in pdgadmin
+```
+docker network inspect laravel
+docker exec -it aspy-pgadmin ping db
+```
 
-## 🧠 Notas adicionales
+In case of other errors, do the following inside your app cointainer, you must have php & composer installed on your system:
+```
+composer clear-cache
+```
 
-- Si tienes errores de permisos:
-  ```bash
-  chmod -R 775 storage bootstrap/cache
-  chown -R www-data:www-data storage bootstrap/cache
-  ```
+## How to see UI API documentacion
 
-- Puedes conectar Laravel con PostgreSQL configurando `.env` con:
-  ```
-  DB_CONNECTION=pgsql
-  DB_HOST=db
-  DB_PORT=5432
-  DB_DATABASE=laravel
-  DB_USERNAME=postgres
-  DB_PASSWORD=postgres
-  ```
+You need to have dev dependencies and run this command after booting the local server & db (or docker compose file in case you use it):
 
----
+```
+docker exec -it aspy php artisan scribe:generate
+```
 
-## ✨ ¡Listo para comenzar!
+in only use:
+```
+php artisan scribe:generate
+```
 
-Empieza creando tus rutas, controladores, vistas, migraciones y autenticación. Laravel ya está conectado a PostgreSQL y funcionando sobre Docker 🚀
+To access docs use this route
+
+```
+BASE_URL/docs
+```
+
+## About Laravel
+
+Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+
+- [Simple, fast routing engine](https://laravel.com/docs/routing).
+- [Powerful dependency injection container](https://laravel.com/docs/container).
+- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+- [Robust background job processing](https://laravel.com/docs/queues).
+- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+
+Laravel is accessible, powerful, and provides tools required for large, robust applications.
+
+## Learning Laravel
+
+Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+
+You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+
+If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+
+## Laravel Sponsors
+
+We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+
+### Premium Partners
+
+- **[Vehikl](https://vehikl.com/)**
+- **[Tighten Co.](https://tighten.co)**
+- **[WebReinvent](https://webreinvent.com/)**
+- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
+- **[64 Robots](https://64robots.com)**
+- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
+- **[Cyber-Duck](https://cyber-duck.co.uk)**
+- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
+- **[Jump24](https://jump24.co.uk)**
+- **[Redberry](https://redberry.international/laravel/)**
+- **[Active Logic](https://activelogic.com)**
+- **[byte5](https://byte5.de)**
+- **[OP.GG](https://op.gg)**
+
+## Contributing
+
+Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+
+## Code of Conduct
+
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+
+## Security Vulnerabilities
+
+If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+
+## License
+
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
