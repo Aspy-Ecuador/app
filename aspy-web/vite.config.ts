@@ -27,5 +27,5 @@ export default defineConfig({
       "@buttons": "/src/components/buttons",
     },
   },
-  base: '/ASPY/aspy-web/',
+  base: '/ASPY/frontend/',
 });
