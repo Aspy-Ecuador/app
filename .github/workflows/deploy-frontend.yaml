@@ -3,12 +3,24 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - frontend # Rama que dispara el workflow
+      - frontend
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+      actions: write
+      checks: write
+      deployments: write
+      statuses: write
+      pull-requests: write
+      issues: write
+      discussions: write
+      
     steps:
     # Paso 1: Checkout del código
     - name: Checkout code
