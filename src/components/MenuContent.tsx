@@ -102,11 +102,11 @@ export default function MenuContent() {
         {mainListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: "block" }}>
             <ListItemButton
-              onClick={() => navigate(item.route)}
+              onClick={() => navigate(`/Aspy${item.route}`)}
               selected={
-                item.route === "/"
-                  ? window.location.pathname === item.route
-                  : window.location.pathname.startsWith(item.route)
+                item.route === "/Aspy/"
+                ? window.location.pathname === `/Aspy${item.route}`
+                : window.location.pathname.startsWith(`/Aspy${item.route}`)
               }
             >
               <ListItemIcon>{item.icon}</ListItemIcon>
@@ -119,11 +119,11 @@ export default function MenuContent() {
         {secondaryListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: "block" }}>
             <ListItemButton
-              onClick={() => navigate(item.route)}
+              onClick={() => navigate(`/Aspy${item.route}`)}
               selected={
-                item.route === "/"
-                  ? window.location.pathname === item.route
-                  : window.location.pathname.startsWith(item.route)
+              item.route === "/Aspy/"
+                ? window.location.pathname === `/Aspy${item.route}`
+                : window.location.pathname.startsWith(`/Aspy${item.route}`)
               }
             >
               <ListItemIcon>{item.icon}</ListItemIcon>

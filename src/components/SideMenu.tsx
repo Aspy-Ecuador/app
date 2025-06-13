@@ -8,7 +8,6 @@ import Typography from "@mui/material/Typography";
 import SelectContent from "./SelectContent";
 import MenuContent from "./MenuContent";
 import OptionsMenu from "./OptionsMenu";
-import ColorModeToggle from "@shared-theme/ColorModeToggle";
 import ThemedLogo from "@shared-theme/ThemedLogo";
 import { getAuthenticatedUserName, getAuthenticatedUserEmail } from "@store";
 
@@ -93,7 +92,7 @@ export default function SideMenu() {
         </Box>
 
         <OptionsMenu />
-        <ColorModeToggle />
+        
       </Stack>
     </Drawer>
   );

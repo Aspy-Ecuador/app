@@ -27,14 +27,14 @@ const RoleBasedRoutes = () => {
   return (
     <Route
       element={
-        <AppTheme themeComponents={xThemeComponents}>
-          <CssBaseline enableColorScheme />
-          <Layout />
-        </AppTheme>
+      <AppTheme themeComponents={xThemeComponents}>
+        <CssBaseline enableColorScheme />
+        <Layout />
+      </AppTheme>
       }
     >
       {routes.map((route, i) => (
-        <Route key={i} path={route.path} element={route.element} />
+      <Route key={i} path={`/Aspy${route.path}`} element={route.element} />
       ))}
     </Route>
   );
