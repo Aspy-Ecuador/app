@@ -17,7 +17,7 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "noEmit": true,
-    "types": ["jest", "node", "vite/client"],  // Add vite/client here
+    "types": ["jest", "node", "vite/client"],
     "typeRoots": ["./node_modules/@types/", "./types", "./node_modules"],
     "baseUrl": ".",  // Enable baseUrl for path resolution
     "paths": {
