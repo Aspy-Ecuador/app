@@ -30,5 +30,5 @@ export default defineConfig({
   build: {
     outDir: 'dist', // Especifica la carpeta de salida
   },
-  base: '/Aspy/', // Aquí se debe poner el nombre del repositorio en GitHub
+  base: '/app/', // Aquí se debe poner el nombre del repositorio en GitHub
 });

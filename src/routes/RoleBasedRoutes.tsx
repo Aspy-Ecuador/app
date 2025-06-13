@@ -34,7 +34,7 @@ const RoleBasedRoutes = () => {
       }
     >
       {routes.map((route, i) => (
-      <Route key={i} path={`/Aspy${route.path}`} element={route.element} />
+      <Route key={i} path={`/app${route.path}`} element={route.element} />
       ))}
     </Route>
   );

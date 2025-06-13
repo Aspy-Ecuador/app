@@ -1,5 +1,3 @@
-import React from "react";
-
 const NotFound = () => {
   return (
     <div
@@ -24,7 +22,7 @@ const NotFound = () => {
         style={{ width: "300px", maxWidth: "80vw", marginBottom: "2rem", borderRadius: "12px" }}
       />
       <button
-        onClick={() => (window.location.href = "/Aspy/")}
+        onClick={() => (window.location.href = "/app/")}
         style={{
           padding: "0.75rem 2rem",
           fontSize: "1rem",
