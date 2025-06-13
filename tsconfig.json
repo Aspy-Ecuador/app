@@ -5,8 +5,8 @@
     { "path": "./tsconfig.node.json" }
   ],
   "compilerOptions": {
-    "jsx": "react-jsx", // ✅ Esto habilita JSX con React 17+ (o usa "react" si es más antiguo)
-    "esModuleInterop": true, // ✅ Recomendado por ts-jest
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
     "module": "ESNext",
     "target": "ESNext",
     "moduleResolution": "Node",
@@ -17,8 +17,12 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "noEmit": true,
-    "types": ["jest", "node"], // ✅ Muy importante para que Jest y Node sean reconocidos
-    "typeRoots": ["./node_modules/@types", "./types"]
+    "types": ["jest", "node", "vite/client"],  // Add vite/client here
+    "typeRoots": ["./node_modules/@types", "./types"],
+    "baseUrl": ".",  // Enable baseUrl for path resolution
+    "paths": {
+      "@assets/*": ["src/assets/*"]  // Define alias for assets
+    }
   },
   "include": ["src", "jest.setup.ts"]
 }
