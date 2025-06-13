@@ -63,8 +63,8 @@ const App = () => {
         <DocumentTitleUpdater />
         <Routes>
           {/* Rutas públicas sin layout */}
-          <Route path="/login" element={<SignInSide />} />
-          <Route path="/register" element={<SignUp />} />
+          <Route path="/app/login" element={<SignInSide />} />
+          <Route path="/app/register" element={<SignUp />} />
           {/* Rutas privadas basadas en el rol */}
           {RoleBasedRoutes()}
 

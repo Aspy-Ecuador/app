@@ -172,7 +172,7 @@ export default function SignInCard() {
         <Typography sx={{ textAlign: "center" }}>
           ¿No tienes una cuenta?{" "}
           <span>
-            <Link onClick={() => navigate("/register")} component="button">
+            <Link onClick={() => navigate("/app/register")} component="button">
               Regístrate
             </Link>
           </span>

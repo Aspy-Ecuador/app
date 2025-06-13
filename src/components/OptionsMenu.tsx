@@ -30,11 +30,11 @@ export default function OptionsMenu() {
   };
 
   const handleProfile = () => {
-    navigate('/perfil');
+    navigate('/app/perfil');
   };
 
   const handleLogout = () => {
-    navigate('/login');
+    navigate('/app/login');
   };
   return (
     <React.Fragment>

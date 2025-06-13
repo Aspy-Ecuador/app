@@ -45,7 +45,7 @@ export default function FormView({
   const handleClose = () => {
     setOpen(false);
     if (isRegister) {
-      navigate("/login");
+      navigate("/app/login");
     } else {
       navigate(-1);
     }

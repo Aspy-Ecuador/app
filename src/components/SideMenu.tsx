@@ -9,6 +9,7 @@ import SelectContent from "./SelectContent";
 import MenuContent from "./MenuContent";
 import OptionsMenu from "./OptionsMenu";
 import ThemedLogo from "@shared-theme/ThemedLogo";
+import ColorModeToggle from "@shared-theme/ColorModeToggle";
 import { getAuthenticatedUserName, getAuthenticatedUserEmail } from "@store";
 
 const drawerWidth = 240;
@@ -73,12 +74,6 @@ export default function SideMenu() {
           borderColor: "divider",
         }}
       >
-        <Avatar
-          sizes="small"
-          alt="Riley Carter"
-          src="/static/images/avatar/7.jpg"
-          sx={{ width: 36, height: 36 }}
-        />
         <Box sx={{ mr: "auto" }}>
           <Typography
             variant="body2"
@@ -91,6 +86,7 @@ export default function SideMenu() {
           </Typography>
         </Box>
 
+        <ColorModeToggle />
         <OptionsMenu />
         
       </Stack>
