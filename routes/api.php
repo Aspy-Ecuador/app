@@ -42,55 +42,15 @@ use App\Http\Controllers\{
     AppointmentStatusController,
 };
 
-
+Route::get('/login', function () { 
+    return response()->json(['message' => 'Unauthorized, Redirected to Login']);
+})->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->get('/user', [AuthController::class, 'user']);
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 
-Route::get('test', function () {
-    return response()->json(['message' => 'API is working']);
-});
-
-Route::get('citas/{id}', [CitasController::class, 'getCitaById']);
-Route::get('citas/paciente/{id}', [CitasController::class, 'getCitasByPaciente']);
-Route::get('citas/entreFechas/{fechaInicio}/{fechaFin}', [CitasController::class, 'getCitasEntreFechas']);
-Route::get('citas/profesional/{profesionalId}', [CitasController::class, 'getCitasByProfesional']);
-Route::get('citas/estado/{estado}', [CitasController::class, 'getCitasByEstado']);
-Route::get('historiaClinica/paciente/{pacienteId}', [CitasController::class, 'getHistoriaClinicaByPaciente']);
-Route::post('citas', [CitasController::class, 'createCita']);
-Route::put('citas/{id}', [CitasController::class, 'updateCita']);
-
-Route::get('pagos/paciente/{id}', [PagoController::class, 'getPagosByPaciente']);
-Route::get('pagos/cita/{citaId}', [PagoController::class, 'getPagoByCita']);
-Route::get('pagos/estado/{estado}', [PagoController::class, 'getPagosByEstado']);
-Route::get('pagos/servicio/{servicioId}', [PagoController::class, 'getPagosByServicio']);
-Route::post('pagos', [PagoController::class, 'createPago']);
-Route::put('pagos/{id}', [PagoController::class, 'updateEstadoPago']);
-
-Route::get('reportes/{id}', [ReporteController::class, 'getReporteById']);
-Route::post('reportes', [ReporteController::class, 'createReporte']);
-Route::get('reportes/paciente/{id}', [ReporteController::class, 'getReportesByPaciente']);
-Route::get('reportes/entreFechas/{fechaInicio}/{fechaFin}', [ReporteController::class, 'getReportesEntreFechas']);
-Route::get('reportes/profesional/{profesionalId}', [ReporteController::class, 'getReportesByProfesional']);
-
-Route::get('roles', [RolController::class, 'getAllRoles']);
-Route::get('roles/{id}', [RolController::class, 'getRolById']);
-Route::post('roles', [RolController::class, 'createRol']);
-Route::put('roles/{id}', [RolController::class, 'updateRol']);
-
-Route::get('servicios', [ServiciosController::class, 'getAllServicios']);
-Route::get('servicios/{id}', [ServiciosController::class, 'getServicioById']);
-Route::post('servicios', [ServiciosController::class, 'createServicio']);
-Route::put('servicios/{id}', [ServiciosController::class, 'updateServicio']);
-
-Route::get('usuarios', [UsuariosController::class, 'getAllUsuarios']);
-Route::get('usuarios/{id}', [UsuariosController::class, 'getUsuarioById']);
-Route::get('usuarios/rol/{role}', [UsuariosController::class, 'getUsuariosByRol']);
-Route::post('usuarios', [UsuariosController::class, 'createUsuario']);
-Route::put('usuarios/{id}', [UsuariosController::class, 'updateUsuario']);
-
 // Role
-Route::prefix('role')->group(function () {
+Route::middleware('auth:sanctum')->prefix('role')->group(function () {
     Route::get('/', [RoleController::class, 'index']);
     Route::get('/{id}', [RoleController::class, 'show']);
     Route::post('/', [RoleController::class, 'store']);
@@ -99,7 +59,7 @@ Route::prefix('role')->group(function () {
 });
 
 // UserAccount
-Route::prefix('user-account')->group(function () {
+Route::middleware('auth:sanctum')->prefix('user-account')->group(function () {
     Route::get('/', [UserAccountController::class, 'index']);
     Route::get('/{id}', [UserAccountController::class, 'show']);
     Route::post('/', [UserAccountController::class, 'store']);
@@ -108,7 +68,7 @@ Route::prefix('user-account')->group(function () {
 });
 
 // Person
-Route::prefix('person')->group(function () {
+Route::middleware('auth:sanctum')->prefix('person')->group(function () {
     Route::get('/', [PersonController::class, 'index']);
     Route::get('/{id}', [PersonController::class, 'show']);
     Route::post('/', [PersonController::class, 'store']);
@@ -117,7 +77,7 @@ Route::prefix('person')->group(function () {
 });
 
 // Client
-Route::prefix('client')->group(function () {
+Route::middleware('auth:sanctum')->prefix('client')->group(function () {
     Route::get('/', [ClientController::class, 'index']);
     Route::get('/{id}', [ClientController::class, 'show']);
     Route::post('/', [ClientController::class, 'store']);
@@ -126,7 +86,7 @@ Route::prefix('client')->group(function () {
 });
 
 // Staff
-Route::prefix('staff')->group(function () {
+Route::middleware('auth:sanctum')->prefix('staff')->group(function () {
     Route::get('/', [StaffController::class, 'index']);
     Route::get('/{id}', [StaffController::class, 'show']);
     Route::post('/', [StaffController::class, 'store']);
@@ -135,7 +95,7 @@ Route::prefix('staff')->group(function () {
 });
 
 // Professional
-Route::prefix('professional')->group(function () {
+Route::middleware('auth:sanctum')->prefix('professional')->group(function () {
     Route::get('/', [ProfessionalController::class, 'index']);
     Route::get('/{id}', [ProfessionalController::class, 'show']);
     Route::post('/', [ProfessionalController::class, 'store']);
@@ -144,7 +104,7 @@ Route::prefix('professional')->group(function () {
 });
 
 // Identification
-Route::prefix('identification')->group(function () {
+Route::middleware('auth:sanctum')->prefix('identification')->group(function () {
     Route::get('/', [IdentificationController::class, 'index']);
     Route::get('/{id}', [IdentificationController::class, 'show']);
     Route::post('/', [IdentificationController::class, 'store']);
@@ -153,7 +113,7 @@ Route::prefix('identification')->group(function () {
 });
 
 // Address
-Route::prefix('address')->group(function () {
+Route::middleware('auth:sanctum')->prefix('address')->group(function () {
     Route::get('/', [AddressController::class, 'index']);
     Route::get('/{id}', [AddressController::class, 'show']);
     Route::post('/', [AddressController::class, 'store']);
@@ -162,7 +122,7 @@ Route::prefix('address')->group(function () {
 });
 
 // Phone
-Route::prefix('phone')->group(function () {
+Route::middleware('auth:sanctum')->prefix('phone')->group(function () {
     Route::get('/', [PhoneController::class, 'index']);
     Route::get('/{id}', [PhoneController::class, 'show']);
     Route::post('/', [PhoneController::class, 'store']);
@@ -171,7 +131,7 @@ Route::prefix('phone')->group(function () {
 });
 
 // MedicalProfile
-Route::prefix('medical-profile')->group(function () {
+Route::middleware('auth:sanctum')->prefix('medical-profile')->group(function () {
     Route::get('/', [MedicalProfileController::class, 'index']);
     Route::get('/{id}', [MedicalProfileController::class, 'show']);
     Route::post('/', [MedicalProfileController::class, 'store']);
@@ -180,7 +140,7 @@ Route::prefix('medical-profile')->group(function () {
 });
 
 // Schedule
-Route::prefix('schedule')->group(function () {
+Route::middleware('auth:sanctum')->prefix('schedule')->group(function () {
     Route::get('/', [ScheduleController::class, 'index']);
     Route::get('/{id}', [ScheduleController::class, 'show']);
     Route::post('/', [ScheduleController::class, 'store']);
@@ -189,7 +149,7 @@ Route::prefix('schedule')->group(function () {
 });
 
 // WorkerSchedule
-Route::prefix('worker-schedule')->group(function () {
+Route::middleware('auth:sanctum')->prefix('worker-schedule')->group(function () {
     Route::get('/', [WorkerScheduleController::class, 'index']);
     Route::get('/{id}', [WorkerScheduleController::class, 'show']);
     Route::post('/', [WorkerScheduleController::class, 'store']);
@@ -198,7 +158,7 @@ Route::prefix('worker-schedule')->group(function () {
 });
 
 // Discount
-Route::prefix('discount')->group(function () {
+Route::middleware('auth:sanctum')->prefix('discount')->group(function () {
     Route::get('/', [DiscountController::class, 'index']);
     Route::get('/{id}', [DiscountController::class, 'show']);
     Route::post('/', [DiscountController::class, 'store']);
@@ -207,7 +167,7 @@ Route::prefix('discount')->group(function () {
 });
 
 // Service
-Route::prefix('service')->group(function () {
+Route::middleware('auth:sanctum')->prefix('service')->group(function () {
     Route::get('/', [ServiceController::class, 'index']);
     Route::get('/{id}', [ServiceController::class, 'show']);
     Route::post('/', [ServiceController::class, 'store']);
@@ -216,7 +176,7 @@ Route::prefix('service')->group(function () {
 });
 
 // ProfessionalService
-Route::prefix('professional-service')->group(function () {
+Route::middleware('auth:sanctum')->prefix('professional-service')->group(function () {
     Route::get('/', [ProfessionalServiceController::class, 'index']);
     Route::get('/{id}', [ProfessionalServiceController::class, 'show']);
     Route::post('/', [ProfessionalServiceController::class, 'store']);
@@ -225,7 +185,7 @@ Route::prefix('professional-service')->group(function () {
 });
 
 // PaymentData
-Route::prefix('payment-ata')->group(function () {
+Route::middleware('auth:sanctum')->prefix('payment-ata')->group(function () {
     Route::get('/', [PaymentDataController::class, 'index']);
     Route::get('/{id}', [PaymentDataController::class, 'show']);
     Route::post('/', [PaymentDataController::class, 'store']);
@@ -234,7 +194,7 @@ Route::prefix('payment-ata')->group(function () {
 });
 
 // Payment
-Route::prefix('payment')->group(function () {
+Route::middleware('auth:sanctum')->prefix('payment')->group(function () {
     Route::get('/', [PaymentController::class, 'index']);
     Route::get('/{id}', [PaymentController::class, 'show']);
     Route::post('/', [PaymentController::class, 'store']);
@@ -243,7 +203,7 @@ Route::prefix('payment')->group(function () {
 });
 
 // Receipt
-Route::prefix('receipt')->group(function () {
+Route::middleware('auth:sanctum')->prefix('receipt')->group(function () {
     Route::get('/', [ReceiptController::class, 'index']);
     Route::get('/{id}', [ReceiptController::class, 'show']);
     Route::post('/', [ReceiptController::class, 'store']);
@@ -252,7 +212,7 @@ Route::prefix('receipt')->group(function () {
 });
 
 // Appointment
-Route::prefix('appointment')->group(function () {
+Route::middleware('auth:sanctum')->prefix('appointment')->group(function () {
     Route::get('/', [AppointmentController::class, 'index']);
     Route::get('/{id}', [AppointmentController::class, 'show']);
     Route::post('/', [AppointmentController::class, 'store']);
@@ -261,7 +221,7 @@ Route::prefix('appointment')->group(function () {
 });
 
 // AppointmentReport
-Route::prefix('appointment-report')->group(function () {
+Route::middleware('auth:sanctum')->prefix('appointment-report')->group(function () {
     Route::get('/', [AppointmentReportController::class, 'index']);
     Route::get('/{id}', [AppointmentReportController::class, 'show']);
     Route::post('/', [AppointmentReportController::class, 'store']);
@@ -270,7 +230,7 @@ Route::prefix('appointment-report')->group(function () {
 });
 
 // Gender
-Route::prefix('gender')->group(function () {
+Route::middleware('auth:sanctum')->prefix('gender')->group(function () {
     Route::get('/', [GenderController::class, 'index']);
     Route::get('/{id}', [GenderController::class, 'show']);
     Route::post('/', [GenderController::class, 'store']);
@@ -279,7 +239,7 @@ Route::prefix('gender')->group(function () {
 });
 
 // Occupation
-Route::prefix('occupation')->group(function () {
+Route::middleware('auth:sanctum')->prefix('occupation')->group(function () {
     Route::get('/', [OccupationController::class, 'index']);
     Route::get('/{id}', [OccupationController::class, 'show']);
     Route::post('/', [OccupationController::class, 'store']);
@@ -288,7 +248,7 @@ Route::prefix('occupation')->group(function () {
 });
 
 // MaritalStatus
-Route::prefix('marital-status')->group(function () {
+Route::middleware('auth:sanctum')->prefix('marital-status')->group(function () {
     Route::get('/', [MaritalStatusController::class, 'index']);
     Route::get('/{id}', [MaritalStatusController::class, 'show']);
     Route::post('/', [MaritalStatusController::class, 'store']);
@@ -297,7 +257,7 @@ Route::prefix('marital-status')->group(function () {
 });
 
 // Education
-Route::prefix('education')->group(function () {
+Route::middleware('auth:sanctum')->prefix('education')->group(function () {
     Route::get('/', [EducationController::class, 'index']);
     Route::get('/{id}', [EducationController::class, 'show']);
     Route::post('/', [EducationController::class, 'store']);
@@ -306,7 +266,7 @@ Route::prefix('education')->group(function () {
 });
 
 // Country
-Route::prefix('country')->group(function () {
+Route::middleware('auth:sanctum')->prefix('country')->group(function () {
     Route::get('/', [CountryController::class, 'index']);
     Route::get('/{id}', [CountryController::class, 'show']);
     Route::post('/', [CountryController::class, 'store']);
@@ -315,7 +275,7 @@ Route::prefix('country')->group(function () {
 });
 
 // State
-Route::prefix('state')->group(function () {
+Route::middleware('auth:sanctum')->prefix('state')->group(function () {
     Route::get('/', [StateController::class, 'index']);
     Route::get('/{id}', [StateController::class, 'show']);
     Route::post('/', [StateController::class, 'store']);
@@ -324,7 +284,7 @@ Route::prefix('state')->group(function () {
 });
 
 // City
-Route::prefix('city')->group(function () {
+Route::middleware('auth:sanctum')->prefix('city')->group(function () {
     Route::get('/', [CityController::class, 'index']);
     Route::get('/{id}', [CityController::class, 'show']);
     Route::post('/', [CityController::class, 'store']);
@@ -333,7 +293,7 @@ Route::prefix('city')->group(function () {
 });
 
 // Aga
-Route::prefix('aga')->group(function () {
+Route::middleware('auth:sanctum')->prefix('aga')->group(function () {
     Route::get('/', [AgaController::class, 'index']);
     Route::get('/{id}', [AgaController::class, 'show']);
     Route::post('/', [AgaController::class, 'store']);
@@ -342,7 +302,7 @@ Route::prefix('aga')->group(function () {
 });
 
 // UserAccountStatus
-Route::prefix('user-account-status')->group(function () {
+Route::middleware('auth:sanctum')->prefix('user-account-status')->group(function () {
     Route::get('/', [UserAccountStatusController::class, 'index']);
     Route::get('/{id}', [UserAccountStatusController::class, 'show']);
     Route::post('/', [UserAccountStatusController::class, 'store']);
@@ -351,7 +311,7 @@ Route::prefix('user-account-status')->group(function () {
 });
 
 // PaymentStatus
-Route::prefix('payment-status')->group(function () {
+Route::middleware('auth:sanctum')->prefix('payment-status')->group(function () {
     Route::get('/', [PaymentStatusController::class, 'index']);
     Route::get('/{id}', [PaymentStatusController::class, 'show']);
     Route::post('/', [PaymentStatusController::class, 'store']);
@@ -360,7 +320,7 @@ Route::prefix('payment-status')->group(function () {
 });
 
 // AppointmentStatus
-Route::prefix('appointment-status')->group(function () {
+Route::middleware('auth:sanctum')->prefix('appointment-status')->group(function () {
     Route::get('/', [AppointmentStatusController::class, 'index']);
     Route::get('/{id}', [AppointmentStatusController::class, 'show']);
     Route::post('/', [AppointmentStatusController::class, 'store']);
