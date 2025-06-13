@@ -47,6 +47,9 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->get('/user', [AuthController::class, 'user']);
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 
+Route::get('test', function () {
+    return response()->json(['message' => 'API is working']);
+});
 
 Route::get('citas/{id}', [CitasController::class, 'getCitaById']);
 Route::get('citas/paciente/{id}', [CitasController::class, 'getCitasByPaciente']);

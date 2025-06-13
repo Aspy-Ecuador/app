@@ -9,6 +9,7 @@ use App\Models\Staff;
 use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 
 class UserAccountController extends Controller
@@ -24,72 +25,72 @@ class UserAccountController extends Controller
     }
 
     public function store(Request $request)
-{
-    $validatedUser = $request->validate([
-        'role_id' => 'required|integer',
-        'email' => 'required|email|unique:user_accounts,email',
-        'password_hash' => 'required|string',
-        'status' => 'required|integer',
-        
-    ]);
+    {
+        $validatedUser = $request->validate([
+            'role_id' => 'required|integer',
+            'email' => 'required|email|unique:user_account,email',
+            'password' => 'required|string',
+        ]);
 
-    $validatedPerson = $request->validate([
-        'first_name' => 'required|string',
-        'middle_name' => 'nullable|string',
-        'birthdate' => 'required|date|before_or_equal:today',
-        'gender' => 'required|integer',
-        'occupation' => 'required|integer',
-        'marital_status' => 'required|integer',
-        'education' => 'required|integer',
-        
-    ]);
+        $validatedPerson = $request->validate([
+            'first_name' => 'required|string',
+            'middle_name' => 'nullable|string',
+            'birthdate' => 'required|date|before_or_equal:today',
+            'gender' => 'required|integer',
+            'occupation' => 'required|integer',
+            'marital_status' => 'required|integer',
+            'education' => 'required|integer',
+            
+        ]);
 
-    $validatedChildType = $request->validate([
-        'person_type' => 'required|string|in:professional,staff,client',
-    ]);
+        $validatedChildType = $request->validate([
+            'person_type' => 'required|string|in:professional,staff,client',
+        ]);
 
-    \DB::beginTransaction();
+        \DB::beginTransaction();
 
-    try {
-        // Crear UserAccount
-        $user = UserAccount::create($validatedUser);
+        try {
+            // Crear UserAccount
+            $validatedUser['password_hash'] = Hash::make(value: $request->password); 
+            $validatedUser['status'] = 1; // Asignar estado activo por defecto
+            $user = UserAccount::create($validatedUser);
 
-        // Crear Persona ligada a user_id
-        $validatedPerson['user_id'] = $user->id;
-        $person = Person::create($validatedPerson);
+            // Crear Persona ligada a user_id
+            $validatedPerson['user_id'] = $user->user_id;
+            $person = Person::create($validatedPerson);
 
-        // Crear el "hijo" según person_type
-        if ($validatedChildType['person_type'] === 'professional') {
-            // Validar campos adicionales solo para professional
-            $validatedProfessional = $request->validate([
-                'specialty' => 'required|string',
-                'title' => 'required|string',
-                'about' => 'nullable|string',
-                
-            ]);
-            $validatedProfessional['person_id'] = $person->id;
-            Professional::create($validatedProfessional);
+            // Crear el "hijo" según person_type
+            if ($validatedChildType['person_type'] === 'professional') {
+                // Validar campos adicionales solo para professional
+                $validatedProfessional = $request->validate([
+                    'specialty' => 'required|string',
+                    'title' => 'required|string',
+                    'about' => 'nullable|string',
+                    
+                ]);
+                $validatedProfessional['person_id'] = $person->person_id;
+                Professional::create($validatedProfessional);
 
-        } elseif ($validatedChildType['person_type'] === 'staff') {
-            Staff::create(['person_id' => $person->id]);
+            } elseif ($validatedChildType['person_type'] === 'staff') {
+                Staff::create(['person_id' => $person->person_id]);
 
-        } elseif ($validatedChildType['person_type'] === 'client') {
-            Client::create(['person_id' => $person->id]);
+            } elseif ($validatedChildType['person_type'] === 'client') {
+                Client::create(['person_id' => $person->person_id]);
+            }
+
+            \DB::commit();
+
+            return response()->json([
+                'user' => $user,
+                'person' => $person,
+                'person_type' => $validatedChildType['person_type']
+            ], 201);
+
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return response()->json(['error' => 'Error al crear usuario: ' . $e->getMessage()], 500);
         }
-
-        \DB::commit();
-
-        return response()->json([
-            'user' => $user,
-            'person' => $person,
-            'person_type' => $validatedChildType['person_type']
-        ], 201);
-
-    } catch (\Exception $e) {
-        \DB::rollBack();
-        return response()->json(['error' => 'Error al crear usuario: ' . $e->getMessage()], 500);
     }
-}
 
 
     public function update(Request $request, $id)
@@ -97,11 +98,11 @@ class UserAccountController extends Controller
         $user = UserAccount::findOrFail($id);
         $validated = $request->validate([
             'role_id' => 'integer',
-            'email' => 'email|unique:user_accounts,email,'.$id,
-            'password_hash' => 'string',
+            'email' => 'email|unique:user_account,email,'.$id,
             'status' => 'integer'
         ]);
         
+        $validated['password_hash'] = Hash::make($request->password); 
         $validated['modification_date'] = Carbon::now();
         $validated['modified_by'] = 'system';
         

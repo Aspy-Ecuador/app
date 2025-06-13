@@ -334,6 +334,82 @@ CREATE TABLE IF NOT EXISTS appointment_report (
     FOREIGN KEY (appointment_id) REFERENCES appointment(appointment_id)
 );
 
+CREATE TABLE IF NOT EXISTS sessions (
+    id VARCHAR PRIMARY KEY,
+    user_id INTEGER NULL,
+    ip_address VARCHAR(45) NULL,
+    user_agent TEXT NULL,
+    payload TEXT NOT NULL,
+    last_activity INTEGER,
+    FOREIGN KEY (user_id) REFERENCES user_account(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    email VARCHAR PRIMARY KEY,
+    token VARCHAR NOT NULL,
+    created_at TIMESTAMP NULL
+);
+
+CREATE TABLE IF NOT EXISTS cache (
+    key VARCHAR PRIMARY KEY,
+    value TEXT,
+    expiration INT
+);
+
+CREATE TABLE IF NOT EXISTS cache_locks (
+    key VARCHAR PRIMARY KEY,
+    owner VARCHAR NOT NULL,
+    expiration INT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS jobs (
+    id SERIAL PRIMARY KEY,
+    queue VARCHAR NOT NULL,
+    payload TEXT NOT NULL,
+    attempts SMALLINT UNSIGNED NOT NULL,
+    reserved_at INT UNSIGNED NULL,
+    available_at INT UNSIGNED NOT NULL,
+    created_at INT UNSIGNED NOT NULL,
+    CONSTRAINT queue_index FOREIGN KEY(queue) REFERENCES queue(queue)
+);
+
+CREATE TABLE IF NOT EXISTS job_batches (
+    id VARCHAR PRIMARY KEY,
+    name VARCHAR NOT NULL,
+    total_jobs INT NOT NULL,
+    pending_jobs INT NOT NULL,
+    failed_jobs INT NOT NULL,
+    failed_job_ids TEXT NOT NULL,
+    options TEXT NULL,
+    cancelled_at INT NULL,
+    created_at INT NOT NULL,
+    finished_at INT NULL
+);
+
+CREATE TABLE IF NOT EXISTS failed_jobs (
+    id SERIAL PRIMARY KEY,
+    uuid VARCHAR UNIQUE NOT NULL,
+    connection TEXT NOT NULL,
+    queue TEXT NOT NULL,
+    payload TEXT NOT NULL,
+    exception TEXT NOT NULL,
+    failed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS personal_access_tokens (
+    id SERIAL PRIMARY KEY,
+    tokenable_type VARCHAR NOT NULL,
+    tokenable_id INT NOT NULL,
+    name VARCHAR NOT NULL,
+    token VARCHAR(64) UNIQUE NOT NULL,
+    abilities TEXT NULL,
+    last_used_at TIMESTAMP NULL,
+    expires_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT tokenable UNIQUE (tokenable_type, tokenable_id)
+);
+
 -- INDICES
 CREATE INDEX idx_user_account_role_id ON user_account(role_id);
 CREATE INDEX idx_user_account_status ON user_account(status);
@@ -385,6 +461,8 @@ CREATE INDEX idx_aga_name ON aga(name);
 CREATE INDEX idx_user_account_status_name ON user_account_status(name);
 CREATE INDEX idx_appointment_status_name ON appointment_status(name);
 CREATE INDEX idx_payment_status_name ON payment_status(name);
+CREATE INDEX sessions_user_id_index ON sessions(user_id);
+CREATE INDEX sessions_last_activity_index ON sessions(last_activity);
 
 -- CHECK CONSTRAINTS
 ALTER TABLE user_account
@@ -467,12 +545,16 @@ INSERT INTO aga (name) VALUES
 ('Zona 9: Distrito Metropolitano de Quito');
 
 -- Usuarios
+-- Habilitar la extensión pgcrypto para funciones de hash
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- Las contraseñas deben almacenarse cifradas (hash). Ejemplo usando SHA-256 para propósitos de demostración:
 INSERT INTO user_account (role_id, email, password_hash, status)
 VALUES 
-(1, 'admin@example.com', 'hashedpassword', 1),   -- Admin
-(2, 'doc1@example.com', 'hashedpassword', 1),    -- Profesional
-(3, 'client1@example.com', 'hashedpassword', 1), -- Cliente
-(4, 'staff1@example.com', 'hashedpassword', 1);  -- Staff
+(1, 'admin@aspy.com', encode(digest('admin', 'sha256'), 'hex'), 1),   -- Admin
+(2, 'doc1@aspy.com', encode(digest('doc1', 'sha256'), 'hex'), 1),    -- Profesional
+(3, 'client1@aspy.com', encode(digest('client1', 'sha256'), 'hex'), 1), -- Cliente
+(4, 'staff1@aspy.com', encode(digest('staff1', 'sha256'), 'hex'), 1);  -- Staff
 
 -- Personas
 INSERT INTO person (user_id, first_name, middle_name, birthdate, gender, occupation, marital_status, education)
