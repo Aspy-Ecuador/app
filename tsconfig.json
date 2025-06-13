@@ -18,7 +18,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "types": ["jest", "node", "vite/client"],  // Add vite/client here
-    "typeRoots": ["./node_modules/@types", "./types"],
+    "typeRoots": ["./node_modules/@types/", "./types", "./node_modules"],
     "baseUrl": ".",  // Enable baseUrl for path resolution
     "paths": {
       "@assets/*": ["src/assets/*"]  // Define alias for assets
