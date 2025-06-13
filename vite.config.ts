@@ -3,7 +3,6 @@ import react from "@vitejs/plugin-react-swc";
 
 export default defineConfig({
   plugins: [react()],
-  base: '/ASPY/frontend/',
   resolve: {
     alias: {
       "@": "/src",
@@ -28,4 +27,8 @@ export default defineConfig({
       "@buttons": "/src/components/buttons",
     },
   },
+  build: {
+    outDir: 'dist', // Especifica la carpeta de salida
+  },
+  base: '/Aspy/', // Aquí se debe poner el nombre del repositorio en GitHub
 });

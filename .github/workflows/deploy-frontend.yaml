@@ -1,56 +1,36 @@
-name: Deploy frontend to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
     branches:
-      - main 
+      - frontend # Rama que dispara el workflow
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
+    # Paso 1: Checkout del código
+    - name: Checkout code
+      uses: actions/checkout@v2
 
+    # Paso 2: Configuración de Node.js
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '20'     
 
-      - name: Remove node_modules and package-lock.json
-        run: rm -rf node_modules package-lock.json
-        working-directory: ./aspy-web
-      
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
+    # Paso 5: Instalar las dependencias nuevamente
+    - name: Install dependencies
+      run: npm install --force
 
-      - name: Install dependencies
-        run: npm install --force
-        working-directory: ./aspy-web
+    # Paso 6: Construir la aplicación
+    - name: Build the application
+      run: npm run build
 
-      - name: Build project
-        run: npm run build
-        working-directory: ./aspy-web
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './aspy-web/dist'
-
-
-  deploy:
-      permissions:
-          contents: read
-          pages: write
-          id-token: write
-      environment:
-        name: github-pages
-        url: https://aspy-ecuador.github.io/Aspy/
-      runs-on: ubuntu-latest
-      needs: build
-      steps:
-        - name: Deploy to GitHub Pages
-          id: deployment
-          uses: actions/deploy-pages@v4
+    # Paso 7: Desplegar a GitHub Pages
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        publish_dir: dist      # La carpeta de salida de tu build
+        github_token: ${{ secrets.GITHUB_TOKEN }}  # Token de autenticación de GitHub
