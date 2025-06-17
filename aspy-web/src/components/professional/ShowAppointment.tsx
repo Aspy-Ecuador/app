@@ -155,7 +155,7 @@ export default function ShowAppointment({
                   >
                     <Typography gutterBottom variant="h6">
                       Paciente:{" "}
-                      {cita.patient.first_name + cita.patient.last_name}
+                      {cita.patient.first_name + " " + cita.patient.last_name}
                     </Typography>
                   </Stack>
                 </Box>

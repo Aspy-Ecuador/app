@@ -9,7 +9,8 @@
     "paths": {
       "@shared-theme/*": ["src/shared-theme/*"],
       "@/*": ["src/*"],
-      "@components/*": ["components/*"]
+      "@components/*": ["components/*"],
+      "@API/*": ["src/API/*"]
     },
     "jsx": "react-jsx", // ✅ Esto habilita JSX con React 17+ (o usa "react" si es más antiguo)
     "esModuleInterop": true, // ✅ Recomendado por ts-jest
