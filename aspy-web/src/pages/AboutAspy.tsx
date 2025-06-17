@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import usuarioAPI from "@API/usuarioAPI";
+import { useEffect, useState } from "react";
+
 import { getAllUsuarios } from "@API/usuarioAPI";
 
 export default function AboutAspy() {
@@ -18,6 +18,7 @@ export default function AboutAspy() {
 
     fetchUsuarios();
   }, []);
+  console.log(usuarios);
 
-  return console.log(usuarios);
+  return <h1>Hola soy sobre</h1>;
 }
