@@ -1,12 +1,6 @@
 <?php
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CitasController;
-use App\Http\Controllers\PagoController;
-use App\Http\Controllers\ReporteController;
-use App\Http\Controllers\RolController;
-use App\Http\Controllers\ServiciosController;
-use App\Http\Controllers\UsuariosController;
 
 use App\Http\Controllers\{
     RoleController,
@@ -62,9 +56,13 @@ Route::middleware('auth:sanctum')->prefix('role')->group(function () {
 Route::middleware('auth:sanctum')->prefix('user-account')->group(function () {
     Route::get('/', [UserAccountController::class, 'index']);
     Route::get('/{id}', [UserAccountController::class, 'show']);
-    Route::post('/', [UserAccountController::class, 'store']);
     Route::put('/{id}', [UserAccountController::class, 'update']);
     Route::delete('/{id}', [UserAccountController::class, 'destroy']);
+});
+
+// UserAccount
+Route::prefix('user-account')->group(function () {
+    Route::post('/', [UserAccountController::class, 'store']);
 });
 
 // Person
@@ -185,7 +183,7 @@ Route::middleware('auth:sanctum')->prefix('professional-service')->group(functio
 });
 
 // PaymentData
-Route::middleware('auth:sanctum')->prefix('payment-ata')->group(function () {
+Route::middleware('auth:sanctum')->prefix('payment-data')->group(function () {
     Route::get('/', [PaymentDataController::class, 'index']);
     Route::get('/{id}', [PaymentDataController::class, 'show']);
     Route::post('/', [PaymentDataController::class, 'store']);

@@ -24,3 +24,6 @@ yarn-error.log
 aspy
 vendor
 postgresql
+.vite
+package-lock.json
+yarn.lock

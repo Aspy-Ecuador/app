@@ -53,7 +53,7 @@ class UserAccountController extends Controller
             // Crear UserAccount
             $validatedUser['password_hash'] = Hash::make(value: $request->password); 
             $validatedUser['status'] = 1; // Asignar estado activo por defecto
-            $user = UserAccount::create($validatedUser);
+            $user = UserAccount::create(attributes: $validatedUser);
 
             // Crear Persona ligada a user_id
             $validatedPerson['user_id'] = $user->user_id;
@@ -77,6 +77,7 @@ class UserAccountController extends Controller
             } elseif ($validatedChildType['person_type'] === 'client') {
                 Client::create(['person_id' => $person->person_id]);
             }
+
 
             \DB::commit();
 
@@ -118,25 +119,25 @@ class UserAccountController extends Controller
         $user = UserAccount::findOrFail($id);
 
         // Buscar persona relacionada
-        $person = Person::where('user_id', $user->id)->first();
+        $person = Person::where('user_id', $user->user_id)->first();
 
         if ($person) {
             // Borrar el hijo relacionado (professional, staff o client)
 
             // Intentamos borrar Professional
-            $professional = Professional::where('person_id', $person->id)->first();
+            $professional = Professional::where('person_id', $person->person_id)->first();
             if ($professional) {
                 $professional->delete();
             }
 
             // Intentamos borrar Staff
-            $staff = Staff::where('person_id', $person->id)->first();
+            $staff = Staff::where('person_id', $person->person_id)->first();
             if ($staff) {
                 $staff->delete();
             }
 
             // Intentamos borrar Client
-            $client = Client::where('person_id', $person->id)->first();
+            $client = Client::where('person_id', $person->person_id)->first();
             if ($client) {
                 $client->delete();
             }

@@ -559,58 +559,58 @@ VALUES
 -- Personas
 INSERT INTO person (user_id, first_name, middle_name, birthdate, gender, occupation, marital_status, education)
 VALUES
-(1, 'Administrador', NULL, '1980-01-01', 1, 3, 2, 3),
-(2, 'Juan', 'Carlos', '1975-05-10', 1, 1, 2, 3),
-(3, 'María', NULL, '1990-12-20', 2, 4, 1, 2),
-(4, 'Luisa', NULL, '1985-07-15', 2, 2, 1, 2);
+(5, 'Administrador', NULL, '1980-01-01', 1, 3, 2, 3),
+(6, 'Juan', 'Carlos', '1975-05-10', 1, 1, 2, 3),
+(7, 'María', NULL, '1990-12-20', 2, 4, 1, 2),
+(8, 'Luisa', NULL, '1985-07-15', 2, 2, 1, 2);
 
 -- Clientes, Staff y Profesionales
-INSERT INTO staff (person_id) VALUES (1);
-INSERT INTO professional (person_id, specialty, title) VALUES (2, 'Cardiología', 'Médico');
-INSERT INTO client (person_id) VALUES (3);
 INSERT INTO staff (person_id) VALUES (4);
+INSERT INTO professional (person_id, specialty, title) VALUES (5, 'Cardiología', 'Médico');
+INSERT INTO client (person_id) VALUES (6);
+INSERT INTO staff (person_id) VALUES (7);
 
 -- Identificaciones (solo cliente ejemplo)
 INSERT INTO identification (person_id, type, number)
-VALUES (3, 'Cedula', '1712345678');
+VALUES (6, 'Cedula', '1712345678');
 
 -- Direcciones (ejemplo para cliente)
 INSERT INTO address (person_id, type, country, province, city, primary_address, aga)
-VALUES (3, 'Domicilio', 1, 1, 1, 'Av. Siempre Viva 742', 1);
+VALUES (7, 'Domicilio', 1, 1, 1, 'Av. Siempre Viva 742', 1);
 
 -- Teléfonos
 INSERT INTO phone (person_id, type, number, relationship)
 VALUES
-(3, 'Personal', '0998765432', 'Cliente'),
-(4, 'Trabajo', '0991234567', 'Staff');
+(7, 'Personal', '0998765432', 'Cliente'),
+(8, 'Trabajo', '0991234567', 'Staff');
 
 -- Servicios y descuentos
 INSERT INTO discount (name, discount) VALUES ('Descuento Promo', 10);
 INSERT INTO service (name, price) VALUES ('Consulta General', 50.00);
 
 -- Vincular profesional con servicio
-INSERT INTO professional_service (service_id, person_id) VALUES (1, 2);
+INSERT INTO professional_service (service_id, person_id) VALUES (1, 5);
 
 -- Agendas y horarios
 INSERT INTO schedule (date, start_time, end_time, name) VALUES ('2025-05-10', '08:00:00', '09:00:00', 'Turno mañana');
 
-INSERT INTO worker_schedule (schedule_id, person_id, is_available) VALUES (1, 2, TRUE); -- Profesional disponible
+INSERT INTO worker_schedule (schedule_id, person_id, is_available) VALUES (1, 5, TRUE); -- Profesional disponible
 
-INSERT INTO worker_schedule (schedule_id, person_id, is_available) VALUES (1, 4, TRUE); -- Staff disponible
+INSERT INTO worker_schedule (schedule_id, person_id, is_available) VALUES (1, 7, TRUE); -- Staff disponible
 
 -- Método de pago
 INSERT INTO payment_data (type, number, file) VALUES ('Tarjeta Crédito', 123456789, 'file_path');
 
 -- Pago (con precio de servicio copiado)
 INSERT INTO payment (person_id, service_id, discount_id, payment_data_id, service_price, discount_percentage, total_amount, status)
-VALUES (3, 1, 1, 1, 50.00, 10, 45.00, 2); -- Cliente 1 pago
+VALUES (6, 1, 1, 1, 50.00, 10, 45.00, 2); -- Cliente 1 pago
 
 -- Recibo
 INSERT INTO receipt (payment_id, status) VALUES (1, 'Emitido');
 
 -- Cita
 INSERT INTO appointment (payment_id, scheduled_by, worker_schedule_id, status)
-VALUES (1, 1, 1, 1); -- Cita para el pago 1, programada por persona_id 1, worker_schedule 1
+VALUES (1, 7, 1, 1); -- Cita para el pago 1, programada por persona_id 1, worker_schedule 1
 
 -- Reporte de cita
 INSERT INTO appointment_report (appointment_id, comments, sign)
