@@ -17,8 +17,6 @@ lerna-debug.log*
 node_modules
 dist-ssr
 *.local
-package-lock.json
-pnpm-lock.yaml
 
 # Editor directories and files
 .vscode/*
@@ -30,10 +28,5 @@ pnpm-lock.yaml
 *.njsproj
 *.sln
 *.sw?
+*.d.ts
 tsconfig.tsbuildinfo
-.vite
-bootstrap
-aspy
-storage
-vendor
-nginx

@@ -1,15 +1,15 @@
 import { styled } from "@mui/material/styles";
+import Avatar from "@mui/material/Avatar";
 import MuiDrawer, { drawerClasses } from "@mui/material/Drawer";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import SelectContent from "./SelectContent";
 import MenuContent from "./MenuContent";
 import OptionsMenu from "./OptionsMenu";
 import ThemedLogo from "@shared-theme/ThemedLogo";
-import { getAuthenticatedUserName, getAuthenticatedUserEmail } from "@store";
+import { getAuthenticatedUserName, getAuthenticatedUserEmail } from "@/utils/store";
 
 const drawerWidth = 240;
 
@@ -35,6 +35,7 @@ export default function SideMenu() {
         },
       }}
     >
+      {/*
       <Box
         sx={{
           display: "flex",
@@ -44,6 +45,7 @@ export default function SideMenu() {
       >
         <SelectContent />
       </Box>
+      */}
       <Divider />
       <Box
         sx={{
@@ -92,7 +94,6 @@ export default function SideMenu() {
         </Box>
 
         <OptionsMenu />
-        
       </Stack>
     </Drawer>
   );

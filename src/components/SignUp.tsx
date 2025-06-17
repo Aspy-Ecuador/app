@@ -140,7 +140,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Typography sx={{ textAlign: "center" }}>
               ¿Ya tienes una cuenta?{" "}
-              <Link onClick={() => navigate("/app/login")} component="button">
+              <Link onClick={() => navigate("/login")} component="button">
                 Iniciar sesión
               </Link>
             </Typography>

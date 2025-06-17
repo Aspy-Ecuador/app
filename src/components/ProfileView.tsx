@@ -16,11 +16,11 @@ function ProfileView({ user_info, onEdit, isRowPosition }: ProfileProps) {
         <img
           className="rounded-full w-auto h-auto"
           src={`https://randomuser.me/api/portraits/${user_info.gender.toLowerCase() === "masculino" ? "men" : "women"}/${Math.floor(Math.random() * 50) + 1}.jpg`}
-          alt={user_info.firstName}
+          alt={user_info.first_name}
         />
         <div className="flex flex-col gap-1 justify-center items-center">
           <h1 className="font-kumbh text-primaryAspy font-semibold text-base">
-            {user_info.firstName} {user_info.lastName}
+            {user_info.first_name} {user_info.last_name}
           </h1>
           <h2 className="font-kumbh text-secondaryAspy text-sm">
             {user_info.role}

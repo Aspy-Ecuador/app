@@ -6,7 +6,7 @@ import { Appointment } from "@/types/Appointment";
 export default function Agenda({ citas }: { citas: Appointment[] }) {
   const events = citas.map((cita) => ({
     event_id: cita.id,
-    title: `Paciente: ${cita.patient.firstName} ${cita.patient.lastName} | Profesional: ${cita.professional.firstName} ${cita.professional.lastName}`,
+    title: `Paciente: ${cita.patient.first_name} ${cita.patient.last_name} | Profesional: ${cita.professional.first_name} ${cita.professional.last_name}`,
     subtitle: `Asistió: ${cita.assist ? "Sí" : "No"}`,
     start: new Date(`${cita.date}T${cita.startTime}`),
     end: new Date(`${cita.date}T${cita.endTime}`),

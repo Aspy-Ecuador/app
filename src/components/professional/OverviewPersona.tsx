@@ -40,7 +40,7 @@ export default function Overview_persona({
         </Grid>
         <Grid size={12}>
           <Typography variant="body1" className="class_nombres">
-            {selectedData.firstName} {selectedData.lastName}
+            {selectedData.first_name} {selectedData.last_name}
           </Typography>
         </Grid>
         <Grid size={12}>
