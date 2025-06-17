@@ -5,8 +5,8 @@ import { ProfessionalRoutes } from "./ProfessionalRoutes";
 import { ClientRoutes } from "./ClientRoutes";
 
 export const Routes = {
-  admin: AdminRoutes,
-  staff: StaffRoutes,
-  professional: ProfessionalRoutes,
-  client: ClientRoutes,
+  Admin: AdminRoutes,
+  Staff: StaffRoutes,
+  Professional: ProfessionalRoutes,
+  Client: ClientRoutes,
 };

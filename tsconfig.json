@@ -19,9 +19,10 @@
     "noEmit": true,
     "types": ["jest", "node", "vite/client"],
     "typeRoots": ["./node_modules/@types/", "./types", "./node_modules"],
-    "baseUrl": ".",  // Enable baseUrl for path resolution
+    "baseUrl": ".", // Enable baseUrl for path resolution
     "paths": {
-      "@assets/*": ["src/assets/*"]  // Define alias for assets
+      "@assets/*": ["src/assets/*"], // Define alias for assets
+      "@API/*": ["src/API/*"]
     }
   },
   "include": ["src", "jest.setup.ts"]

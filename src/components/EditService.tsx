@@ -18,7 +18,7 @@ export default function EditService() {
       <Grid container spacing={2}>
         <Grid size={12} className="grid-p-patients-tittle">
           <Header
-            textHeader={"Registrar Servicio"}
+            textHeader={"Editar Servicio"}
             isCreate={false}
             handle={handleBack}
           />

@@ -8,7 +8,9 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import PersonIcon from "@mui/icons-material/Person";
 import { styled } from "@mui/material/styles";
-import { getAuthenticatedUserRole, setAuthenticatedUserByRole } from "@store";
+import {
+  getAuthenticatedUserRole /*setAuthenticatedUserByRole*/,
+} from "@store";
 import { Role } from "@/types/Role";
 
 const roleOptions = [
@@ -48,7 +50,7 @@ export default function RoleSwitcher() {
   const handleChange = (event: SelectChangeEvent<unknown>) => {
     const selectedRole = event.target.value as Role;
     setRole(selectedRole);
-    setAuthenticatedUserByRole(selectedRole);
+    //setAuthenticatedUserByRole(selectedRole);
     window.location.reload();
   };
 
