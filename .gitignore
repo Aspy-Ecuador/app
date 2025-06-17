@@ -30,3 +30,7 @@ dist-ssr
 *.sw?
 *.d.ts
 tsconfig.tsbuildinfo
+bootstrap
+aspy
+vendor
+storage
