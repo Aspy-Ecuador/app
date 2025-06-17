@@ -3,7 +3,6 @@ postgresql/data/
 .env
 .env.production
 dist
-.vite 
 
 # Logs
 logs
@@ -17,6 +16,8 @@ lerna-debug.log*
 node_modules
 dist-ssr
 *.local
+package-lock.json
+pnpm-lock.yaml
 
 # Editor directories and files
 .vscode/*
@@ -28,9 +29,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-*.d.ts
 tsconfig.tsbuildinfo
+.vite
 bootstrap
 aspy
-vendor
 storage
+vendor
+nginx

@@ -1,9 +1,9 @@
 import RoleBasedRoutes from "@routes/RoleBasedRoutes";
 import SignInSide from "@components/SignInSide";
 import SignUp from "@components/SignUp";
+import NotFound from "@components/NotFound";
 import AppTheme from "./shared-theme/AppTheme";
 import CssBaseline from "@mui/material/CssBaseline";
-import { Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -11,7 +11,7 @@ import {
   Routes,
   useLocation,
 } from "react-router-dom";
-import PrivateRoute from "@components/PrivateRoute";
+
 // Mapeo de rutas y títulos
 const routeTitles: { [key: string]: string } = {
   "/": "Inicio",
@@ -63,14 +63,13 @@ const App = () => {
         <DocumentTitleUpdater />
         <Routes>
           {/* Rutas públicas sin layout */}
-          <Route path="/login" element={<SignInSide />} />
-          <Route path="/register" element={<SignUp />} />
+          <Route path="/app/login" element={<SignInSide />} />
+          <Route path="/app/register" element={<SignUp />} />
           {/* Rutas privadas basadas en el rol */}
-          <Route element={<PrivateRoute />}>
-            <Route path="*" element={<RoleBasedRoutes />} />
-          </Route>
+          {RoleBasedRoutes()}
+
           {/* Rutas no encontradas */}
-          <Route path="*" element={<Navigate to="/app/" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </AppTheme>
