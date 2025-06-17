@@ -60,7 +60,7 @@ export default function SignInCard() {
       password: data.get('password'),
     }); */
 
-    navigate("/");
+    navigate("/app/");
   };
 
   const validateInputs = () => {

@@ -3,6 +3,7 @@ postgresql/data/
 .env
 .env.production
 dist
+.vite 
 
 # Logs
 logs

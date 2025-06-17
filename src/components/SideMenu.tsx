@@ -1,5 +1,6 @@
 import { styled } from "@mui/material/styles";
 import MuiDrawer, { drawerClasses } from "@mui/material/Drawer";
+import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
@@ -8,7 +9,6 @@ import SelectContent from "./SelectContent";
 import MenuContent from "./MenuContent";
 import OptionsMenu from "./OptionsMenu";
 import ThemedLogo from "@shared-theme/ThemedLogo";
-import ColorModeToggle from "@shared-theme/ColorModeToggle";
 import { getAuthenticatedUserName, getAuthenticatedUserEmail } from "@store";
 
 const drawerWidth = 240;
@@ -73,6 +73,12 @@ export default function SideMenu() {
           borderColor: "divider",
         }}
       >
+        <Avatar
+          sizes="small"
+          alt="Riley Carter"
+          src="/static/images/avatar/7.jpg"
+          sx={{ width: 32, height: 32 }}
+        />
         <Box sx={{ mr: "auto" }}>
           <Typography
             variant="body2"
@@ -85,7 +91,6 @@ export default function SideMenu() {
           </Typography>
         </Box>
 
-        <ColorModeToggle />
         <OptionsMenu />
         
       </Stack>

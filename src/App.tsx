@@ -1,9 +1,9 @@
 import RoleBasedRoutes from "@routes/RoleBasedRoutes";
 import SignInSide from "@components/SignInSide";
 import SignUp from "@components/SignUp";
-import NotFound from "@components/NotFound";
 import AppTheme from "./shared-theme/AppTheme";
 import CssBaseline from "@mui/material/CssBaseline";
+import { Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -69,7 +69,7 @@ const App = () => {
           {RoleBasedRoutes()}
 
           {/* Rutas no encontradas */}
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<Navigate to="/app/" replace />} />
         </Routes>
       </Router>
     </AppTheme>

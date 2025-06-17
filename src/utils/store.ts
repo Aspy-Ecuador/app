@@ -5,6 +5,7 @@ import { sampleUsers } from "@assets/sampleUsers";
 // Definir el estado inicial y el tipo de estado
 interface State {
   user: UserAccount | null; // El usuario puede ser null si no hay un usuario autenticado
+  "mui-mode": "light";
 }
 
 // Cargar el usuario desde localStorage
