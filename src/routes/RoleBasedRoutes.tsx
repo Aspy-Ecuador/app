@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes as RRDRoutes, Route } from "react-router-dom";
+import { Route } from "react-router-dom";
 import { getAuthenticatedUserRole } from "@store";
 import { Routes } from "@routes/Routes";
 import { Role } from "@/types/Role";
@@ -12,10 +12,10 @@ import ProfessionalLayout from "@layouts/ProfessionalLayout";
 import ClientLayout from "@layouts/ClientLayout";
 
 const layouts: Record<Role, () => React.ReactElement> = {
-  Admin: AdminLayout,
-  Staff: StaffLayout,
-  Professional: ProfessionalLayout,
-  Client: ClientLayout,
+  admin: AdminLayout,
+  staff: StaffLayout,
+  professional: ProfessionalLayout,
+  client: ClientLayout,
 };
 
 const RoleBasedRoutes = () => {
@@ -25,21 +25,18 @@ const RoleBasedRoutes = () => {
   const routes = Routes[role];
 
   return (
-    <RRDRoutes>
-      <Route
-        path="/"
-        element={
-          <AppTheme themeComponents={xThemeComponents}>
-            <CssBaseline enableColorScheme />
-            <Layout />
-          </AppTheme>
-        }
-      >
-        {routes.map((route, i) => (
-          <Route key={i} path={route.path} element={route.element} />
-        ))}
-      </Route>
-    </RRDRoutes>
+    <Route
+      element={
+      <AppTheme themeComponents={xThemeComponents}>
+        <CssBaseline enableColorScheme />
+        <Layout />
+      </AppTheme>
+      }
+    >
+      {routes.map((route, i) => (
+      <Route key={i} path={`/app${route.path}`} element={route.element} />
+      ))}
+    </Route>
   );
 };
 

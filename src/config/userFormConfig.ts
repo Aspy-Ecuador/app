@@ -1,7 +1,7 @@
 export const inputCreateUserConfig = [
   {
     label: "Nombre",
-    key: "first_name",
+    key: "firstName",
     type: "text",
     validation: {
       required: {
@@ -12,7 +12,7 @@ export const inputCreateUserConfig = [
   },
   {
     label: "Apellido",
-    key: "last_name",
+    key: "lastName",
     type: "text",
     validation: {
       required: {

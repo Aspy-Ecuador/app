@@ -65,12 +65,8 @@ const professionalListItems = [
 
 const clientListItems = [
   { text: "Vista General", route: "/", icon: <HomeRoundedIcon /> },
-  {
-    text: "Nueva cita",
-    route: "/agendar-cita",
-    icon: <CalendarMonthRoundedIcon />,
-  },
-  { text: "Recibos", route: "/recibos", icon: <ReceiptLongRoundedIcon /> },
+  { text: "Citas", route: "/citas", icon: <CalendarMonthRoundedIcon /> },
+  { text: "Facturas", route: "/facturas", icon: <ReceiptLongRoundedIcon /> },
 ];
 
 const secondaryListItems = [
@@ -88,13 +84,13 @@ export default function MenuContent() {
   const userRole = getAuthenticatedUserRole();
   let mainListItems: ListItem[];
 
-  if (userRole === "Admin") {
+  if (userRole === "admin") {
     mainListItems = adminListItems;
-  } else if (userRole === "Staff") {
+  } else if (userRole === "staff") {
     mainListItems = staffListItems;
-  } else if (userRole === "Professional") {
+  } else if (userRole === "professional") {
     mainListItems = professionalListItems;
-  } else if (userRole === "Client") {
+  } else if (userRole === "client") {
     mainListItems = clientListItems;
   } else {
     mainListItems = [];
@@ -106,11 +102,11 @@ export default function MenuContent() {
         {mainListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: "block" }}>
             <ListItemButton
-              onClick={() => navigate(item.route)}
+              onClick={() => navigate(`/app${item.route}`)}
               selected={
-                item.route === "/"
-                  ? window.location.pathname === item.route
-                  : window.location.pathname.startsWith(item.route)
+                item.route === "/app/"
+                ? window.location.pathname === `/app${item.route}`
+                : window.location.pathname.startsWith(`/app${item.route}`)
               }
             >
               <ListItemIcon>{item.icon}</ListItemIcon>
@@ -123,11 +119,11 @@ export default function MenuContent() {
         {secondaryListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: "block" }}>
             <ListItemButton
-              onClick={() => navigate(item.route)}
+              onClick={() => navigate(`/app${item.route}`)}
               selected={
-                item.route === "/"
-                  ? window.location.pathname === item.route
-                  : window.location.pathname.startsWith(item.route)
+              item.route === "/app/"
+                ? window.location.pathname === `/app${item.route}`
+                : window.location.pathname.startsWith(`/app${item.route}`)
               }
             >
               <ListItemIcon>{item.icon}</ListItemIcon>

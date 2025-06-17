@@ -1,9 +1,8 @@
 export interface User {
   id: number;
   identity?: number;
-  first_name: string;
-  last_name: string;
-  middle_name?: string;
+  firstName: string;
+  lastName: string;
   role: string;
   photo?: string;
   aboutme?: string;

@@ -26,17 +26,11 @@ export default function SelectProfessional({
     <Box sx={{ minWidth: 120 }}>
       <Typography variant="body1">Profesionales</Typography>
       <FormControl fullWidth>
-        <Select
-          value={selectedId}
-          onChange={handleChange}
-          displayEmpty
-          renderValue={
-            selectedId !== "" ? undefined : () => <em>Seleccione una opción</em>
-          }
-        >
+        <Select value={selectedId} onChange={handleChange}>
+          <MenuItem value="">Seleccione una opción</MenuItem>
           {options?.map((option) => (
             <MenuItem key={option.id} value={option.id}>
-              {option.first_name + " " + option.last_name}
+              {option.firstName + " " + option.lastName}
             </MenuItem>
           ))}
         </Select>
