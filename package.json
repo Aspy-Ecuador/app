@@ -2,7 +2,7 @@
   "name": "aspy-web",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://aspy-ecuador.github.io/Aspy",
+  "homepage": "https://aspy-ecuador.github.io/app",
   "type": "module",
   "scripts": {
     "dev": "vite",
