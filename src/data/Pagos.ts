@@ -27,7 +27,7 @@ export const paymentList: Payment[] = [
     service_price: 40.0,
     discount_percentage: 10,
     total_amount: 40.0,
-    status: true,
+    status: false,
     address: "Calle 10 y Av. 9 de Octubre",
     contactEmail: "melissa@example.com",
     contactPhone: "+593912345678",

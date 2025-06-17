@@ -16,14 +16,14 @@ export const columnsUsersAdmin: GridColDef[] = [
     resizable: false,
   },
   {
-    field: "firstName",
+    field: "first_name",
     headerName: "Nombres",
     disableColumnMenu: true,
     flex: 2,
     resizable: false,
   },
   {
-    field: "lastName",
+    field: "last_name",
     headerName: "Apellidos",
     disableColumnMenu: true,
     flex: 2,
@@ -94,14 +94,14 @@ export const columnsUsers: GridColDef[] = [
     resizable: false,
   },
   {
-    field: "firstName",
+    field: "first_name",
     headerName: "Nombres",
     disableColumnMenu: true,
     width: 160,
     resizable: false,
   },
   {
-    field: "lastName",
+    field: "last_name",
     headerName: "Apellidos",
     disableColumnMenu: true,
     width: 160,

@@ -6,15 +6,18 @@ import CancelButton from "../buttons/CancelButton";
 import CreationButton from "../buttons/CreationButton";
 import UploadButton from "../buttons/UploadButton";
 
-export default function AddReport() {
+interface AddReportProps {
+  setReport: (file: FileData | null) => void;
+}
+
+export default function AddReport({ setReport }: AddReportProps) {
   const [signature, setSignature] = useState<FileData | null>(null);
-  const [report, setReport] = useState<FileData | null>(null);
   const [comment, setComment] = useState<string>("");
+  const [reporte, setReporte] = useState<FileData | null>(null);
   const navigate = useNavigate();
   const handleBack = () => {
     navigate(-1);
   };
-  console.log(report?.file);
   return (
     <div className="bg-white p-6 rounded-xl shadow-md w-full  space-y-6 flex flex-col relative">
       <div>
@@ -30,9 +33,22 @@ export default function AddReport() {
           onFileSelected={(fileData) => setSignature(fileData)}
         />
         {signature && (
-          <p className="text-sm text-gray-500 mt-1">
-            Firma cargada: <strong>{signature.name}</strong>
-          </p>
+          <>
+            <p className="text-sm text-gray-500 mt-1">
+              Firma cargada: <strong>{signature.name}</strong>
+            </p>
+            <div className="mt-2">
+              <img
+                src={
+                  signature.file instanceof File
+                    ? URL.createObjectURL(signature.file)
+                    : signature.file
+                }
+                alt="Firma seleccionada"
+                className="max-h-48 object-contain border rounded-md"
+              />
+            </div>
+          </>
         )}
       </div>
 
@@ -42,15 +58,18 @@ export default function AddReport() {
           <h2 className="text-lg font-semibold">Reporte del profesional</h2>
         </div>
         <UploadButton
-          accept="pdf/*"
+          accept="application/pdf"
           label="Subir Reporte"
           icon={<UploadFile className="mr-2 text-blue-600" />}
           buttonClassName="bg-white text-black font-bold border border-blue-600 hover:bg-blue-50"
-          onFileSelected={(fileData) => setReport(fileData)}
+          onFileSelected={(fileData) => {
+            setReport(fileData);
+            setReporte(fileData);
+          }}
         />
-        {report && (
+        {reporte && (
           <p className="text-sm text-gray-500 mt-1">
-            Reporte cargado: <strong>{report.name}</strong>
+            Reporte cargado: <strong>{reporte.name}</strong>
           </p>
         )}
       </div>
@@ -61,6 +80,7 @@ export default function AddReport() {
             setSignature(null);
             setComment("");
             setReport(null);
+            setReporte(null);
             handleBack();
           }}
           text="Cancelar"
@@ -70,6 +90,7 @@ export default function AddReport() {
           onClick={() => {
             console.log("Comentario:", comment);
             console.log("Firma:", signature);
+            navigate("/");
           }}
         />
       </div>

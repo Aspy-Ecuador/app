@@ -14,6 +14,7 @@ import { styled } from "@mui/material/styles";
 import ForgotPassword from "./ForgotPassword";
 import { useNavigate } from "react-router-dom";
 import ThemedLogo from "@/shared-theme/ThemedLogo";
+import { login } from "../API/auth";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -39,6 +40,9 @@ export default function SignInCard() {
   const [passwordError, setPasswordError] = useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
   const [open, setOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
   const navigate = useNavigate();
 
   const handleClickOpen = () => {
@@ -49,38 +53,42 @@ export default function SignInCard() {
     setOpen(false);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    if (emailError || passwordError) {
-      event.preventDefault();
-      return;
+  const loginUser = async () => {
+    try {
+      await login(email, password);
+      navigate("/");
+    } catch (error) {
+      console.error("Login failed:", error);
+      setLoginError("Credenciales Incorrectas");
     }
-    /* const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    }); */
+  };
 
-    navigate("/");
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const isValid = validateInputs();
+    if (!isValid) return;
+    await loginUser();
   };
 
   const validateInputs = () => {
-    const email = document.getElementById("email") as HTMLInputElement;
-    const password = document.getElementById("password") as HTMLInputElement;
-
     let isValid = true;
 
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
       setEmailError(true);
-      setEmailErrorMessage("Please enter a valid email address.");
+      setEmailErrorMessage(
+        "Por favor, introduzca una dirección de correo electrónico válida."
+      );
       isValid = false;
     } else {
       setEmailError(false);
       setEmailErrorMessage("");
     }
 
-    if (!password.value || password.value.length < 6) {
+    if (!password || password.length < 4) {
       setPasswordError(true);
-      setPasswordErrorMessage("Password must be at least 6 characters long.");
+      setPasswordErrorMessage(
+        "La contraseña debe tener al menos 3 caracteres."
+      );
       isValid = false;
     } else {
       setPasswordError(false);
@@ -102,6 +110,11 @@ export default function SignInCard() {
       >
         Iniciar sesión
       </Typography>
+      {loginError && (
+        <Typography color="error" sx={{ textAlign: "center" }}>
+          {loginError}
+        </Typography>
+      )}
       <Box
         component="form"
         onSubmit={handleSubmit}
@@ -113,7 +126,8 @@ export default function SignInCard() {
           <TextField
             error={emailError}
             helperText={emailErrorMessage}
-            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             type="email"
             name="email"
             placeholder="tu@correo.com"
@@ -144,7 +158,8 @@ export default function SignInCard() {
             name="password"
             placeholder="•••••••••"
             type="password"
-            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
             autoFocus
             required
@@ -172,7 +187,7 @@ export default function SignInCard() {
         <Typography sx={{ textAlign: "center" }}>
           ¿No tienes una cuenta?{" "}
           <span>
-            <Link onClick={() => navigate("/app/register")} component="button">
+            <Link onClick={() => navigate("/register")} component="button">
               Regístrate
             </Link>
           </span>

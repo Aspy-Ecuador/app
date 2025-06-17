@@ -4,8 +4,8 @@ import ProfileView from "@components/ProfileView";
 export default function Profile() {
   const sample_data: User = {
     id: 1,
-    firstName: "Jhon",
-    lastName: "Gonzales",
+    first_name: "Jhon",
+    last_name: "Gonzales",
     role: "Paciente",
     aboutme: "No disponible",
     age: 35,

@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Payment } from "@/types/Payment";
+import { paymentList } from "@data/Pagos";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import ReceiptRevision from "@staff/ReceiptRevision";
@@ -14,6 +15,7 @@ interface ReceiptDetailsProps {
 export default function ReceiptDetails({ receiptData }: ReceiptDetailsProps) {
   const navigate = useNavigate();
   const handleBack = () => {
+    paymentList[1].status = true;
     navigate("/pagos");
   };
 

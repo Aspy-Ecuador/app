@@ -3,7 +3,7 @@ import ControlPanel from "@staff/ControlPanel";
 import Profile from "@components/Profile";
 import ProffesionalList from "@staff/ProffesionalList";
 import ClientList from "@staff/ClientList";
-import ReceiptList from "@staff/ReceiptList";
+import ReceiptList from "@components/ReceiptList";
 import Appointments from "@staff/Appointments";
 import PaymentsList from "@components/staff/PaymentsList";
 import Services from "@components/staff/ServicesList";
