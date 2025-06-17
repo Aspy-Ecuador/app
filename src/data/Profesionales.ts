@@ -3,8 +3,8 @@ import { User } from "../types/User";
 export const profesionales: User[] = [
   {
     id: 16,
-    firstName: "Oscar",
-    lastName: "Mendoza",
+    first_name: "Oscar",
+    last_name: "Mendoza",
     role: "Profesional",
     aboutme: "No disponible",
     age: 36,
@@ -17,8 +17,8 @@ export const profesionales: User[] = [
   },
   {
     id: 17,
-    firstName: "Carlos",
-    lastName: "Flores",
+    first_name: "Carlos",
+    last_name: "Flores",
     role: "Profesional",
     aboutme: "No disponible",
     age: 36,
@@ -31,8 +31,8 @@ export const profesionales: User[] = [
   },
   {
     id: 18,
-    firstName: "Lucía",
-    lastName: "Almeida",
+    first_name: "Lucía",
+    last_name: "Almeida",
     role: "Profesional",
     aboutme: "Psicóloga infantil especializada en terapias de juego.",
     age: 34,
@@ -45,8 +45,8 @@ export const profesionales: User[] = [
   },
   {
     id: 19,
-    firstName: "Daniel",
-    lastName: "Torres",
+    first_name: "Daniel",
+    last_name: "Torres",
     role: "Profesional",
     aboutme: "Psicoterapeuta con enfoque en terapia familiar y de pareja.",
     age: 42,
@@ -59,8 +59,8 @@ export const profesionales: User[] = [
   },
   {
     id: 20,
-    firstName: "Verónica",
-    lastName: "Ríos",
+    first_name: "Verónica",
+    last_name: "Ríos",
     role: "Profesional",
     aboutme: "Terapista ocupacional con experiencia en autismo.",
     age: 39,

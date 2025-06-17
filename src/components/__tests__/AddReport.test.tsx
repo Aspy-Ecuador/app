@@ -5,9 +5,11 @@ import { MemoryRouter } from "react-router-dom";
 
 describe("AddReport component", () => {
   test("renders correctly and allows uploading a file and writing a comment", () => {
-    render(<MemoryRouter>
-      <AddReport />
-    </MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <AddReport setReport={() => {}} />
+      </MemoryRouter>
+    );
     // Check for titles
     expect(screen.getByText("Firma del profesional")).toBeInTheDocument();
   });

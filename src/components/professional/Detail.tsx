@@ -96,7 +96,7 @@ export default function AppointmentDetail() {
                   Profesional
                 </Typography>
                 <Typography variant="body1">
-                  {user?.firstName} {user?.lastName}
+                  {user?.first_name} {user?.last_name}
                 </Typography>
                 <Typography variant="body1">{user?.email}</Typography>
                 <Typography variant="body1">
@@ -110,7 +110,7 @@ export default function AppointmentDetail() {
                   Paciente
                 </Typography>
                 <Typography variant="body1">
-                  {user?.firstName} {user?.lastName}
+                  {user?.first_name} {user?.last_name}
                 </Typography>
                 <Typography variant="body1">{user?.email}</Typography>
                 <Typography variant="body1">

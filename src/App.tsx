@@ -11,7 +11,7 @@ import {
   Routes,
   useLocation,
 } from "react-router-dom";
-
+import PrivateRoute from "@components/PrivateRoute";
 // Mapeo de rutas y títulos
 const routeTitles: { [key: string]: string } = {
   "/": "Inicio",
@@ -63,11 +63,12 @@ const App = () => {
         <DocumentTitleUpdater />
         <Routes>
           {/* Rutas públicas sin layout */}
-          <Route path="/app/login" element={<SignInSide />} />
-          <Route path="/app/register" element={<SignUp />} />
+          <Route path="/login" element={<SignInSide />} />
+          <Route path="/register" element={<SignUp />} />
           {/* Rutas privadas basadas en el rol */}
-          {RoleBasedRoutes()}
-
+          <Route element={<PrivateRoute />}>
+            <Route path="*" element={<RoleBasedRoutes />} />
+          </Route>
           {/* Rutas no encontradas */}
           <Route path="*" element={<NotFound />} />
         </Routes>

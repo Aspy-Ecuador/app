@@ -37,7 +37,7 @@ export default function OverviewPaciente({
             </Grid>
             <Grid size={6}>
               <Typography>
-                {paciente.firstName} {paciente.lastName}
+                {paciente.first_name} {paciente.last_name}
               </Typography>
             </Grid>
           </Grid>
@@ -75,7 +75,7 @@ export default function OverviewPaciente({
             </Grid>
             <Grid size={6}>
               <Typography>
-                {representante.firstName} {representante.lastName}
+                {representante.first_name} {representante.last_name}
               </Typography>
             </Grid>
           </Grid>

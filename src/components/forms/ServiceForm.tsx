@@ -3,6 +3,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { servicesList } from "@data/Servicios";
 import { inputServiceConfig } from "@/config/serviceFormConfig";
 import { Service } from "@/types/Service";
+import { useNavigate } from "react-router-dom";
 import UserInput from "@forms/UserInput";
 import SaveButton from "@buttons/SaveButton";
 import CreationButton from "@buttons/CreationButton";
@@ -34,6 +35,7 @@ export default function ServiceForm({
 
   //Estas dos lineas son solo para pruebas
   const serviceData = servicesList.find((u) => u.id === serviceId);
+  const navigate = useNavigate();
 
   /*
   useEffect(() => {
@@ -91,14 +93,17 @@ export default function ServiceForm({
       ...data,
       active: data.active === "Sí",
     };
+    servicesList[1].active = false;
     console.log(transformedData);
     alert(data);
     console.log(data);
+    navigate(-1);
   });
 
   const onClickCreate = methods.handleSubmit((data) => {
     alert(data);
     console.log(data);
+    navigate(-1);
   });
 
   return (
