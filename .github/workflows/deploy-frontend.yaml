@@ -44,5 +44,5 @@ jobs:
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
       with:
-        publish_dir: dist      # La carpeta de salida de tu build
-        github_token: ${{ secrets.GITHUB_TOKEN }}  # Token de autenticación de GitHub
+        publish_dir: dist
+        github_token: ${{ secrets.GITHUB_TOKEN }}

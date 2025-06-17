@@ -30,3 +30,9 @@ pnpm-lock.yaml
 *.sln
 *.sw?
 tsconfig.tsbuildinfo
+.vite
+bootstrap
+aspy
+storage
+vendor
+nginx
