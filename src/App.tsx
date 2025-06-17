@@ -60,7 +60,7 @@ const App = () => {
   return (
     <AppTheme themeComponents={xThemeComponents}>
       <CssBaseline enableColorScheme />
-      <Router>
+      <Router basename="/app">
         <DocumentTitleUpdater />
         <Routes>
           {/* Rutas públicas sin layout */}
