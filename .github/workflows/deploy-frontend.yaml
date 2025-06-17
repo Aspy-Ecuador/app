@@ -34,7 +34,7 @@ jobs:
 
     # Paso 5: Instalar las dependencias nuevamente
     - name: Install dependencies
-      run: npm install --force
+      run: npm install
 
     # Paso 6: Construir la aplicación
     - name: Build the application
