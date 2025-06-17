@@ -196,7 +196,6 @@ export default function PaymentForm({
               </CardContent>
             </CardActionArea>
           </Card>
-
           <Card
             selected={paymentType === "bankTransfer"}
             onClick={() => setPaymentType("bankTransfer")}
@@ -238,7 +237,6 @@ export default function PaymentForm({
           </Card>
         </RadioGroup>
       </FormControl>
-
       {paymentType === "creditCard" && (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <PaymentContainer>

@@ -18,7 +18,7 @@ export default function EditRole() {
       <Grid container spacing={2}>
         <Grid size={12} className="grid-p-patients-tittle">
           <Header
-            textHeader={"Editar Usuario"}
+            textHeader={"Registrar Servicio"}
             isCreate={false}
             handle={handleBack}
           />

@@ -1,18 +1,15 @@
 import { styled } from "@mui/material/styles";
-import Avatar from "@mui/material/Avatar";
 import MuiDrawer, { drawerClasses } from "@mui/material/Drawer";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import SelectContent from "./SelectContent";
 import MenuContent from "./MenuContent";
 import OptionsMenu from "./OptionsMenu";
-import ColorModeToggle from "@shared-theme/ColorModeToggle";
 import ThemedLogo from "@shared-theme/ThemedLogo";
-import {
-  getAuthenticatedUserName,
-  getAuthenticatedUserEmail,
-} from "@/utils/store";
+import ColorModeToggle from "@shared-theme/ColorModeToggle";
+import { getAuthenticatedUserName, getAuthenticatedUserEmail } from "@store";
 
 const drawerWidth = 240;
 
@@ -38,7 +35,6 @@ export default function SideMenu() {
         },
       }}
     >
-      {/*
       <Box
         sx={{
           display: "flex",
@@ -48,7 +44,6 @@ export default function SideMenu() {
       >
         <SelectContent />
       </Box>
-      */}
       <Divider />
       <Box
         sx={{
@@ -78,12 +73,6 @@ export default function SideMenu() {
           borderColor: "divider",
         }}
       >
-        <Avatar
-          sizes="small"
-          alt="Riley Carter"
-          src="/static/images/avatar/7.jpg"
-          sx={{ width: 36, height: 36 }}
-        />
         <Box sx={{ mr: "auto" }}>
           <Typography
             variant="body2"
@@ -96,8 +85,9 @@ export default function SideMenu() {
           </Typography>
         </Box>
 
-        <OptionsMenu />
         <ColorModeToggle />
+        <OptionsMenu />
+        
       </Stack>
     </Drawer>
   );

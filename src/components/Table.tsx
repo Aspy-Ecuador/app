@@ -27,7 +27,6 @@ export default function Table<T>({
         columns={columns}
         getRowId={(row) => row.id}
         slots={{ toolbar: GridToolbar }}
-        checkboxSelection
         onRowSelectionModelChange={(newRowSelectionModel) => {
           onRowSelectionChange(newRowSelectionModel);
         }}

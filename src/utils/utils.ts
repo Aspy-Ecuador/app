@@ -13,7 +13,6 @@ import { paymentList } from "@data/Pagos";
 import { Payment } from "@/types/Payment";
 import { ServiceOptions } from "@/types/ServiceOptions";
 import { ProfessionalOptions } from "@/types/ProfessionalOptions";
-import { AvailableDateTime } from "@/types/AvailableDateTime";
 
 type TendenciaDiaria = {
   promedioPorcentual: number;
@@ -202,16 +201,4 @@ export function getProfessionalAppointment(
       name: service.nameProfesional,
     },
   ];
-}
-
-export function getDates(): Promise<AvailableDateTime[]> {
-  return Promise.resolve([
-    { date: "2025-06-12", hours: ["10:00", "11:00"] },
-    { date: "2025-06-14", hours: ["09:00", "15:00"] },
-  ]);
-}
-
-export function getReceipts(id: number): Receipt[] {
-  console.log(id);
-  return receiptList;
 }

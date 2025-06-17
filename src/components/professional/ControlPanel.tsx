@@ -14,10 +14,7 @@ export default function ControlPanel() {
         </Grid>
 
         <Grid size={12}>
-          <ShowAppointment
-            unmarkedAppointmentsProp={citas}
-            unreportedAppointments={citas}
-          />
+          <ShowAppointment citasSinMarcar={citas} citasSinReporte={citas} />
         </Grid>
       </Grid>
     </Box>

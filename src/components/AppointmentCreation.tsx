@@ -11,56 +11,26 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import DateCalendarValue from "@components/DateCalendarValue";
+
+import DateCalendarValue from "./DateCalendarValue";
 import { ProfessionalOptions } from "@/types/ProfessionalOptions";
-import { getDates } from "@utils/utils";
 
 export default function AppointmentCreation() {
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [selectedHour, setSelectedHour] = useState<string | null>(null);
-  const [identity, setIdentity] = useState<string>("");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const servicesOptions: ServiceOptions[] = getServicesAppointment();
-  const [serviceId, setServiceId] = useState<number | null>(null);
-  const [queryType, setQueryType] = useState<string | null>(null);
-  const [professionalId, setProfessionalId] = useState<number | null>(null);
-  const [professionalsOptions, setProfessionalsOptions] = useState<
-    ProfessionalOptions[]
-  >([]);
-
   const navigate = useNavigate();
   const handleToPay = () => {
-    if (
-      !serviceId ||
-      !professionalId ||
-      !queryType ||
-      !identity.trim() ||
-      !selectedDate ||
-      !selectedHour
-    ) {
-      setErrorMessage(
-        "Por favor, complete todos los campos antes de continuar."
-      );
-      return;
-    }
-
-    // Si todo está correcto, limpiar error y continuar
-    setErrorMessage(null);
-    console.log({
-      serviceId,
-      professionalId,
-      queryType,
-      selectedDate,
-      selectedHour,
-      identity,
-    });
     navigate("/pago");
   };
 
+  const servicesOptions: ServiceOptions[] = getServicesAppointment();
+  const [serviceId, setServiceId] = useState<number | null>(null);
   const handleServiceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
     setServiceId(value ? parseInt(value) : null);
   };
+
+  const [professionalsOptions, setProfessionalsOptions] = useState<
+    ProfessionalOptions[]
+  >([]);
 
   useEffect(() => {
     if (serviceId !== null) {
@@ -69,13 +39,15 @@ export default function AppointmentCreation() {
     }
   }, [serviceId]);
 
+  const [queryType, setQueryType] = useState<string | null>(null);
+  const [professionalId, setProfessionalId] = useState<number | null>(null);
   const handleProfessionalChange = (
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const value = e.target.value;
     setProfessionalId(value ? parseInt(value) : null);
   };
-
+  console.log(professionalId); //SACAR
   return (
     <div
       style={{
@@ -95,7 +67,7 @@ export default function AppointmentCreation() {
         }}
       >
         <FormControl>
-          <div className="grid grid-cols-1 md:grid-cols-1 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-10">
             <div className="flex flex-col gap-2 w-full">
               <div className="flex flex-row gap-2 w-full">
                 <h6 className="grow">Servicio</h6>
@@ -159,22 +131,27 @@ export default function AppointmentCreation() {
                 type="tel"
                 variant="outlined"
                 size="small"
-                value={identity}
-                onChange={(e) => setIdentity(e.target.value)}
-                className="w-full"
+                className="w-full md:w-[300px]"
+              />
+            </div>
+            <div className="flex flex-col gap-2 w-full">
+              <div className="flex flex-row gap-2 w-full">
+                <h6 className="grow">Nombre del paciente</h6>
+              </div>
+              <TextField
+                required
+                type="text"
+                variant="outlined"
+                size="small"
+                className="w-full md:w-[300px]"
               />
             </div>
           </div>
-          <div className="flex flex-col gap-2 w-full mt-8">
+          <div className="flex flex-col gap-2 w-full">
             <Button variant="contained" onClick={handleToPay}>
               Proceder a pagar
             </Button>
           </div>
-          {errorMessage && (
-            <div className="text-red-600 text-sm mb-2 text-center">
-              {errorMessage}
-            </div>
-          )}
         </FormControl>
       </div>
 
@@ -187,11 +164,7 @@ export default function AppointmentCreation() {
           alignItems: "center",
         }}
       >
-        <DateCalendarValue
-          fetchAvailableDates={getDates}
-          onDateChange={setSelectedDate}
-          onHourChange={setSelectedHour}
-        />
+        <DateCalendarValue />
       </div>
     </div>
   );

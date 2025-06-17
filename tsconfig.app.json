@@ -21,8 +21,7 @@
       "@forms/*": ["src/components/forms/*"],
       "@pages/*": ["src/pages/*"],
       "@shared-theme/*": ["src/shared-theme/*"],
-      "@buttons/*": ["src/components/buttons/*"],
-      "@API/*": ["src/API/*"]
+      "@buttons/*": ["src/components/buttons/*"]
     },
 
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",

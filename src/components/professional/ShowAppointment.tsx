@@ -1,7 +1,6 @@
-import { useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import { Appointment } from "@/types/Appointment";
-import { useState } from "react";
 import Card from "@mui/material/Card";
 import Divider from "@mui/material/Divider";
 import Box from "@mui/material/Box";
@@ -14,50 +13,21 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 import Button from "@mui/material/Button";
-import ConfirmDialog from "@professional/ConfirmDialog";
 
 interface ShowAppointmentProps {
-  unmarkedAppointmentsProp: Appointment[];
-  unreportedAppointments: Appointment[];
+  citasSinMarcar: Appointment[];
+  citasSinReporte: Appointment[];
 }
 
 export default function ShowAppointment({
-  unmarkedAppointmentsProp,
-  unreportedAppointments,
+  citasSinMarcar,
+  citasSinReporte,
 }: ShowAppointmentProps) {
-  const [unmarkedAppointments, setUnmarkedAppointments] = useState(
-    unmarkedAppointmentsProp
-  );
-  const [selectedAppointment, setSelectedAppointment] =
-    useState<Appointment | null>(null);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [assistMap, setAssistMap] = useState<Record<number, string>>({});
   const navigate = useNavigate();
-  const theme = useTheme().palette.mode;
-  const themeClass = theme === "dark" ? "dark-theme" : "light-theme";
 
-  const handleConfirmAssist = () => {
-    (document.activeElement as HTMLElement)?.blur(); // ✅ esto
-    if (selectedAppointment) {
-      setUnmarkedAppointments((prev) =>
-        prev.filter((cita) => cita.id !== selectedAppointment.id)
-      );
-
-      setAssistMap((prev) => {
-        const updated = { ...prev };
-        delete updated[selectedAppointment.id];
-        return updated;
-      });
-    }
-    setOpenDialog(false);
-    setSelectedAppointment(null);
-  };
-
-  const handleCancel = () => {
-    (document.activeElement as HTMLElement)?.blur(); // ✅ esto
-    setOpenDialog(false);
-    setSelectedAppointment(null);
-  };
+  const theme = useTheme();
+  const themeClass =
+    theme.palette.mode === "dark" ? "dark-theme" : "light-theme";
 
   return (
     <Grid container spacing={2} className={themeClass}>
@@ -66,8 +36,8 @@ export default function ShowAppointment({
       </Grid>
 
       <Grid size={12} container alignItems="center" justifyContent="center">
-        {unmarkedAppointments.length > 0 ? (
-          unmarkedAppointments.map((cita, index) => (
+        {citasSinMarcar.length > 0 ? (
+          citasSinMarcar.map((cita, index) => (
             <Grid key={index} size={12} sx={{ maxWidth: 310 }}>
               <Card variant="outlined">
                 <Box sx={{ p: 2 }}>
@@ -79,8 +49,7 @@ export default function ShowAppointment({
                     }}
                   >
                     <Typography gutterBottom variant="h6">
-                      Paciente:{" "}
-                      {cita.patient.first_name + " " + cita.patient.last_name}
+                      Paciente: {cita.patient.firstName + cita.patient.lastName}
                     </Typography>
                   </Stack>
                 </Box>
@@ -93,26 +62,16 @@ export default function ShowAppointment({
                       </FormLabel>
                       <RadioGroup
                         row
+                        aria-labelledby={`opciones-${index}`}
                         name={`opcion-cita-${index}`}
-                        value={assistMap[cita.id] || ""}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          setAssistMap((prev) => ({
-                            ...prev,
-                            [cita.id]: value,
-                          }));
-
-                          setSelectedAppointment(cita);
-                          setOpenDialog(true);
-                        }}
                       >
                         <FormControlLabel
-                          value="assist"
+                          value="female"
                           control={<Radio />}
                           label="Asistió"
                         />
                         <FormControlLabel
-                          value="no-assist"
+                          value="male"
                           control={<Radio />}
                           label="No asistió"
                         />
@@ -141,8 +100,8 @@ export default function ShowAppointment({
       </Grid>
 
       <Grid size={12} container alignItems="center" justifyContent="center">
-        {unreportedAppointments.length > 0 ? (
-          unreportedAppointments.map((cita, index) => (
+        {citasSinReporte.length > 0 ? (
+          citasSinReporte.map((cita, index) => (
             <Grid key={index} size={12} sx={{ maxWidth: 310 }}>
               <Card variant="outlined">
                 <Box sx={{ p: 2 }}>
@@ -154,8 +113,7 @@ export default function ShowAppointment({
                     }}
                   >
                     <Typography gutterBottom variant="h6">
-                      Paciente:{" "}
-                      {cita.patient.first_name + " " + cita.patient.last_name}
+                      Paciente: {cita.patient.firstName + cita.patient.lastName}
                     </Typography>
                   </Stack>
                 </Box>
@@ -168,7 +126,7 @@ export default function ShowAppointment({
                   >
                     <Button
                       onClick={() => {
-                        const newPath = `pacientes/${cita.patient.id}-${cita.patient.first_name.toLowerCase()}/nuevoReporte`;
+                        const newPath = `pacientes/${cita.patient.id}-${cita.patient.firstName.toLowerCase()}/nuevoReporte`;
                         navigate(newPath);
                       }}
                       variant="outlined"
@@ -189,13 +147,6 @@ export default function ShowAppointment({
           </Grid>
         )}
       </Grid>
-
-      <ConfirmDialog
-        open={openDialog}
-        onClose={handleCancel}
-        onConfirm={handleConfirmAssist}
-        value={selectedAppointment ? assistMap[selectedAppointment.id] : ""}
-      />
     </Grid>
   );
 }

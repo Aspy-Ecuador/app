@@ -7,9 +7,6 @@ import UserForm from "@forms/UserForm";
 import Steps from "@components/Steps";
 import Grid from "@mui/material/Grid2";
 import Success from "@components/Success";
-//import { addPerson } from "../API/usuarioAPI";
-import { register } from "../API/auth";
-import { Person } from "@/types/Person";
 
 interface FormViewProps {
   isEdit: boolean;
@@ -48,37 +45,18 @@ export default function FormView({
   const handleClose = () => {
     setOpen(false);
     if (isRegister) {
-      navigate("/login");
+      navigate("/app/login");
     } else {
       navigate(-1);
     }
   };
 
   const navigate = useNavigate();
-
-  const handleFinalSubmit = async (data: Partial<User>) => {
+  const handleFinalSubmit = (data: Partial<User>) => {
     const fullData = { ...userData, ...data };
-    if (isEdit) {
-      console.log("Usuario final:", fullData);
-      await register();
-    } else {
-      const newPerson: Person = {
-        first_name: fullData.first_name || "",
-        middle_name: fullData.last_name || "",
-        birthdate: new Date().toISOString().split("T")[0],
-        gender: 1,
-        occupation: 1,
-        marital_status: 1,
-        education: 3,
-        created_by: "system",
-        modified_by: "",
-        creation_date: new Date().toISOString().split("T")[0],
-        modification_date: new Date().toISOString().split("T")[0],
-      };
-      console.log(newPerson);
-      await register();
-    }
+    console.log("Usuario final:", fullData);
     handleOpen();
+    // Aquí puedes guardar el usuario o enviarlo al backend
   };
 
   return (

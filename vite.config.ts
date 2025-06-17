@@ -25,7 +25,6 @@ export default defineConfig({
       "@forms": "/src/components/forms",
       "@pages": "/src/pages",
       "@buttons": "/src/components/buttons",
-      "@API": "/src/API",
     },
   },
   build: {

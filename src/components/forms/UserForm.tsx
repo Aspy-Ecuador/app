@@ -36,8 +36,8 @@ export default function UserForm({
   useEffect(() => {
     if (isEditMode && user) {
       methods.reset({
-        first_name: user.first_name,
-        last_name: user.last_name,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
         phone: user.phone,
         address: user.address,
@@ -47,8 +47,8 @@ export default function UserForm({
       });
     } else {
       methods.reset({
-        first_name: "",
-        last_name: "",
+        firstName: "",
+        lastName: "",
         email: "",
         phone: "",
         address: "",

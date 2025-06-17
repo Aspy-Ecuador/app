@@ -19,7 +19,7 @@ export default function CreateUser({ role }: CreateUserProps) {
       <Grid container spacing={2}>
         <Grid size={12} className="grid-p-patients-tittle">
           <Header
-            textHeader={"Crear Usuario"}
+            textHeader={"Registrar Servicio"}
             isCreate={false}
             handle={handleBack}
           />

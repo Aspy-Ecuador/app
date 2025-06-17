@@ -51,8 +51,8 @@ export default function TimeLinePatients() {
                   <strong>Hora:</strong> {cita.startTime} - {cita.endTime}
                 </Typography>
                 <Typography variant="body1">
-                  <strong>Profesional:</strong> {cita.professional.first_name}{" "}
-                  {cita.patient.last_name}
+                  <strong>Profesional:</strong> {cita.professional.firstName}{" "}
+                  {cita.patient.lastName}
                 </Typography>
                 <Typography variant="body1">
                   <strong>{cita.assist ? "Asistió" : "No Asistió"}</strong>

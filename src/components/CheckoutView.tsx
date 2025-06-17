@@ -31,7 +31,7 @@ export default function CheckoutView() {
 
   const handleClose = () => {
     setOpen(false);
-    navigate("/");
+    navigate("/citas");
   };
 
   const getStepContent = (step: number) => {
