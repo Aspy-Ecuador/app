@@ -29,6 +29,7 @@ export default function FormView({
   const [step, setStep] = useState(0);
   const totalSteps = 3; // O calculado según el tamaño de `inputCreateUserConfig`
   const fieldsPerStep = Math.ceil(inputCreateUserConfig.length / totalSteps);
+
   const [open, setOpen] = useState(false);
 
   const [userData, setUserData] = useState<Partial<User>>({});
@@ -57,26 +58,25 @@ export default function FormView({
   const navigate = useNavigate();
 
   const handleFinalSubmit = async (data: Partial<User>) => {
-    const fullData = { ...userData, ...data };
+    const fullData = { ...userData, ...data, role_id: 1 };
+
+    console.log(fullData);
     if (isEdit) {
       console.log("Usuario final:", fullData);
-      await register();
-    } else {
       const newPerson: Person = {
         first_name: fullData.first_name || "",
         middle_name: fullData.last_name || "",
         birthdate: new Date().toISOString().split("T")[0],
+        email: "aaaa@espps.ccc",
+        password: "2341",
         gender: 1,
         occupation: 1,
         marital_status: 1,
         education: 3,
-        created_by: "system",
-        modified_by: "",
-        creation_date: new Date().toISOString().split("T")[0],
-        modification_date: new Date().toISOString().split("T")[0],
       };
-      console.log(newPerson);
-      await register();
+      //await register(newPerson);
+    } else {
+      await register(fullData);
     }
     handleOpen();
   };

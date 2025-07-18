@@ -4,14 +4,21 @@ import { findInputError } from "@utils/findInputError";
 import { isFormInvalid } from "@utils/isFormInvalid";
 import TextField from "@mui/material/TextField";
 import InputError from "@forms/InputError";
+import { useEffect, useState } from "react";
+
+type Option = {
+  label: string;
+  value: number;
+};
 
 interface UserInputProps {
   label: string;
   type: string;
   id: string;
   validation: object;
-  options?: string[];
-  role?: string;
+  options?: Option[];
+  dependsOn?: string;
+  getOptions?: (selectedValue: number) => Option[];
 }
 
 export default function UserInput({
@@ -19,13 +26,39 @@ export default function UserInput({
   type,
   id,
   validation,
-  options,
-  role,
+  options = [],
+  dependsOn,
+  getOptions,
 }: UserInputProps) {
   const {
     register,
     formState: { errors },
+    watch,
+    setValue,
   } = useFormContext();
+
+  const [dynamicOptions, setDynamicOptions] = useState<Option[]>(options);
+
+  // Observar el campo del cual depende
+  const dependentValue = dependsOn ? watch(dependsOn) : null;
+
+  useEffect(() => {
+    if (dependsOn && getOptions && dependentValue) {
+      // Obtener las nuevas opciones basadas en el valor del campo dependiente
+      const newOptions = getOptions(Number(dependentValue));
+      setDynamicOptions(newOptions);
+
+      // Limpiar el valor actual del campo cuando cambie la dependencia
+      setValue(id, "");
+    } else if (dependsOn && !dependentValue) {
+      // Si no hay valor seleccionado en el campo dependiente, limpiar opciones
+      setDynamicOptions([]);
+      setValue(id, "");
+    } else if (!dependsOn) {
+      // Si no depende de ningún campo, usar las opciones estáticas
+      setDynamicOptions(options);
+    }
+  }, [dependentValue, dependsOn, getOptions, id, setValue, options]);
 
   const inputError = findInputError(errors, id);
   const isInvalid = isFormInvalid(inputError);
@@ -48,12 +81,12 @@ export default function UserInput({
           id={id}
           {...register(id, validation)}
           className="border border-gray-300 rounded-md p-2 w-full"
-          disabled={!!role}
+          disabled={dependsOn && dependentValue} // Deshabilitar si depende de otro campo que no tiene valor
         >
           <option value="">Seleccione una opción</option>
-          {options?.map((option) => (
-            <option key={option} value={option}>
-              {option}
+          {dynamicOptions?.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
             </option>
           ))}
         </select>

@@ -21,7 +21,7 @@ export const login = async (email: string, password: string) => {
 
   // Guarda el token
   localStorage.setItem("token", data.access_token);
-
+  console.log(localStorage.getItem("token"));
   await StoreUser();
   return data;
 };
@@ -52,32 +52,9 @@ export const StoreUser = async () => {
   return userWithRoleName;
 };
 
-export const register = async () => {
-  const token = localStorage.getItem("token");
-  const userRegister = {
-    role_id: 4,
-    email: "staff5@aspy.com",
-    password: "staff5",
-
-    first_name: "Miguel",
-    last_name: "Castro",
-    birthdate: "1982-07-20",
-    gender: 2,
-    occupation: 4,
-    marital_status: 1,
-    education: 2,
-
-    person_type: "staff",
-  };
-
-  if (!token) throw new Error("Token no encontrado");
+export const register = async (userRegister: User) => {
   try {
-    const response = await axios.post(`${apiURL}/user-account`, userRegister, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await axios.post(`${apiURL}/user-account`, userRegister);
     return response.data as UserLogin;
   } catch (error) {
     console.error("Error al agregar persona:", error);

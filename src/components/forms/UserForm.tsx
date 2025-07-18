@@ -7,7 +7,7 @@ import Button from "@mui/material/Button";
 import UserInput from "@forms/UserInput";
 
 interface UserFormProps {
-  isEditMode?: boolean;
+  isEditMode: boolean;
   userId?: number;
   role?: string;
   start: number;
@@ -30,31 +30,46 @@ export default function UserForm({
   isLast,
 }: UserFormProps) {
   const user = usuarios.find((u) => u.id === userId);
-
-  const methods = useForm<User>(); // sin defaultValues por ahora
+  const methods = useForm<User>();
 
   useEffect(() => {
     if (isEditMode && user) {
       methods.reset({
+        identity: user.identity,
         first_name: user.first_name,
         last_name: user.last_name,
+        middle_name: user.middle_name || "",
         email: user.email,
         phone: user.phone,
         address: user.address,
-        identity: user.identity,
-        role: user.role,
         password: "",
+        confirmPassword: "",
+        birthdate: user.birthdate || "",
+        gender: user.gender || "",
+        occupation: user.occupation || "",
+        marital_status: user.marital_status || "",
+        education: user.education || "",
+        province: user.province || "",
+        city: user.city || "",
       });
     } else {
       methods.reset({
+        identity: 0,
         first_name: "",
         last_name: "",
+        middle_name: "",
         email: "",
         phone: "",
         address: "",
-        identity: 0,
-        role: role,
         password: "",
+        confirmPassword: "",
+        birthdate: "",
+        gender: "",
+        occupation: "",
+        marital_status: "",
+        education: "",
+        province: "",
+        city: "",
       });
     }
   }, [isEditMode, user, methods, role]);
@@ -65,7 +80,6 @@ export default function UserForm({
       label={input.label}
       type={input.type}
       id={input.key}
-      role={role}
       validation={
         input.key === "confirmPassword"
           ? {
@@ -77,6 +91,8 @@ export default function UserForm({
           : input.validation
       }
       options={input.options}
+      dependsOn={input.dependsOn} // Agregar esta línea
+      getOptions={input.getOptions} // Agregar esta línea
     />
   ));
 

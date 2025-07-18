@@ -6,8 +6,6 @@ export interface Person {
   occupation: number;
   marital_status: number;
   education: number;
-  created_by: string;
-  modified_by: string;
-  creation_date: string;
-  modification_date: string;
+  email: string;
+  password: string;
 }

@@ -173,12 +173,7 @@ export default function SignInCard() {
           label="Recordarme"
         />
         <ForgotPassword open={open} handleClose={handleClose} />
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          onClick={validateInputs}
-        >
+        <Button type="submit" fullWidth variant="contained" onClick={() => {}}>
           Iniciar Sesión
         </Button>
       </Box>
