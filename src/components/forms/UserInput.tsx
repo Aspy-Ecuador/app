@@ -81,7 +81,7 @@ export default function UserInput({
           id={id}
           {...register(id, validation)}
           className="border border-gray-300 rounded-md p-2 w-full"
-          disabled={dependsOn && dependentValue} // Deshabilitar si depende de otro campo que no tiene valor
+          disabled={dependsOn ? !dependentValue : false} // Deshabilitar si depende de otro campo que no tiene valor
         >
           <option value="">Seleccione una opción</option>
           {dynamicOptions?.map((option) => (

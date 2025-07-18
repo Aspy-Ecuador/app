@@ -165,7 +165,7 @@ export const inputCreateUserConfig = [
       },
     },
   },
-  /*
+
   {
     label: "Provincia",
     key: "province",
@@ -175,8 +175,7 @@ export const inputCreateUserConfig = [
       required: { value: true, message: "Campo requerido" },
     },
   },
-  */
-  /*
+ 
   {
     label: "Ciudad",
     key: "city",
@@ -192,5 +191,5 @@ export const inputCreateUserConfig = [
       required: { value: true, message: "Campo requerido" },
     },
   },
-  */
+
 ];
