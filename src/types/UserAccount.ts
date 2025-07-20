@@ -1,8 +1,14 @@
+//SÍ SE USA
 export interface UserAccount {
-  id: number;
-  name: string;
-  identity: number;
+  role_id: number;
   email: string;
-  phone: number;
-  role: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  birthdate: string;
+  gender: number;
+  occupation: number;
+  marital_status: number;
+  education: number;
+  person_type: string;
 }

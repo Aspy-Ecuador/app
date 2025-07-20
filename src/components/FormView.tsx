@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { User } from "@/types/User";
+import { UserAccount } from "@/types/UserAccount";
 import { inputCreateUserConfig } from "../config/userFormConfig";
 import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
@@ -32,9 +32,9 @@ export default function FormView({
 
   const [open, setOpen] = useState(false);
 
-  const [userData, setUserData] = useState<Partial<User>>({});
+  const [userData, setUserData] = useState<UserAccount>();
 
-  const handleNext = (data: Partial<User>) => {
+  const handleNext = (data: UserAccount) => {
     setUserData((prev) => ({ ...prev, ...data }));
     if (step < totalSteps - 1) setStep(step + 1);
   };
@@ -48,6 +48,7 @@ export default function FormView({
 
   const handleClose = () => {
     setOpen(false);
+
     if (isRegister) {
       navigate("/login");
     } else {
@@ -57,12 +58,28 @@ export default function FormView({
 
   const navigate = useNavigate();
 
-  const handleFinalSubmit = async (data: Partial<User>) => {
-    const fullData = { ...userData, ...data, role_id: 1 };
+  const formatUserAccount = (data: any): UserAccount => {
+    return {
+      role_id: Number(data.role_id),
+      email: data.email,
+      password: data.password,
+      first_name: data.first_name,
+      last_name: data.last_name,
+      birthdate: data.birthdate,
+      gender: Number(data.gender),
+      occupation: Number(data.occupation),
+      marital_status: Number(data.marital_status),
+      education: Number(data.education),
+      person_type: "staff",
+    };
+  };
 
-    console.log(fullData);
+  const handleFinalSubmit = async (data: UserAccount) => {
+    const fullData = { ...userData, ...data, role_id: 1 };
+    const userRegister = formatUserAccount(fullData);
+    console.log(userRegister);
+
     if (isEdit) {
-      console.log("Usuario final:", fullData);
       const newPerson: Person = {
         first_name: fullData.first_name || "",
         middle_name: fullData.last_name || "",
@@ -76,7 +93,7 @@ export default function FormView({
       };
       //await register(newPerson);
     } else {
-      await register(fullData);
+      await register(userRegister);
     }
     handleOpen();
   };

@@ -304,7 +304,10 @@ export const ciudadesPorProvincia: { [key: number]: CityOption[] } = {
   ],
 
   // Santo Domingo de los Tsáchilas
-  21: [{ label: "Santo Domingo", value: 1 }],
+  21: [
+    { label: "Santo Domingo", value: 1 },
+    { label: "La Concordia", value: 2 },
+  ],
 
   // Sucumbíos
   22: [

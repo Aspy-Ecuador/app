@@ -43,22 +43,24 @@ export default function UserInput({
   const dependentValue = dependsOn ? watch(dependsOn) : null;
 
   useEffect(() => {
-    if (dependsOn && getOptions && dependentValue) {
-      // Obtener las nuevas opciones basadas en el valor del campo dependiente
-      const newOptions = getOptions(Number(dependentValue));
-      setDynamicOptions(newOptions);
+    if (!dependsOn || !getOptions) return;
 
-      // Limpiar el valor actual del campo cuando cambie la dependencia
-      setValue(id, "");
-    } else if (dependsOn && !dependentValue) {
-      // Si no hay valor seleccionado en el campo dependiente, limpiar opciones
-      setDynamicOptions([]);
-      setValue(id, "");
-    } else if (!dependsOn) {
-      // Si no depende de ningún campo, usar las opciones estáticas
-      setDynamicOptions(options);
-    }
-  }, [dependentValue, dependsOn, getOptions, id, setValue, options]);
+    const subscription = watch((value, { name, type }) => {
+      if (name === dependsOn && type === "change") {
+        const newValue = value[dependsOn];
+        if (newValue) {
+          const newOptions = getOptions(Number(newValue));
+          setDynamicOptions(newOptions);
+          setValue(id, "");
+        } else {
+          setDynamicOptions([]);
+          setValue(id, "");
+        }
+      }
+    });
+
+    return () => subscription.unsubscribe(); // cleanup
+  }, [dependsOn, getOptions, id, setValue, watch]);
 
   const inputError = findInputError(errors, id);
   const isInvalid = isFormInvalid(inputError);
@@ -81,7 +83,7 @@ export default function UserInput({
           id={id}
           {...register(id, validation)}
           className="border border-gray-300 rounded-md p-2 w-full"
-          disabled={dependsOn && dependentValue} // Deshabilitar si depende de otro campo que no tiene valor
+          disabled={dependsOn ? !dependentValue : false} // Deshabilitar si depende de otro campo que no tiene valor
         >
           <option value="">Seleccione una opción</option>
           {dynamicOptions?.map((option) => (

@@ -38,7 +38,7 @@ export const inputCreateUserConfig = [
       },
     },
   },
-  {
+  /*   {
     label: "Teléfono",
     key: "phone",
     type: "text",
@@ -49,16 +49,16 @@ export const inputCreateUserConfig = [
         message: "Teléfono debe tener 10 dígitos",
       },
     },
-  },
-  {
+  }, */
+  /*   {
     label: "Dirección",
     key: "address",
     type: "text",
     validation: {
       required: { value: true, message: "Campo requerido" },
     },
-  },
-  {
+  }, */
+  /*   {
     label: "Numero de Identificación",
     key: "identity",
     type: "number",
@@ -69,7 +69,7 @@ export const inputCreateUserConfig = [
         message: "Cédula debe tener 10 dígitos",
       },
     },
-  },
+  }, */
   {
     label: "Género",
     key: "gender",
@@ -77,7 +77,6 @@ export const inputCreateUserConfig = [
     options: [
       { label: "Masculino", value: 1 },
       { label: "Femenino", value: 2 },
-      { label: "Otro", value: 3 },
     ],
     validation: {
       required: { value: true, message: "Campo requerido" },
@@ -88,10 +87,10 @@ export const inputCreateUserConfig = [
     key: "occupation",
     type: "select",
     options: [
-      { label: "Empleado", value: 1 },
-      { label: "Estudiante", value: 2 },
-      { label: "Desempleado", value: 3 },
-      { label: "Otro", value: 4 },
+      { label: "Doctor", value: 1 },
+      { label: "Enfermero", value: 2 },
+      { label: "Ingeniero", value: 3 },
+      { label: "Estudiante", value: 4 },
     ],
     validation: {
       required: { value: true, message: "Campo requerido" },
@@ -105,7 +104,6 @@ export const inputCreateUserConfig = [
       { label: "Soltero", value: 1 },
       { label: "Casado", value: 2 },
       { label: "Divorciado", value: 3 },
-      { label: "Viudo", value: 4 },
     ],
     validation: {
       required: { value: true, message: "Campo requerido" },
@@ -116,10 +114,9 @@ export const inputCreateUserConfig = [
     key: "education",
     type: "select",
     options: [
-      { label: "Primaria", value: 1 },
-      { label: "Secundaria", value: 2 },
-      { label: "Universitaria", value: 3 },
-      { label: "Postgrado", value: 4 },
+      { label: "Secundaria", value: 1 },
+      { label: "Pregrado", value: 2 },
+      { label: "Postgrado", value: 3 },
     ],
     validation: {
       required: { value: true, message: "Campo requerido" },
@@ -165,8 +162,7 @@ export const inputCreateUserConfig = [
       },
     },
   },
-  /*
-  {
+  /*   {
     label: "Provincia",
     key: "province",
     type: "select",
@@ -174,10 +170,8 @@ export const inputCreateUserConfig = [
     validation: {
       required: { value: true, message: "Campo requerido" },
     },
-  },
-  */
-  /*
-  {
+  }, */
+  /* {
     label: "Ciudad",
     key: "city",
     type: "select",
@@ -191,6 +185,5 @@ export const inputCreateUserConfig = [
     validation: {
       required: { value: true, message: "Campo requerido" },
     },
-  },
-  */
+  }, */
 ];

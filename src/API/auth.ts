@@ -4,8 +4,8 @@ import { UserLogin } from "@/types/UserLogin";
 import { getRolById } from "../API/rolAPI";
 import { getUserById } from "../API/usuarioAPI";
 import { setAuthenticatedUser } from "@store";
+import { UserAccount } from "@/types/UserAccount";
 import { User } from "@/types/User";
-
 export const login = async (email: string, password: string) => {
   const response = await axios.post(
     `${apiURL}/login`,
@@ -18,10 +18,8 @@ export const login = async (email: string, password: string) => {
   }
 
   const data = response.data;
-
   // Guarda el token
   localStorage.setItem("token", data.access_token);
-  console.log(localStorage.getItem("token"));
   await StoreUser();
   return data;
 };
@@ -52,7 +50,7 @@ export const StoreUser = async () => {
   return userWithRoleName;
 };
 
-export const register = async (userRegister: User) => {
+export const register = async (userRegister: UserAccount) => {
   try {
     const response = await axios.post(`${apiURL}/user-account`, userRegister);
     return response.data as UserLogin;
