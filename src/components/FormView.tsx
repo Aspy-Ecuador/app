@@ -80,17 +80,7 @@ export default function FormView({
     console.log(userRegister);
 
     if (isEdit) {
-      const newPerson: Person = {
-        first_name: fullData.first_name || "",
-        middle_name: fullData.last_name || "",
-        birthdate: new Date().toISOString().split("T")[0],
-        email: "aaaa@espps.ccc",
-        password: "2341",
-        gender: 1,
-        occupation: 1,
-        marital_status: 1,
-        education: 3,
-      };
+      console.log("se debe editar");
       //await register(newPerson);
     } else {
       await register(userRegister);

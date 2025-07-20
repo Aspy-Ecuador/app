@@ -1,5 +1,5 @@
 export interface User {
-  id?: number;
+  id: number;
   identity: number;
   first_name: string;
   last_name: string;
@@ -8,17 +8,17 @@ export interface User {
   photo?: string;
   aboutme?: string;
   age?: number;
-  gender: string | number;
+  gender: string;
   email: string;
   phone: string;
   address: string;
-  province: string | number;
-  city: string | number;
+  province: string;
+  city: string;
   password: string;
   confirmPassword?: string;
   birthdate: string;
-  occupation: string | number;
-  marital_status: string | number;
-  education: string | number;
+  occupation: string;
+  marital_status: string;
+  education: string;
   role_id?: number;
 }

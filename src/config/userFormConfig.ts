@@ -1,5 +1,5 @@
-import { provincias, ciudadesPorProvincia } from "./provincias-ciudad";
-type ProvinceValue = number;
+//import { provincias, ciudadesPorProvincia } from "./provincias-ciudad";
+//type ProvinceValue = number;
 
 export const inputCreateUserConfig = [
   {
