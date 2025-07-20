@@ -61,7 +61,10 @@ export const inputServiceConfig = [
         message: "Debe seleccionar una opción",
       },
     },
-    options: ["Sí", "No"],
+    options: [
+      { label: "Sí", value: 1 },
+      { label: "No", value: 2 },
+    ],
   },
   {
     label: "Tipo",
@@ -73,6 +76,11 @@ export const inputServiceConfig = [
         message: "Debe seleccionar una opción",
       },
     },
-    options: ["Consulta Médica", "Terapia Psicológica", "Terapia de Lenguaje"],
+
+    options: [
+      { label: "Consulta Médica", value: 1 },
+      { label: "Terapia Psicológica", value: 2 },
+      { label: "Terapia de Lenguaje", value: 2 },
+    ],
   },
 ];
