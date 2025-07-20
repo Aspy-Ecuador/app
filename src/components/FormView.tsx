@@ -9,7 +9,6 @@ import Grid from "@mui/material/Grid2";
 import Success from "@components/Success";
 //import { addPerson } from "../API/usuarioAPI";
 import { register } from "../API/auth";
-import { Person } from "@/types/Person";
 
 interface FormViewProps {
   isEdit: boolean;
