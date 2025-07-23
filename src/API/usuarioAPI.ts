@@ -93,15 +93,11 @@ export const getAllUsuarios = async () => {
   const token = localStorage.getItem("token");
   if (!token) throw new Error("Token no encontrado");
   try {
-    const response = await axios.put(
-      `${apiURL}/person/8`,
-      { middle_name: "Guaman" },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await axios.get(`${apiURL}/person`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response.data;
   } catch (error) {
     console.error("Error al obtener todos los usuarios:", error);

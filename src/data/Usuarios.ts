@@ -482,3 +482,19 @@ export const usuarios: User[] = [
     role_id: 3,
   },
 ];
+
+/**
+ * Funcion para obtener los usuarios de la aplicación
+ * y retorna el array de usuarios
+ * @return User[]
+ */
+export const getUsuariosApp = async (): Promise<User[]> => {
+  try {
+    const usuariosApp = await getAllUsuarios();
+    return usuariosApp as User[];
+  } catch (error) {
+    console.error("Error al obtener los usuarios de la aplicación:", error);
+    return [];
+  } 
+}
+export const usuariosApp: User[] = await getUsuariosApp();
