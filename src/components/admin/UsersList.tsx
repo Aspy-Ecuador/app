@@ -7,7 +7,7 @@ import { profesionales } from "@data/Profesionales";
 import { pacientes } from "@data/Pacientes";
 import { ButtonAdmin } from "@/types/ButtonAdmin";
 import { columnsUsersAdmin } from "@utils/columns";
-import { usuarios } from "@data/Usuarios";
+import { usuariosApp } from "@data/Usuarios";
 import SimpleHeader from "@components/SimpleHeader";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
@@ -60,7 +60,7 @@ export default function UsersList() {
   //Mostrar el usuario
   useEffect(() => {
     if (rowSelection.length > 0) {
-      const selectedUser = usuarios.find((item) => item.id === rowSelection[0]);
+      const selectedUser = usuariosApp.find((item) => item.person_id === rowSelection[0]);
       if (selectedUser) {
         setUser(selectedUser);
       }
@@ -75,7 +75,7 @@ export default function UsersList() {
 
   const handleEdit = () => {
     if (user) {
-      const newPath = `${location.pathname}/${user.id}`;
+      const newPath = `${location.pathname}/${user.person_id}`;
       navigate(newPath);
     }
   };
@@ -115,7 +115,8 @@ export default function UsersList() {
         <Grid size={8} className={themeClass + " grid-tabla"}>
           <Table<User>
             columns={columnsUsersAdmin}
-            rows={usuarios}
+            rows={usuariosApp}
+            getRowId={(row) => row.person_id}
             rowSelectionModel={rowSelection}
             onRowSelectionChange={(newSelection) =>
               setRowSelection(newSelection)

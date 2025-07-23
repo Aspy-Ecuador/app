@@ -1,8 +1,9 @@
+import { getAllUsuarios } from "@/API/usuarioAPI";
 import { User } from "@/types/User";
 
 export const usuarios: User[] = [
   {
-    id: 1,
+    person_id: 1,
     identity: 123456789,
     first_name: "Jhon",
     last_name: "Gonzales",
@@ -26,7 +27,7 @@ export const usuarios: User[] = [
     role_id: 2,
   },
   {
-    id: 2,
+    person_id: 2,
     identity: 987654321,
     first_name: "Maria",
     last_name: "Martinez",
@@ -50,7 +51,7 @@ export const usuarios: User[] = [
     role_id: 2,
   },
   {
-    id: 3,
+    person_id: 3,
     identity: 456789123,
     first_name: "Carlos",
     last_name: "Perez",
@@ -74,7 +75,7 @@ export const usuarios: User[] = [
     role_id: 2,
   },
   {
-    id: 4,
+   person_id: 4,
     identity: 789123456,
     first_name: "Ana",
     last_name: "Lopez",
@@ -98,7 +99,7 @@ export const usuarios: User[] = [
     role_id: 2,
   },
   {
-    id: 5,
+   person_id: 5,
     identity: 321654987,
     first_name: "Luis",
     last_name: "Ramirez",
@@ -122,7 +123,7 @@ export const usuarios: User[] = [
     role_id: 2,
   },
   {
-    id: 6,
+   person_id: 6,
     identity: 654987321,
     first_name: "Sofia",
     last_name: "Torres",
@@ -146,7 +147,7 @@ export const usuarios: User[] = [
     role_id: 2,
   },
   {
-    id: 7,
+   person_id: 7,
     identity: 987321654,
     first_name: "Jorge",
     last_name: "Herrera",
@@ -170,7 +171,7 @@ export const usuarios: User[] = [
     role_id: 2,
   },
   {
-    id: 8,
+   person_id: 8,
     identity: 123789456,
     first_name: "Laura",
     last_name: "Diaz",
@@ -194,7 +195,7 @@ export const usuarios: User[] = [
     role_id: 2,
   },
   {
-    id: 9,
+   person_id: 9,
     identity: 456123789,
     first_name: "Miguel",
     last_name: "Castro",
@@ -218,7 +219,7 @@ export const usuarios: User[] = [
     role_id: 2,
   },
   {
-    id: 10,
+   person_id: 10,
     identity: 789456123,
     first_name: "Isabel",
     last_name: "Vega",
@@ -242,7 +243,7 @@ export const usuarios: User[] = [
     role_id: 2,
   },
   {
-    id: 11,
+   person_id: 11,
     identity: 112233445,
     first_name: "Ricardo",
     last_name: "Morales",
@@ -266,7 +267,7 @@ export const usuarios: User[] = [
     role_id: 2,
   },
   {
-    id: 12,
+   person_id: 12,
     identity: 998877665,
     first_name: "Elena",
     last_name: "Garcia",
@@ -290,7 +291,7 @@ export const usuarios: User[] = [
     role_id: 2,
   },
   {
-    id: 13,
+   person_id: 13,
     identity: 556677889,
     first_name: "Fernando",
     last_name: "Sanchez",
@@ -314,7 +315,7 @@ export const usuarios: User[] = [
     role_id: 2,
   },
   {
-    id: 14,
+   person_id: 14,
     identity: 334455667,
     first_name: "Claudia",
     last_name: "Rojas",
@@ -338,7 +339,7 @@ export const usuarios: User[] = [
     role_id: 2,
   },
   {
-    id: 15,
+   person_id: 15,
     identity: 778899001,
     first_name: "Oscar",
     last_name: "Mendoza",
@@ -362,7 +363,7 @@ export const usuarios: User[] = [
     role_id: 2,
   },
   {
-    id: 16,
+   person_id: 16,
     identity: 778899001,
     first_name: "Oscar",
     last_name: "Mendoza",
@@ -386,7 +387,7 @@ export const usuarios: User[] = [
     role_id: 3,
   },
   {
-    id: 17,
+   person_id: 17,
     identity: 12123001,
     first_name: "Carlos",
     last_name: "Flores",
@@ -410,7 +411,7 @@ export const usuarios: User[] = [
     role_id: 3,
   },
   {
-    id: 18,
+   person_id: 18,
     identity: 998877221,
     first_name: "Lucía",
     last_name: "Almeida",
@@ -434,7 +435,7 @@ export const usuarios: User[] = [
     role_id: 3,
   },
   {
-    id: 19,
+   person_id: 19,
     identity: 112244668,
     first_name: "Daniel",
     last_name: "Torres",
@@ -458,7 +459,7 @@ export const usuarios: User[] = [
     role_id: 3,
   },
   {
-    id: 20,
+   person_id: 20,
     identity: 556699332,
     first_name: "Verónica",
     last_name: "Ríos",
