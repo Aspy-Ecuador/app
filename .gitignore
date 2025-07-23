@@ -36,3 +36,6 @@ aspy
 storage
 vendor
 nginx
+
+*.d.ts
+*.tsbuildinfo
