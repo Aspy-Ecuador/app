@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { ButtonControl } from "@/types/ButtonControl";
-/* getAuthenticatedUserEmail */
 import { getAuthenticatedUserName } from "@store";
 import Grid from "@mui/material/Grid2";
 import Box from "@mui/material/Box";
@@ -10,8 +9,10 @@ import WelcomePanel from "@components/WelcomePanel";
 
 import PostAddOutlinedIcon from "@mui/icons-material/PostAddOutlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import { initData } from '../../API/init';
+import { useEffect } from "react";
 
-export default function ControlPanel() {
+const ControlPanel = () => {
   const navigate = useNavigate();
 
   const handleCreateUser = () => {
@@ -37,6 +38,11 @@ export default function ControlPanel() {
     },
   ];
 
+  // Ensure that initData runs inside the component with useEffect
+  useEffect(() => {
+    initData();
+  }, []);
+
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 1, md: 1 }}>
@@ -54,4 +60,6 @@ export default function ControlPanel() {
       </Grid>
     </Box>
   );
-}
+};
+
+export default ControlPanel;

@@ -6,6 +6,7 @@ import { getUserById } from "../API/usuarioAPI";
 import { setAuthenticatedUser } from "@store";
 import { UserAccount } from "@/types/UserAccount";
 import { User } from "@/types/User";
+
 export const login = async (email: string, password: string) => {
   const response = await axios.post(
     `${apiURL}/login`,
