@@ -27,3 +27,9 @@ postgresql
 .vite
 package-lock.json
 yarn.lock
+
+*.d.ts
+*.tsbuildinfo
+*.svg
+*.tsbuildinfo
+.package-lock.json
