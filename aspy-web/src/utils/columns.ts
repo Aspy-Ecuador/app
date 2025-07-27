@@ -1,20 +1,14 @@
 import { GridColDef } from "@mui/x-data-grid";
 
 export const columnsUsersAdmin: GridColDef[] = [
-  {
+ /*  {
     field: "identity",
     headerName: "Cédula",
     disableColumnMenu: true,
     flex: 2,
     resizable: false,
-  },
-  {
-    field: "role",
-    headerName: "Rol",
-    disableColumnMenu: true,
-    flex: 2,
-    resizable: false,
-  },
+  }, */
+
   {
     field: "first_name",
     headerName: "Nombres",
@@ -29,6 +23,13 @@ export const columnsUsersAdmin: GridColDef[] = [
     flex: 2,
     resizable: false,
   },
+   {
+    field: "role",
+    headerName: "Rol",
+    disableColumnMenu: true,
+    flex: 2,
+    resizable: false,
+  },
   {
     field: "email",
     headerName: "Correo",
@@ -39,13 +40,13 @@ export const columnsUsersAdmin: GridColDef[] = [
 ];
 
 export const columnsServiceAdmin: GridColDef[] = [
-  {
+ /*  {
     field: "id",
     headerName: "ID",
     flex: 1,
     disableColumnMenu: true,
     resizable: false,
-  },
+  }, */
   {
     field: "name",
     headerName: "Nombre",
@@ -60,21 +61,21 @@ export const columnsServiceAdmin: GridColDef[] = [
     disableColumnMenu: true,
     resizable: false,
   },
-  {
+  /* {
     field: "serviceType",
     headerName: "Tipo",
     flex: 3,
     disableColumnMenu: true,
     resizable: false,
-  },
+  }, */
   {
     field: "active",
     headerName: "Activo",
     flex: 2,
     disableColumnMenu: true,
     resizable: false,
-    renderCell: (params) => (params.value ? "Sí" : "No"),
-  },
+    renderCell: "Sí",
+  },/* 
   {
     field: "updated_on",
     headerName: "Últ. Act.",
@@ -82,17 +83,17 @@ export const columnsServiceAdmin: GridColDef[] = [
     disableColumnMenu: true,
     resizable: false,
     valueFormatter: (params) => new Date(params).toLocaleDateString("es-ES"),
-  },
+  }, */
 ];
 
 export const columnsUsers: GridColDef[] = [
-  {
+  /* {
     field: "identity",
     headerName: "Cédula",
     disableColumnMenu: true,
     width: 140,
     resizable: false,
-  },
+  }, */
   {
     field: "first_name",
     headerName: "Nombres",
@@ -165,13 +166,13 @@ export const columnsPayment: GridColDef[] = [
 ];
 
 export const columnsServices: GridColDef[] = [
-  {
+  /* {
     field: "id",
     headerName: "ID",
     flex: 1,
     disableColumnMenu: true,
     resizable: false,
-  },
+  }, */
   {
     field: "name",
     headerName: "Nombre",
@@ -186,11 +187,11 @@ export const columnsServices: GridColDef[] = [
     disableColumnMenu: true,
     resizable: false,
   },
-  {
+  /* {
     field: "serviceType",
     headerName: "Tipo",
     flex: 3,
     disableColumnMenu: true,
     resizable: false,
-  },
+  }, */
 ];

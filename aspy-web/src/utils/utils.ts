@@ -212,6 +212,6 @@ export function getDates(): Promise<AvailableDateTime[]> {
 }
 
 export function getReceipts(id: number): Receipt[] {
-  console.log(id);
+  //console.log(id);
   return receiptList;
 }

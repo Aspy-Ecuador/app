@@ -1,0 +1,48 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - frontend
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+      actions: write
+      checks: write
+      deployments: write
+      statuses: write
+      pull-requests: write
+      issues: write
+      discussions: write
+      
+    steps:
+    # Paso 1: Checkout del código
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    # Paso 2: Configuración de Node.js
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '20'     
+
+    # Paso 5: Instalar las dependencias nuevamente
+    - name: Install dependencies
+      run: npm install --force
+
+    # Paso 6: Construir la aplicación
+    - name: Build the application
+      run: npm run build
+
+    # Paso 7: Desplegar a GitHub Pages
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        publish_dir: dist
+        github_token: ${{ secrets.GITHUB_TOKEN }}

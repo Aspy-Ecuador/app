@@ -23,6 +23,8 @@ export default function Success({
   return (
     <Dialog
       open={open}
+      disableEnforceFocus
+      disableRestoreFocus
       onClose={handleClose}
       sx={{
         "& .MuiPaper-root": {

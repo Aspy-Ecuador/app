@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\WorkerSchedule;
+use App\Models\Schedule;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -29,7 +31,6 @@ class WorkerScheduleController extends Controller
 
             // Campos para WorkerSchedule
             'person_id' => 'required|integer',
-            'is_available' => 'required|boolean',
         ]);
 
         DB::beginTransaction();
@@ -49,14 +50,16 @@ class WorkerScheduleController extends Controller
                     'end_time' => $validated['end_time'],
                     'name' => $validated['name'] ?? null,
                 ];
+
                 $schedule = Schedule::create($scheduleData);
             }
 
             // Crear WorkerSchedule asociado a schedule_id y person_id
             $workerScheduleData = [
-                'schedule_id' => $schedule->id,
+                'schedule_id' => $schedule->schedule_id,
                 'person_id' => $validated['person_id'],
-                'is_available' => $validated['is_available'],
+                'is_available' => true, // Asignar is_available por defecto
+                'creation_date' => Carbon::now(),
             ];
 
             $workerSchedule = WorkerSchedule::create($workerScheduleData);

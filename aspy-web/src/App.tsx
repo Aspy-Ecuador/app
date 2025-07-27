@@ -12,6 +12,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import PrivateRoute from "@components/PrivateRoute";
+
 // Mapeo de rutas y títulos
 const routeTitles: { [key: string]: string } = {
   "/": "Inicio",
@@ -59,7 +60,7 @@ const App = () => {
   return (
     <AppTheme themeComponents={xThemeComponents}>
       <CssBaseline enableColorScheme />
-      <Router>
+      <Router basename="/app">
         <DocumentTitleUpdater />
         <Routes>
           {/* Rutas públicas sin layout */}

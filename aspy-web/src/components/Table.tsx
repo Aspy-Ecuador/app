@@ -9,6 +9,7 @@ import {
 export type TableProps<T> = {
   columns: GridColDef[];
   rows: T[];
+  getRowId?: (row: T) => string | number;
   rowSelectionModel: GridRowSelectionModel;
   onRowSelectionChange: (newSelection: GridRowSelectionModel) => void;
 };
@@ -16,6 +17,7 @@ export type TableProps<T> = {
 export default function Table<T>({
   columns,
   rows,
+  getRowId,
   rowSelectionModel,
   onRowSelectionChange,
 }: TableProps<T>) {
@@ -25,9 +27,8 @@ export default function Table<T>({
         className="data-grid-custom"
         rows={rows}
         columns={columns}
-        getRowId={(row) => row.id}
+        getRowId={getRowId}
         slots={{ toolbar: GridToolbar }}
-        checkboxSelection
         onRowSelectionModelChange={(newRowSelectionModel) => {
           onRowSelectionChange(newRowSelectionModel);
         }}

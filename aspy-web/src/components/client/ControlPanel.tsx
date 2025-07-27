@@ -7,12 +7,18 @@ import { getAuthenticatedUserName } from "@store";
 import { citas } from "@data/Citas";
 import Agenda from "@components/Agenda";
 import WelcomePanel from "@components/WelcomePanel";
+import { runClientLoaders } from '../../API/init';
+import { useEffect } from "react";
 
 export default function ControlPanel() {
   const theme = useTheme();
   const themeClass =
     theme.palette.mode === "dark" ? "dark-theme" : "light-theme";
 
+  useEffect(() => {
+    runClientLoaders();
+  }, []);
+  
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 1, md: 1 }}>

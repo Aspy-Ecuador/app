@@ -15,6 +15,7 @@ import ForgotPassword from "./ForgotPassword";
 import { useNavigate } from "react-router-dom";
 import ThemedLogo from "@/shared-theme/ThemedLogo";
 import { login } from "../API/auth";
+import CircularProgress from "@mui/material/CircularProgress"; // Importar CircularProgress
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -43,6 +44,7 @@ export default function SignInCard() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
+  const [loading, setLoading] = useState(false); // Estado de carga
   const navigate = useNavigate();
 
   const handleClickOpen = () => {
@@ -55,11 +57,14 @@ export default function SignInCard() {
 
   const loginUser = async () => {
     try {
+      setLoading(true); // Inicia el ciclo de carga
       await login(email, password);
       navigate("/");
     } catch (error) {
       console.error("Login failed:", error);
       setLoginError("Credenciales Incorrectas");
+    } finally {
+      setLoading(false); // Termina el ciclo de carga
     }
   };
 
@@ -177,9 +182,13 @@ export default function SignInCard() {
           type="submit"
           fullWidth
           variant="contained"
-          onClick={validateInputs}
+          disabled={loading} // Deshabilitar el botón cuando esté cargando
         >
-          Iniciar Sesión
+          {loading ? (
+            <CircularProgress size={24} sx={{ color: "white" }} /> // Mostrar ciclo de carga
+          ) : (
+            "Iniciar Sesión"
+          )}
         </Button>
       </Box>
       <Divider>o</Divider>

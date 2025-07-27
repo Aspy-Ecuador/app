@@ -4,14 +4,21 @@ import { findInputError } from "@utils/findInputError";
 import { isFormInvalid } from "@utils/isFormInvalid";
 import TextField from "@mui/material/TextField";
 import InputError from "@forms/InputError";
+import { useEffect, useState } from "react";
+
+type Option = {
+  label: string;
+  value: number;
+};
 
 interface UserInputProps {
   label: string;
   type: string;
   id: string;
   validation: object;
-  options?: string[];
-  role?: string;
+  options?: Option[];
+  dependsOn?: string;
+  getOptions?: (selectedValue: number) => Option[];
 }
 
 export default function UserInput({
@@ -19,13 +26,41 @@ export default function UserInput({
   type,
   id,
   validation,
-  options,
-  role,
+  options = [],
+  dependsOn,
+  getOptions,
 }: UserInputProps) {
   const {
     register,
     formState: { errors },
+    watch,
+    setValue,
   } = useFormContext();
+
+  const [dynamicOptions, setDynamicOptions] = useState<Option[]>(options);
+
+  // Observar el campo del cual depende
+  const dependentValue = dependsOn ? watch(dependsOn) : null;
+
+  useEffect(() => {
+    if (!dependsOn || !getOptions) return;
+
+    const subscription = watch((value, { name, type }) => {
+      if (name === dependsOn && type === "change") {
+        const newValue = value[dependsOn];
+        if (newValue) {
+          const newOptions = getOptions(Number(newValue));
+          setDynamicOptions(newOptions);
+          setValue(id, "");
+        } else {
+          setDynamicOptions([]);
+          setValue(id, "");
+        }
+      }
+    });
+
+    return () => subscription.unsubscribe(); // cleanup
+  }, [dependsOn, getOptions, id, setValue, watch]);
 
   const inputError = findInputError(errors, id);
   const isInvalid = isFormInvalid(inputError);
@@ -48,12 +83,12 @@ export default function UserInput({
           id={id}
           {...register(id, validation)}
           className="border border-gray-300 rounded-md p-2 w-full"
-          disabled={!!role}
+          disabled={dependsOn ? !dependentValue : false} // Deshabilitar si depende de otro campo que no tiene valor
         >
           <option value="">Seleccione una opción</option>
-          {options?.map((option) => (
-            <option key={option} value={option}>
-              {option}
+          {dynamicOptions?.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
             </option>
           ))}
         </select>

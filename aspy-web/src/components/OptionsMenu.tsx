@@ -52,8 +52,8 @@ export default function OptionsMenu() {
         open={open}
         onClose={handleClose}
         onClick={handleClose}
-        transformOrigin={{ horizontal: "right", vertical: "top" }}
-        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+        transformOrigin={{ horizontal: "right", vertical: "bottom" }} // Cambiar origen de transformación
+        anchorOrigin={{ horizontal: "right", vertical: "top" }} // Cambiar origen de anclaje
         sx={{
           [`& .${listClasses.root}`]: {
             padding: "4px",
@@ -67,22 +67,16 @@ export default function OptionsMenu() {
         }}
       >
         <MenuItem onClick={handleProfile}>Profile</MenuItem>
-        <MenuItem onClick={handleClose}>My account</MenuItem>
-        <Divider />
-        <MenuItem onClick={handleClose}>Add another account</MenuItem>
-        <MenuItem onClick={handleClose}>Settings</MenuItem>
-        <Divider />
         <MenuItem
           onClick={handleLogout}
           sx={{
             [`& .${listItemIconClasses.root}`]: {
-              ml: "auto",
               minWidth: 0,
             },
           }}
         >
           <ListItemText>Logout</ListItemText>
-          <ListItemIcon>
+          <ListItemIcon sx={{ marginLeft: "4px" }}>
             <LogoutRoundedIcon fontSize="small" />
           </ListItemIcon>
         </MenuItem>

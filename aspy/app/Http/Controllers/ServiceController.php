@@ -21,7 +21,7 @@ class ServiceController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|unique:services,name',
+            'name' => 'required|string|unique:service,name',
             'price' => 'required|numeric|min:0',
             
         ]);

@@ -2,8 +2,6 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import { useTheme } from "@mui/material";
-import { servicesList } from "@data/Servicios";
-import { Service } from "@/types/Service";
 import { columnsServiceAdmin } from "@utils/columns";
 import Grid from "@mui/material/Grid2";
 import Box from "@mui/material/Box";
@@ -85,6 +83,18 @@ export default function ServicesList() {
 
   const newColumns: GridColDef[] = [...columnsServiceAdmin, ...columnsExtra];
 
+  const getServicesFromLocalStorage = () => {
+    const servicesData = localStorage.getItem("services");
+    return servicesData
+      ? JSON.parse(servicesData).map((service, index) => ({
+          ...service,
+          id: service.service_id || index, // Asignar un id único si no existe
+        }))
+      : [];
+  };
+
+  const services = getServicesFromLocalStorage();
+
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1}>
@@ -104,7 +114,7 @@ export default function ServicesList() {
                 </Grid>
                 <Grid size={12}>
                   <Typography variant="body1" className="typo-number-boton">
-                    {servicesList.length}
+                    {services.length}
                   </Typography>
                 </Grid>
               </Grid>
@@ -129,7 +139,7 @@ export default function ServicesList() {
         <Grid size={12} className={themeClass + " grid-tabla"}>
           <Table<Service>
             columns={newColumns}
-            rows={servicesList}
+            rows={services}
             rowSelectionModel={rowSelection}
             onRowSelectionChange={(newSelection) =>
               setRowSelection(newSelection)

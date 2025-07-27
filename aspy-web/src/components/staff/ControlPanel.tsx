@@ -13,8 +13,15 @@ import PersonAddAltRoundedIcon from "@mui/icons-material/PersonAddAltRounded";
 import MedicalServicesRoundedIcon from "@mui/icons-material/MedicalServicesRounded";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
 import PermContactCalendarRoundedIcon from "@mui/icons-material/PermContactCalendarRounded";
+import { runStaffLoaders } from '../../API/init';
+import { useEffect } from "react";
 
 export default function ControlPanel() {
+
+  useEffect(() => {
+    runStaffLoaders();
+  }, []);
+
   const navigate = useNavigate();
 
   const handleCreatePatient = () => {

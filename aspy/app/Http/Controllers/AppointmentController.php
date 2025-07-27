@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Payment;
+use App\Models\PaymentData;
 use Carbon\Carbon;
 
 class AppointmentController extends Controller
@@ -26,6 +28,7 @@ class AppointmentController extends Controller
             // Campos para PaymentData
             'payment_data.type' => 'required|string',
             'payment_data.number' => 'required|integer',
+            'payment_data.file' => 'nullable|string', // Tamaño máximo de 2MB
 
             // Campos para Payment
             'payment.person_id' => 'required|integer',
@@ -37,9 +40,8 @@ class AppointmentController extends Controller
 
             // Campos para Appointment
             'scheduled_by' => 'required|integer',
-            'worker_schedule_id' => 'required|integer|unique:appointments,worker_schedule_id',
-            'tracking_appointment' => 'nullable|integer|unique:appointments,tracking_appointment',
-            'status' => 'required|integer',
+            'worker_schedule_id' => 'required|integer|unique:appointment,worker_schedule_id',
+            'tracking_appointment' => 'nullable|integer|unique:appointment,tracking_appointment',
         ]);
 
         DB::beginTransaction();
@@ -50,7 +52,7 @@ class AppointmentController extends Controller
 
             // Crear Payment vinculando payment_data_id recién creado
             $paymentDataValidated = $validated['payment'];
-            $paymentDataValidated['payment_data_id'] = $paymentData->id;
+            $paymentDataValidated['payment_data_id'] = $paymentData->payment_data_id;
             $paymentDataValidated['status'] = 1; // Pendiente
 
 
@@ -58,7 +60,7 @@ class AppointmentController extends Controller
 
             // Crear Appointment vinculando payment_id recién creado
             $appointmentData = [
-                'payment_id' => $payment->id,
+                'payment_id' => $payment->payment_id,
                 'scheduled_by' => $validated['scheduled_by'],
                 'worker_schedule_id' => $validated['worker_schedule_id'],
                 'tracking_appointment' => $validated['tracking_appointment'] ?? null,

@@ -3,18 +3,28 @@ import ProfileView from "@components/ProfileView";
 
 export default function Profile() {
   const sample_data: User = {
-    id: 1,
-    first_name: "Jhon",
-    last_name: "Gonzales",
-    role: "Paciente",
-    aboutme: "No disponible",
-    age: 35,
+    id: 19,
+    identity: 112244668,
+    first_name: "Daniel",
+    last_name: "Torres",
+    middle_name: "Ignacio",
+    role: "Profesional",
+    photo: "",
+    aboutme: "Psicoterapeuta con enfoque en terapia familiar y de pareja.",
+    age: 42,
     gender: "Masculino",
-    email: "jgonzales@gmail.com",
-    identity: 123456789,
-    phone: "0999273651",
-    address: "Av. Quito y Los Ríos",
-    province: "Pichincha", // Campo province agregado
+    email: "dtorres@gmail.com",
+    phone: "0912341234",
+    address: "Calle Loja y Cuenca",
+    province: "Manabí",
+    city: "Portoviejo",
+    password: "profesional123",
+    confirmPassword: "profesional123",
+    birthdate: "1982-02-14",
+    occupation: "Psicoterapeuta",
+    marital_status: "Casado",
+    education: "Maestría",
+    role_id: 3,
   };
 
   const handleImageClick = () => {

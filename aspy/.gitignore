@@ -21,3 +21,15 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+aspy
+vendor
+postgresql
+.vite
+package-lock.json
+yarn.lock
+
+*.d.ts
+*.tsbuildinfo
+*.svg
+*.tsbuildinfo
+.package-lock.json

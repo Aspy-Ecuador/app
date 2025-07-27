@@ -7,7 +7,6 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import MenuContent from "./MenuContent";
 import OptionsMenu from "./OptionsMenu";
-import ColorModeToggle from "@shared-theme/ColorModeToggle";
 import ThemedLogo from "@shared-theme/ThemedLogo";
 import {
   getAuthenticatedUserName,
@@ -81,7 +80,7 @@ export default function SideMenu() {
         <Avatar
           sizes="small"
           alt="Riley Carter"
-          src="/static/images/avatar/7.jpg"
+          src="https://mui.com/static/images/avatar/1.jpg"
           sx={{ width: 36, height: 36 }}
         />
         <Box sx={{ mr: "auto" }}>
@@ -97,7 +96,7 @@ export default function SideMenu() {
         </Box>
 
         <OptionsMenu />
-        <ColorModeToggle />
+        {/* <ColorModeToggle /> */}
       </Stack>
     </Drawer>
   );

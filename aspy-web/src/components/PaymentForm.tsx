@@ -19,6 +19,9 @@ import SimCardRoundedIcon from "@mui/icons-material/SimCardRounded";
 import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
 import Grid from "@mui/material/Grid2";
 import BancoPacifico from "@assets/BP.jpeg";
+import { FileData } from "@/types/FileData";
+import UploadButton from "@buttons/UploadButton";
+import { Edit, UploadFile } from "@mui/icons-material";
 
 interface PaymentFormProps {
   paymentType: string;
@@ -99,7 +102,7 @@ export default function PaymentForm({
   const [cvv, setCvv] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
   const [cardName, setCardName] = useState("");
-
+  const [signature, setSignature] = useState<FileData | null>(null);
   const handlePaymentTypeChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -329,6 +332,7 @@ export default function PaymentForm({
           />
         </Box>
       )}
+
       {paymentType === "bankTransfer" && (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <Alert severity="warning" icon={<WarningRoundedIcon />}>
@@ -376,12 +380,35 @@ export default function PaymentForm({
                 </Typography>
               </Box>
             </Grid>
+
             <Grid size={3} className="contenedor-principal">
               <img
                 src={BancoPacifico}
                 alt="bancoPacifico"
                 style={{ width: "50%", height: "auto" }}
               />
+            </Grid>
+            <Grid size={12}>
+              <div className="mt-10">
+                <div className="flex items-center mb-2">
+                  <Edit className="mr-2 text-gray-600" />
+                  <h2 className="text-lg font-semibold">Comprobante de pago</h2>
+                </div>
+                <UploadButton
+                  accept="pdf/*"
+                  label="Subir comprobante"
+                  icon={<UploadFile className="mr-2 text-blue-600" />}
+                  buttonClassName="bg-white text-black font-bold border border-blue-600 hover:bg-blue-50"
+                  onFileSelected={(fileData) => setSignature(fileData)}
+                />
+                {signature && (
+                  <>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Comprobante cargado: <strong>{signature.name}</strong>
+                    </p>
+                  </>
+                )}
+              </div>
             </Grid>
           </Grid>
         </Box>

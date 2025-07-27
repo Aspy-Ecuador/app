@@ -1,20 +1,20 @@
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { inputCreateUserConfig } from "@/config/userFormConfig";
-import { usuarios } from "@data/Usuarios";
-import { User } from "@/types/User";
+import { users } from "@data/UsersAccount";
+import { UserAccount } from "@/types/UserAccount";
 import Button from "@mui/material/Button";
 import UserInput from "@forms/UserInput";
 
 interface UserFormProps {
-  isEditMode?: boolean;
+  isEditMode: boolean;
   userId?: number;
   role?: string;
   start: number;
   end: number;
-  onNext: (data: Partial<User>) => void;
+  onNext: (data: UserAccount) => void;
   onBack: () => void;
-  onFinish: (data: Partial<User>) => void;
+  onFinish: (data: UserAccount) => void;
   isLast?: boolean;
 }
 
@@ -29,9 +29,8 @@ export default function UserForm({
   onFinish,
   isLast,
 }: UserFormProps) {
-  const user = usuarios.find((u) => u.id === userId);
-
-  const methods = useForm<User>(); // sin defaultValues por ahora
+  const user = users.find((u) => u.role_id === userId);
+  const methods = useForm<UserAccount>();
 
   useEffect(() => {
     if (isEditMode && user) {
@@ -39,22 +38,26 @@ export default function UserForm({
         first_name: user.first_name,
         last_name: user.last_name,
         email: user.email,
-        phone: user.phone,
-        address: user.address,
-        identity: user.identity,
-        role: user.role,
-        password: "",
+        birthdate: user.birthdate,
+        gender: user.gender,
+        occupation: user.occupation,
+        marital_status: user.marital_status,
+        education: user.education,
+        //province: user.province,
+        //city: user.city,
       });
     } else {
       methods.reset({
         first_name: "",
         last_name: "",
         email: "",
-        phone: "",
-        address: "",
-        identity: 0,
-        role: role,
-        password: "",
+        birthdate: "",
+        gender: 0,
+        occupation: 0,
+        marital_status: 0,
+        education: 0,
+        //province: user.province,
+        //city: user.city,
       });
     }
   }, [isEditMode, user, methods, role]);
@@ -65,7 +68,6 @@ export default function UserForm({
       label={input.label}
       type={input.type}
       id={input.key}
-      role={role}
       validation={
         input.key === "confirmPassword"
           ? {
@@ -77,6 +79,8 @@ export default function UserForm({
           : input.validation
       }
       options={input.options}
+      //dependsOn={input.dependsOn}
+      //getOptions={input.getOptions}
     />
   ));
 

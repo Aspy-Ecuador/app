@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import penToSquare from "@assets/pen-to-square.svg";
 import { User } from "@/types/User";
 
@@ -8,6 +9,11 @@ type ProfileProps = {
 };
 
 function ProfileView({ user_info, onEdit, isRowPosition }: ProfileProps) {
+  // Generar imagen aleatoria solo cuando cambia el usuario
+  const randomIndex = useMemo(() => Math.floor(Math.random() * 50) + 1, [user_info.user_id]);
+  const genderFolder = user_info.gender === "1" ? "men" : "women";
+  const imageUrl = `https://randomuser.me/api/portraits/${genderFolder}/${randomIndex}.jpg`;
+
   return (
     <div
       className={`flex ${isRowPosition ? "flex-col md:flex-row" : "flex-col"} justify-center gap-16 p-8 m-8`}
@@ -15,7 +21,7 @@ function ProfileView({ user_info, onEdit, isRowPosition }: ProfileProps) {
       <div className="flex flex-col gap-16 items-center">
         <img
           className="rounded-full w-auto h-auto"
-          src={`https://randomuser.me/api/portraits/${user_info.gender.toLowerCase() === "masculino" ? "men" : "women"}/${Math.floor(Math.random() * 50) + 1}.jpg`}
+          src={imageUrl}
           alt={user_info.first_name}
         />
         <div className="flex flex-col gap-1 justify-center items-center">
@@ -56,7 +62,7 @@ function ProfileView({ user_info, onEdit, isRowPosition }: ProfileProps) {
               Género
             </h2>
             <p className="font-kumbh text-sm text-secondaryAspy">
-              {user_info.gender}
+              {user_info.gender === "1" ? "Hombre" : "Mujer"}
             </p>
           </div>
         </div>

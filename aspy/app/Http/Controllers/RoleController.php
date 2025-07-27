@@ -21,7 +21,7 @@ class RoleController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|unique:roles,name',
+            'name' => 'required|string|unique:role,name',
             
         ]);
 
@@ -32,7 +32,7 @@ class RoleController extends Controller
     {
         $role = Role::findOrFail($id);
         $validated = $request->validate([
-            'name' => 'string|unique:roles,name,'.$id
+            'name' => 'string|unique:role,name,'.$id
         ]);
         
         $validated['modification_date'] = Carbon::now();

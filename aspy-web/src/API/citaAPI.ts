@@ -1,5 +1,6 @@
 import axios from 'axios';
-import apiURL from './apiConfig';
+import apiURL from "./apiConfig";
+
 
 const citaAPI = {
     getCitaById: (id: string) =>

@@ -2,7 +2,7 @@
   "name": "aspy-web",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://aspy-ecuador.github.io/Aspy",
+  "homepage": "https://aspy-ecuador.github.io/app",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -48,6 +48,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@types/estree": "^1.0.8",
     "@types/jest": "^29.5.14",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",

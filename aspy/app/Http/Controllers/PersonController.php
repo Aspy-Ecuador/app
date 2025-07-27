@@ -23,7 +23,7 @@ class PersonController extends Controller
         $validated = $request->validate([
             'user_id' => 'required|integer|unique:people,user_id',
             'first_name' => 'required|string',
-            'middle_name' => 'nullable|string',
+            'last_name' => 'nullable|string',
             'birthdate' => 'required|date|before_or_equal:today',
             'gender' => 'required|integer',
             'occupation' => 'required|integer',
@@ -40,7 +40,7 @@ class PersonController extends Controller
         $person = Person::findOrFail($id);
         $validated = $request->validate([
             'first_name' => 'string',
-            'middle_name' => 'nullable|string',
+            'last_name' => 'nullable|string',
             'birthdate' => 'date|before_or_equal:today',
             'gender' => 'integer',
             'occupation' => 'integer',
