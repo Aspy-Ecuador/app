@@ -5,6 +5,7 @@ import { users } from "@data/UsersAccount";
 import { UserAccount } from "@/types/UserAccount";
 import Button from "@mui/material/Button";
 import UserInput from "@forms/UserInput";
+import { UserAccountGetRequest } from "@/types/UserAccountGetRequest";
 
 interface UserFormProps {
   isEditMode: boolean;
@@ -29,7 +30,20 @@ export default function UserForm({
   onFinish,
   isLast,
 }: UserFormProps) {
-  const user = users.find((u) => u.role_id === userId);
+
+  const getUserFromLocalStorage = (): UserAccountGetRequest => {
+    // query para obtener id = numericId
+    const UserAccountInfo = localStorage.getItem("userAccounts"); 
+    if (UserAccountInfo) {
+      const userAccounts = JSON.parse(UserAccountInfo) as UserAccountGetRequest[];
+      return userAccounts.find((user) => user.user_id === userId) ?? {} as UserAccountGetRequest;
+    }
+    return {} as UserAccountGetRequest;
+  };
+
+  //const user_from_local_storage = getUserFromLocalStorage();
+
+  const user = getUserFromLocalStorage();
   const methods = useForm<UserAccount>();
 
   useEffect(() => {
