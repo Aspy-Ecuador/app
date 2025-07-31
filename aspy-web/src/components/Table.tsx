@@ -9,7 +9,7 @@ import {
 export type TableProps<T> = {
   columns: GridColDef[];
   rows: T[];
-  getRowId?: (row: T) => string | number;
+  getRowId: (row: T) => string | number;
   rowSelectionModel: GridRowSelectionModel;
   onRowSelectionChange: (newSelection: GridRowSelectionModel) => void;
 };

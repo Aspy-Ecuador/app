@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import { useTheme } from "@mui/material";
 import { columnsServiceAdmin } from "@utils/columns";
+import { Service } from "@/types/Service";
 import Grid from "@mui/material/Grid2";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -49,17 +50,6 @@ export default function ServicesList() {
       },
     },
     {
-      field: "durationMinutes",
-      headerName: "Duración",
-      flex: 2,
-      disableColumnMenu: true,
-      resizable: false,
-      renderCell: (params) => {
-        return <Typography variant="body1">{params.value} min</Typography>;
-      },
-    },
-
-    {
       field: "acciones",
       headerName: "",
       flex: 1,
@@ -71,7 +61,7 @@ export default function ServicesList() {
       headerAlign: "center",
       renderCell: (params) => (
         <Button
-          onClick={() => handleEdit(params.row.id)}
+          onClick={() => handleEdit(params.row.service_id)}
           variant="text"
           className="boton-editar"
         >
@@ -83,14 +73,9 @@ export default function ServicesList() {
 
   const newColumns: GridColDef[] = [...columnsServiceAdmin, ...columnsExtra];
 
-  const getServicesFromLocalStorage = () => {
+  const getServicesFromLocalStorage = (): Service[] => {
     const servicesData = localStorage.getItem("services");
-    return servicesData
-      ? JSON.parse(servicesData).map((service, index) => ({
-          ...service,
-          id: service.service_id || index, // Asignar un id único si no existe
-        }))
-      : [];
+    return servicesData ? (JSON.parse(servicesData) as Service[]) : [];
   };
 
   const services = getServicesFromLocalStorage();
@@ -140,6 +125,7 @@ export default function ServicesList() {
           <Table<Service>
             columns={newColumns}
             rows={services}
+            getRowId={(row) => row.service_id}
             rowSelectionModel={rowSelection}
             onRowSelectionChange={(newSelection) =>
               setRowSelection(newSelection)

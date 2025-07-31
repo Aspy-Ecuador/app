@@ -1,3 +1,4 @@
+// SÍ SE USA
 export interface Person {
   first_name: string;
   middle_name: string;

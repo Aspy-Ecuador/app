@@ -1,79 +1,48 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { ServiceOptions } from "@/types/ServiceOptions";
-import {
-  getProfessionalAppointment,
-  getServicesAppointment,
-} from "@utils/utils";
-import Radio from "@mui/material/Radio";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
+import { useState } from "react";
 import FormControl from "@mui/material/FormControl";
-import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import DateCalendarValue from "@components/DateCalendarValue";
-import { ProfessionalOptions } from "@/types/ProfessionalOptions";
-import { getDates } from "@utils/utils";
+import { WorkerSchedule } from "@/types/WorkerSchedule";
+import { Service } from "@/types/Service";
 
 export default function AppointmentCreation() {
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [selectedHour, setSelectedHour] = useState<string | null>(null);
-  const [identity, setIdentity] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const servicesOptions: ServiceOptions[] = getServicesAppointment();
   const [serviceId, setServiceId] = useState<number | null>(null);
-  const [queryType, setQueryType] = useState<string | null>(null);
-  const [professionalId, setProfessionalId] = useState<number | null>(null);
-  const [professionalsOptions, setProfessionalsOptions] = useState<
-    ProfessionalOptions[]
-  >([]);
+  const [scheduleId, setScheduleId] = useState<number | null>(null);
 
   const navigate = useNavigate();
+
+  const getWorkerScheduleFromLocalStorage = (): WorkerSchedule[] => {
+    const servicesData = localStorage.getItem("workerSchedules");
+    return servicesData ? (JSON.parse(servicesData) as WorkerSchedule[]) : [];
+  };
+
+  const schedules = getWorkerScheduleFromLocalStorage();
+
+  const getServicesFromLocalStorage = (): Service[] => {
+    const servicesData = localStorage.getItem("services");
+    return servicesData ? (JSON.parse(servicesData) as Service[]) : [];
+  };
+
+  const servicesOptions = getServicesFromLocalStorage();
+
   const handleToPay = () => {
-    if (
-      !serviceId ||
-      !professionalId ||
-      !queryType ||
-      !identity.trim() ||
-      !selectedDate ||
-      !selectedHour
-    ) {
+    if (!serviceId || !scheduleId) {
       setErrorMessage(
         "Por favor, complete todos los campos antes de continuar."
       );
       return;
     }
 
-    // Si todo está correcto, limpiar error y continuar
     setErrorMessage(null);
-    console.log({
-      serviceId,
-      professionalId,
-      queryType,
-      selectedDate,
-      selectedHour,
-      identity,
-    });
-    navigate("/pago");
+    const newPath = `/pago/${serviceId}/${scheduleId}`;
+    navigate(newPath);
   };
 
   const handleServiceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
     setServiceId(value ? parseInt(value) : null);
-  };
-
-  useEffect(() => {
-    if (serviceId !== null) {
-      const professionals = getProfessionalAppointment(serviceId); // o await si es async
-      setProfessionalsOptions(professionals);
-    }
-  }, [serviceId]);
-
-  const handleProfessionalChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const value = e.target.value;
-    setProfessionalId(value ? parseInt(value) : null);
   };
 
   return (
@@ -106,63 +75,11 @@ export default function AppointmentCreation() {
               >
                 <option value="">Escoja el servicio</option>
                 {servicesOptions?.map((option) => (
-                  <option key={option.id} value={option.id}>
+                  <option key={option.service_id} value={option.service_id}>
                     {option.name}
                   </option>
                 ))}
               </select>
-            </div>
-            <div className="flex flex-col gap-2 w-full">
-              <div className="flex flex-row gap-2 w-full">
-                <h6 className="grow">Profesional</h6>
-              </div>
-              <select
-                onChange={handleProfessionalChange}
-                className="border border-gray-300 rounded-md p-2 w-full"
-              >
-                <option value="">Escoja el profesional</option>
-                {professionalsOptions?.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex flex-col gap-2 w-full">
-              <div className="flex flex-row gap-2 w-full">
-                <h6 className="grow">Tipo de consulta</h6>
-              </div>
-              <RadioGroup
-                row
-                name="row-radio-buttons-group"
-                value={queryType}
-                onChange={(e) => setQueryType(e.target.value)}
-              >
-                <FormControlLabel
-                  value="presencial"
-                  control={<Radio />}
-                  label="Presencial"
-                />
-                <FormControlLabel
-                  value="virtual"
-                  control={<Radio />}
-                  label="Virtual"
-                />
-              </RadioGroup>
-            </div>
-            <div className="flex flex-col gap-2 w-full">
-              <div className="flex flex-row gap-2 w-full">
-                <h6 className="grow">Cédula del paciente</h6>
-              </div>
-              <TextField
-                required
-                type="tel"
-                variant="outlined"
-                size="small"
-                value={identity}
-                onChange={(e) => setIdentity(e.target.value)}
-                className="w-full"
-              />
             </div>
           </div>
           <div className="flex flex-col gap-2 w-full mt-8">
@@ -188,9 +105,8 @@ export default function AppointmentCreation() {
         }}
       >
         <DateCalendarValue
-          fetchAvailableDates={getDates}
-          onDateChange={setSelectedDate}
-          onHourChange={setSelectedHour}
+          availableSchedules={schedules}
+          onScheduleSelect={setScheduleId}
         />
       </div>
     </div>

@@ -1,25 +1,11 @@
-import { Fragment } from "react";
 import Divider from "@mui/material/Divider";
-import Grid from "@mui/material/Grid2";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
-interface ReviewProps {
-  paymentType: string;
-}
-
-const addresses = ["1 MUI Drive", "Reactville", "Anytown", "99999", "USA"];
-const payments = [
-  { name: "Card type:", detail: "Visa" },
-  { name: "Card holder:", detail: "Mr. John Smith" },
-  { name: "Card number:", detail: "xxxx-xxxx-xxxx-1234" },
-  { name: "Expiry date:", detail: "04/2024" },
-];
-
-export default function Review({ paymentType }: ReviewProps) {
+export default function Review() {
   return (
     <Stack spacing={2}>
       <List disablePadding>
@@ -50,40 +36,15 @@ export default function Review({ paymentType }: ReviewProps) {
             Shipment details
           </Typography>
           <Typography gutterBottom>John Smith</Typography>
-          <Typography gutterBottom sx={{ color: "text.secondary" }}>
-            {addresses.join(", ")}
-          </Typography>
         </div>
         <div>
           <Typography variant="subtitle2" gutterBottom>
             Detalles de Pago
           </Typography>
-          {paymentType === "creditCard" ? (
-            <Grid container>
-              {payments.map((payment) => (
-                <Fragment key={payment.name}>
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    useFlexGap
-                    sx={{ width: "100%", mb: 1 }}
-                  >
-                    <Typography
-                      variant="body1"
-                      sx={{ color: "text.secondary" }}
-                    >
-                      {payment.name}
-                    </Typography>
-                    <Typography variant="body2">{payment.detail}</Typography>
-                  </Stack>
-                </Fragment>
-              ))}
-            </Grid>
-          ) : (
-            <Typography variant="body1" sx={{ color: "text.secondary" }}>
-              Transferencia bancaria
-            </Typography>
-          )}
+
+          <Typography variant="body1" sx={{ color: "text.secondary" }}>
+            Transferencia bancaria
+          </Typography>
         </div>
       </Stack>
     </Stack>

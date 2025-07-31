@@ -9,7 +9,7 @@ import WelcomePanel from "@components/WelcomePanel";
 
 import PostAddOutlinedIcon from "@mui/icons-material/PostAddOutlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
-import { runAdminLoaders } from '../../API/init';
+import { runAdminLoaders } from "../../API/init";
 import { useEffect } from "react";
 
 const ControlPanel = () => {

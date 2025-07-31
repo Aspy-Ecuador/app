@@ -6,7 +6,7 @@ import ServicesList from "@/components/admin/ServicesList";
 import EditUser from "@/components/EditUser";
 import EditService from "@/components/EditService";
 import CreateService from "@/components/CreateService";
-import CreateUser from "@/components/CreateUser";
+import CreateUserAdmin from "@admin/CreateUserAdmin";
 import Appointment from "@/components/admin/Appointments";
 
 export const AdminRoutes = [
@@ -17,7 +17,7 @@ export const AdminRoutes = [
   { path: "/usuarios/:id", element: <EditUser /> },
   { path: "/servicios/:id", element: <EditService /> },
   { path: "/nuevo-servicio", element: <CreateService /> },
-  { path: "/nuevo-usuario", element: <CreateUser role="" /> },
+  { path: "/nuevo-usuario", element: <CreateUserAdmin /> },
   { path: "/citas", element: <Appointment /> },
   ...SharedRoutes,
 ];

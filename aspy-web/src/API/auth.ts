@@ -19,6 +19,7 @@ export const login = async (email: string, password: string) => {
   }
 
   const data = response.data;
+  console.log(data);
   // Guarda el token
   localStorage.setItem("token", data.access_token);
   await StoreUser();
@@ -44,8 +45,16 @@ export const StoreUser = async () => {
     ...userData,
     role: roleInfo.name,
     name: userInfo.first_name + " " + userInfo.last_name,
+    person_id: userInfo.person_id,
+    first_name: userInfo.first_name,
+    last_name: userInfo.last_name,
+    birthdate: userInfo.birthdate,
+    gender_id: userInfo.gender,
+    occupation_id: userInfo.occupation,
+    marital_status_id: userInfo.marital_status,
+    education_id: userInfo.education,
   };
-
+  console.log(userWithRoleName.person_id);
   setAuthenticatedUser(userWithRoleName);
   //Guarda el usuario logeado
   return userWithRoleName;

@@ -10,6 +10,6 @@ export const ClientRoutes = [
   { path: "/perfil", element: <Profile /> },
   { path: "/agendar-cita", element: <AppointmentView /> },
   { path: "/recibos", element: <ReceiptList /> },
-  { path: "/pago", element: <CheckoutView /> },
+  { path: "/pago/:serviceId/:scheduleId", element: <CheckoutView /> },
   ...SharedRoutes,
 ];

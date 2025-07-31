@@ -1,5 +1,10 @@
 import { useState, Fragment } from "react";
 import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { PaymentRequest } from "@/types/PaymentRequest";
+import createAppointment from "@API/appointmentAPI";
+import { FileData } from "@/types/FileData";
+import { Service } from "@/types/Service";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid2";
@@ -10,21 +15,93 @@ import PaymentForm from "@/components/PaymentForm";
 import Review from "@components/Review";
 import Steps from "@components/Steps";
 import Divider from "@mui/material/Divider";
-
+import { getAuthenticatedUser } from "@/utils/store";
 import ReplyRoundedIcon from "@mui/icons-material/ReplyRounded";
 import Success from "@components/Success";
 
 const steps = ["Detalles de Pago", "Revisar cita"];
 
+export const uploadToCloudinary = async (file: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", "aspy-web"); // 🔁 reemplaza con tu upload preset
+  formData.append("cloud_name", "dyqznwbdb"); // 🔁 reemplaza con tu cloud name
+  // Detecta si es imagen o PDF
+  const isPdf = file.type === "application/pdf";
+  console.log(file.type);
+  const url = isPdf
+    ? "https://api.cloudinary.com/v1_1/dyqznwbdb/raw/upload"
+    : "https://api.cloudinary.com/v1_1/dyqznwbdb/upload";
+
+  const res = await fetch(url, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) throw new Error("Error al subir a Cloudinary");
+
+  const data = await res.json();
+  return data.secure_url; // este es el link que usarás
+};
+
 export default function CheckoutView() {
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
-  const [paymentType, setPaymentType] = useState("creditCard");
   const [isPaymentValid, setIsPaymentValid] = useState(false);
 
   const [open, setOpen] = useState(false);
 
-  const handleOpen = () => {
+  const [file, setFile] = useState<FileData | null>(null);
+  const { serviceId, scheduleId } = useParams();
+
+  // Opcional: convertirlos a número si los necesitas como enteros
+  const parsedServiceId = parseInt(serviceId || "", 10);
+  const parsedScheduleId = parseInt(scheduleId || "", 10);
+
+  const handleOpen = async () => {
+    const getServicesFromLocalStorage = (): Service[] => {
+      const servicesData = localStorage.getItem("services");
+      return servicesData ? (JSON.parse(servicesData) as Service[]) : [];
+    };
+
+    const services = getServicesFromLocalStorage();
+
+    const selectedService = services.find(
+      (service) => service.service_id === parsedServiceId
+    );
+
+    // 1. Convertir de FileData (tu tipo) a File real
+    const realFile = file!.file as File;
+
+    // 2. Subir a Cloudinary
+    const uploadedFileUrl = await uploadToCloudinary(realFile);
+    console.log(typeof uploadedFileUrl);
+
+    const hardcodedPersonId = getAuthenticatedUser()!.person_id; // Cliente
+    const hardcodedScheduledBy = 5;
+    const hardcodedServicePrice = selectedService!.price;
+    const hardcodedTotalAmount = selectedService!.price;
+    const hardcodedPaymentType = "Transferencia";
+    const hardcodedAccountNumber = 987654321;
+
+    const data: PaymentRequest = {
+      payment_data: {
+        type: hardcodedPaymentType,
+        number: hardcodedAccountNumber,
+        file: uploadedFileUrl,
+      },
+      payment: {
+        person_id: hardcodedPersonId,
+        service_id: parsedServiceId,
+        service_price: Number(hardcodedServicePrice),
+        total_amount: Number(hardcodedTotalAmount),
+      },
+      scheduled_by: hardcodedScheduledBy,
+      worker_schedule_id: parsedScheduleId,
+    };
+    console.log(JSON.stringify(data, null, 2));
+    console.log(data);
+    await createAppointment.createAppointment(data);
     setActiveStep(activeStep + 1);
     setOpen(true);
   };
@@ -37,15 +114,9 @@ export default function CheckoutView() {
   const getStepContent = (step: number) => {
     switch (step) {
       case 0:
-        return (
-          <PaymentForm
-            paymentType={paymentType}
-            setPaymentType={setPaymentType}
-            setIsValid={setIsPaymentValid}
-          />
-        );
+        return <PaymentForm setIsValid={setIsPaymentValid} setFile={setFile} />;
       case 1:
-        return <Review paymentType={paymentType} />;
+        return <Review />;
       default:
         throw new Error("Unknown step");
     }
@@ -105,29 +176,9 @@ export default function CheckoutView() {
                 open={open}
                 handleClose={handleClose}
                 isRegister={false}
-                message={
-                  paymentType === "creditCard"
-                    ? "Cita agendada con éxito"
-                    : "Cita registrada con éxito"
-                }
+                message={"Cita registrada con éxito"}
               />
             ) : (
-              /*
-              <Stack spacing={2} useFlexGap>
-                <img src={LogoCita} width={"10%"} />
-                <Typography variant="h5">Gracias por preferirnos!!!</Typography>
-                <Typography variant="body1" sx={{ color: "text.secondary" }}>
-                  Hemos enviado por correo electrónico la confirmación de su
-                  pedido y le informaremos cuando se haya enviado.
-                </Typography>
-                <Button
-                  variant="contained"
-                  sx={{ alignSelf: "start", width: { xs: "100%", sm: "auto" } }}
-                >
-                  Go to my orders
-                </Button>
-              </Stack>
-              */
               <Fragment>
                 {getStepContent(activeStep)}
                 <Box
@@ -163,7 +214,7 @@ export default function CheckoutView() {
                       variant="contained"
                       endIcon={<ChevronRightRoundedIcon />}
                       onClick={handleNext}
-                      disabled={paymentType === "creditCard" && !isPaymentValid}
+                      disabled={!isPaymentValid}
                       sx={{ width: { xs: "100%", sm: "fit-content" } }}
                     >
                       Next

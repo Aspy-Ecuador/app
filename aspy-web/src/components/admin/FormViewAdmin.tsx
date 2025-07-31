@@ -1,33 +1,27 @@
 import { useState } from "react";
 import { UserAccount } from "@/types/UserAccount";
-import { inputCreateUserConfig } from "../config/userFormConfig";
+import { inputCreateUserAdminConfig } from "@/config/userFormAdminConfig";
 import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
-import UserForm from "@forms/UserForm";
+import UserFormAdmin from "@admin/UserFormAdmin";
 import Steps from "@components/Steps";
 import Grid from "@mui/material/Grid2";
 import Success from "@components/Success";
 //import { addPerson } from "../API/usuarioAPI";
-import { register } from "../API/auth";
+import { register } from "@API/auth";
 
 interface FormViewProps {
   isEdit: boolean;
-  userId?: number;
-  role: string;
-  isRegister?: boolean;
 }
 
 const stepsName = ["Datos personales", "Hogar", "Seguridad"];
 
-export default function FormView({
-  isEdit,
-  userId,
-  role,
-  isRegister,
-}: FormViewProps) {
+export default function FormViewAdmin({ isEdit }: FormViewProps) {
   const [step, setStep] = useState(0);
-  const totalSteps = 3; // O calculado según el tamaño de `inputCreateUserConfig`
-  const fieldsPerStep = Math.ceil(inputCreateUserConfig.length / totalSteps);
+  const totalSteps = 3;
+  const fieldsPerStep = Math.ceil(
+    inputCreateUserAdminConfig.length / totalSteps
+  );
 
   const [open, setOpen] = useState(false);
 
@@ -47,17 +41,19 @@ export default function FormView({
 
   const handleClose = () => {
     setOpen(false);
-
-    if (isRegister) {
-      navigate("/login");
-    } else {
-      navigate(-1);
-    }
+    navigate(-1);
   };
 
   const navigate = useNavigate();
 
   const formatUserAccount = (data: any): UserAccount => {
+    const roleMap: { [key: number]: string } = {
+      1: "admin",
+      2: "proffesional",
+      3: "client",
+      4: "staff",
+    };
+
     return {
       role_id: Number(data.role_id),
       email: data.email,
@@ -69,19 +65,20 @@ export default function FormView({
       occupation: Number(data.occupation),
       marital_status: Number(data.marital_status),
       education: Number(data.education),
-      person_type: "client",
+      person_type: roleMap[data.role_id],
     };
   };
 
   const handleFinalSubmit = async (data: UserAccount) => {
-    const fullData = { ...userData, ...data, role_id: 3 };
+    const fullData = { ...userData, ...data };
+
     const userRegister = formatUserAccount(fullData);
-    console.log(userRegister);
 
     if (isEdit) {
       console.log("se debe editar");
       //await register(newPerson);
     } else {
+      console.log("se debe registrar");
       await register(userRegister);
     }
     handleOpen();
@@ -94,10 +91,8 @@ export default function FormView({
           <Steps activeStep={step} steps={stepsName} />
         </Grid>
         <Grid size={12}>
-          <UserForm
+          <UserFormAdmin
             isEditMode={isEdit}
-            userId={userId}
-            role={role}
             start={step * fieldsPerStep}
             end={(step + 1) * fieldsPerStep}
             onNext={handleNext}

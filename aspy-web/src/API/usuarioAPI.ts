@@ -59,7 +59,7 @@ export const getUserById = async (id: number): Promise<User> => {
   const token = localStorage.getItem("token");
   if (!token) throw new Error("Token no encontrado");
   try {
-    const response = await axios.get(`${apiURL}/person/${id}`, {
+    const response = await axios.get(`${apiURL}/person/${id - 1}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

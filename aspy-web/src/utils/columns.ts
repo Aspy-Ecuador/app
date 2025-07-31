@@ -1,7 +1,7 @@
 import { GridColDef } from "@mui/x-data-grid";
 
 export const columnsUsersAdmin: GridColDef[] = [
- /*  {
+  /*  {
     field: "identity",
     headerName: "Cédula",
     disableColumnMenu: true,
@@ -23,7 +23,7 @@ export const columnsUsersAdmin: GridColDef[] = [
     flex: 2,
     resizable: false,
   },
-   {
+  {
     field: "role",
     headerName: "Rol",
     disableColumnMenu: true,
@@ -40,13 +40,13 @@ export const columnsUsersAdmin: GridColDef[] = [
 ];
 
 export const columnsServiceAdmin: GridColDef[] = [
- /*  {
-    field: "id",
+  {
+    field: "service_id",
     headerName: "ID",
     flex: 1,
     disableColumnMenu: true,
     resizable: false,
-  }, */
+  },
   {
     field: "name",
     headerName: "Nombre",
@@ -54,6 +54,7 @@ export const columnsServiceAdmin: GridColDef[] = [
     disableColumnMenu: true,
     resizable: false,
   },
+  /*
   {
     field: "description",
     headerName: "Descripción",
@@ -61,21 +62,21 @@ export const columnsServiceAdmin: GridColDef[] = [
     disableColumnMenu: true,
     resizable: false,
   },
-  /* {
+  {
     field: "serviceType",
     headerName: "Tipo",
     flex: 3,
     disableColumnMenu: true,
     resizable: false,
-  }, */
+  },
   {
     field: "active",
     headerName: "Activo",
     flex: 2,
     disableColumnMenu: true,
     resizable: false,
-    renderCell: "Sí",
-  },/* 
+    renderCell: (params) => (params.value ? "Sí" : "No"),
+  },
   {
     field: "updated_on",
     headerName: "Últ. Act.",
@@ -83,7 +84,8 @@ export const columnsServiceAdmin: GridColDef[] = [
     disableColumnMenu: true,
     resizable: false,
     valueFormatter: (params) => new Date(params).toLocaleDateString("es-ES"),
-  }, */
+  },
+  */
 ];
 
 export const columnsUsers: GridColDef[] = [

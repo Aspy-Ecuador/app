@@ -10,6 +10,7 @@ export const inputServiceConfig = [
       },
     },
   },
+  /*
   {
     label: "Descripción",
     key: "description",
@@ -21,6 +22,7 @@ export const inputServiceConfig = [
       },
     },
   },
+  */
   {
     label: "Precio",
     key: "price",
@@ -36,6 +38,7 @@ export const inputServiceConfig = [
       },
     },
   },
+  /*
   {
     label: "Duración (minutos)",
     key: "durationMinutes",
@@ -83,4 +86,5 @@ export const inputServiceConfig = [
       { label: "Terapia de Lenguaje", value: 2 },
     ],
   },
+  */
 ];

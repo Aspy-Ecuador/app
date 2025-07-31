@@ -1,80 +1,62 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { servicesList } from "@data/Servicios";
 import { inputServiceConfig } from "@/config/serviceFormConfig";
 import { Service } from "@/types/Service";
 import { useNavigate } from "react-router-dom";
+import serviceAPI from "@API/serviceAPI";
 import UserInput from "@forms/UserInput";
 import SaveButton from "@buttons/SaveButton";
 import CreationButton from "@buttons/CreationButton";
+import Success from "@components/Success";
+import Progress from "@components/Progress";
 
 interface ServiceFormProps {
   isEditMode: boolean;
   serviceId?: number;
 }
 
-type ServiceNew = {
-  id: number;
-  name: string;
-  idProfessinoal: number;
-  nameProfesional: string;
-  description: string;
-  price: number;
-  durationMinutes: number;
-  serviceType: string;
-  active: string;
-  creatingIn: string;
-  updated_on: string;
-};
-
 export default function ServiceForm({
   isEditMode,
   serviceId,
 }: ServiceFormProps) {
-  //const [serviceData, setServiceData] = useState<ServiceData | null>(null);
-
-  //Estas dos lineas son solo para pruebas
-  const serviceData = servicesList.find((u) => u.id === serviceId);
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  /*
-  useEffect(() => {
-    if (props.isEditMode && props.serviceId) {
-      const fetchData = async () => {
-        const response = await fetch(
-          `/api-endpoint-not-yet/${props.serviceId}`
-        );
-        const data = await response.json();
-        setServiceData(data);
-      };
-      fetchData();
-    }
-  }, [props.isEditMode, props.serviceId]);
-  */
+  const handleClose = () => {
+    navigate("/servicios");
+    setOpen(false);
+  };
 
-  const methods = useForm<ServiceNew>();
+  const methods = useForm<Service>();
 
   useEffect(() => {
-    if (isEditMode && serviceData) {
-      methods.reset({
-        name: serviceData.name,
-        description: serviceData.description,
-        price: serviceData.price,
-        durationMinutes: serviceData.durationMinutes,
-        active: serviceData.active ? "Sí" : "No",
-        serviceType: serviceData.serviceType,
-      });
-    } else {
-      methods.reset({
-        name: "",
-        description: "",
-        price: 0,
-        durationMinutes: 0,
-        active: "",
-        serviceType: "",
-      });
-    }
-  }, [isEditMode, serviceData, methods]);
+    setLoading(true);
+    const fetchService = async () => {
+      if (isEditMode) {
+        try {
+          const serviceData: Service = await serviceAPI.getServiceById(
+            serviceId!
+          );
+          setLoading(false);
+          methods.reset({
+            name: serviceData.name,
+            price: serviceData.price,
+          });
+        } catch (error) {
+          console.error("Error al obtener el servicio:", error);
+        }
+      } else {
+        setLoading(false);
+        methods.reset({
+          name: "",
+          price: 0,
+        });
+      }
+    };
+    fetchService();
+  }, [isEditMode, methods]);
 
   const list_inputs = inputServiceConfig.map((input) => (
     <UserInput
@@ -83,28 +65,37 @@ export default function ServiceForm({
       type={input.type}
       id={input.key}
       validation={input.validation}
-      options={input.options}
     />
   ));
 
   // TODO in a diff file
-  const onClickSave = methods.handleSubmit((data) => {
-    const transformedData: Service = {
-      ...data,
-      active: data.active === "Sí",
-    };
-    servicesList[1].active = false;
-    console.log(transformedData);
-    alert(data);
-    console.log(data);
-    navigate(-1);
+  const onClickSave = methods.handleSubmit(async (data) => {
+    try {
+      const transformedData: Service = data;
+      setLoading(true);
+      await serviceAPI.updateService(serviceId!, transformedData.price);
+      setLoading(false);
+      setMessage("¡Se ha actualizado con éxito!");
+      setOpen(true);
+    } catch (error) {
+      console.error("Error al guardar el servicio:", error);
+    }
   });
 
-  const onClickCreate = methods.handleSubmit((data) => {
-    alert(data);
-    console.log(data);
-    navigate(-1);
+  const onClickCreate = methods.handleSubmit(async (data) => {
+    try {
+      const transformedData: Service = data;
+      setLoading(true);
+      await serviceAPI.createService(transformedData);
+      setLoading(false);
+      setMessage("¡Se ha creado con éxito!");
+      setOpen(true);
+    } catch (error) {
+      console.error("Error al guardar el servicio:", error);
+    }
   });
+
+  if (loading) return <Progress />;
 
   return (
     <FormProvider {...methods}>
@@ -125,6 +116,12 @@ export default function ServiceForm({
           {isEditMode && <SaveButton onClick={onClickSave} text="Guardar" />}
         </div>
       </form>
+      <Success
+        open={open}
+        handleClose={handleClose}
+        isRegister={false}
+        message={message}
+      />
     </FormProvider>
   );
 }

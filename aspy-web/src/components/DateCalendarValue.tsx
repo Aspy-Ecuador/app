@@ -4,58 +4,50 @@ import { DemoContainer, DemoItem } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
-import { AvailableDateTime } from "@/types/AvailableDateTime";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import { WorkerSchedule } from "@/types/WorkerSchedule";
 
 interface DateCalendarValueProps {
-  fetchAvailableDates: () => Promise<AvailableDateTime[]>;
-  onDateChange: (date: string) => void;
-  onHourChange: (hour: string) => void;
+  availableSchedules: WorkerSchedule[];
+  onScheduleSelect: (scheduleId: number) => void;
 }
 
 export default function DateCalendarValue({
-  fetchAvailableDates,
-  onDateChange,
-  onHourChange,
+  availableSchedules,
+  onScheduleSelect,
 }: DateCalendarValueProps) {
-  const [available, setAvailable] = React.useState<AvailableDateTime[]>([]);
   const [selectedDate, setSelectedDate] = React.useState<Dayjs | null>(null);
-  const [selectedHour, setSelectedHour] = React.useState<string | null>(null);
+  const [selectedScheduleId, setSelectedScheduleId] = React.useState<
+    number | null
+  >(null);
 
-  // Cargar las fechas disponibles al montar el componente
-  React.useEffect(() => {
-    fetchAvailableDates().then((data) => setAvailable(data));
-  }, [fetchAvailableDates]);
+  const enabledDates = [
+    ...new Set(availableSchedules.map((ws) => ws.schedule.date)),
+  ];
 
-  // Extraer fechas disponibles
-  const enabledDates = available.map((item) => item.date);
-
-  // Filtrar horas según fecha seleccionada
-  const hoursForSelectedDate =
+  const schedulesForSelectedDate =
     selectedDate &&
-    available.find((item) => item.date === selectedDate.format("YYYY-MM-DD"))
-      ?.hours;
+    availableSchedules.filter(
+      (ws) => ws.schedule.date === selectedDate.format("YYYY-MM-DD")
+    );
 
-  // Habilitar solo los días disponibles
   const shouldDisableDate = (day: Dayjs) => {
     return !enabledDates.includes(day.format("YYYY-MM-DD"));
   };
 
   const handleDateChange = (newValue: Dayjs | null) => {
     setSelectedDate(newValue);
-    setSelectedHour(null);
-    if (newValue) {
-      onDateChange(newValue.format("YYYY-MM-DD"));
-    }
+    setSelectedScheduleId(null);
   };
 
   const handleHourChange = (
     _: React.MouseEvent<HTMLElement>,
-    newHour: string
+    newScheduleId: string
   ) => {
-    setSelectedHour(newHour);
-    onHourChange(newHour);
+    const id = parseInt(newScheduleId);
+    setSelectedScheduleId(id);
+    onScheduleSelect(id);
   };
 
   return (
@@ -74,22 +66,25 @@ export default function DateCalendarValue({
 
       <ToggleButtonGroup
         color="primary"
-        value={selectedHour}
+        value={selectedScheduleId}
         exclusive
         onChange={handleHourChange}
         aria-label="Hora"
         className="flex flex-wrap justify-center w-3/5 mt-4"
       >
-        {hoursForSelectedDate?.map((hour) => (
-          <ToggleButton
-            key={hour}
-            value={hour}
-            aria-label={hour}
-            className="m-1 rounded-xl"
-          >
-            {hour}
-          </ToggleButton>
-        )) || (
+        {schedulesForSelectedDate?.map((ws) => {
+          const label = `${ws.schedule.start_time.slice(0, 5)} - ${ws.schedule.end_time.slice(0, 5)}`;
+          return (
+            <ToggleButton
+              key={ws.schedule_id}
+              value={ws.schedule_id.toString()}
+              aria-label={label}
+              className="m-1 rounded-xl"
+            >
+              {label}
+            </ToggleButton>
+          );
+        }) || (
           <p className="mt-2 text-sm text-gray-500">
             Seleccione una fecha válida
           </p>
