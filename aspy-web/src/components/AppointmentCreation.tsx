@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useRoleData } from "@/observer/RoleDataContext";
 import FormControl from "@mui/material/FormControl";
 import Button from "@mui/material/Button";
 import DateCalendarValue from "@components/DateCalendarValue";
-import { WorkerSchedule } from "@/types/WorkerSchedule";
-import { Service } from "@/types/Service";
+import Progress from "@components/Progress";
 
 export default function AppointmentCreation() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -13,19 +13,13 @@ export default function AppointmentCreation() {
 
   const navigate = useNavigate();
 
-  const getWorkerScheduleFromLocalStorage = (): WorkerSchedule[] => {
-    const servicesData = localStorage.getItem("workerSchedules");
-    return servicesData ? (JSON.parse(servicesData) as WorkerSchedule[]) : [];
-  };
+  const { data, loading } = useRoleData();
 
-  const schedules = getWorkerScheduleFromLocalStorage();
+  if (loading) return <Progress />;
 
-  const getServicesFromLocalStorage = (): Service[] => {
-    const servicesData = localStorage.getItem("services");
-    return servicesData ? (JSON.parse(servicesData) as Service[]) : [];
-  };
+  const schedules = data.workerSchedules;
 
-  const servicesOptions = getServicesFromLocalStorage();
+  const servicesOptions = data.services;
 
   const handleToPay = () => {
     if (!serviceId || !scheduleId) {
@@ -74,7 +68,7 @@ export default function AppointmentCreation() {
                 className="border border-gray-300 rounded-md p-2 w-full"
               >
                 <option value="">Escoja el servicio</option>
-                {servicesOptions?.map((option) => (
+                {servicesOptions.map((option: any) => (
                   <option key={option.service_id} value={option.service_id}>
                     {option.name}
                   </option>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { inputServiceConfig } from "@/config/serviceFormConfig";
-import { Service } from "@/types/Service";
+import { Service } from "src/types/ServiceResponse";
 import { useNavigate } from "react-router-dom";
 import serviceAPI from "@API/serviceAPI";
 import UserInput from "@forms/UserInput";

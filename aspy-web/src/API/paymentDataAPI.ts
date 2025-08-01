@@ -1,43 +1,42 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from "axios";
 import apiURL from "./apiConfig";
-
+import { getConfig } from "./config";
 
 interface PaymentDataStructure {
-  type: string;              // Type of payment (e.g., 'Credit Card', 'Transfer')
-  number: number;            // Payment reference number
-  file: string;              // Payment receipt or reference file
+  type: string; // Type of payment (e.g., 'Credit Card', 'Transfer')
+  number: number; // Payment reference number
+  file: string; // Payment receipt or reference file
 }
-
-const config = {
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem('token')}`,
-  },
-};
 
 const paymentDataAPI = {
   // Get all payment data
   getAllPaymentData: async (): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/payment-data`, config);
+    return axios.get(`${apiURL}/payment-data`, getConfig());
   },
 
   // Get payment data by ID
   getPaymentDataById: async (id: string): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/payment-data/${id}`, config);
+    return axios.get(`${apiURL}/payment-data/${id}`, getConfig());
   },
 
   // Create new payment data
-  createPaymentData: async (paymentData: PaymentDataStructure): Promise<AxiosResponse> => {
-    return axios.post(`${apiURL}/payment-data`, paymentData, config);
+  createPaymentData: async (
+    paymentData: PaymentDataStructure
+  ): Promise<AxiosResponse> => {
+    return axios.post(`${apiURL}/payment-data`, paymentData, getConfig());
   },
 
   // Update payment data by ID
-  updatePaymentData: async (id: string, paymentData: PaymentDataStructure): Promise<AxiosResponse> => {
-    return axios.put(`${apiURL}/payment-data/${id}`, paymentData, config);
+  updatePaymentData: async (
+    id: string,
+    paymentData: PaymentDataStructure
+  ): Promise<AxiosResponse> => {
+    return axios.put(`${apiURL}/payment-data/${id}`, paymentData, getConfig());
   },
 
   // Delete payment data by ID
   deletePaymentData: async (id: string): Promise<AxiosResponse> => {
-    return axios.delete(`${apiURL}/payment-data/${id}`, config);
+    return axios.delete(`${apiURL}/payment-data/${id}`, getConfig());
   },
 };
 

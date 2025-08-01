@@ -6,10 +6,10 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import { WorkerSchedule } from "@/types/WorkerSchedule";
+import { WorkerScheduleResponse } from "@/types/WorkerScheduleResponse";
 
 interface DateCalendarValueProps {
-  availableSchedules: WorkerSchedule[];
+  availableSchedules: WorkerScheduleResponse[];
   onScheduleSelect: (scheduleId: number) => void;
 }
 
@@ -17,6 +17,7 @@ export default function DateCalendarValue({
   availableSchedules,
   onScheduleSelect,
 }: DateCalendarValueProps) {
+  console.log(availableSchedules);
   const [selectedDate, setSelectedDate] = React.useState<Dayjs | null>(null);
   const [selectedScheduleId, setSelectedScheduleId] = React.useState<
     number | null
@@ -43,8 +44,9 @@ export default function DateCalendarValue({
 
   const handleHourChange = (
     _: React.MouseEvent<HTMLElement>,
-    newScheduleId: string
+    newScheduleId: string | null
   ) => {
+    if (newScheduleId === null) return; // Evitar parseInt(null)
     const id = parseInt(newScheduleId);
     setSelectedScheduleId(id);
     onScheduleSelect(id);

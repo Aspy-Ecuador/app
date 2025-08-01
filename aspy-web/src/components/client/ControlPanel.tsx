@@ -1,33 +1,25 @@
-/*import { ReactNode } from "react";*/
-
-import Grid from "@mui/material/Grid2";
-import Box from "@mui/material/Box";
-import { useTheme } from "@mui/material";
 import { getAuthenticatedUserName } from "@store";
-import { citas } from "@data/Citas";
+import { useRoleData } from "@/observer/RoleDataContext";
 import Agenda from "@components/Agenda";
 import WelcomePanel from "@components/WelcomePanel";
-import { runClientLoaders } from '../../API/init';
-import { useEffect } from "react";
+import Grid from "@mui/material/Grid2";
+import Box from "@mui/material/Box";
+import Progress from "@components/Progress";
 
 export default function ControlPanel() {
-  const theme = useTheme();
-  const themeClass =
-    theme.palette.mode === "dark" ? "dark-theme" : "light-theme";
+  const { data, loading } = useRoleData();
 
-  useEffect(() => {
-    runClientLoaders();
-  }, []);
-  
+  if (loading) return <Progress />;
+
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 1, md: 1 }}>
         <Grid size={12} sx={{ padding: 5 }}>
-          <WelcomePanel user={"Estimado" + getAuthenticatedUserName()} />
+          <WelcomePanel user={"Estimado " + getAuthenticatedUserName()} />
         </Grid>
 
-        <Grid size={12} className={themeClass}>
-          <Agenda citas={citas} />
+        <Grid size={12}>
+          <Agenda appointments={data.appointments} />
         </Grid>
       </Grid>
     </Box>

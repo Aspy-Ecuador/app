@@ -1,4 +1,4 @@
-import { Service } from "@/types/Service";
+import { Service } from "src/types/ServiceResponse";
 
 export const servicesList: Service[] = [
   {

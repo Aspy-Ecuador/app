@@ -1,42 +1,45 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from "axios";
 import apiURL from "./apiConfig";
-
+import { getConfig } from "./config";
 
 interface UserAccountData {
-  email: string;                    // Email address
-  password: string;                 // Password for the user
+  email: string; // Email address
+  password: string; // Password for the user
 }
-
-const config = {
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem('token')}`,
-  },
-};
 
 const userAccountAPI = {
   // Get all user accounts
   getAllUserAccounts: async (): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/user-account`, config);
+    return axios.get(`${apiURL}/user-account`, getConfig());
   },
 
   // Get user account by ID
   getUserAccountById: async (id: string): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/user-account/${id}`, config);
+    return axios.get(`${apiURL}/user-account/${id}`, getConfig());
   },
 
   // Create a new user account
-  createUserAccount: async (userAccountData: UserAccountData): Promise<AxiosResponse> => {
-    return axios.post(`${apiURL}/user-account`, userAccountData, config);
+  createUserAccount: async (
+    userAccountData: UserAccountData
+  ): Promise<AxiosResponse> => {
+    return axios.post(`${apiURL}/user-account`, userAccountData, getConfig());
   },
 
   // Update user account by ID
-  updateUserAccount: async (id: string, userAccountData: UserAccountData): Promise<AxiosResponse> => {
-    return axios.put(`${apiURL}/user-account/${id}`, userAccountData, config);
+  updateUserAccount: async (
+    id: string,
+    userAccountData: UserAccountData
+  ): Promise<AxiosResponse> => {
+    return axios.put(
+      `${apiURL}/user-account/${id}`,
+      userAccountData,
+      getConfig()
+    );
   },
 
   // Delete user account by ID
   deleteUserAccount: async (id: string): Promise<AxiosResponse> => {
-    return axios.delete(`${apiURL}/user-account/${id}`, config);
+    return axios.delete(`${apiURL}/user-account/${id}`, getConfig());
   },
 };
 

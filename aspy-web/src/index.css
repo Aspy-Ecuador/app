@@ -474,7 +474,7 @@ p {
 
 /*Calendario*/
 /* Claro */
-.light-theme .css-onh7xc-MuiPaper-root {
+.css-onh7xc-MuiPaper-root {
   background-color: #f1f1f1 !important;
 }
 /* Semana */
@@ -536,76 +536,6 @@ p {
 .css-1czauyl {
   margin-top: 5px;
   border: 1px solid hsl(220, 20%, 80%) !important;
-  border-radius: 8px;
-}
-
-/*Oscuro*/
-.css-onh7xc-MuiPaper-root {
-  background-color: #181919 !important;
-}
-/*Semana*/
-.css-qeli4d {
-  margin-top: 5px;
-  border-radius: 8px;
-  text-align: center;
-  border-color: black !important;
-}
-
-.css-qeli4d .rs__cell {
-  color: white;
-  background-color: #10172a !important;
-  border: none !important;
-}
-
-.css-47nvf8 {
-  margin-top: 5px;
-  border: 0px solid black !important;
-  border-radius: 10px;
-}
-
-.css-47nvf8 .rs__cell {
-  border: 0px solid black !important;
-}
-
-/*Mes*/
-.css-1gwdr4p {
-  border-radius: 8px !important;
-  margin-top: 5px !important;
-  border-color: black !important;
-}
-
-.dark-theme
-  .MuiTypography-root.MuiTypography-body2.MuiTypography-alignCenter.rs__cell.rs__header.rs__header__center.css-1bvhhcn-MuiTypography-root {
-  background-color: #10172a !important;
-  border: none !important;
-  color: white !important;
-}
-
-.css-15o5vin {
-  margin-top: 5px !important;
-  border: 1px solid hsl(0, 0%, 100%) !important;
-  border-radius: 8px !important;
-}
-
-/*Dia*/
-.css-12aktbw {
-  margin-top: 5px;
-}
-
-.css-hr6g5a {
-  border-radius: 8px;
-  border-color: black !important;
-}
-
-.css-hr6g5a .rs__cell {
-  background-color: #10172a !important;
-  border: none !important;
-  text-align: center;
-}
-
-.css-15beo7e {
-  margin-top: 5px;
-  border: 1px solid white !important;
   border-radius: 8px;
 }
 

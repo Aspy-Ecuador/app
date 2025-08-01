@@ -1,37 +1,32 @@
 import axios, { AxiosResponse } from "axios";
 import apiURL from "./apiConfig";
+import { getConfig } from "./config";
 
 interface WorkerScheduleData {
   schedule_id: number;
   worker_id: number;
 }
 
-const config = {
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
-  },
-};
-
 const workerScheduleAPI = {
   getAllWorkerSchedules: async (): Promise<AxiosResponse> =>
-    await axios.get(`${apiURL}/worker-schedule`, config),
+    await axios.get(`${apiURL}/worker-schedule`, getConfig()),
 
   getWorkerScheduleById: async (id: string): Promise<AxiosResponse> =>
-    axios.get(`${apiURL}/worker-schedule/${id}`, config),
+    axios.get(`${apiURL}/worker-schedule/${id}`, getConfig()),
 
   createWorkerSchedule: async (
     data: WorkerScheduleData
   ): Promise<AxiosResponse> =>
-    axios.post(`${apiURL}/worker-schedule`, data, config),
+    axios.post(`${apiURL}/worker-schedule`, data, getConfig()),
 
   updateWorkerSchedule: async (
     id: string,
     data: WorkerScheduleData
   ): Promise<AxiosResponse> =>
-    axios.put(`${apiURL}/worker-schedule/${id}`, data, config),
+    axios.put(`${apiURL}/worker-schedule/${id}`, data, getConfig()),
 
   deleteWorkerSchedule: async (id: string): Promise<AxiosResponse> =>
-    axios.delete(`${apiURL}/worker-schedule/${id}`, config),
+    axios.delete(`${apiURL}/worker-schedule/${id}`, getConfig()),
 };
 
 export default workerScheduleAPI;

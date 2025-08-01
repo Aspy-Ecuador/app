@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { PaymentRequest } from "@/types/PaymentRequest";
 import createAppointment from "@API/appointmentAPI";
 import { FileData } from "@/types/FileData";
-import { Service } from "@/types/Service";
+import { Service } from "src/types/ServiceResponse";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid2";

@@ -1,5 +1,5 @@
 // SÍ SE USA
-export type WorkerSchedule = {
+export type WorkerScheduleResponse = {
   worker_schedule_id: number;
   schedule_id: number;
   person_id: number;

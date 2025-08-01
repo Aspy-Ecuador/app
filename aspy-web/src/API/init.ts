@@ -8,6 +8,7 @@ import workerScheduleAPI from "./workerScheduleAPI";
 import appointmentAPI from "./appointmentAPI";
 import appointmentReportAPI from "./appointmentReportAPI";
 import userAccountAPI from "./userAccountAPI";
+import personAPI from "./personAPI";
 
 type Loader = {
   name: string;
@@ -19,12 +20,17 @@ const adminLoaders: Loader[] = [
   { name: "userAccounts", fn: userAccountAPI.getAllUserAccounts },
   { name: "appointments", fn: appointmentAPI.getAllAppointments },
   { name: "appointmentReports", fn: appointmentReportAPI.getAllReports },
+  { name: "persons", fn: personAPI.getAllPersons },
 ];
 
 const clientLoaders: Loader[] = [
-  { name: "payments", fn: paymentAPI.getAllPayments },
+  { name: "persons", fn: personAPI.getAllPersons },
+  //{ name: "payments", fn: paymentAPI.getAllPayments },
   { name: "paymentData", fn: paymentDataAPI.getAllPaymentData },
-  { name: "professionalServices", fn: professionalServiceAPI.getAllProfessionalServices },
+  {
+    name: "professionalServices",
+    fn: professionalServiceAPI.getAllProfessionalServices,
+  },
   { name: "receipts", fn: receiptAPI.getAllReceipts },
   { name: "schedules", fn: scheduleAPI.getAllSchedules },
   { name: "services", fn: serviceAPI.getAllServices },
@@ -37,7 +43,10 @@ const clientLoaders: Loader[] = [
 const staffLoaders: Loader[] = [
   { name: "payments", fn: paymentAPI.getAllPayments },
   { name: "paymentData", fn: paymentDataAPI.getAllPaymentData },
-  { name: "professionalServices", fn: professionalServiceAPI.getAllProfessionalServices },
+  {
+    name: "professionalServices",
+    fn: professionalServiceAPI.getAllProfessionalServices,
+  },
   { name: "receipts", fn: receiptAPI.getAllReceipts },
   { name: "schedules", fn: scheduleAPI.getAllSchedules },
   { name: "services", fn: serviceAPI.getAllServices },
@@ -45,12 +54,16 @@ const staffLoaders: Loader[] = [
   { name: "workerSchedules", fn: workerScheduleAPI.getAllWorkerSchedules },
   { name: "appointments", fn: appointmentAPI.getAllAppointments },
   { name: "appointmentReports", fn: appointmentReportAPI.getAllReports },
+  { name: "persons", fn: personAPI.getAllPersons },
 ];
 
 const professionalLoaders: Loader[] = [
   { name: "payments", fn: paymentAPI.getAllPayments },
   { name: "paymentData", fn: paymentDataAPI.getAllPaymentData },
-  { name: "professionalServices", fn: professionalServiceAPI.getAllProfessionalServices },
+  {
+    name: "professionalServices",
+    fn: professionalServiceAPI.getAllProfessionalServices,
+  },
   { name: "receipts", fn: receiptAPI.getAllReceipts },
   { name: "schedules", fn: scheduleAPI.getAllSchedules },
   { name: "services", fn: serviceAPI.getAllServices },
@@ -58,6 +71,7 @@ const professionalLoaders: Loader[] = [
   { name: "workerSchedules", fn: workerScheduleAPI.getAllWorkerSchedules },
   { name: "appointments", fn: appointmentAPI.getAllAppointments },
   { name: "appointmentReports", fn: appointmentReportAPI.getAllReports },
+  { name: "persons", fn: personAPI.getAllPersons },
 ];
 
 // Recorrers para cada tipo
@@ -124,7 +138,7 @@ export const runProfessionalLoaders = async () => {
     }
   }
 };
-
+/*
 export const initData = async (): Promise<void> => {
   console.log("Initializing data...");
   const token = localStorage.getItem("token");
@@ -140,3 +154,4 @@ export const initData = async (): Promise<void> => {
     }
   }
 };
+*/

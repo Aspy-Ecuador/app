@@ -1,33 +1,30 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from "axios";
 import apiURL from "./apiConfig";
-
+import { getConfig } from "./config";
 
 interface ReceiptData {
   appointment_id: number;
   file_url: string;
 }
 
-const config = {
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem('token')}`,
-  },
-};
-
 const receiptAPI = {
   getAllReceipts: async (): Promise<AxiosResponse> =>
-    axios.get(`${apiURL}/receipt`, config),
+    axios.get(`${apiURL}/receipt`, getConfig()),
 
   getReceiptById: async (id: string): Promise<AxiosResponse> =>
-    axios.get(`${apiURL}/receipt/${id}`, config),
+    axios.get(`${apiURL}/receipt/${id}`, getConfig()),
 
   createReceipt: async (data: ReceiptData): Promise<AxiosResponse> =>
-    axios.post(`${apiURL}/receipt`, data, config),
+    axios.post(`${apiURL}/receipt`, data, getConfig()),
 
-  updateReceipt: async (id: string, data: ReceiptData): Promise<AxiosResponse> =>
-    axios.put(`${apiURL}/receipt/${id}`, data, config),
+  updateReceipt: async (
+    id: string,
+    data: ReceiptData
+  ): Promise<AxiosResponse> =>
+    axios.put(`${apiURL}/receipt/${id}`, data, getConfig()),
 
   deleteReceipt: async (id: string): Promise<AxiosResponse> =>
-    axios.delete(`${apiURL}/receipt/${id}`, config),
+    axios.delete(`${apiURL}/receipt/${id}`, getConfig()),
 };
 
 export default receiptAPI;
