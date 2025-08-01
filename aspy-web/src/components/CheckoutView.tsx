@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { PaymentRequest } from "@/types/PaymentRequest";
 import createAppointment from "@API/appointmentAPI";
 import { FileData } from "@/types/FileData";
-import { Service } from "src/types/ServiceResponse";
+import { ServiceResponse } from "src/types/ServiceResponse";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid2";
@@ -59,9 +59,11 @@ export default function CheckoutView() {
   const parsedScheduleId = parseInt(scheduleId || "", 10);
 
   const handleOpen = async () => {
-    const getServicesFromLocalStorage = (): Service[] => {
+    const getServicesFromLocalStorage = (): ServiceResponse[] => {
       const servicesData = localStorage.getItem("services");
-      return servicesData ? (JSON.parse(servicesData) as Service[]) : [];
+      return servicesData
+        ? (JSON.parse(servicesData) as ServiceResponse[])
+        : [];
     };
 
     const services = getServicesFromLocalStorage();
@@ -75,7 +77,6 @@ export default function CheckoutView() {
 
     // 2. Subir a Cloudinary
     const uploadedFileUrl = await uploadToCloudinary(realFile);
-    console.log(typeof uploadedFileUrl);
 
     const hardcodedPersonId = getAuthenticatedUser()!.person_id; // Cliente
     const hardcodedScheduledBy = 5;
@@ -99,7 +100,7 @@ export default function CheckoutView() {
       scheduled_by: hardcodedScheduledBy,
       worker_schedule_id: parsedScheduleId,
     };
-    console.log(JSON.stringify(data, null, 2));
+
     console.log(data);
     await createAppointment.createAppointment(data);
     setActiveStep(activeStep + 1);

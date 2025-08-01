@@ -18,9 +18,8 @@ import { getAuthenticatedUserRole } from "@/utils/store";
 
 const PrivateRoute: React.FC = () => {
   const token = localStorage.getItem("token");
-  const role = getAuthenticatedUserRole() as UserRole | null;
-
   if (!token) return <Navigate to="/login" replace />;
+  const role = getAuthenticatedUserRole() as UserRole | null;
   if (!role) return <Navigate to="/login" replace />;
 
   return (

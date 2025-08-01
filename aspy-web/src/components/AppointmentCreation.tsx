@@ -1,6 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRoleData } from "@/observer/RoleDataContext";
+import { PersonResponse } from "@/types/PersonResponse";
+import { getProfessionalService } from "@/utils/utils";
+import { getProfessionalSchedule } from "@/utils/utils";
+import { WorkerScheduleResponse } from "@/types/WorkerScheduleResponse";
 import FormControl from "@mui/material/FormControl";
 import Button from "@mui/material/Button";
 import DateCalendarValue from "@components/DateCalendarValue";
@@ -10,19 +14,44 @@ export default function AppointmentCreation() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [serviceId, setServiceId] = useState<number | null>(null);
   const [scheduleId, setScheduleId] = useState<number | null>(null);
+  const [professionalId, setProfessionalId] = useState<number | null>(null);
+  const [professionalsOptions, setProfessionalsOptions] = useState<
+    PersonResponse[]
+  >([]);
+  const [workerSchedules, setWorkerSchedules] = useState<
+    WorkerScheduleResponse[]
+  >([]);
 
   const navigate = useNavigate();
 
   const { data, loading } = useRoleData();
 
-  if (loading) return <Progress />;
+  useEffect(() => {
+    if (serviceId !== null) {
+      const professionals: PersonResponse[] = getProfessionalService(
+        serviceId,
+        data
+      );
+      setProfessionalsOptions(professionals);
+    } else {
+      setProfessionalsOptions([]);
+    }
 
-  const schedules = data.workerSchedules;
+    if (professionalId !== null) {
+      const workerschedules: WorkerScheduleResponse[] = getProfessionalSchedule(
+        professionalId,
+        data
+      );
+      setWorkerSchedules(workerschedules);
+    } else {
+      setWorkerSchedules([]);
+    }
+  }, [serviceId, data]);
 
   const servicesOptions = data.services;
 
   const handleToPay = () => {
-    if (!serviceId || !scheduleId) {
+    if (!serviceId || !scheduleId || !professionalId) {
       setErrorMessage(
         "Por favor, complete todos los campos antes de continuar."
       );
@@ -38,6 +67,15 @@ export default function AppointmentCreation() {
     const value = event.target.value;
     setServiceId(value ? parseInt(value) : null);
   };
+
+  const handleProfessionalChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const value = e.target.value;
+    setProfessionalId(value ? parseInt(value) : null);
+  };
+
+  if (loading) return <Progress />;
 
   return (
     <div
@@ -75,6 +113,22 @@ export default function AppointmentCreation() {
                 ))}
               </select>
             </div>
+            <div className="flex flex-col gap-2 w-full">
+              <div className="flex flex-row gap-2 w-full">
+                <h6 className="grow">Profesional</h6>
+              </div>
+              <select
+                onChange={handleProfessionalChange}
+                className="border border-gray-300 rounded-md p-2 w-full"
+              >
+                <option value="">Escoja el profesional</option>
+                {professionalsOptions?.map((option) => (
+                  <option key={option.person_id} value={option.person_id}>
+                    {option.first_name}" "{option.middle_name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <div className="flex flex-col gap-2 w-full mt-8">
             <Button variant="contained" onClick={handleToPay}>
@@ -99,7 +153,7 @@ export default function AppointmentCreation() {
         }}
       >
         <DateCalendarValue
-          availableSchedules={schedules}
+          availableSchedules={workerSchedules}
           onScheduleSelect={setScheduleId}
         />
       </div>

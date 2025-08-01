@@ -14,6 +14,7 @@ import { Payment } from "@/types/Payment";
 import { ServiceOptions } from "@/types/ServiceOptions";
 import { ProfessionalOptions } from "@/types/ProfessionalOptions";
 import { AvailableDateTime } from "@/types/AvailableDateTime";
+import { ProfessionalServiceResponse } from "@/types/ProfessionalServiceResponse";
 
 type TendenciaDiaria = {
   promedioPorcentual: number;
@@ -64,13 +65,6 @@ export function TotalIngresosMensual(data: number[]): TotalIngresosMensual {
 
 export function getProfesionales(): User[] {
   return usuarios.filter((u: User) => u.role === "Profesional");
-}
-
-export function getCitasProfesional(id: number): Appointment[] {
-  if (!id) {
-    return citas;
-  }
-  return citas.filter((cita) => cita.professional?.id === id);
 }
 
 export function handleDownloadInvoice(invoice: Receipt) {
@@ -211,7 +205,81 @@ export function getDates(): Promise<AvailableDateTime[]> {
   ]);
 }
 
-export function getReceipts(id: number): Receipt[] {
-  //console.log(id);
-  return receiptList;
+import { PersonResponse } from "@/types/PersonResponse";
+import { WorkerScheduleResponse } from "@/types/WorkerScheduleResponse";
+import { ServiceResponse } from "@/types/ServiceResponse";
+import { AppointmentResponse } from "@/types/AppointmentResponse";
+
+export function getPerson(person_id: number, data: any): PersonResponse {
+  const persons: PersonResponse[] = data.persons;
+  const person = persons.find((person) => person.person_id === person_id);
+  if (!person) throw new Error(`No se encontró la persona con ID ${person_id}`);
+  return person;
+}
+
+export function getWorkerSchedule(
+  worker_schedule_id: number,
+  data: any
+): WorkerScheduleResponse {
+  const workerschedules: WorkerScheduleResponse[] = data.workerSchedules;
+  const workerschedule = workerschedules.find(
+    (workerschedule) => workerschedule.worker_schedule_id === worker_schedule_id
+  );
+  if (!workerschedule)
+    throw new Error(
+      `No se encontró el worker schedule con ID ${worker_schedule_id}`
+    );
+  return workerschedule;
+}
+
+export function getService(service_id: number, data: any): ServiceResponse {
+  const services: ServiceResponse[] = data.services;
+  const service = services.find((service) => service.service_id === service_id);
+  if (!service)
+    throw new Error(`No se encontró el worker schedule con ID ${service_id}`);
+  return service;
+}
+
+export function getCitasProfesional(
+  proffesional_id: number,
+  data: any
+): AppointmentResponse[] {
+  const appointments: AppointmentResponse[] = data.appointments;
+  if (!proffesional_id) {
+    return appointments;
+  }
+  return appointments.filter(
+    (appointment) => appointment.worker_schedule.person_id === proffesional_id
+  );
+}
+
+export function getProfessionalService(
+  service_id: number,
+  data: any
+): PersonResponse[] {
+  const professionals: ProfessionalServiceResponse[] =
+    data.professionalServices;
+
+  const professionalsFilter = professionals.filter(
+    (service) => service.service_id === service_id
+  );
+
+  const persons: PersonResponse[] = data.persons;
+
+  const professionalIds = new Set(
+    professionalsFilter.map((prof) => prof.person_id)
+  );
+
+  return persons.filter((person) => professionalIds.has(person.person_id));
+}
+
+export function getProfessionalSchedule(
+  person_id: number,
+  data: any
+): WorkerScheduleResponse[] {
+  const workerSchedules: WorkerScheduleResponse[] = data.workerSchedules;
+  const workerFilter: WorkerScheduleResponse[] = workerSchedules.filter(
+    (worker) => worker.person_id === person_id
+  );
+  return workerFilter;
 }

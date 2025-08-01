@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useTheme } from "@mui/material";
 import { getCitasProfesional } from "@utils/utils";
-import { Appointment } from "@/types/Appointment";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import Agenda from "@components/Agenda";
 import SelectProfessional from "@components/SelectProfessional";
 import SimpleHeader from "@components/SimpleHeader";
+import { AppointmentResponse } from "@/types/AppointmentResponse";
 
 export default function Appointments() {
   const theme = useTheme();
@@ -19,7 +19,9 @@ export default function Appointments() {
     setSelected(id);
   };
 
-  const citasProfesional: Appointment[] = getCitasProfesional(selectedId!);
+  const citasProfesional: AppointmentResponse[] = getCitasProfesional(
+    selectedId!
+  );
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
@@ -28,7 +30,7 @@ export default function Appointments() {
           <SimpleHeader text={"Citas"} />
         </Grid>
         <Grid size={9} className={themeClass}>
-          <Agenda citas={citasProfesional} />
+          <Agenda appointments={citasProfesional} />
         </Grid>
         <Grid size={3}>
           <SelectProfessional onSelect={handleSelectProfessional} />
