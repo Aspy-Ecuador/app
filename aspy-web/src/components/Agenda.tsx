@@ -1,27 +1,20 @@
 import { Scheduler } from "@aldabil/react-scheduler";
 import { es } from "date-fns/locale";
-import { AppointmentResponse } from "@/types/AppointmentResponse";
-import { getPerson, getService, getWorkerSchedule } from "@/utils/utils";
-import { useRoleData } from "@/observer/RoleDataContext";
+import { Appointment } from "@/types/Appointment";
 
 /* Ver documentacion en https://github.com/aldabil21/react-scheduler  */
 
 export default function Agenda({
   appointments,
 }: {
-  appointments: AppointmentResponse[];
+  appointments: Appointment[];
 }) {
-  const { data } = useRoleData();
   const events = appointments.map((appointment) => ({
-    event_id: `Servicio: ${getService(appointment.payment.service_id, data).name}`,
-    title: `Paciente: ${getPerson(appointment.payment.person_id, data).first_name} ${getPerson(appointment.payment.person_id, data).middle_name} | Profesional: ${getPerson(appointment.worker_schedule.person_id, data).first_name} ${getPerson(appointment.worker_schedule.person_id, data).middle_name}`,
+    event_id: `Servicio: ${appointment.service.name}`,
+    title: `Paciente: ${appointment.client.full_name} | Profesional: ${appointment.proffesional.full_name}`,
     subtitle: `Estado: ${appointment.status.name}`,
-    start: new Date(
-      `${getWorkerSchedule(appointment.worker_schedule_id, data).schedule.date}T${getWorkerSchedule(appointment.worker_schedule_id, data).schedule.start_time}`
-    ),
-    end: new Date(
-      `${getWorkerSchedule(appointment.worker_schedule_id, data).schedule.date}T${getWorkerSchedule(appointment.worker_schedule_id, data).schedule.end_time}`
-    ),
+    start: new Date(`${appointment.date}T${appointment.startTime}`),
+    end: new Date(`${appointment.date}T${appointment.endTime}`),
   }));
 
   return (

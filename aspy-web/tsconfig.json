@@ -22,7 +22,10 @@
     "baseUrl": ".", // Enable baseUrl for path resolution
     "paths": {
       "@assets/*": ["src/assets/*"], // Define alias for assets
-      "@API/*": ["src/API/*"]
+      "@API/*": ["src/API/*"],
+      "@types/*": ["src/type/*"],
+      "@typesResponse/*": ["src/typesResponse/*"],
+      "@typesRequest/*": ["src/typesRequest/*"]
     }
   },
   "include": ["src", "jest.setup.ts"]

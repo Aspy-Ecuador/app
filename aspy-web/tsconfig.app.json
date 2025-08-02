@@ -16,13 +16,15 @@
       "@shared/*": ["src/shared/*"],
       "@hooks/*": ["src/hooks/*"],
       "@types/*": ["src/types/*"],
+      "@typesResponse/*": ["src/typesResponse/*"],
       "@store": ["src/utils/store.ts"],
       "@data/*": ["src/data/*"],
       "@forms/*": ["src/components/forms/*"],
       "@pages/*": ["src/pages/*"],
       "@shared-theme/*": ["src/shared-theme/*"],
       "@buttons/*": ["src/components/buttons/*"],
-      "@API/*": ["src/API/*"]
+      "@API/*": ["src/API/*"],
+      "@typesRequest/*": ["src/typesRequest/*"]
     },
 
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",

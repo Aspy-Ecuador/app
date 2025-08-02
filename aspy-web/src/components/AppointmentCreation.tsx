@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useRoleData } from "@/observer/RoleDataContext";
-import { PersonResponse } from "@/types/PersonResponse";
+import { PersonResponse } from "@/typesResponse/PersonResponse";
 import { getProfessionalService } from "@/utils/utils";
 import { getProfessionalSchedule } from "@/utils/utils";
-import { WorkerScheduleResponse } from "@/types/WorkerScheduleResponse";
+import { WorkerScheduleResponse } from "@/typesResponse/WorkerScheduleResponse";
 import FormControl from "@mui/material/FormControl";
 import Button from "@mui/material/Button";
 import DateCalendarValue from "@components/DateCalendarValue";

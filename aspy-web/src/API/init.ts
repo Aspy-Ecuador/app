@@ -9,6 +9,7 @@ import appointmentAPI from "./appointmentAPI";
 import appointmentReportAPI from "./appointmentReportAPI";
 import userAccountAPI from "./userAccountAPI";
 import personAPI from "./personAPI";
+import roleAPI from "./roleAPI";
 
 type Loader = {
   name: string;
@@ -38,6 +39,7 @@ const clientLoaders: Loader[] = [
   { name: "workerSchedules", fn: workerScheduleAPI.getAllWorkerSchedules },
   { name: "appointments", fn: appointmentAPI.getAllAppointments },
   { name: "appointmentReports", fn: appointmentReportAPI.getAllReports },
+  { name: "roles", fn: roleAPI.getAllRoles },
 ];
 
 const staffLoaders: Loader[] = [

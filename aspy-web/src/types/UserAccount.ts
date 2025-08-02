@@ -1,4 +1,4 @@
-//SÍ SE USA
+// HAY QUE REVISAR SI SE USA CON LAS ACTUAIZACIONES
 export interface UserAccount {
   role_id: number;
   email: string;
