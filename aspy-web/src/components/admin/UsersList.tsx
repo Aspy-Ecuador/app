@@ -5,6 +5,11 @@ import { User } from "@/types/User";
 import { ButtonAdmin } from "@/types/ButtonAdmin";
 import { columnsUsersAdmin } from "@utils/columns";
 import { useRoleData } from "@/observer/RoleDataContext";
+import { PersonResponse } from "@/typesResponse/PersonResponse";
+import { UserAccountResponse } from "@/typesResponse/UserAccountResponse";
+import { RoleResponse } from "@/typesResponse/RoleResponse";
+import { getUsers } from "@/utils/utils";
+import Progress from "@components/Progress";
 import SimpleHeader from "@components/SimpleHeader";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
@@ -19,21 +24,16 @@ import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined
 import AttributionOutlinedIcon from "@mui/icons-material/AttributionOutlined";
 import SupervisedUserCircleOutlinedIcon from "@mui/icons-material/SupervisedUserCircleOutlined";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import { PersonResponse } from "@/typesResponse/PersonResponse";
-import { UserAccountResponse } from "@/typesResponse/UserAccountResponse";
-import { RoleResponse } from "@/typesResponse/RoleResponse";
-import { userAdapter } from "@/adapters/userAdapter";
 
 export default function UsersList() {
-  //Fila seleccionada
   const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
-
-  //Usuario seleccionado
   const [user, setUser] = useState<User | null>(null);
+  const { data, loading } = useRoleData();
 
-  const { data } = useRoleData();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const users: User[] = mapUsers(data.persons, data.userAccounts, data.roles);
+  const users: User[] = getUsers(data);
 
   const buttonsData: ButtonAdmin[] = [
     {
@@ -53,7 +53,6 @@ export default function UsersList() {
     },
   ];
 
-  //Mostrar el usuario
   useEffect(() => {
     if (rowSelection.length > 0) {
       const selectedUser = users.find(
@@ -63,26 +62,22 @@ export default function UsersList() {
         setUser(selectedUser);
       }
     } else {
-      setUser(null); // O setUser(defaultUser) si prefieres uno por defecto
+      setUser(null);
     }
-  }, [rowSelection, users]);
-
-  //Ruta para editar y crear
-  const navigate = useNavigate();
-  const location = useLocation();
+  }, [rowSelection]);
 
   const handleEdit = () => {
     if (user) {
-      setRowSelection([]); // Desmarcar fila
-      const newPath = `${location.pathname}/${user.user_id}`;
-      navigate(newPath);
+      setRowSelection([]);
+      navigate(`${location.pathname}/${user.user_id}`);
     }
   };
 
   const handleCreate = () => {
-    const newPath = `/nuevo-usuario`;
-    navigate(newPath);
+    navigate(`/nuevo-usuario`);
   };
+
+  if (loading) return <Progress />;
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
@@ -115,17 +110,18 @@ export default function UsersList() {
           <Table<User>
             columns={columnsUsersAdmin}
             rows={users}
-            getRowId={(row) => row.user_id} // Usar la propiedad id como identificador único
+            getRowId={(row) => row.user_id}
             rowSelectionModel={rowSelection}
             onRowSelectionChange={(newSelection) =>
               setRowSelection(newSelection)
             }
           />
         </Grid>
+
         {user && (
           <Grid size={4}>
             <ProfileView
-              user_info={user}
+              user={user}
               onEdit={handleEdit}
               isRowPosition={false}
             />
@@ -134,21 +130,4 @@ export default function UsersList() {
       </Grid>
     </Box>
   );
-}
-
-function mapUsers(
-  persons: PersonResponse[],
-  userAccounts: UserAccountResponse[],
-  roles: RoleResponse[]
-): User[] {
-  return userAccounts
-    .map((account) => {
-      const person = persons.find((p) => p.person_id === account.user_id); // o usa otro campo si aplica
-      const role = roles.find((r) => r.role_id === account.role_id);
-      if (person && role) {
-        return userAdapter(person, role, account);
-      }
-      return null;
-    })
-    .filter((user): user is User => user !== null);
 }

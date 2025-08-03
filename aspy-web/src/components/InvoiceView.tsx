@@ -13,13 +13,9 @@ interface InvoiceViewProps {
   date: string;
   client: string;
   service: string;
-  address: string;
   price: number;
-  discount: number;
   total: number;
   paymentMethod: string;
-  contactEmail: string;
-  contactPhone: string;
 }
 
 export default function InvoiceView({
@@ -27,13 +23,9 @@ export default function InvoiceView({
   date,
   client,
   service,
-  address,
   price,
-  discount,
   total,
   paymentMethod,
-  contactEmail,
-  contactPhone,
 }: InvoiceViewProps) {
   return (
     <Box
@@ -58,8 +50,8 @@ export default function InvoiceView({
       <Typography fontWeight="bold">Client Name:</Typography>
       <Typography gutterBottom>{client}</Typography>
 
-      <Typography fontWeight="bold">Address:</Typography>
-      <Typography gutterBottom>{address}</Typography>
+      {/*<Typography fontWeight="bold">Address:</Typography>*/}
+      {/*<Typography gutterBottom>{address}</Typography>*/}
 
       <Box mt={4}>
         <TableContainer component={Paper} variant="outlined">
@@ -75,7 +67,7 @@ export default function InvoiceView({
               </TableRow>
               <TableRow>
                 <TableCell>{service}</TableCell>
-                <TableCell align="right">${price.toFixed(2)}</TableCell>
+                <TableCell align="right">${price}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -90,16 +82,16 @@ export default function InvoiceView({
             <TableBody>
               <TableRow>
                 <TableCell>Subtotal</TableCell>
-                <TableCell align="right">${price.toFixed(2)}</TableCell>
+                <TableCell align="right">${price}</TableCell>
               </TableRow>
-              <TableRow>
+              {/*<TableRow>
                 <TableCell>Descuento</TableCell>
                 <TableCell align="right">${discount}</TableCell>
-              </TableRow>
+              </TableRow>*/}
               <TableRow>
                 <TableCell sx={{ fontWeight: "bold" }}>Total</TableCell>
                 <TableCell align="right" sx={{ fontWeight: "bold" }}>
-                  ${total.toFixed(2)}
+                  ${total}
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -112,11 +104,11 @@ export default function InvoiceView({
           <Typography fontWeight="bold">Payment Method:</Typography>
           <Typography>{paymentMethod}</Typography>
         </Grid>
-        <Grid size={6}>
+        {/*<Grid size={6}>
           <Typography fontWeight="bold">Contact Info:</Typography>
           <Typography>{contactEmail || "N/A"}</Typography>
           <Typography>{contactPhone || "N/A"}</Typography>
-        </Grid>
+        </Grid>*/}
       </Grid>
     </Box>
   );

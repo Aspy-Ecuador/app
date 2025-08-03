@@ -33,20 +33,18 @@ export default function AppointmentCreation() {
         data
       );
       setProfessionalsOptions(professionals);
-    } else {
-      setProfessionalsOptions([]);
-    }
-
-    if (professionalId !== null) {
-      const workerschedules: WorkerScheduleResponse[] = getProfessionalSchedule(
-        professionalId,
-        data
-      );
-      setWorkerSchedules(workerschedules);
+      if (professionalId !== null) {
+        const workerschedules: WorkerScheduleResponse[] =
+          getProfessionalSchedule(professionalId, data);
+        setWorkerSchedules(workerschedules);
+      } else {
+        setWorkerSchedules([]);
+      }
     } else {
       setWorkerSchedules([]);
+      setProfessionalsOptions([]);
     }
-  }, [serviceId, data]);
+  }, [serviceId, data, professionalId]);
 
   const servicesOptions = data.services;
 
@@ -66,6 +64,10 @@ export default function AppointmentCreation() {
   const handleServiceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
     setServiceId(value ? parseInt(value) : null);
+    setProfessionalId(null); // ✅ Resetea el profesional seleccionado
+    setScheduleId(null); // (opcional) resetea también el horario si es necesario
+    setProfessionalsOptions([]);
+    setWorkerSchedules([]);
   };
 
   const handleProfessionalChange = (

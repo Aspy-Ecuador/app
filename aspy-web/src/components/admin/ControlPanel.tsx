@@ -1,19 +1,23 @@
 import { useNavigate } from "react-router-dom";
 import { ButtonControl } from "@/types/ButtonControl";
 import { getAuthenticatedUserName } from "@store";
+import { useRoleData } from "@/observer/RoleDataContext";
 import Grid from "@mui/material/Grid2";
 import Box from "@mui/material/Box";
 import Overview from "@admin/Overview";
 import ButtonList from "@components/ButtonList";
 import WelcomePanel from "@components/WelcomePanel";
+import Progress from "@components/Progress";
 
 import PostAddOutlinedIcon from "@mui/icons-material/PostAddOutlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
-import { runAdminLoaders } from "../../API/init";
-import { useEffect } from "react";
 
-const ControlPanel = () => {
+export default function ControlPanel() {
   const navigate = useNavigate();
+  const { data, loading } = useRoleData();
+
+  if (loading) return <Progress />;
+  console.log(data);
 
   const handleCreateUser = () => {
     const newPath = `/nuevo-usuario`;
@@ -38,10 +42,6 @@ const ControlPanel = () => {
     },
   ];
 
-  useEffect(() => {
-    runAdminLoaders();
-  }, []);
-
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 1, md: 1 }}>
@@ -59,6 +59,4 @@ const ControlPanel = () => {
       </Grid>
     </Box>
   );
-};
-
-export default ControlPanel;
+}

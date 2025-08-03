@@ -2,8 +2,11 @@ import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { inputCreateUserAdminConfig } from "@/config/userFormAdminConfig";
 import { UserAccount } from "@/types/UserAccount";
+import { useRoleData } from "@/observer/RoleDataContext";
 import Button from "@mui/material/Button";
 import UserInput from "@forms/UserInput";
+import { User } from "@/types/User";
+import { getUsers } from "@/utils/utils";
 
 interface UserFormProps {
   isEditMode: boolean;
@@ -27,16 +30,12 @@ export default function UserFormAdmin({
   isLast,
 }: UserFormProps) {
   const methods = useForm<UserAccount>();
+  const { data, loading } = useRoleData();
+  const users: User[] = getUsers(data);
 
   useEffect(() => {
     if (isEditMode) {
-      const getUsuariosFromLocalStorage = (): UserAccount[] => {
-        const servicesData = localStorage.getItem("services");
-        return servicesData ? (JSON.parse(servicesData) as UserAccount[]) : [];
-      };
-
-      const users = getUsuariosFromLocalStorage();
-      const user = users.find((u) => u.role_id === userId);
+      const user = users.find((u) => u.user_id === userId);
 
       if (user) {
         methods.reset({
@@ -44,7 +43,7 @@ export default function UserFormAdmin({
           last_name: user.last_name,
           email: user.email,
           birthdate: user.birthdate,
-          gender: user.gender,
+          gender: user.gender === 1 ? "men" : "women",
           occupation: user.occupation,
           marital_status: user.marital_status,
           education: user.education,
@@ -62,7 +61,7 @@ export default function UserFormAdmin({
         education: -1,
       });
     }
-  }, [isEditMode, userId]); // <- se ejecuta solo si cambia isEditMode o userId
+  }, [isEditMode, userId]);
 
   const list_inputs = inputCreateUserAdminConfig
     .slice(start, end)
@@ -102,6 +101,8 @@ export default function UserFormAdmin({
     }
     return "Siguiente";
   };
+
+  if (loading) return <Progress />;
 
   return (
     <FormProvider {...methods}>

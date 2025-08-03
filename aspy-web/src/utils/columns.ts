@@ -119,30 +119,6 @@ export const columnsUsers: GridColDef[] = [
   },
 ];
 
-export const columnsReceipt: GridColDef[] = [
-  {
-    field: "id",
-    headerName: "ID Factura",
-    disableColumnMenu: true,
-    flex: 2,
-    resizable: false,
-  },
-  {
-    field: "clientName",
-    headerName: "Cliente",
-    disableColumnMenu: true,
-    flex: 3,
-    resizable: false,
-  },
-  {
-    field: "issueDate",
-    headerName: "Fecha de Emisión",
-    disableColumnMenu: true,
-    flex: 3,
-    resizable: false,
-  },
-];
-
 export const columnsPayment: GridColDef[] = [
   {
     field: "id",

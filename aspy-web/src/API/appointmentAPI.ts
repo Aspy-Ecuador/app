@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import apiURL from "./apiConfig";
-import { PaymentRequest } from "@/types/PaymentRequest";
+import { AppointmentRequest } from "@/typesRequest/AppointmentRequest";
 import { getConfig } from "./config";
 
 const appointmentAPI = {
@@ -16,7 +16,7 @@ const appointmentAPI = {
 
   // Create a new appointment
   createAppointment: async (
-    appointmentData: PaymentRequest
+    appointmentData: AppointmentRequest
   ): Promise<AxiosResponse> => {
     return axios.post(`${apiURL}/appointment`, appointmentData, getConfig());
   },

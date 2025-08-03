@@ -1,21 +1,20 @@
 import { getAuthenticatedUserName } from "@store";
 import { useRoleData } from "@/observer/RoleDataContext";
 import { appointmentAdapter } from "@/adapters/appointmentAdapter";
+import { Appointment } from "@/types/Appointment";
+import { userAdapter } from "@/adapters/userAdapter";
 import Agenda from "@components/Agenda";
 import WelcomePanel from "@components/WelcomePanel";
 import Grid from "@mui/material/Grid2";
 import Box from "@mui/material/Box";
 import Progress from "@components/Progress";
-import { AppointmentResponse } from "@/typesResponse/AppointmentResponse";
-import { Appointment } from "@/types/Appointment";
-import { userAdapter } from "@/adapters/userAdapter";
 
 export default function ControlPanel() {
   const { data, loading } = useRoleData();
 
   if (loading) return <Progress />;
 
-  const appointments = (data.appointments || [])
+  const appointments: Appointment[] = (data.appointments || [])
     .map((appointment: any) => {
       const service = data.services?.find(
         (s: any) => s.service_id === appointment.payment.service_id
@@ -78,7 +77,6 @@ export default function ControlPanel() {
     })
     .filter(Boolean);
 
-  console.log(appointments);
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 1, md: 1 }}>

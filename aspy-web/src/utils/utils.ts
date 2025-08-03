@@ -95,15 +95,13 @@ export function handleDownloadInvoice(invoice: Receipt) {
 
   // Datos de Factura
   doc.setFontSize(12);
-  doc.text(`Comprobante de Pago Nº: ${invoice.number}`, 10, 52);
-  doc.text(`Fecha de Emisión: ${invoice.issueDate}`, 142, 52);
-  doc.text(`Cliente: ${invoice.clientName}`, 10, 59);
-  doc.text(`Dirección: ${invoice.address}`, 10, 66);
+  doc.text(`Comprobante de Pago Nº: ${invoice.receipt.receipt_id}`, 10, 52);
+  doc.text(`Fecha de Emisión: ${invoice.date}`, 142, 52);
+  doc.text(`Cliente: ${invoice.client.full_name}`, 10, 59);
+  //doc.text(`Dirección: ${invoice.address}`, 10, 66);
 
   // Tabla de servicios
-  const servicios = [
-    [invoice.serviceName, `$${invoice.servicePrice.toFixed(2)}`],
-  ];
+  const servicios = [[invoice.service.name, `$${invoice.service.price}`]];
 
   autoTable(doc, {
     startY: 75,
@@ -120,9 +118,9 @@ export function handleDownloadInvoice(invoice: Receipt) {
 
   // Tabla de totales
   const totales = [
-    ["Subtotal:", `$${invoice.subtotal.toFixed(2)}`],
-    ["IVA 15%:", `$${invoice.tax.toFixed(2)}`],
-    ["Total:", `$${invoice.total.toFixed(2)}`],
+    ["Subtotal:", `$${invoice.service.price}`],
+    ["IVA 15%:", `$${0}`],
+    ["Total:", `$${invoice.service.price}`],
   ];
 
   autoTable(doc, {
@@ -143,11 +141,11 @@ export function handleDownloadInvoice(invoice: Receipt) {
 
   // Método de pago
   doc.setFontSize(11);
-  doc.text(`Método de Pago: ${invoice.paymentMethod}`, 10, finalY);
+  doc.text(`Método de Pago: ${invoice.payment_data.type}`, 10, finalY);
 
   // Datos de contacto
-  doc.text(`Email: ${invoice.contactEmail}`, 10, finalY + 7);
-  doc.text(`Teléfono: ${invoice.contactPhone}`, 10, finalY + 14);
+  doc.text(`Ctn.: ${invoice.payment_data.number}`, 10, finalY + 7);
+  //doc.text(`Teléfono: ${invoice.payment_data.}`, 10, finalY + 14);
 
   // Pie de página
 
@@ -156,7 +154,9 @@ export function handleDownloadInvoice(invoice: Receipt) {
   doc.setFontSize(9);
   doc.text("Gracias por confiar en nosotros.", 105, 290, { align: "center" });
 
-  doc.save(`Factura-${invoice.number}-${invoice.clientName}.pdf`);
+  doc.save(
+    `Factura-${invoice.receipt.receipt_id}-${invoice.client.first_name}.pdf`
+  );
 }
 
 export function getReceipt(id: number): Receipt {
@@ -205,10 +205,13 @@ export function getDates(): Promise<AvailableDateTime[]> {
   ]);
 }
 
-import { PersonResponse } from "@/types/PersonResponse";
-import { WorkerScheduleResponse } from "@/types/WorkerScheduleResponse";
-import { ServiceResponse } from "@/types/ServiceResponse";
-import { AppointmentResponse } from "@/types/AppointmentResponse";
+import { PersonResponse } from "@/typesResponse/PersonResponse";
+import { WorkerScheduleResponse } from "@/typesResponse/WorkerScheduleResponse";
+import { ServiceResponse } from "@/typesResponse/ServiceResponse";
+import { AppointmentResponse } from "@/typesResponse/AppointmentResponse";
+import { UserAccountResponse } from "@/typesResponse/UserAccountResponse";
+import { RoleResponse } from "@/typesResponse/RoleResponse";
+import { userAdapter } from "@/adapters/userAdapter";
 
 export function getPerson(person_id: number, data: any): PersonResponse {
   const persons: PersonResponse[] = data.persons;
@@ -282,4 +285,17 @@ export function getProfessionalSchedule(
     (worker) => worker.person_id === person_id
   );
   return workerFilter;
+}
+
+export function getUsers(data: any): User[] {
+  const persons: PersonResponse[] = data.persons;
+  const userAccounts: UserAccountResponse[] = data.userAccounts;
+  const roles: RoleResponse[] = data.roles;
+  return userAccounts
+    .map((account) => {
+      const person = persons.find((p) => p.person_id === account.user_id);
+      const role = roles.find((r) => r.role_id === account.role_id);
+      return person && role ? userAdapter(person, role, account) : null;
+    })
+    .filter((user): user is User => user !== null);
 }

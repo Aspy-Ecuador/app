@@ -1,10 +1,11 @@
 import { useState, Fragment } from "react";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
-import { PaymentRequest } from "@/types/PaymentRequest";
-import createAppointment from "@API/appointmentAPI";
+import { AppointmentRequest } from "@/typesRequest/AppointmentRequest";
 import { FileData } from "@/types/FileData";
-import { ServiceResponse } from "src/types/ServiceResponse";
+import { ServiceResponse } from "@/typesResponse/ServiceResponse";
+import { useRoleData } from "@/observer/RoleDataContext";
+import { getAuthenticatedUser } from "@/utils/store";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid2";
@@ -15,36 +16,62 @@ import PaymentForm from "@/components/PaymentForm";
 import Review from "@components/Review";
 import Steps from "@components/Steps";
 import Divider from "@mui/material/Divider";
-import { getAuthenticatedUser } from "@/utils/store";
 import ReplyRoundedIcon from "@mui/icons-material/ReplyRounded";
 import Success from "@components/Success";
+import createAppointment from "@API/appointmentAPI";
+import Progress from "@components/Progress";
 
 const steps = ["Detalles de Pago", "Revisar cita"];
+
+interface CloudinaryUploadResponse {
+  secure_url: string;
+  public_id: string;
+  resource_type: string;
+  original_filename: string;
+  format: string;
+}
 
 export const uploadToCloudinary = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append("file", file);
-  formData.append("upload_preset", "aspy-web"); // 🔁 reemplaza con tu upload preset
-  formData.append("cloud_name", "dyqznwbdb"); // 🔁 reemplaza con tu cloud name
-  // Detecta si es imagen o PDF
+  formData.append("upload_preset", "aspy-web");
+
+  formData.append("folder", "pdfs");
+
   const isPdf = file.type === "application/pdf";
-  console.log(file.type);
-  const url = isPdf
-    ? "https://api.cloudinary.com/v1_1/dyqznwbdb/raw/upload"
-    : "https://api.cloudinary.com/v1_1/dyqznwbdb/upload";
+  if (!isPdf && !file.type.startsWith("image/")) {
+    throw new Error("Solo se permiten imágenes o PDFs.");
+  }
 
-  const res = await fetch(url, {
-    method: "POST",
-    body: formData,
-  });
+  const resourceType = isPdf ? "raw" : "image";
+  const url = `https://api.cloudinary.com/v1_1/dyqznwbdb/${resourceType}/upload`;
 
-  if (!res.ok) throw new Error("Error al subir a Cloudinary");
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      body: formData,
+    });
 
-  const data = await res.json();
-  return data.secure_url; // este es el link que usarás
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Error Cloudinary: ${res.status} - ${errText}`);
+    }
+
+    const data = (await res.json()) as CloudinaryUploadResponse;
+    return data.secure_url;
+  } catch (error: any) {
+    console.error("Error subiendo a Cloudinary:", error.message);
+    throw new Error("No se pudo subir el archivo a Cloudinary.");
+  }
 };
 
 export default function CheckoutView() {
+  const { data, loading } = useRoleData();
+
+  if (loading) return <Progress />;
+
+  const services: ServiceResponse[] = data.services;
+
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
   const [isPaymentValid, setIsPaymentValid] = useState(false);
@@ -59,20 +86,10 @@ export default function CheckoutView() {
   const parsedScheduleId = parseInt(scheduleId || "", 10);
 
   const handleOpen = async () => {
-    const getServicesFromLocalStorage = (): ServiceResponse[] => {
-      const servicesData = localStorage.getItem("services");
-      return servicesData
-        ? (JSON.parse(servicesData) as ServiceResponse[])
-        : [];
-    };
-
-    const services = getServicesFromLocalStorage();
-
     const selectedService = services.find(
       (service) => service.service_id === parsedServiceId
     );
 
-    // 1. Convertir de FileData (tu tipo) a File real
     const realFile = file!.file as File;
 
     // 2. Subir a Cloudinary
@@ -85,23 +102,21 @@ export default function CheckoutView() {
     const hardcodedPaymentType = "Transferencia";
     const hardcodedAccountNumber = 987654321;
 
-    const data: PaymentRequest = {
+    const data: AppointmentRequest = {
       payment_data: {
         type: hardcodedPaymentType,
         number: hardcodedAccountNumber,
         file: uploadedFileUrl,
       },
       payment: {
-        person_id: hardcodedPersonId,
-        service_id: parsedServiceId,
+        person_id: Number(hardcodedPersonId),
+        service_id: Number(parsedServiceId),
         service_price: Number(hardcodedServicePrice),
         total_amount: Number(hardcodedTotalAmount),
       },
       scheduled_by: hardcodedScheduledBy,
       worker_schedule_id: parsedScheduleId,
     };
-
-    console.log(data);
     await createAppointment.createAppointment(data);
     setActiveStep(activeStep + 1);
     setOpen(true);
@@ -117,7 +132,7 @@ export default function CheckoutView() {
       case 0:
         return <PaymentForm setIsValid={setIsPaymentValid} setFile={setFile} />;
       case 1:
-        return <Review />;
+        return <Review service_id={parsedServiceId} />;
       default:
         throw new Error("Unknown step");
     }
@@ -134,7 +149,7 @@ export default function CheckoutView() {
   const handleBackPage = () => {
     navigate(-1);
   };
-
+  if (loading) return <Progress />;
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1} className="contenedor-principal">

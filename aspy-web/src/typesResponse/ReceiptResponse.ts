@@ -2,17 +2,9 @@
 export interface ReceiptResponse {
   receipt_id: number;
   payment_id: number;
-  number: string;
-  issueDate: string;
-  clientName: string;
-  address: string;
-  serviceName: string;
-  servicePrice: number;
-  discount_percentage: number;
-  subtotal: number;
-  tax: number;
-  total: number;
-  paymentMethod: string;
-  contactEmail: string;
-  contactPhone: string;
+  status: number;
+  created_by: string;
+  modified_by: string;
+  creation_date: string;
+  modification_date: string;
 }
