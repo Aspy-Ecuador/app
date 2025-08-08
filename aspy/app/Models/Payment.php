@@ -27,9 +27,9 @@ class Payment extends Model
         'modification_date',
     ];
 
-    public function client()
+    public function person()
     {
-        return $this->belongsTo(Client::class, 'person_id');
+        return $this->belongsTo(Person::class, 'person_id');
     }
 
     public function service()

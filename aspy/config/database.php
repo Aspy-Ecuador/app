@@ -16,7 +16,16 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'sqlite'),
+    /*
+    |--------------------------------------------------------------------------
+    | Default Database Connection Name
+    |--------------------------------------------------------------------------
+    |
+    | Para producción y entornos de alto rendimiento preferimos que Laravel
+    | utilice PostgreSQL por defecto en lugar de SQLite. Esto puede
+    | sobreescribirse mediante la variable de entorno DB_CONNECTION.
+    */
+    'default' => env('DB_CONNECTION', 'pgsql'),
 
     /*
     |--------------------------------------------------------------------------
@@ -94,7 +103,17 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
             'search_path' => 'public',
-            'sslmode' => 'prefer',
+            //
+            // SSL Mode: permite establecer "require" en el archivo .env
+            // para evitar negociaciones innecesarias cuando el servidor exige TLS.
+            'sslmode' => env('DB_SSLMODE', 'prefer'),
+
+            // Opciones adicionales de PDO para optimizar la conexión.
+            // Al activar ATTR_PERSISTENT se reutiliza la conexión entre
+            // peticiones, evitando el coste de establecerla cada vez.
+            'options' => extension_loaded('pdo_pgsql') ? [
+                \PDO::ATTR_PERSISTENT => true,
+            ] : [],
         ],
 
         'sqlsrv' => [
