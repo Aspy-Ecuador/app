@@ -7,36 +7,36 @@ interface RoleData {
   description: string;    // Role description
 }
 
-const config = {
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem('token')}`,
-  },
+// Función helper para obtener la configuración con token actualizado
+const getConfig = () => {
+  const token = localStorage.getItem('token');
+  return { headers: { Authorization: `Bearer ${token}` } };
 };
 
 const roleAPI = {
   // Get all roles
   getAllRoles: async (): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/role`, config);
+    return axios.get(`${apiURL}/role`, getConfig());
   },
 
   // Get role by ID
   getRoleById: async (id: string): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/role/${id}`, config);
+    return axios.get(`${apiURL}/role/${id}`, getConfig());
   },
 
   // Create a new role
   createRole: async (roleData: RoleData): Promise<AxiosResponse> => {
-    return axios.post(`${apiURL}/role`, roleData, config);
+    return axios.post(`${apiURL}/role`, roleData, getConfig());
   },
 
   // Update role by ID
   updateRole: async (id: string, roleData: RoleData): Promise<AxiosResponse> => {
-    return axios.put(`${apiURL}/role/${id}`, roleData, config);
+    return axios.put(`${apiURL}/role/${id}`, roleData, getConfig());
   },
 
   // Delete role by ID
   deleteRole: async (id: string): Promise<AxiosResponse> => {
-    return axios.delete(`${apiURL}/role/${id}`, config);
+    return axios.delete(`${apiURL}/role/${id}`, getConfig());
   },
 };
 
