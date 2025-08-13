@@ -43,6 +43,23 @@ function AreaGradient({ color, id }: { color: string; id: string }) {
   );
 }
 
+function getLastMonthAndYear(): { month: number; year: number } {
+  const today = new Date();
+  let year = today.getFullYear();
+  let month = today.getMonth(); // 0-based: enero=0, diciembre=11
+
+  if (month === 0) {
+    // Si es enero, el mes pasado es diciembre del año anterior
+    month = 11;
+    year = year - 1;
+  } else {
+    month = month - 1;
+  }
+
+  // Queremos el mes 1-based para tu función getDaysInMonth
+  return { month: month + 1, year };
+}
+
 export default function StatCard({
   title,
   value,
@@ -50,8 +67,9 @@ export default function StatCard({
   trend,
   data,
 }: StatCardProps) {
+  const { month, year } = getLastMonthAndYear();
   const theme = useTheme();
-  const daysInWeek = getDaysInMonth(4, 2024);
+  const daysInWeek = getDaysInMonth(month, year);
 
   const trendColors = {
     usuarios:

@@ -1,29 +1,75 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useTheme } from "@mui/material";
-import { GridRowSelectionModel } from "@mui/x-data-grid";
+import { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import { User } from "@/types/User";
-import { pacientes } from "@data/Pacientes";
-import { columnsUsers } from "@utils/columns";
 import Divider from "@mui/material/Divider";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
 import OverviewPersona from "@professional/OverviewPersona";
 import Table from "@components/Table";
+import { useRoleData } from "@/observer/RoleDataContext";
+import Progress from "@components/Progress";
+import { getAge, getUsers } from "@/utils/utils";
+
+export const columns: GridColDef[] = [
+  {
+    field: "first_name",
+    headerName: "Nombres",
+    disableColumnMenu: true,
+    flex: 2,
+    resizable: false,
+  },
+  {
+    field: "last_name",
+    headerName: "Apellidos",
+    disableColumnMenu: true,
+    flex: 2,
+    resizable: false,
+  },
+  {
+    field: "email",
+    headerName: "Correo",
+    disableColumnMenu: true,
+    flex: 2,
+    resizable: false,
+  },
+  {
+    field: "age",
+    headerName: "Edad",
+    disableColumnMenu: true,
+    flex: 2,
+    renderCell: (params) => {
+      return (
+        <Typography variant="body1">{getAge(params.row.birthdate)}</Typography>
+      );
+    },
+    resizable: false,
+  },
+  {
+    field: "occupation",
+    headerName: "Ocupación",
+    disableColumnMenu: true,
+    flex: 2,
+    resizable: false,
+  },
+];
 
 export default function PatientsList() {
+  const { data, loading } = useRoleData();
   const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
   const [user, setUser] = useState<User | null>(null);
 
-  const theme = useTheme();
-  const themeClass =
-    theme.palette.mode === "dark" ? "dark-theme" : "light-theme";
+  if (loading) return <Progress />;
+
+  const users: User[] = getUsers(data);
+  const clients: User[] =
+    users.filter((user: User) => user.role_id === 3) || [];
 
   useEffect(() => {
     if (rowSelection.length > 0) {
-      const selectedUser = pacientes.find(
-        (item) => item.id === rowSelection[0]
+      const selectedUser = clients.find(
+        (item) => item.user_id === rowSelection[0]
       );
       if (selectedUser) {
         setUser(selectedUser);
@@ -38,7 +84,7 @@ export default function PatientsList() {
 
   const handleMoreInfo = () => {
     if (user) {
-      const newPath = `${location.pathname}/${user.id}`;
+      const newPath = `${location.pathname}/${user.user_id}`;
       navigate(newPath);
     }
   };
@@ -54,10 +100,11 @@ export default function PatientsList() {
           </Grid>
           <Divider className="divider-paciente-historial"></Divider>
         </Grid>
-        <Grid size={8} className={themeClass + " grid-tabla"}>
+        <Grid size={8}>
           <Table<User>
-            columns={columnsUsers}
-            rows={pacientes}
+            columns={columns}
+            rows={clients}
+            getRowId={(row) => row.user_id}
             rowSelectionModel={rowSelection}
             onRowSelectionChange={(newSelection) =>
               setRowSelection(newSelection)
@@ -65,9 +112,9 @@ export default function PatientsList() {
           />
         </Grid>
         {user && (
-          <Grid size={4} className={themeClass}>
+          <Grid size={4}>
             <OverviewPersona
-              key={user.id}
+              key={user.user_id}
               selectedData={user}
               moreInfo={handleMoreInfo}
             />

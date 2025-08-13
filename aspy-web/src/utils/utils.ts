@@ -1,20 +1,11 @@
-import { usuarios } from "@data/Usuarios";
-import { servicesList } from "@data/Servicios";
 import type { User } from "@/types/User";
 import type { Appointment } from "@/types/Appointment";
-import { citas } from "@data/Citas";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import autoTable from "jspdf-autotable";
 import logoBase64 from "@assets/logo mediano.png";
 import { Receipt } from "@/types/Receipt";
-import { receiptList } from "@data/Recibos";
-import { paymentList } from "@data/Pagos";
-import { Payment } from "@/types/Payment";
-import { ServiceOptions } from "@/types/ServiceOptions";
-import { ProfessionalOptions } from "@/types/ProfessionalOptions";
-import { AvailableDateTime } from "@/types/AvailableDateTime";
-import { ProfessionalServiceResponse } from "@/types/ProfessionalServiceResponse";
+import { ProfessionalServiceResponse } from "@/typesResponse/ProfessionalServiceResponse";
 
 type TendenciaDiaria = {
   promedioPorcentual: number;
@@ -63,9 +54,459 @@ export function TotalIngresosMensual(data: number[]): TotalIngresosMensual {
   return { total: data.reduce((total, numero) => total + numero, 0) };
 }
 
-export function getProfesionales(): User[] {
-  return usuarios.filter((u: User) => u.role === "Profesional");
+import { PersonResponse } from "@/typesResponse/PersonResponse";
+import { WorkerScheduleResponse } from "@/typesResponse/WorkerScheduleResponse";
+import { ServiceResponse } from "@/typesResponse/ServiceResponse";
+import { AppointmentResponse } from "@/typesResponse/AppointmentResponse";
+import { UserAccountResponse } from "@/typesResponse/UserAccountResponse";
+import { RoleResponse } from "@/typesResponse/RoleResponse";
+import { userAdapter } from "@/adapters/userAdapter";
+import { PaymentResponse } from "@/typesResponse/PaymentResponse";
+import { PageViewsBarChartProps } from "@/components/admin/PageViewsBarChart";
+import { StatCardProps } from "@/components/admin/StatCard";
+import { ProfessionalResponse } from "@/typesResponse/ProffesionalResponse";
+import { appointmentAdapter } from "@/adapters/appointmentAdapter";
+import { AppointmentReportResponse } from "@/typesResponse/AppointmentReportResponse";
+import { AppointmentReport } from "@/types/AppointmentReport";
+import { appointmentReportResponseAdapter } from "@/adapters/appointmentReportResponseAdapter";
+import { CloudinaryUploadResponse } from "@/typesResponse/CloudinaryUploadResponse";
+import { FileData } from "@/types/FileData";
+import { dataPayments } from "@/data/Payment";
+
+export function getPerson(person_id: number, data: any): PersonResponse {
+  const persons: PersonResponse[] = data.persons;
+  const person = persons.find((person) => person.person_id === person_id);
+  if (!person) throw new Error(`No se encontró la persona con ID ${person_id}`);
+  return person;
 }
+
+export function getWorkerSchedule(
+  worker_schedule_id: number,
+  data: any
+): WorkerScheduleResponse {
+  const workerschedules: WorkerScheduleResponse[] = data.workerSchedules;
+  const workerschedule = workerschedules.find(
+    (workerschedule) => workerschedule.worker_schedule_id === worker_schedule_id
+  );
+  if (!workerschedule)
+    throw new Error(
+      `No se encontró el worker schedule con ID ${worker_schedule_id}`
+    );
+  return workerschedule;
+}
+
+export function getService(service_id: number, data: any): ServiceResponse {
+  const services: ServiceResponse[] = data.services;
+  const service = services.find((service) => service.service_id === service_id);
+  if (!service)
+    throw new Error(`No se encontró el worker schedule con ID ${service_id}`);
+  return service;
+}
+
+export function getProfessionalService(
+  service_id: number,
+  data: any
+): PersonResponse[] {
+  const professionals: ProfessionalServiceResponse[] =
+    data.professionalServices;
+
+  const professionalsFilter = professionals.filter(
+    (service) => service.service_id === service_id
+  );
+
+  const persons: PersonResponse[] = data.persons;
+
+  const professionalIds = new Set(
+    professionalsFilter.map((prof) => prof.person_id)
+  );
+
+  return persons.filter((person) => professionalIds.has(person.person_id));
+}
+
+export function getProfessionalSchedule(
+  person_id: number,
+  data: any
+): WorkerScheduleResponse[] {
+  const workerSchedules: WorkerScheduleResponse[] = data.workerSchedules;
+  const workerFilter: WorkerScheduleResponse[] = workerSchedules.filter(
+    (worker) => worker.person_id === person_id
+  );
+  return workerFilter;
+}
+
+export function getUsers(data: any): User[] {
+  const persons: PersonResponse[] = data.persons;
+  const userAccounts: UserAccountResponse[] = data.userAccounts;
+  const roles: RoleResponse[] = data.roles;
+  const professionals: ProfessionalResponse[] = data.professional;
+
+  return userAccounts
+    .map((account) => {
+      const person = persons.find((p) => p.user_id === account.user_id);
+      const role = roles.find((r) => r.role_id === account.role_id);
+      if (!person || !role) return null;
+      const user = userAdapter(person, role, account);
+
+      // Si es profesional (role_id === 2), añadimos sus datos extra
+      if (role.role_id === 2) {
+        const prof = professionals.find(
+          (p) => p.person_id === person.person_id
+        );
+        if (prof) {
+          user.title = prof.title;
+          user.about = prof.about;
+          user.specialty = prof.specialty;
+        }
+      }
+      return user;
+    })
+    .filter((user): user is User => user !== null);
+}
+
+export function getIncome(data: PaymentResponse[]): number[] {
+  const monthlyIncome = Array(12).fill(0); // Inicializamos un arreglo con 12 ceros (uno por cada mes)
+
+  data.forEach((payment) => {
+    const creationMonth = new Date(payment.creation_date).getMonth(); // Obtenemos el mes (0-11)
+    const totalAmount = payment.total_amount;
+
+    // Sumamos el total_amount al mes correspondiente
+    monthlyIncome[creationMonth] += totalAmount;
+  });
+
+  return monthlyIncome;
+}
+
+export function getDataAppointment(data: any): PageViewsBarChartProps {
+  const appointments: AppointmentResponse[] = data.appointments;
+  const scheduled = Array(12).fill(0);
+  const completed = Array(12).fill(0);
+  const cancelled = Array(12).fill(0);
+
+  appointments.forEach((appointment) => {
+    const creationMonth = new Date(appointment.creation_date).getMonth(); // Obtenemos el mes (0-11)
+    const statusName = appointment.status.name.toLowerCase(); // Obtenemos el estado de la cita (scheduled, completed, cancelled)
+
+    if (statusName === "scheduled") {
+      scheduled[creationMonth] += 1;
+    } else if (statusName === "completed") {
+      completed[creationMonth] += 1;
+    } else if (statusName === "cancelled") {
+      cancelled[creationMonth] += 1;
+    }
+  });
+
+  const total = appointments.length; // Total de citas es la longitud de la lista de datos
+
+  return {
+    total,
+    scheduled,
+    completed,
+    cancelled,
+  };
+}
+
+export function getDataCard(data: any): StatCardProps[] {
+  const users: UserAccountResponse[] = data.userAccounts;
+  const appointments: AppointmentResponse[] = data.appointments;
+  const today = new Date();
+
+  const lastMonth = today.getMonth() - 1 < 0 ? 11 : today.getMonth() - 1;
+  const lastMonthYear =
+    today.getMonth() - 1 < 0 ? today.getFullYear() - 1 : today.getFullYear();
+
+  const daysInLastMonth = new Date(lastMonthYear, lastMonth + 1, 0).getDate();
+
+  function countMonthDays<T>(
+    items: T[],
+    getDate: (item: T) => string
+  ): number[] {
+    const counts = Array(daysInLastMonth).fill(0);
+
+    items.forEach((item) => {
+      const date = new Date(getDate(item));
+      if (
+        date.getMonth() === lastMonth &&
+        date.getFullYear() === lastMonthYear
+      ) {
+        const day = date.getDate() - 1;
+        counts[day] += 1;
+      }
+    });
+
+    while (counts.length < 31) {
+      counts.push(0);
+    }
+
+    return counts;
+  }
+
+  const usuariosData = countMonthDays(users, (u) => u.creation_date);
+  const citasData = countMonthDays(appointments, (c) => c.creation_date);
+  const pacientesData = countMonthDays(
+    users.filter((u) => u.role_id === 3),
+    (u) => u.creation_date
+  );
+  const inactivosData = countMonthDays(
+    users.filter((u) => u.status === 2),
+    (u) => u.creation_date
+  );
+
+  return [
+    {
+      title: "Usuarios",
+      value: usuariosData.reduce((a, b) => a + b, 0).toString(),
+      interval: "Mes pasado",
+      trend: "usuarios",
+      data: usuariosData,
+    },
+    {
+      title: "Citas",
+      value: citasData.reduce((a, b) => a + b, 0).toString(),
+      interval: "Mes pasado",
+      trend: "citas",
+      data: citasData,
+    },
+    {
+      title: "Pacientes",
+      value: pacientesData.reduce((a, b) => a + b, 0).toString(),
+      interval: "Mes pasado",
+      trend: "pacientes",
+      data: pacientesData,
+    },
+    {
+      title: "Usuarios inactivos",
+      value: inactivosData.reduce((a, b) => a + b, 0).toString(),
+      interval: "Mes pasado",
+      trend: "inactivos",
+      data: inactivosData,
+    },
+  ];
+}
+
+export function translateRol(rol: string): string {
+  switch (rol.trim().toLowerCase()) {
+    case "admin":
+      return "Administrador";
+    case "professional":
+      return "Profesional";
+    case "client":
+      return "Cliente";
+    case "staff":
+      return "Secretario";
+    default:
+      return "Desconocido";
+  }
+}
+
+export function toNumber(str: string): number {
+  return Number(str);
+}
+
+export function getAppointmentProfessional(
+  proffesional_id: number,
+  data: Appointment[]
+): Appointment[] {
+  if (proffesional_id === 0 || !data) {
+    return [];
+  }
+
+  return data.filter(
+    (appointment) => appointment.proffesional.person_id === proffesional_id
+  );
+}
+
+export function getAppointments(data: any): Appointment[] {
+  const appointments: Appointment[] = (data.appointments || [])
+    .map((appointment: any) => {
+      const service = data.services?.find(
+        (s: any) => s.service_id === appointment.payment.service_id
+      );
+
+      const clientPerson = data.persons?.find(
+        (p: any) => p.person_id === appointment.payment.person_id
+      );
+
+      const clientAccount = data.userAccounts?.find(
+        (a: any) => a.user_id === clientPerson?.user_id
+      );
+
+      const clientRole = data.roles?.find(
+        (r: any) => r.role_id === clientAccount?.role_id
+      );
+
+      const professionalPerson = data.persons?.find(
+        (p: any) => p.person_id === appointment.worker_schedule.person_id
+      );
+      const professionalAccount = data.userAccounts?.find(
+        (a: any) => a.user_id === professionalPerson?.user_id
+      );
+
+      const professionalRole = data.roles?.find(
+        (r: any) => r.role_id === professionalAccount?.role_id
+      );
+
+      const schedule = data.schedules?.find(
+        (s: any) => s.schedule_id === appointment.worker_schedule.schedule_id
+      );
+
+      // Validación
+      if (
+        !service ||
+        !clientPerson ||
+        !clientAccount ||
+        !clientRole ||
+        !professionalPerson ||
+        !professionalAccount ||
+        !professionalRole ||
+        !schedule
+      )
+        return null;
+
+      const client = userAdapter(clientPerson, clientRole, clientAccount);
+      const professional = userAdapter(
+        professionalPerson,
+        professionalRole,
+        professionalAccount
+      );
+
+      return appointmentAdapter(
+        appointment,
+        schedule,
+        client,
+        professional,
+        service
+      );
+    })
+    .filter(Boolean);
+
+  return appointments;
+}
+
+export function translateStatus(status: string): string {
+  switch (status.trim().toLowerCase()) {
+    case "scheduled":
+      return "Agendado";
+    case "completed":
+      return "Completado";
+    case "cancelled":
+      return "Cancelado";
+    default:
+      return "Desconocido";
+  }
+}
+
+export function getOccupation(occupation: number): string {
+  switch (occupation) {
+    case 1:
+      return "Doctor";
+    case 2:
+      return "Enfermero";
+    case 3:
+      return "Ingeniero";
+    case 4:
+      return "Estudiante";
+    default:
+      return "Desconocido";
+  }
+}
+
+export function getAge(birthdate: string): number {
+  const today = new Date();
+  const [year, month, day] = birthdate.split("-").map(Number);
+  let age = today.getFullYear() - year;
+
+  // Ajustar si aún no ha cumplido años este año
+  const mesActual = today.getMonth() + 1;
+  const diaActual = today.getDate();
+  if (mesActual < month || (mesActual === month && diaActual < day)) {
+    age--;
+  }
+
+  return age;
+}
+
+export function getGender(gender: number): string {
+  switch (gender) {
+    case 1:
+      return "Masculino";
+    case 2:
+      return "Femenino";
+    default:
+      return "Desconocido";
+  }
+}
+
+export function getAppointmentsReport(
+  appointments: Appointment[],
+  data: any
+): AppointmentReport[] {
+  const appointmentReport: AppointmentReportResponse[] =
+    data.appointmentReports;
+  return appointmentReport
+    .map((report) => {
+      const appointment = appointments.find(
+        (a) => a.id_appointment === report.appointment_id
+      );
+
+      if (!appointment) return null;
+
+      return appointmentReportResponseAdapter(appointment, report);
+    })
+    .filter((item): item is AppointmentReport => item !== null);
+}
+
+export function getReportsUser(
+  appointmentsReport: AppointmentReport[],
+  patient_id: number
+): AppointmentReport[] {
+  return appointmentsReport.filter(
+    (report) => report.appointment.client.person_id === patient_id
+  );
+}
+
+export const uploadToCloudinary = async (file: FileData): Promise<string> => {
+  const realFile = file!.file as File;
+  const formData = new FormData();
+  formData.append("file", realFile);
+  formData.append("upload_preset", "aspy-web");
+
+  formData.append("folder", "pdfs");
+
+  const isPdf = realFile.type === "application/pdf";
+  if (!isPdf && !realFile.type.startsWith("image/")) {
+    throw new Error("Solo se permiten imágenes o PDFs.");
+  }
+
+  const resourceType = isPdf ? "raw" : "image";
+  const url = `https://api.cloudinary.com/v1_1/dyqznwbdb/${resourceType}/upload`;
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Error Cloudinary: ${res.status} - ${errText}`);
+    }
+
+    const data = (await res.json()) as CloudinaryUploadResponse;
+    return data.secure_url;
+  } catch (error: any) {
+    console.error("Error subiendo a Cloudinary:", error.message);
+    throw new Error("No se pudo subir el archivo a Cloudinary.");
+  }
+};
+
+export const getPayment = (id: number): PaymentResponse => {
+  const payment = dataPayments.find((p) => p.payment_id === id);
+  if (!payment) {
+    throw new Error(`No se encontró el pago con ID ${id}`);
+  }
+  return payment;
+};
 
 export function handleDownloadInvoice(invoice: Receipt) {
   const doc = new jsPDF("p", "mm", "a4") as jsPDFWithAutoTable; // Vertical, milímetros, tamaño A4
@@ -157,145 +598,4 @@ export function handleDownloadInvoice(invoice: Receipt) {
   doc.save(
     `Factura-${invoice.receipt.receipt_id}-${invoice.client.first_name}.pdf`
   );
-}
-
-export function getReceipt(id: number): Receipt {
-  const receipt = receiptList.find((receipt) => receipt.payment_id === id);
-  if (!receipt) {
-    throw new Error(`Recibo con ID ${id} no encontrada`);
-  }
-  return receipt;
-}
-
-export function getPayment(id: number): Payment {
-  const payment = paymentList.find((payment) => payment.id === id);
-  if (!payment) {
-    throw new Error(`Pago con ID ${id} no encontrada`);
-  }
-  return payment;
-}
-
-export function getServicesAppointment(): ServiceOptions[] {
-  return servicesList.map((servicio) => ({
-    id: servicio.id,
-    name: servicio.name,
-    price: servicio.price,
-  }));
-}
-
-export function getProfessionalAppointment(
-  serviceId: number
-): ProfessionalOptions[] {
-  const service = servicesList.find((s) => s.id === serviceId);
-
-  if (!service) return [];
-
-  return [
-    {
-      id: service.idProfessinoal,
-      name: service.nameProfesional,
-    },
-  ];
-}
-
-export function getDates(): Promise<AvailableDateTime[]> {
-  return Promise.resolve([
-    { date: "2025-06-12", hours: ["10:00", "11:00"] },
-    { date: "2025-06-14", hours: ["09:00", "15:00"] },
-  ]);
-}
-
-import { PersonResponse } from "@/typesResponse/PersonResponse";
-import { WorkerScheduleResponse } from "@/typesResponse/WorkerScheduleResponse";
-import { ServiceResponse } from "@/typesResponse/ServiceResponse";
-import { AppointmentResponse } from "@/typesResponse/AppointmentResponse";
-import { UserAccountResponse } from "@/typesResponse/UserAccountResponse";
-import { RoleResponse } from "@/typesResponse/RoleResponse";
-import { userAdapter } from "@/adapters/userAdapter";
-
-export function getPerson(person_id: number, data: any): PersonResponse {
-  const persons: PersonResponse[] = data.persons;
-  const person = persons.find((person) => person.person_id === person_id);
-  if (!person) throw new Error(`No se encontró la persona con ID ${person_id}`);
-  return person;
-}
-
-export function getWorkerSchedule(
-  worker_schedule_id: number,
-  data: any
-): WorkerScheduleResponse {
-  const workerschedules: WorkerScheduleResponse[] = data.workerSchedules;
-  const workerschedule = workerschedules.find(
-    (workerschedule) => workerschedule.worker_schedule_id === worker_schedule_id
-  );
-  if (!workerschedule)
-    throw new Error(
-      `No se encontró el worker schedule con ID ${worker_schedule_id}`
-    );
-  return workerschedule;
-}
-
-export function getService(service_id: number, data: any): ServiceResponse {
-  const services: ServiceResponse[] = data.services;
-  const service = services.find((service) => service.service_id === service_id);
-  if (!service)
-    throw new Error(`No se encontró el worker schedule con ID ${service_id}`);
-  return service;
-}
-
-export function getCitasProfesional(
-  proffesional_id: number,
-  data: any
-): AppointmentResponse[] {
-  const appointments: AppointmentResponse[] = data.appointments;
-  if (!proffesional_id) {
-    return appointments;
-  }
-  return appointments.filter(
-    (appointment) => appointment.worker_schedule.person_id === proffesional_id
-  );
-}
-
-export function getProfessionalService(
-  service_id: number,
-  data: any
-): PersonResponse[] {
-  const professionals: ProfessionalServiceResponse[] =
-    data.professionalServices;
-
-  const professionalsFilter = professionals.filter(
-    (service) => service.service_id === service_id
-  );
-
-  const persons: PersonResponse[] = data.persons;
-
-  const professionalIds = new Set(
-    professionalsFilter.map((prof) => prof.person_id)
-  );
-
-  return persons.filter((person) => professionalIds.has(person.person_id));
-}
-
-export function getProfessionalSchedule(
-  person_id: number,
-  data: any
-): WorkerScheduleResponse[] {
-  const workerSchedules: WorkerScheduleResponse[] = data.workerSchedules;
-  const workerFilter: WorkerScheduleResponse[] = workerSchedules.filter(
-    (worker) => worker.person_id === person_id
-  );
-  return workerFilter;
-}
-
-export function getUsers(data: any): User[] {
-  const persons: PersonResponse[] = data.persons;
-  const userAccounts: UserAccountResponse[] = data.userAccounts;
-  const roles: RoleResponse[] = data.roles;
-  return userAccounts
-    .map((account) => {
-      const person = persons.find((p) => p.person_id === account.user_id);
-      const role = roles.find((r) => r.role_id === account.role_id);
-      return person && role ? userAdapter(person, role, account) : null;
-    })
-    .filter((user): user is User => user !== null);
 }

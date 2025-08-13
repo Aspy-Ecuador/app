@@ -1,8 +1,13 @@
+import { User } from "@/types/User";
+import { PaymentDataResponse } from "./PaymentDataResponse";
+import { Service } from "@/types/Service";
+
 // SÍ SE USA
 export type PaymentResponse = {
   payment_id: number;
-  person_id: number;
-  service_id: number;
+  person: User;
+  service: Service;
+  paymenta_data: PaymentDataResponse;
   discount_id: number | null; // Está vacío en tu ejemplo
   payment_data_id: number;
   service_price: number;

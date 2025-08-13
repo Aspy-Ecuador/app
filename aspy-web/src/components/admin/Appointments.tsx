@@ -1,26 +1,92 @@
 import { useState } from "react";
-import { useTheme } from "@mui/material";
-import { getCitasProfesional } from "@utils/utils";
+import { getAppointmentProfessional } from "@utils/utils";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import Agenda from "@components/Agenda";
 import SelectProfessional from "@components/SelectProfessional";
 import SimpleHeader from "@components/SimpleHeader";
-import { AppointmentResponse } from "@/types/AppointmentResponse";
+import { useRoleData } from "@/observer/RoleDataContext";
+import Progress from "@components/Progress";
+import { Appointment } from "@/types/Appointment";
+import { userAdapter } from "@/adapters/userAdapter";
+import { appointmentAdapter } from "@/adapters/appointmentAdapter";
 
 export default function Appointments() {
-  const theme = useTheme();
-  const themeClass =
-    theme.palette.mode === "dark" ? "dark-theme" : "light-theme";
-
-  const [selectedId, setSelected] = useState<number>();
+  const { data, loading } = useRoleData();
+  if (loading) return <Progress />;
+  const [selectedId, setSelected] = useState<number>(0);
 
   const handleSelectProfessional = (id: number) => {
     setSelected(id);
   };
 
-  const citasProfesional: AppointmentResponse[] = getCitasProfesional(
-    selectedId!
+  const appointments: Appointment[] = (data.appointments || [])
+    .map((appointment: any) => {
+      const service = data.services?.find(
+        (s: any) => s.service_id === appointment.payment.service_id
+      );
+
+      const clientPerson = data.persons?.find(
+        (p: any) => p.person_id === appointment.payment.person_id
+      );
+
+      const clientAccount = data.userAccounts?.find(
+        (a: any) => a.user_id === clientPerson?.user_id
+      );
+
+      const clientRole = data.roles?.find(
+        (r: any) => r.role_id === clientAccount?.role_id
+      );
+
+      const professionalPerson = data.persons?.find(
+        (p: any) => p.person_id === appointment.worker_schedule.person_id
+      );
+      const professionalAccount = data.userAccounts?.find(
+        (a: any) => a.user_id === professionalPerson?.user_id
+      );
+
+      const professionalRole = data.roles?.find(
+        (r: any) => r.role_id === professionalAccount?.role_id
+      );
+
+      const schedule = data.schedules?.find(
+        (s: any) => s.schedule_id === appointment.worker_schedule.schedule_id
+      );
+
+      // Validación
+      if (
+        !service ||
+        !clientPerson ||
+        !clientAccount ||
+        !clientRole ||
+        !professionalPerson ||
+        !professionalAccount ||
+        !professionalRole ||
+        !schedule
+      ) {
+        return null;
+      }
+
+      const client = userAdapter(clientPerson, clientRole, clientAccount);
+      const professional = userAdapter(
+        professionalPerson,
+        professionalRole,
+        professionalAccount
+      );
+
+      return appointmentAdapter(
+        appointment,
+        schedule,
+        client,
+        professional,
+        service
+      );
+    })
+    .filter(Boolean);
+
+  const appointmentProfessional: Appointment[] = getAppointmentProfessional(
+    selectedId,
+    appointments
   );
 
   return (
@@ -29,8 +95,8 @@ export default function Appointments() {
         <Grid size={12} className="grid-p-patients-tittle">
           <SimpleHeader text={"Citas"} />
         </Grid>
-        <Grid size={9} className={themeClass}>
-          <Agenda appointments={citasProfesional} />
+        <Grid size={9}>
+          <Agenda appointments={appointmentProfessional} />
         </Grid>
         <Grid size={3}>
           <SelectProfessional onSelect={handleSelectProfessional} />

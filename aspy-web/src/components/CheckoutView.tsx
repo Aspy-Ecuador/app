@@ -18,52 +18,11 @@ import Steps from "@components/Steps";
 import Divider from "@mui/material/Divider";
 import ReplyRoundedIcon from "@mui/icons-material/ReplyRounded";
 import Success from "@components/Success";
-import createAppointment from "@API/appointmentAPI";
+import appointmentAPI from "@API/appointmentAPI";
 import Progress from "@components/Progress";
+import { uploadToCloudinary } from "@/utils/utils";
 
 const steps = ["Detalles de Pago", "Revisar cita"];
-
-interface CloudinaryUploadResponse {
-  secure_url: string;
-  public_id: string;
-  resource_type: string;
-  original_filename: string;
-  format: string;
-}
-
-export const uploadToCloudinary = async (file: File): Promise<string> => {
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("upload_preset", "aspy-web");
-
-  formData.append("folder", "pdfs");
-
-  const isPdf = file.type === "application/pdf";
-  if (!isPdf && !file.type.startsWith("image/")) {
-    throw new Error("Solo se permiten imágenes o PDFs.");
-  }
-
-  const resourceType = isPdf ? "raw" : "image";
-  const url = `https://api.cloudinary.com/v1_1/dyqznwbdb/${resourceType}/upload`;
-
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!res.ok) {
-      const errText = await res.text();
-      throw new Error(`Error Cloudinary: ${res.status} - ${errText}`);
-    }
-
-    const data = (await res.json()) as CloudinaryUploadResponse;
-    return data.secure_url;
-  } catch (error: any) {
-    console.error("Error subiendo a Cloudinary:", error.message);
-    throw new Error("No se pudo subir el archivo a Cloudinary.");
-  }
-};
 
 export default function CheckoutView() {
   const { data, loading } = useRoleData();
@@ -86,40 +45,41 @@ export default function CheckoutView() {
   const parsedScheduleId = parseInt(scheduleId || "", 10);
 
   const handleOpen = async () => {
-    const selectedService = services.find(
-      (service) => service.service_id === parsedServiceId
-    );
+    if (file != null) {
+      const selectedService = services.find(
+        (service) => service.service_id === parsedServiceId
+      );
 
-    const realFile = file!.file as File;
+      // 2. Subir a Cloudinary
+      const uploadedFileUrl = await uploadToCloudinary(file);
 
-    // 2. Subir a Cloudinary
-    const uploadedFileUrl = await uploadToCloudinary(realFile);
+      const hardcodedPersonId = getAuthenticatedUser()!.person_id; // Cliente
+      const hardcodedScheduledBy = 5;
+      const hardcodedServicePrice = selectedService!.price;
+      const hardcodedTotalAmount = selectedService!.price;
+      const hardcodedPaymentType = "Transferencia";
+      const hardcodedAccountNumber = 987654321;
 
-    const hardcodedPersonId = getAuthenticatedUser()!.person_id; // Cliente
-    const hardcodedScheduledBy = 5;
-    const hardcodedServicePrice = selectedService!.price;
-    const hardcodedTotalAmount = selectedService!.price;
-    const hardcodedPaymentType = "Transferencia";
-    const hardcodedAccountNumber = 987654321;
-
-    const data: AppointmentRequest = {
-      payment_data: {
-        type: hardcodedPaymentType,
-        number: hardcodedAccountNumber,
-        file: uploadedFileUrl,
-      },
-      payment: {
-        person_id: Number(hardcodedPersonId),
-        service_id: Number(parsedServiceId),
-        service_price: Number(hardcodedServicePrice),
-        total_amount: Number(hardcodedTotalAmount),
-      },
-      scheduled_by: hardcodedScheduledBy,
-      worker_schedule_id: parsedScheduleId,
-    };
-    await createAppointment.createAppointment(data);
-    setActiveStep(activeStep + 1);
-    setOpen(true);
+      const data: AppointmentRequest = {
+        payment_data: {
+          type: hardcodedPaymentType,
+          number: hardcodedAccountNumber,
+          file: uploadedFileUrl,
+        },
+        payment: {
+          person_id: Number(hardcodedPersonId),
+          service_id: Number(parsedServiceId),
+          service_price: Number(hardcodedServicePrice),
+          total_amount: Number(hardcodedTotalAmount),
+        },
+        scheduled_by: hardcodedScheduledBy,
+        worker_schedule_id: parsedScheduleId,
+      };
+      console.log(data);
+      await appointmentAPI.createAppointment(data);
+      setActiveStep(activeStep + 1);
+      setOpen(true);
+    }
   };
 
   const handleClose = () => {

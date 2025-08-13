@@ -1,7 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { useTheme } from "@mui/material";
-import { servicesList } from "@data/Servicios";
-import { columnsServices } from "@utils/columns";
+import { columnsServiceAdmin } from "@utils/columns";
 import { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import Grid from "@mui/material/Grid2";
 import Box from "@mui/material/Box";
@@ -11,13 +9,13 @@ import Table from "@components/Table";
 import Header from "@components/Header";
 
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import { useRoleData } from "@/observer/RoleDataContext";
+import { useState } from "react";
+import { ServiceResponse } from "@/typesResponse/ServiceResponse";
 
 export default function Services() {
-  const rowSelection: GridRowSelectionModel = [];
-
-  const theme = useTheme();
-  const themeClass =
-    theme.palette.mode === "dark" ? "dark-theme" : "light-theme";
+  const { data } = useRoleData();
+  const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
 
   //Ruta para editar y crear
   const navigate = useNavigate();
@@ -33,7 +31,7 @@ export default function Services() {
     navigate(newPath);
   };
 
-  const columnasExtra: GridColDef[] = [
+  const columnsExtra: GridColDef[] = [
     {
       field: "price",
       headerName: "Costo",
@@ -43,33 +41,6 @@ export default function Services() {
       renderCell: (params) => {
         return <Typography variant="body1">$ {params.value}</Typography>;
       },
-    },
-    {
-      field: "durationMinutes",
-      headerName: "Duración",
-      flex: 2,
-      disableColumnMenu: true,
-      resizable: false,
-      renderCell: (params) => {
-        return <Typography variant="body1">{params.value} min</Typography>;
-      },
-    },
-
-    {
-      field: "active",
-      headerName: "Activo",
-      flex: 2,
-      disableColumnMenu: true,
-      resizable: false,
-      renderCell: (params) => (params.value ? "Sí" : "No"),
-    },
-    {
-      field: "updated_on",
-      headerName: "Últ. Act.",
-      flex: 2,
-      disableColumnMenu: true,
-      resizable: false,
-      valueFormatter: (params) => new Date(params).toLocaleDateString("es-ES"),
     },
     {
       field: "acciones",
@@ -83,7 +54,7 @@ export default function Services() {
       headerAlign: "center",
       renderCell: (params) => (
         <Button
-          onClick={() => handleEdit(params.row.id)}
+          onClick={() => handleEdit(params.row.service_id)}
           variant="text"
           className="boton-editar"
         >
@@ -93,7 +64,9 @@ export default function Services() {
     },
   ];
 
-  const newColumns: GridColDef[] = [...columnsServices, ...columnasExtra];
+  const newColumns: GridColDef[] = [...columnsServiceAdmin, ...columnsExtra];
+
+  const services: ServiceResponse[] = data.services;
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
@@ -107,12 +80,15 @@ export default function Services() {
           />
         </Grid>
 
-        <Grid size={12} className={themeClass + " grid-tabla"}>
-          <Table
+        <Grid size={12}>
+          <Table<ServiceResponse>
             columns={newColumns}
-            rows={servicesList}
+            rows={services}
+            getRowId={(row) => row.service_id}
             rowSelectionModel={rowSelection}
-            onRowSelectionChange={() => {}}
+            onRowSelectionChange={(newSelection) =>
+              setRowSelection(newSelection)
+            }
           />
         </Grid>
       </Grid>

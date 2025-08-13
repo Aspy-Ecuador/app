@@ -1,14 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import apiURL from "./apiConfig";
 import { getConfig } from "./config";
-
-interface AppointmentReportData {
-  appointment_id: number;
-  professional_id: number;
-  notes: string;
-  diagnosis: string;
-  recommendations: string;
-}
+import { AppointmentReportRequest } from "@/typesRequest/AppointmentReportRequest";
 
 const appointmentReportAPI = {
   getAllReports: async (): Promise<AxiosResponse> =>
@@ -17,12 +10,14 @@ const appointmentReportAPI = {
   getReportById: async (id: string): Promise<AxiosResponse> =>
     axios.get(`${apiURL}/appointment-report/${id}`, getConfig()),
 
-  createReport: async (data: AppointmentReportData): Promise<AxiosResponse> =>
+  createReport: async (
+    data: AppointmentReportRequest
+  ): Promise<AxiosResponse> =>
     axios.post(`${apiURL}/appointment-report`, data, getConfig()),
 
   updateReport: async (
     id: string,
-    data: AppointmentReportData
+    data: AppointmentReportRequest
   ): Promise<AxiosResponse> =>
     axios.put(`${apiURL}/appointment-report/${id}`, data, getConfig()),
 

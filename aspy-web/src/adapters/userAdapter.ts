@@ -2,6 +2,7 @@ import { User } from "@/types/User";
 import { PersonResponse } from "@/typesResponse/PersonResponse";
 import { RoleResponse } from "@/typesResponse/RoleResponse";
 import { UserAccountResponse } from "@/typesResponse/UserAccountResponse";
+import { toNumber } from "@/utils/utils";
 
 export function userAdapter(
   person: PersonResponse,
@@ -11,6 +12,7 @@ export function userAdapter(
   return {
     user_id: userAccount.user_id,
     person_id: person.person_id,
+    role_id: role.role_id,
     first_name: person.first_name,
     last_name: person.middle_name,
     full_name: person.first_name + " " + person.middle_name,
@@ -19,10 +21,11 @@ export function userAdapter(
       name: role.name,
     },
     birthdate: person.birthdate,
-    education: person.education,
+    education: toNumber(person.education),
     email: userAccount.email,
-    gender: person.gender,
-    marital_status: person.marital_status,
-    occupation: person.occupation, // Aunque el campo del tipo User es "ocupation", deberías corregirlo a "occupation"
+    gender: toNumber(person.gender),
+    marital_status: toNumber(person.marital_status),
+    occupation: toNumber(person.occupation), // Aunque el campo del tipo User es "ocupation", deberías corregirlo a "occupation"
+    password: "",
   };
 }

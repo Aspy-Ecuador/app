@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "@mui/material";
 import { Appointment } from "@/types/Appointment";
 import { useState } from "react";
 import Card from "@mui/material/Card";
@@ -33,19 +32,19 @@ export default function ShowAppointment({
   const [openDialog, setOpenDialog] = useState(false);
   const [assistMap, setAssistMap] = useState<Record<number, string>>({});
   const navigate = useNavigate();
-  const theme = useTheme().palette.mode;
-  const themeClass = theme === "dark" ? "dark-theme" : "light-theme";
 
   const handleConfirmAssist = () => {
     (document.activeElement as HTMLElement)?.blur(); // ✅ esto
     if (selectedAppointment) {
       setUnmarkedAppointments((prev) =>
-        prev.filter((cita) => cita.id !== selectedAppointment.id)
+        prev.filter(
+          (cita) => cita.id_appointment !== selectedAppointment.id_appointment
+        )
       );
 
       setAssistMap((prev) => {
         const updated = { ...prev };
-        delete updated[selectedAppointment.id];
+        delete updated[selectedAppointment.id_appointment];
         return updated;
       });
     }
@@ -60,7 +59,7 @@ export default function ShowAppointment({
   };
 
   return (
-    <Grid container spacing={2} className={themeClass}>
+    <Grid container spacing={2}>
       <Grid size={12}>
         <Typography variant="h3">Citas sin marcar:</Typography>
       </Grid>
@@ -79,8 +78,7 @@ export default function ShowAppointment({
                     }}
                   >
                     <Typography gutterBottom variant="h6">
-                      Paciente:{" "}
-                      {cita.patient.first_name + " " + cita.patient.last_name}
+                      Paciente: {cita.client.full_name}
                     </Typography>
                   </Stack>
                 </Box>
@@ -94,12 +92,12 @@ export default function ShowAppointment({
                       <RadioGroup
                         row
                         name={`opcion-cita-${index}`}
-                        value={assistMap[cita.id] || ""}
+                        value={assistMap[cita.id_appointment] || ""}
                         onChange={(e) => {
                           const value = e.target.value;
                           setAssistMap((prev) => ({
                             ...prev,
-                            [cita.id]: value,
+                            [cita.id_appointment]: value,
                           }));
 
                           setSelectedAppointment(cita);
@@ -154,8 +152,7 @@ export default function ShowAppointment({
                     }}
                   >
                     <Typography gutterBottom variant="h6">
-                      Paciente:{" "}
-                      {cita.patient.first_name + " " + cita.patient.last_name}
+                      Paciente: {cita.client.full_name}
                     </Typography>
                   </Stack>
                 </Box>
@@ -168,7 +165,7 @@ export default function ShowAppointment({
                   >
                     <Button
                       onClick={() => {
-                        const newPath = `pacientes/${cita.patient.id}-${cita.patient.first_name.toLowerCase()}/nuevoReporte`;
+                        const newPath = `pacientes/${cita.client.person_id}/${cita.id_appointment}/nuevoReporte`;
                         navigate(newPath);
                       }}
                       variant="outlined"
@@ -194,7 +191,11 @@ export default function ShowAppointment({
         open={openDialog}
         onClose={handleCancel}
         onConfirm={handleConfirmAssist}
-        value={selectedAppointment ? assistMap[selectedAppointment.id] : ""}
+        value={
+          selectedAppointment
+            ? assistMap[selectedAppointment.id_appointment]
+            : ""
+        }
       />
     </Grid>
   );

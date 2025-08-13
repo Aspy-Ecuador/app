@@ -4,4 +4,5 @@ export type UserAccountResponse = {
   role_id: number;
   email: string;
   status: number;
+  creation_date: string;
 };

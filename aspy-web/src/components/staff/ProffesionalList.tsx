@@ -1,30 +1,32 @@
 import { useState, useEffect } from "react";
 import { GridRowSelectionModel } from "@mui/x-data-grid";
-import { useTheme } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { User } from "@/types/User";
-import { profesionales } from "@data/Profesionales";
-import { columnsUsers } from "@utils/columns";
+import { columnsProfessional } from "@utils/columns";
 import Table from "@components/Table";
 import ProfileView from "@components/ProfileView";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import Header from "@components/Header";
+import { useRoleData } from "@/observer/RoleDataContext";
+import { getUsers } from "@/utils/utils";
+import Progress from "@components/Progress";
 
 export default function ProffesionalList() {
   const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
 
-  const theme = useTheme().palette.mode;
-  const themeClass = theme === "dark" ? "dark-theme" : "light-theme";
-
   //Usuario seleccionado
   const [user, setUser] = useState<User | null>(null);
 
+  const { data, loading } = useRoleData();
+  const users: User[] = getUsers(data);
+  const professionals: User[] = users.filter((user) => user.role_id === 2);
+  console.log(professionals);
   //Mostrar el usuario
   useEffect(() => {
     if (rowSelection.length > 0) {
-      const selectedUser = profesionales.find(
-        (item) => item.id === rowSelection[0]
+      const selectedUser = professionals.find(
+        (item) => item.user_id === rowSelection[0]
       );
       if (selectedUser) {
         setUser(selectedUser);
@@ -40,7 +42,7 @@ export default function ProffesionalList() {
 
   const handleEdit = () => {
     if (user) {
-      const newPath = `${location.pathname}/${user.id}`;
+      const newPath = `${location.pathname}/${user.user_id}`;
       navigate(newPath);
     }
   };
@@ -50,6 +52,8 @@ export default function ProffesionalList() {
     navigate(newPath);
   };
 
+  if (loading) return <Progress />;
+
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1}>
@@ -57,14 +61,15 @@ export default function ProffesionalList() {
           <Header
             textHeader={"Profesionales"}
             isCreate={true}
-            textIcon={"Agregar Profesional"}
+            textIcon={"Nuevo Profesional"}
             handle={handleCreateProfessional}
           />
         </Grid>
-        <Grid size={8} className={themeClass + " grid-tabla"}>
+        <Grid size={8}>
           <Table<User>
-            columns={columnsUsers}
-            rows={profesionales}
+            columns={columnsProfessional}
+            rows={professionals}
+            getRowId={(row) => row.user_id}
             rowSelectionModel={rowSelection}
             onRowSelectionChange={(newSelection) =>
               setRowSelection(newSelection)
@@ -72,9 +77,9 @@ export default function ProffesionalList() {
           />
         </Grid>
         {user && (
-          <Grid size={4} className={themeClass}>
+          <Grid size={4}>
             <ProfileView
-              user_info={user}
+              user={user}
               onEdit={handleEdit}
               isRowPosition={false}
             />

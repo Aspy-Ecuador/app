@@ -1,10 +1,8 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { useTheme } from "@mui/material";
 import { GridRowSelectionModel } from "@mui/x-data-grid";
-import { Payment } from "@/types/Payment";
+import { PaymentResponse } from "@/typesResponse/PaymentResponse";
 import { GridColDef } from "@mui/x-data-grid";
-import { columnsPayment } from "@utils/columns";
-import { paymentList } from "@data/Pagos";
+import { dataPayments } from "@data/Payment";
 import Button from "@mui/material/Button";
 import Table from "@components/Table";
 import Box from "@mui/material/Box";
@@ -15,22 +13,47 @@ import SimpleHeader from "@components/SimpleHeader";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import AccessTimeFilledRoundedIcon from "@mui/icons-material/AccessTimeFilledRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import CancelRoundedIcon from "@mui/icons-material/CancelRounded";
 
 export default function PaymentsList() {
   const rowSelection: GridRowSelectionModel = [];
 
-  const theme = useTheme().palette.mode;
-  const themeClass = theme === "dark" ? "dark-theme" : "light-theme";
-
   //Ruta para aprobar
   const navigate = useNavigate();
   const location = useLocation();
+
   const handleApprove = (id: number) => {
     const newPath = `${location.pathname}/${id}`;
     navigate(newPath);
   };
 
-  const columnasExtra: GridColDef[] = [
+  const columns: GridColDef[] = [
+    {
+      field: "payment_id",
+      headerName: "N° de Pago",
+      disableColumnMenu: true,
+      flex: 2,
+      resizable: false,
+    },
+    {
+      field: "person",
+      headerName: "Cliente",
+      disableColumnMenu: true,
+      flex: 3,
+      renderCell: (params) => {
+        return (
+          <Typography variant="body1">{params.row.person.full_name}</Typography>
+        );
+      },
+      resizable: false,
+    },
+    {
+      field: "creation_date",
+      headerName: "Fecha de Emisión",
+      disableColumnMenu: true,
+      flex: 3,
+      resizable: false,
+    },
     {
       field: "total_amount",
       headerName: "Total",
@@ -54,7 +77,7 @@ export default function PaymentsList() {
       headerAlign: "center",
       renderCell: (params) => (
         <Button
-          onClick={() => handleApprove(params.row.id)}
+          onClick={() => handleApprove(params.row.payment_id)}
           variant="text"
           color="primary"
           className="boton-editar"
@@ -72,16 +95,9 @@ export default function PaymentsList() {
       sortable: false,
       align: "center",
       headerAlign: "center",
-      renderCell: (params) =>
-        params.value ? (
-          <CheckCircleRoundedIcon color="success" />
-        ) : (
-          <AccessTimeFilledRoundedIcon color="warning" />
-        ),
+      renderCell: (params) => getStatusIcon(params.value),
     },
   ];
-
-  const newColumns: GridColDef[] = [...columnsPayment, ...columnasExtra];
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
@@ -89,10 +105,11 @@ export default function PaymentsList() {
         <Grid size={12} className="grid-p-patients-tittle">
           <SimpleHeader text={"Pagos"} />
         </Grid>
-        <Grid size={12} className={themeClass + " grid-tabla"}>
-          <Table<Payment>
-            columns={newColumns}
-            rows={paymentList}
+        <Grid size={12}>
+          <Table<PaymentResponse>
+            columns={columns}
+            getRowId={(row) => row.payment_id}
+            rows={dataPayments}
             rowSelectionModel={rowSelection}
             onRowSelectionChange={() => {}}
           />
@@ -101,3 +118,16 @@ export default function PaymentsList() {
     </Box>
   );
 }
+
+const getStatusIcon = (status: number) => {
+  switch (status) {
+    case 1:
+      return <AccessTimeFilledRoundedIcon color="warning" />;
+    case 2:
+      return <CheckCircleRoundedIcon color="success" />;
+    case 3:
+      return <CancelRoundedIcon color="error" />;
+    default:
+      return null;
+  }
+};

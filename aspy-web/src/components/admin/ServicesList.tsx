@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
-import { useTheme } from "@mui/material";
 import { columnsServiceAdmin } from "@utils/columns";
-import { Service } from "src/types/ServiceResponse";
+import { ServiceResponse } from "@/typesResponse/ServiceResponse";
+import { useRoleData } from "@/observer/RoleDataContext";
 import Grid from "@mui/material/Grid2";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -18,11 +18,8 @@ import AssignmentTurnedInRoundedIcon from "@mui/icons-material/AssignmentTurnedI
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 
 export default function ServicesList() {
+  const { data } = useRoleData();
   const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
-
-  const theme = useTheme();
-  const themeClass =
-    theme.palette.mode === "dark" ? "dark-theme" : "light-theme";
 
   //Ruta para editar y crear
   const navigate = useNavigate();
@@ -73,12 +70,7 @@ export default function ServicesList() {
 
   const newColumns: GridColDef[] = [...columnsServiceAdmin, ...columnsExtra];
 
-  const getServicesFromLocalStorage = (): Service[] => {
-    const servicesData = localStorage.getItem("services");
-    return servicesData ? (JSON.parse(servicesData) as Service[]) : [];
-  };
-
-  const services = getServicesFromLocalStorage();
+  const services: ServiceResponse[] = data.services;
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
@@ -121,8 +113,8 @@ export default function ServicesList() {
           </Stack>
         </Grid>
 
-        <Grid size={12} className={themeClass + " grid-tabla"}>
-          <Table<Service>
+        <Grid size={12}>
+          <Table<ServiceResponse>
             columns={newColumns}
             rows={services}
             getRowId={(row) => row.service_id}

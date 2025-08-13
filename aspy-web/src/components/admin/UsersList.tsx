@@ -3,12 +3,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { GridRowSelectionModel } from "@mui/x-data-grid";
 import { User } from "@/types/User";
 import { ButtonAdmin } from "@/types/ButtonAdmin";
-import { columnsUsersAdmin } from "@utils/columns";
 import { useRoleData } from "@/observer/RoleDataContext";
-import { PersonResponse } from "@/typesResponse/PersonResponse";
-import { UserAccountResponse } from "@/typesResponse/UserAccountResponse";
-import { RoleResponse } from "@/typesResponse/RoleResponse";
+import { GridColDef } from "@mui/x-data-grid";
 import { getUsers } from "@/utils/utils";
+import { translateRol } from "@/utils/utils";
 import Progress from "@components/Progress";
 import SimpleHeader from "@components/SimpleHeader";
 import Box from "@mui/material/Box";
@@ -19,11 +17,56 @@ import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
 import DataInformation from "@admin/DataInformation";
 import Table from "@components/Table";
-
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import AttributionOutlinedIcon from "@mui/icons-material/AttributionOutlined";
 import SupervisedUserCircleOutlinedIcon from "@mui/icons-material/SupervisedUserCircleOutlined";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+
+const columns: GridColDef[] = [
+  /*  {
+    field: "identity",
+    headerName: "Cédula",
+    disableColumnMenu: true,
+    flex: 2,
+    resizable: false,
+  },*/
+  {
+    field: "first_name",
+    headerName: "Nombres",
+    disableColumnMenu: true,
+    flex: 2,
+
+    resizable: false,
+  },
+  {
+    field: "last_name",
+    headerName: "Apellidos",
+    disableColumnMenu: true,
+    flex: 2,
+    resizable: false,
+  },
+  {
+    field: "role",
+    headerName: "Rol",
+    disableColumnMenu: true,
+    flex: 2,
+    renderCell: (params) => {
+      return (
+        <Typography variant="body1">
+          {translateRol(params.row.role.name)}
+        </Typography>
+      );
+    },
+    resizable: false,
+  },
+  {
+    field: "email",
+    headerName: "Correo",
+    disableColumnMenu: true,
+    flex: 4,
+    resizable: false,
+  },
+];
 
 export default function UsersList() {
   const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
@@ -108,7 +151,7 @@ export default function UsersList() {
 
         <Grid size={8}>
           <Table<User>
-            columns={columnsUsersAdmin}
+            columns={columns}
             rows={users}
             getRowId={(row) => row.user_id}
             rowSelectionModel={rowSelection}

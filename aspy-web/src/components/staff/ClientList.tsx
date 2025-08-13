@@ -1,29 +1,82 @@
 import { useState, useEffect } from "react";
-import { GridRowSelectionModel } from "@mui/x-data-grid";
-import { useTheme } from "@mui/material";
+import { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import { useNavigate, useLocation } from "react-router-dom";
 import { User } from "@/types/User";
-import { usuarios } from "@data/Usuarios";
-import { columnsUsers } from "@utils/columns";
 import Table from "@components/Table";
 import ProfileView from "@components/ProfileView";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import Header from "@components/Header";
+import Progress from "../Progress";
+import { getAge, getOccupation, getUsers } from "@/utils/utils";
+import { useRoleData } from "@/observer/RoleDataContext";
+import Typography from "@mui/material/Typography";
+
+export const columns: GridColDef[] = [
+  {
+    field: "first_name",
+    headerName: "Nombres",
+    disableColumnMenu: true,
+    flex: 2,
+    resizable: false,
+  },
+  {
+    field: "last_name",
+    headerName: "Apellidos",
+    disableColumnMenu: true,
+    flex: 2,
+    resizable: false,
+  },
+  {
+    field: "email",
+    headerName: "Correo",
+    disableColumnMenu: true,
+    flex: 2,
+    resizable: false,
+  },
+  {
+    field: "age",
+    headerName: "Edad",
+    disableColumnMenu: true,
+    flex: 2,
+    renderCell: (params) => {
+      return (
+        <Typography variant="body1">{getAge(params.row.birthdate)}</Typography>
+      );
+    },
+    resizable: false,
+  },
+  {
+    field: "occupation",
+    headerName: "Ocupación",
+    disableColumnMenu: true,
+    flex: 2,
+    renderCell: (params) => {
+      return (
+        <Typography variant="body1">
+          {getOccupation(params.row.occupation)}
+        </Typography>
+      );
+    },
+    resizable: false,
+  },
+];
 
 export default function ClientsList() {
   const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
-
-  const theme = useTheme().palette.mode;
-  const themeClass = theme === "dark" ? "dark-theme" : "light-theme";
-
-  //Usuario seleccionado
   const [user, setUser] = useState<User | null>(null);
+  const { data, loading } = useRoleData();
+
+  const users: User[] = getUsers(data);
+  const clients: User[] =
+    users.filter((user: User) => user.role_id === 3) || [];
 
   //Mostrar el usuario
   useEffect(() => {
     if (rowSelection.length > 0) {
-      const selectedUser = usuarios.find((item) => item.id === rowSelection[0]);
+      const selectedUser = users.find(
+        (item) => item.user_id === rowSelection[0]
+      );
       if (selectedUser) {
         setUser(selectedUser);
       }
@@ -38,7 +91,7 @@ export default function ClientsList() {
 
   const handleEdit = () => {
     if (user) {
-      const newPath = `${location.pathname}/${user.id}`;
+      const newPath = `${location.pathname}/${user.user_id}`;
       navigate(newPath);
     }
   };
@@ -48,6 +101,8 @@ export default function ClientsList() {
     navigate(newPath);
   };
 
+  if (loading) return <Progress />;
+
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1}>
@@ -55,14 +110,15 @@ export default function ClientsList() {
           <Header
             textHeader={"Clientes"}
             isCreate={true}
-            textIcon={"Agregar Cliente"}
+            textIcon={"Nuevo Cliente"}
             handle={handleCreatePatient}
           />
         </Grid>
-        <Grid size={8} className={themeClass + " grid-tabla"}>
+        <Grid size={8}>
           <Table<User>
-            columns={columnsUsers}
-            rows={usuarios}
+            columns={columns}
+            rows={clients}
+            getRowId={(row) => row.user_id}
             rowSelectionModel={rowSelection}
             onRowSelectionChange={(newSelection) =>
               setRowSelection(newSelection)
@@ -70,9 +126,9 @@ export default function ClientsList() {
           />
         </Grid>
         {user && (
-          <Grid size={4} className={themeClass}>
+          <Grid size={4}>
             <ProfileView
-              user_info={user}
+              user={user}
               onEdit={handleEdit}
               isRowPosition={false}
             />

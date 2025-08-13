@@ -1,16 +1,18 @@
 import { getAuthenticatedUserName } from "@store";
-import { citas } from "@data/Citas";
+import { Appointment } from "@/types/Appointment";
+import { useRoleData } from "@/observer/RoleDataContext";
+import { getAppointments } from "@/utils/utils";
 import Grid from "@mui/material/Grid2";
 import Box from "@mui/material/Box";
 import ShowAppointment from "@professional/ShowAppointment";
 import WelcomePanel from "@components/WelcomePanel";
-import { runProfessionalLoaders } from '../../API/init';
-import { useEffect } from "react";
+
+import Progress from "@components/Progress";
 
 export default function ControlPanel() {
-  useEffect(() => {
-    runProfessionalLoaders();
-  }, []);
+  const { data, loading } = useRoleData();
+  if (loading) return <Progress />;
+  const appointments: Appointment[] = getAppointments(data);
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
@@ -21,8 +23,8 @@ export default function ControlPanel() {
 
         <Grid size={12}>
           <ShowAppointment
-            unmarkedAppointmentsProp={citas}
-            unreportedAppointments={citas}
+            unmarkedAppointmentsProp={appointments}
+            unreportedAppointments={appointments}
           />
         </Grid>
       </Grid>

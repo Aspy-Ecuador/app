@@ -1,4 +1,4 @@
-import paymentAPI from "./paymentAPI";
+//import paymentAPI from "./paymentAPI";
 import paymentDataAPI from "./paymentDataAPI";
 import professionalServiceAPI from "./professionalServiceAPI";
 import receiptAPI from "./receiptAPI";
@@ -10,6 +10,7 @@ import appointmentReportAPI from "./appointmentReportAPI";
 import userAccountAPI from "./userAccountAPI";
 import personAPI from "./personAPI";
 import roleAPI from "./roleAPI";
+import professionalAPI from "./professionalAPI";
 
 type Loader = {
   name: string;
@@ -22,6 +23,8 @@ const adminLoaders: Loader[] = [
   { name: "appointments", fn: appointmentAPI.getAllAppointments },
   { name: "appointmentReports", fn: appointmentReportAPI.getAllReports },
   { name: "persons", fn: personAPI.getAllPersons },
+  { name: "roles", fn: roleAPI.getAllRoles },
+  { name: "professional", fn: professionalAPI.getAllProfessionals },
 ];
 
 const clientLoaders: Loader[] = [
@@ -43,7 +46,7 @@ const clientLoaders: Loader[] = [
 ];
 
 const staffLoaders: Loader[] = [
-  { name: "payments", fn: paymentAPI.getAllPayments },
+  //{ name: "payments", fn: paymentAPI.getAllPayments },
   { name: "paymentData", fn: paymentDataAPI.getAllPaymentData },
   {
     name: "professionalServices",
@@ -60,7 +63,7 @@ const staffLoaders: Loader[] = [
 ];
 
 const professionalLoaders: Loader[] = [
-  { name: "payments", fn: paymentAPI.getAllPayments },
+  //{ name: "payments", fn: paymentAPI.getAllPayments },
   { name: "paymentData", fn: paymentDataAPI.getAllPaymentData },
   {
     name: "professionalServices",

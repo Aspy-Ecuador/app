@@ -6,6 +6,7 @@ import { getUserById } from "../API/usuarioAPI";
 import { setAuthenticatedUser } from "@store";
 import { UserAccount } from "@/types/UserAccount";
 import { User } from "@/types/User";
+import { UserAccountRequest } from "@/typesRequest/UserAccountRequest";
 
 export const login = async (email: string, password: string) => {
   const response = await axios.post(
@@ -58,14 +59,4 @@ export const StoreUser = async () => {
   setAuthenticatedUser(userWithRoleName);
   //Guarda el usuario logeado
   return userWithRoleName;
-};
-
-export const register = async (userRegister: UserAccount) => {
-  try {
-    const response = await axios.post(`${apiURL}/user-account`, userRegister);
-    return response.data as UserLogin;
-  } catch (error) {
-    console.error("Error al agregar persona:", error);
-    throw error;
-  }
 };

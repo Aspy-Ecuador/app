@@ -1,7 +1,7 @@
 //import { provincias, ciudadesPorProvincia } from "./provincias-ciudad";
 //type ProvinceValue = number;
 
-export const inputCreateUserConfig = [
+export const inputRegisterUserConfig = [
   {
     label: "Nombre",
     key: "first_name",
@@ -126,30 +126,6 @@ export const inputCreateUserConfig = [
         value: 6,
         message: "min 6 caracteres",
       },
-    },
-  },
-  {
-    label: "Título",
-    key: "title",
-    type: "text",
-    validation: {
-      required: { value: true, message: "Campo requerido" },
-    },
-  },
-  {
-    label: "Descripción",
-    key: "about",
-    type: "text",
-    validation: {
-      required: { value: true, message: "Campo requerido" },
-    },
-  },
-  {
-    label: "Especialidad",
-    key: "specialty",
-    type: "text",
-    validation: {
-      required: { value: true, message: "Campo requerido" },
     },
   },
   /*   {

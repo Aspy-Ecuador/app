@@ -4,7 +4,7 @@ interface PDFViewerProps {
 
 const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
   return (
-    <div className="w-full h-screen">
+    <div className="w-full h-full">
       <iframe
         src={url}
         title="PDF Viewer"

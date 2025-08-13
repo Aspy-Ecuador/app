@@ -7,16 +7,16 @@ import Stack from "@mui/material/Stack";
 
 export type PageViewsBarChartProps = {
   total: number;
-  asistidas: number[];
-  canceladas: number[];
-  noAsistidas: number[];
+  scheduled: number[];
+  completed: number[];
+  cancelled: number[];
 };
 
 export default function PageViewsBarChart({
   total,
-  asistidas,
-  canceladas,
-  noAsistidas,
+  scheduled,
+  completed,
+  cancelled,
 }: PageViewsBarChartProps) {
   const theme = useTheme();
   const colorPalette = [
@@ -72,21 +72,21 @@ export default function PageViewsBarChart({
           ]}
           series={[
             {
+              id: "citas-agendadas",
+              label: "Citas Agendadas",
+              data: scheduled,
+              stack: "A",
+            },
+            {
               id: "citas-asistidas",
               label: "Citas Asistidas",
-              data: asistidas,
+              data: completed,
               stack: "A",
             },
             {
               id: "citas-canceladas",
               label: "Citas Canceladas",
-              data: canceladas,
-              stack: "A",
-            },
-            {
-              id: "citas-no-asistidas",
-              label: "Citas No Asistidas",
-              data: noAsistidas,
+              data: cancelled,
               stack: "A",
             },
           ]}

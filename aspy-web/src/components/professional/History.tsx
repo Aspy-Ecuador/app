@@ -1,31 +1,46 @@
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { pacientes } from "@data/Pacientes";
 import { User } from "@/types/User";
-import Typography from "@mui/material/Typography";
+import { useRoleData } from "@/observer/RoleDataContext";
+import { getUsers } from "@/utils/utils";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
-import Divider from "@mui/material/Divider";
-import Button from "@mui/material/Button";
-import OverviewPaciente from "@professional/OverviewPaciente";
+import OverviewPatient from "@professional/OverviewPatient";
 import TimeLinePatients from "@professional/TimeLinePatient";
-
-import ReplyRoundedIcon from "@mui/icons-material/ReplyRounded";
+import Header from "@components/Header";
+import Progress from "@components/Progress";
 
 export default function History() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const { data, loading } = useRoleData();
 
-  const numericId = id ? parseInt(id.split("-")[0]) : null;
-  const user: User | undefined = pacientes.find((u) => u.id === numericId);
+  if (loading) return <Progress />;
 
   const handleBack = () => {
     navigate(-1);
   };
 
+  const backToHome = () => {
+    navigate("/");
+  };
+
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const numericId = id ? parseInt(id) : 0;
+
+  if (numericId == 0) {
+    backToHome();
+  }
+
+  const users: User[] = getUsers(data);
+  const clients: User[] =
+    users.filter((user: User) => user.role_id === 3) || [];
+
+  const user: User | undefined = clients.find((u) => u.user_id === numericId);
+
   const location = useLocation();
 
   const handleNewReport = () => {
-    if (user) {
+    if (true) {
       const newPath = `${location.pathname}/nuevoReporte`;
       navigate(newPath);
     }
@@ -35,33 +50,17 @@ export default function History() {
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1}>
         <Grid size={12} className="grid-p-patients-tittle">
-          <Grid container spacing={0}>
-            <Grid size={9}>
-              <Typography variant="h3">Histórico de Paciente</Typography>
-            </Grid>
-            <Grid size={3} display="flex" justifyContent="flex-end">
-              <Button
-                onClick={handleBack}
-                variant="outlined"
-                startIcon={<ReplyRoundedIcon />}
-                className="guardar"
-              >
-                Volver
-              </Button>
-            </Grid>
-          </Grid>
-          <Divider className="divider-paciente-historial"></Divider>
+          <Header
+            textHeader={"Histórico de Paciente"}
+            isCreate={false}
+            handle={handleBack}
+          />
         </Grid>
         <Grid size={8}>
-          <Typography variant="h6">Histórico</Typography>
-          <TimeLinePatients />
+          <TimeLinePatients patient={user!} />
         </Grid>
         <Grid size={4}>
-          <OverviewPaciente
-            paciente={user!}
-            representante={user!}
-            newReport={handleNewReport}
-          />
+          <OverviewPatient patient={user!} newReport={handleNewReport} />
         </Grid>
       </Grid>
     </Box>

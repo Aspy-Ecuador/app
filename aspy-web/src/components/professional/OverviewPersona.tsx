@@ -6,6 +6,8 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 
 import InfoIcon from "@mui/icons-material/Info";
+import { useMemo } from "react";
+import { getAge, getGender, translateRol } from "@/utils/utils";
 
 interface OverviewPersonaProps {
   selectedData: User;
@@ -16,12 +18,17 @@ export default function Overview_persona({
   selectedData,
   moreInfo,
 }: OverviewPersonaProps) {
+  const randomIndex = useMemo(
+    () => Math.floor(Math.random() * 50) + 1,
+    [selectedData.user_id]
+  );
+  const genderFolder = selectedData.gender === 1 ? "men" : "women";
   return (
     <Box className="contenedor-overview">
       <Grid container rowSpacing={6} columnSpacing={{ xs: 1, sm: 1, md: 1 }}>
         <Grid size={12}>
           <Typography variant="body1" className="class_id">
-            {selectedData.id}
+            {selectedData.person_id}
           </Typography>
         </Grid>
         <Grid
@@ -34,18 +41,18 @@ export default function Overview_persona({
         >
           <Avatar
             alt="Foto de perfil"
-            src={selectedData.photo}
+            src={`https://randomuser.me/api/portraits/${genderFolder}/${randomIndex}.jpg`}
             sx={{ width: 150, height: 150 }}
           />
         </Grid>
         <Grid size={12}>
           <Typography variant="body1" className="class_nombres">
-            {selectedData.first_name} {selectedData.last_name}
+            {selectedData.full_name}
           </Typography>
         </Grid>
         <Grid size={12}>
           <Typography variant="body1" className="class_titulo">
-            {selectedData.role}
+            {translateRol(selectedData.role.name)}
           </Typography>
         </Grid>
         <Grid
@@ -65,6 +72,7 @@ export default function Overview_persona({
             Información
           </Button>
         </Grid>
+        {/*
         <Grid size={12}>
           <Box sx={{ width: "100%" }}>
             <Grid container spacing={0}>
@@ -81,6 +89,7 @@ export default function Overview_persona({
             </Grid>
           </Box>
         </Grid>
+        */}
         <Grid size={12}>
           <Box sx={{ width: "100%" }}>
             <Grid container spacing={0}>
@@ -94,7 +103,7 @@ export default function Overview_persona({
                     </Grid>
                     <Grid size={12}>
                       <Typography variant="body1" className="class_edad">
-                        {selectedData.age}
+                        {getAge(selectedData.birthdate)}
                       </Typography>
                     </Grid>
                   </Grid>
@@ -113,7 +122,7 @@ export default function Overview_persona({
                     </Grid>
                     <Grid size={12}>
                       <Typography variant="body1" className="class_genero">
-                        {selectedData.gender}
+                        {getGender(selectedData.gender)}
                       </Typography>
                     </Grid>
                   </Grid>

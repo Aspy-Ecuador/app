@@ -2,9 +2,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import Header from "@components/Header";
-import FormView from "@components/FormView";
+import FormViewAdmin from "./FormViewAdmin";
 
-export default function EditRole() {
+export default function EditUserAdmin() {
   //Obtener usuario
   const { id } = useParams();
   const numericId = parseInt(id!);
@@ -25,7 +25,7 @@ export default function EditRole() {
         </Grid>
 
         <Grid size={12}>
-          <FormView isEdit={true} userId={numericId} role="" />
+          <FormViewAdmin isEdit={true} user_id={numericId} />
         </Grid>
       </Grid>
     </Box>

@@ -128,6 +128,30 @@ export const inputCreateUserAdminConfig = [
       },
     },
   },
+  {
+    label: "Título",
+    key: "title",
+    type: "text",
+    validation: {
+      required: { value: true, message: "Campo requerido" },
+    },
+  },
+  {
+    label: "Descripción",
+    key: "about",
+    type: "text",
+    validation: {
+      required: { value: true, message: "Campo requerido" },
+    },
+  },
+  {
+    label: "Especialidad",
+    key: "specialty",
+    type: "text",
+    validation: {
+      required: { value: true, message: "Campo requerido" },
+    },
+  },
   /*   {
     label: "Provincia",
     key: "province",

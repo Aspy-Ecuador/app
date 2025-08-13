@@ -1,39 +1,40 @@
 import { useParams } from "react-router-dom";
-import { getPayment } from "@utils/utils";
-import { Payment } from "@/types/Payment";
+import { getPayment } from "@/utils/utils";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import InvoiceView from "@components/InvoiceView";
 import ReceiptDetails from "@staff/ReceiptDetails";
 import SimpleHeader from "@components/SimpleHeader";
+import { PaymentResponse } from "@/typesResponse/PaymentResponse";
+import PDFViewer from "@components/PDFViewer";
 
 export default function PaymentDetails() {
   const { id } = useParams();
   const numericId = parseInt(id!);
-  const payment: Payment = getPayment(numericId);
 
+  const payment: PaymentResponse = getPayment(numericId);
+  console.log(payment);
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1}>
         <Grid size={12} className="grid-p-patients-tittle">
           <SimpleHeader text={"Detalles del pago"} />
         </Grid>
-        <Grid size={6}>
+        <Grid size={3}>
           <ReceiptDetails receiptData={payment} />
         </Grid>
         <Grid size={6}>
+          <PDFViewer url={payment.paymenta_data.file} />
+        </Grid>
+        <Grid size={3}>
           <InvoiceView
-            id={payment.id}
+            id={payment.payment_id}
             date={payment.creation_date}
-            client={payment.person}
-            service={payment.service}
-            address={payment.address}
+            client={payment.person.full_name}
+            service={payment.service.name}
             price={payment.service_price}
-            discount={payment.discount_percentage}
             total={payment.total_amount}
-            paymentMethod={payment.paymentMethod}
-            contactEmail={payment.contactEmail}
-            contactPhone={payment.contactPhone}
+            paymentMethod={payment.paymenta_data.type}
           />
         </Grid>
       </Grid>

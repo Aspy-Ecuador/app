@@ -1,30 +1,26 @@
-import { useTheme } from "@mui/material";
-import { citas } from "@/data/Citas";
-import Divider from "@mui/material/Divider";
+import { useRoleData } from "@/observer/RoleDataContext";
+import { Appointment } from "@/types/Appointment";
+import { getAppointments } from "@/utils/utils";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
-import Typography from "@mui/material/Typography";
 import Agenda from "@components/Agenda";
+import Progress from "@components/Progress";
+import SimpleHeader from "../SimpleHeader";
 
-export default function Appointment() {
-  const theme = useTheme();
-  const themeClass =
-    theme.palette.mode === "dark" ? "dark-theme" : "light-theme";
+export default function Appointments() {
+  const { data, loading } = useRoleData();
+  if (loading) return <Progress />;
+  const appointments: Appointment[] = getAppointments(data);
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1}>
         <Grid size={12} className="grid-p-patients-tittle">
-          <Grid container spacing={0}>
-            <Grid size={9} marginBottom={"4px"}>
-              <Typography variant="h3">Citas</Typography>
-            </Grid>
-          </Grid>
-          <Divider className="divider-paciente-historial"></Divider>
+          <SimpleHeader text="Citas Agendadas" />
         </Grid>
 
-        <Grid size={12} className={themeClass}>
-          <Agenda citas={citas} />
+        <Grid size={12}>
+          <Agenda appointments={appointments} />
         </Grid>
       </Grid>
     </Box>

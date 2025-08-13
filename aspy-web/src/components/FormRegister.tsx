@@ -1,16 +1,11 @@
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { inputCreateUserConfig } from "@/config/userFormConfig";
-import Button from "@mui/material/Button";
-import UserInput from "@forms/UserInput";
+import { inputRegisterUserConfig } from "@/config/userFormRegister";
 import { User } from "@/types/User";
-import { useRoleData } from "@/observer/RoleDataContext";
-import { getUsers } from "@/utils/utils";
-import Progress from "@components/Progress";
+import Button from "@mui/material/Button";
+import Input from "@components/Input";
 
-interface UserFormProps {
-  isEditMode: boolean;
-  userId?: number;
+interface FormRegisterProps {
   start: number;
   end: number;
   onNext: (data: User) => void;
@@ -19,64 +14,31 @@ interface UserFormProps {
   isLast?: boolean;
 }
 
-export default function UserForm({
-  isEditMode,
-  userId,
+export default function FormRegister({
   start,
   end,
   onNext,
   onBack,
   onFinish,
   isLast,
-}: UserFormProps) {
+}: FormRegisterProps) {
   const methods = useForm<User>();
-  const { data, loading } = useRoleData();
-  const users: User[] = getUsers(data);
 
   useEffect(() => {
-    if (isEditMode) {
-      const user = users.find((u) => u.user_id === userId);
-      if (user) {
-        methods.reset({
-          first_name: user.first_name,
-          last_name: user.last_name,
-          email: user.email,
-          birthdate: user.birthdate,
-          gender: user.gender,
-          occupation: user.occupation,
-          marital_status: user.marital_status,
-          education: user.education,
-          role_id: user.role.role_id,
-          title: user.title,
-          about: user.about,
-          specialty: user.specialty,
-          //province: user.province,
-          //city: user.city,
-        });
-      }
-    } else {
-      methods.reset({
-        first_name: "",
-        last_name: "",
-        email: "",
-        birthdate: "",
-        title: "",
-        about: "",
-        specialty: "",
-        //province: user.province,
-        //city: user.city,
-      });
-    }
-  }, [isEditMode, methods]);
+    methods.reset({
+      first_name: "",
+      last_name: "",
+      email: "",
+      birthdate: "",
+      title: "",
+      about: "",
+      specialty: "",
+      role_id: 3,
+    });
+  }, [methods]);
 
-  const roleSelect = Number(methods.watch("role_id") ?? 0);
-  const filteredInputs = inputCreateUserConfig.filter((input) => {
-    const isExtraField = ["title", "about", "specialty"].includes(input.key);
-    return !(isExtraField && roleSelect !== 2);
-  });
-
-  const list_inputs = filteredInputs.slice(start, end).map((input) => (
-    <UserInput
+  const list_inputs = inputRegisterUserConfig.slice(start, end).map((input) => (
+    <Input
       key={input.key}
       label={input.label}
       type={input.type}
@@ -107,12 +69,10 @@ export default function UserForm({
 
   const getButtonLabel = () => {
     if (isLast) {
-      return isEditMode ? "Guardar" : "Crear";
+      return "Registrar";
     }
     return "Siguiente";
   };
-
-  if (loading) return <Progress />;
 
   return (
     <FormProvider {...methods}>

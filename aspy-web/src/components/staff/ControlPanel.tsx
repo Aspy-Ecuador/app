@@ -1,26 +1,23 @@
 import { useNavigate } from "react-router-dom";
 import { getAuthenticatedUserName } from "@store";
-import { citas } from "@data/Citas";
 import { ButtonControl } from "@/types/ButtonControl";
+import { Appointment } from "@/types/Appointment";
+import { getAppointments } from "@/utils/utils";
+import { useRoleData } from "@/observer/RoleDataContext";
 import Grid from "@mui/material/Grid2";
 import Box from "@mui/material/Box";
 import ButtonList from "@components/ButtonList";
-import ShowAppointment from "@components/ShowAppointment";
+import ShowAppointment from "@staff/ShowAppointment";
 import WelcomePanel from "@components/WelcomePanel";
 import Typography from "@mui/material/Typography";
-
 import PersonAddAltRoundedIcon from "@mui/icons-material/PersonAddAltRounded";
 import MedicalServicesRoundedIcon from "@mui/icons-material/MedicalServicesRounded";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
 import PermContactCalendarRoundedIcon from "@mui/icons-material/PermContactCalendarRounded";
-import { runStaffLoaders } from '../../API/init';
-import { useEffect } from "react";
+import Progress from "@components/Progress";
 
 export default function ControlPanel() {
-
-  useEffect(() => {
-    runStaffLoaders();
-  }, []);
+  const { data, loading } = useRoleData();
 
   const navigate = useNavigate();
 
@@ -67,6 +64,10 @@ export default function ControlPanel() {
     },
   ];
 
+  const appointments: Appointment[] = getAppointments(data);
+
+  if (loading) return <Progress />;
+
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 1, md: 1 }}>
@@ -76,7 +77,7 @@ export default function ControlPanel() {
 
         <Grid size={8}>
           <Typography variant="h3">Proximas citas:</Typography>
-          <ShowAppointment citas={citas} />
+          <ShowAppointment appointments={appointments} />
         </Grid>
 
         <Grid size={4} className="gird-botones-citas">

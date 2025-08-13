@@ -1,44 +1,5 @@
 import { GridColDef } from "@mui/x-data-grid";
 
-export const columnsUsersAdmin: GridColDef[] = [
-  /*  {
-    field: "identity",
-    headerName: "Cédula",
-    disableColumnMenu: true,
-    flex: 2,
-    resizable: false,
-  }, */
-
-  {
-    field: "first_name",
-    headerName: "Nombres",
-    disableColumnMenu: true,
-    flex: 2,
-    resizable: false,
-  },
-  {
-    field: "last_name",
-    headerName: "Apellidos",
-    disableColumnMenu: true,
-    flex: 2,
-    resizable: false,
-  },
-  {
-    field: "role",
-    headerName: "Rol",
-    disableColumnMenu: true,
-    flex: 2,
-    resizable: false,
-  },
-  {
-    field: "email",
-    headerName: "Correo",
-    disableColumnMenu: true,
-    flex: 4,
-    resizable: false,
-  },
-];
-
 export const columnsServiceAdmin: GridColDef[] = [
   {
     field: "service_id",
@@ -88,7 +49,7 @@ export const columnsServiceAdmin: GridColDef[] = [
   */
 ];
 
-export const columnsUsers: GridColDef[] = [
+export const columnsProfessional: GridColDef[] = [
   /* {
     field: "identity",
     headerName: "Cédula",
@@ -100,45 +61,35 @@ export const columnsUsers: GridColDef[] = [
     field: "first_name",
     headerName: "Nombres",
     disableColumnMenu: true,
-    width: 160,
+    flex: 2,
     resizable: false,
   },
   {
     field: "last_name",
     headerName: "Apellidos",
     disableColumnMenu: true,
-    width: 160,
+    flex: 2,
     resizable: false,
   },
   {
     field: "email",
     headerName: "Correo",
     disableColumnMenu: true,
-    width: 180,
+    flex: 2,
     resizable: false,
   },
-];
-
-export const columnsPayment: GridColDef[] = [
   {
-    field: "id",
-    headerName: "ID Factura",
+    field: "title",
+    headerName: "Título",
     disableColumnMenu: true,
     flex: 2,
     resizable: false,
   },
   {
-    field: "person",
-    headerName: "Cliente",
+    field: "specialty",
+    headerName: "Especialidad",
     disableColumnMenu: true,
-    flex: 3,
-    resizable: false,
-  },
-  {
-    field: "creation_date",
-    headerName: "Fecha de Emisión",
-    disableColumnMenu: true,
-    flex: 3,
+    flex: 2,
     resizable: false,
   },
 ];

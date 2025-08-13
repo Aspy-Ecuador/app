@@ -1,3 +1,5 @@
+import { styled } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
 import Divider from "@mui/material/Divider";
@@ -5,11 +7,9 @@ import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
-import { styled } from "@mui/material/styles";
 import AppTheme from "@shared-theme/AppTheme";
 import ColorModeSelect from "@shared-theme/ColorModeSelect";
-import { useNavigate } from "react-router-dom";
-import FormView from "./FormView";
+import RegisterView from "@components/RegisterView";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -132,7 +132,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
             Bienvenidos a ASPY
           </Typography>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <FormView isEdit={false} role={"Paciente"} isRegister={true} />
+            <RegisterView />
           </Box>
           <Divider>
             <Typography sx={{ color: "text.secondary" }}>o</Typography>

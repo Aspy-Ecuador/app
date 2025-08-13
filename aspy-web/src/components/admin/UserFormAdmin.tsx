@@ -1,21 +1,21 @@
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { inputCreateUserAdminConfig } from "@/config/userFormAdminConfig";
-import { UserAccount } from "@/types/UserAccount";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Button from "@mui/material/Button";
 import UserInput from "@forms/UserInput";
 import { User } from "@/types/User";
-import { getUsers } from "@/utils/utils";
+import { getUsers } from "@utils/utils";
+import Progress from "@components/Progress";
 
 interface UserFormProps {
   isEditMode: boolean;
   userId?: number;
   start: number;
   end: number;
-  onNext: (data: UserAccount) => void;
+  onNext: (data: User) => void;
   onBack: () => void;
-  onFinish: (data: UserAccount) => void;
+  onFinish: (data: User) => void;
   isLast?: boolean;
 }
 
@@ -29,24 +29,27 @@ export default function UserFormAdmin({
   onFinish,
   isLast,
 }: UserFormProps) {
-  const methods = useForm<UserAccount>();
+  const methods = useForm<User>();
   const { data, loading } = useRoleData();
   const users: User[] = getUsers(data);
 
   useEffect(() => {
     if (isEditMode) {
       const user = users.find((u) => u.user_id === userId);
-
       if (user) {
         methods.reset({
           first_name: user.first_name,
           last_name: user.last_name,
           email: user.email,
           birthdate: user.birthdate,
-          gender: user.gender === 1 ? "men" : "women",
+          gender: user.gender,
           occupation: user.occupation,
           marital_status: user.marital_status,
           education: user.education,
+          role_id: user.role.role_id,
+          title: user.title,
+          about: user.about,
+          specialty: user.specialty,
         });
       }
     } else {
@@ -55,38 +58,38 @@ export default function UserFormAdmin({
         last_name: "",
         email: "",
         birthdate: "",
-        gender: -1,
-        occupation: -1,
-        marital_status: -1,
-        education: -1,
+        title: "",
+        about: "",
+        specialty: "",
       });
     }
   }, [isEditMode, userId]);
 
-  const list_inputs = inputCreateUserAdminConfig
-    .slice(start, end)
-    .map((input) => (
-      <UserInput
-        key={input.key}
-        label={input.label}
-        type={input.type}
-        id={input.key}
-        validation={
-          input.key === "confirmPassword"
-            ? {
-                ...input.validation,
-                validate: (value: string) =>
-                  value === methods.getValues("password") ||
-                  "Las contraseñas no coinciden",
-              }
-            : input.validation
-        }
-        options={input.options}
-        //dependsOn={input.dependsOn}
-        //getOptions={input.getOptions}
-      />
-    ));
+  const roleSelect = Number(methods.watch("role_id") ?? 0);
+  const filteredInputs = inputCreateUserAdminConfig.filter((input) => {
+    const isExtraField = ["title", "about", "specialty"].includes(input.key);
+    return !(isExtraField && roleSelect !== 2);
+  });
 
+  const list_inputs = filteredInputs.slice(start, end).map((input) => (
+    <UserInput
+      key={input.key}
+      label={input.label}
+      type={input.type}
+      id={input.key}
+      validation={
+        input.key === "confirmPassword"
+          ? {
+              ...input.validation,
+              validate: (value: string) =>
+                value === methods.getValues("password") ||
+                "Las contraseñas no coinciden",
+            }
+          : input.validation
+      }
+      options={input.options}
+    />
+  ));
   const onSubmit = methods.handleSubmit((data) => {
     if (isLast) {
       onFinish(data);

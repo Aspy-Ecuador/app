@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { User } from "@/types/User";
 import penToSquare from "@assets/pen-to-square.svg";
+import { getGender } from "@/utils/utils";
 
 type ProfileProps = {
   user: User;
@@ -19,7 +20,7 @@ export default function ProfileView({
     [user.user_id]
   );
 
-  const genderFolder = user.gender === "1" ? "men" : "women";
+  const genderFolder = user.gender === 1 ? "men" : "women";
 
   const imageUrl = `https://randomuser.me/api/portraits/${genderFolder}/${randomIndex}.jpg`;
 
@@ -73,7 +74,7 @@ export default function ProfileView({
               Género
             </h2>
             <p className="font-kumbh text-sm text-secondaryAspy">
-              {user.gender === "1" ? "Hombre" : "Mujer"}
+              {getGender(user.gender)}
             </p>
           </div>
         </div>

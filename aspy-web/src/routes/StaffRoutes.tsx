@@ -8,9 +8,9 @@ import Appointments from "@staff/Appointments";
 import PaymentsList from "@components/staff/PaymentsList";
 import Services from "@components/staff/ServicesList";
 import PaymentDetails from "@staff/PaymentDetails";
-import CreateUser from "@components/CreateUser";
+import CreateUser from "@staff/CreateUser";
 import CreateService from "@components/CreateService";
-import EditUser from "@components/EditUser";
+import EditUser from "@staff/EditUser";
 import EditService from "@components/EditService";
 import AppointmentView from "@components/AppointmentView";
 import CheckoutView from "@components/CheckoutView";
@@ -25,13 +25,13 @@ export const StaffRoutes = [
   { path: "/citas", element: <Appointments /> },
   { path: "/servicios", element: <Services /> },
   { path: "/agendar-cita", element: <AppointmentView /> },
-  { path: "/crear-paciente", element: <CreateUser role="Paciente" /> },
-  { path: "/crear-profesional", element: <CreateUser role="Profesional" /> },
+  { path: "/crear-paciente", element: <CreateUser /> },
+  { path: "/crear-profesional", element: <CreateUser /> },
   { path: "/crear-servicio", element: <CreateService /> },
   { path: "/pagos/:id", element: <PaymentDetails /> },
   { path: "/pacientes/:id", element: <EditUser /> },
   { path: "/profesionales/:id", element: <EditUser /> },
   { path: "/servicios/:id", element: <EditService /> },
-  { path: "/pago", element: <CheckoutView /> },
+  { path: "/pago/:serviceId/:scheduleId", element: <CheckoutView /> },
   ...SharedRoutes,
 ];

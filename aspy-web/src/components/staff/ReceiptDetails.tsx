@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { Payment } from "@/types/Payment";
 import { paymentList } from "@data/Pagos";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
@@ -7,20 +6,21 @@ import ReceiptRevision from "@staff/ReceiptRevision";
 import CancelButton from "@buttons/CancelButton";
 import CreationButton from "@buttons/CreationButton";
 import Typography from "@mui/material/Typography";
+import { PaymentResponse } from "@/typesResponse/PaymentResponse";
 
 interface ReceiptDetailsProps {
-  receiptData: Payment; //Payment
+  receiptData: PaymentResponse;
 }
 
 export default function ReceiptDetails({ receiptData }: ReceiptDetailsProps) {
   const navigate = useNavigate();
+
   const handleBack = () => {
-    paymentList[1].status = true;
     navigate("/pagos");
   };
 
   return (
-    <Box maxWidth={400} mx="auto" p={3}>
+    <Box maxWidth={400}>
       <Grid container spacing={1}>
         <Grid size={12}>
           <Typography variant="h4">Pendiente revisión</Typography>

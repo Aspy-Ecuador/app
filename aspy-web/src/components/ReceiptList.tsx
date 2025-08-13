@@ -4,6 +4,10 @@ import { Receipt } from "@/types/Receipt";
 import { GridColDef } from "@mui/x-data-grid";
 import { handleDownloadInvoice } from "@utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext";
+import { userAdapter } from "@/adapters/userAdapter";
+import { receiptAdapter } from "@/adapters/receiptAdapter";
+import { ReceiptResponse } from "@/typesResponse/ReceiptResponse";
+import { dataPayments } from "@data/Payment";
 import Button from "@mui/material/Button";
 import InvoiceView from "@components/InvoiceView";
 import Table from "@components/Table";
@@ -12,17 +16,12 @@ import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
 import SimpleHeader from "@components/SimpleHeader";
 import Progress from "@components/Progress";
-
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
-import { userAdapter } from "@/adapters/userAdapter";
-import { receiptAdapter } from "@/adapters/receiptAdapter";
-import { ReceiptResponse } from "@/typesResponse/ReceiptResponse";
-import { PaymentResponse } from "@/typesResponse/PaymentResponse";
 
 const columns: GridColDef[] = [
   {
     field: "id",
-    headerName: "ID Recibo",
+    headerName: "N° de Recibo",
     disableColumnMenu: true,
     renderCell: (params) => {
       return (
@@ -89,55 +88,6 @@ const columns: GridColDef[] = [
 export default function ReceiptList() {
   const { data, loading } = useRoleData();
 
-  //Solo por ejemplo:
-  const dataPayments: PaymentResponse[] = [
-    {
-      payment_id: 16,
-      person_id: 7,
-      service_id: 2,
-      discount_id: null,
-      payment_data_id: 18,
-      service_price: 12.0,
-      discount_percentage: null,
-      total_amount: 12.0,
-      status: 1,
-      created_by: "system",
-      modified_by: null,
-      creation_date: "2025-07-30 22:10:10",
-      modification_date: null,
-    },
-    {
-      payment_id: 17,
-      person_id: 7,
-      service_id: 3,
-      discount_id: null,
-      payment_data_id: 19,
-      service_price: 34.0,
-      discount_percentage: null,
-      total_amount: 34.0,
-      status: 1,
-      created_by: "system",
-      modified_by: null,
-      creation_date: "2025-07-31 18:21:12",
-      modification_date: null,
-    },
-    {
-      payment_id: 18,
-      person_id: 7,
-      service_id: 1,
-      discount_id: 2,
-      payment_data_id: 18,
-      service_price: 50.0,
-      discount_percentage: 10,
-      total_amount: 45.0,
-      status: 1,
-      created_by: "admin",
-      modified_by: "admin",
-      creation_date: "2025-08-01 10:15:00",
-      modification_date: "2025-08-01 12:00:00",
-    },
-  ];
-
   const receiptsRaw: ReceiptResponse[] = data?.receipts ?? [];
 
   const receiptList: Receipt[] = receiptsRaw
@@ -151,10 +101,10 @@ export default function ReceiptList() {
         (pd: any) => pd.payment_data_id === payment.payment_data_id
       );
       const service = data.services?.find(
-        (s: any) => s.service_id === payment.service_id
+        (s: any) => s.service_id === payment.service.id_serice
       );
       const person = data.persons?.find(
-        (p: any) => p.person_id === payment.person_id
+        (p: any) => p.person_id === payment.person.person_id
       );
       const userAccount = data.userAccounts?.find(
         (ua: any) => ua.user_id === person?.user_id
