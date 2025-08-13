@@ -12,18 +12,21 @@ import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import Table from "@components/Table";
+import Progress from "@components/Progress";
 
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import AssignmentTurnedInRoundedIcon from "@mui/icons-material/AssignmentTurnedInRounded";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 
 export default function ServicesList() {
-  const { data } = useRoleData();
+  const { data, loading  } = useRoleData();
   const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
 
   //Ruta para editar y crear
   const navigate = useNavigate();
   const location = useLocation();
+
+  const services: ServiceResponse[] = data?.services ?? [];
 
   const handleEdit = (id: number) => {
     const newPath = `${location.pathname}/${id}`;
@@ -70,7 +73,7 @@ export default function ServicesList() {
 
   const newColumns: GridColDef[] = [...columnsServiceAdmin, ...columnsExtra];
 
-  const services: ServiceResponse[] = data.services;
+ 
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
@@ -114,6 +117,9 @@ export default function ServicesList() {
         </Grid>
 
         <Grid size={12}>
+           {loading ? (
+              <Progress /> 
+            ) : (
           <Table<ServiceResponse>
             columns={newColumns}
             rows={services}
@@ -123,6 +129,7 @@ export default function ServicesList() {
               setRowSelection(newSelection)
             }
           />
+            )}
         </Grid>
       </Grid>
     </Box>

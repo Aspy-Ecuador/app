@@ -135,6 +135,9 @@ export function getProfessionalSchedule(
 }
 
 export function getUsers(data: any): User[] {
+  if (!data || !data.persons || !data.userAccounts || !data.roles) {
+    return [];
+  }
   const persons: PersonResponse[] = data.persons;
   const userAccounts: UserAccountResponse[] = data.userAccounts;
   const roles: RoleResponse[] = data.roles;

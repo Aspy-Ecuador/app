@@ -13,13 +13,12 @@ import { appointmentAdapter } from "@/adapters/appointmentAdapter";
 
 export default function Appointments() {
   const { data, loading } = useRoleData();
-  if (loading) return <Progress />;
   const [selectedId, setSelected] = useState<number>(0);
-
   const handleSelectProfessional = (id: number) => {
     setSelected(id);
   };
-
+  if (loading) return <Progress />;
+  
   const appointments: Appointment[] = (data.appointments || [])
     .map((appointment: any) => {
       const service = data.services?.find(
@@ -96,7 +95,7 @@ export default function Appointments() {
           <SimpleHeader text={"Citas"} />
         </Grid>
         <Grid size={9}>
-          <Agenda appointments={appointmentProfessional} />
+          {loading ? <Progress /> : <Agenda appointments={appointmentProfessional} />}
         </Grid>
         <Grid size={3}>
           <SelectProfessional onSelect={handleSelectProfessional} />

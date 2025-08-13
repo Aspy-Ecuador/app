@@ -76,7 +76,8 @@ export default function UsersList() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const users: User[] = getUsers(data);
+  const users: User[] = getUsers(data ?? []);
+
 
   const buttonsData: ButtonAdmin[] = [
     {
@@ -108,6 +109,7 @@ export default function UsersList() {
       setUser(null);
     }
   }, [rowSelection]);
+
 
   const handleEdit = () => {
     if (user) {
@@ -150,15 +152,21 @@ export default function UsersList() {
         </Grid>
 
         <Grid size={8}>
-          <Table<User>
-            columns={columns}
-            rows={users}
-            getRowId={(row) => row.user_id}
-            rowSelectionModel={rowSelection}
-            onRowSelectionChange={(newSelection) =>
-              setRowSelection(newSelection)
-            }
-          />
+          {loading ? (
+            <Progress /> 
+          ) : users.length ? (
+            <Table<User>
+              columns={columns}
+              rows={users}
+              getRowId={(row) => row.user_id}
+              rowSelectionModel={rowSelection}
+              onRowSelectionChange={(newSelection) =>
+                setRowSelection(newSelection)
+              }
+            />
+          ) : (
+            <Typography>No hay usuarios</Typography>
+          )}
         </Grid>
 
         {user && (
