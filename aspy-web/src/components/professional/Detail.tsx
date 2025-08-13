@@ -1,20 +1,16 @@
+import { useRoleData } from "@/observer/RoleDataContext";
 import { useParams, useNavigate } from "react-router-dom";
+import { Appointment } from "@/types/Appointment";
+import { AppointmentReport } from "@/types/AppointmentReport";
+import { getAppointments, getAppointmentsReport } from "@/utils/utils";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
 import LogoClaro from "@assets/logo mediano.png";
 import Divider from "@mui/material/Divider";
-import Button from "@mui/material/Button";
-
-import ReplyRoundedIcon from "@mui/icons-material/ReplyRounded";
-import { useRoleData } from "@/observer/RoleDataContext";
 import Progress from "@components/Progress";
-import { getAppointments, getAppointmentsReport } from "@/utils/utils";
-
-import { Appointment } from "@/types/Appointment";
-import { AppointmentReport } from "@/types/AppointmentReport";
-import PDFViewer from "../PDFViewer";
-import Header from "../Header";
+import PDFViewer from "@components/PDFViewer";
+import Header from "@components/Header";
 
 export default function AppointmentDetail() {
   const { data, loading } = useRoleData();
@@ -42,7 +38,11 @@ export default function AppointmentDetail() {
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={2}>
         <Grid size={12} className="grid-p-patients-tittle">
-          <Header textHeader="Citas" isCreate={false} handle={handleBack} />
+          <Header
+            textHeader="Detalles de la cita"
+            isCreate={false}
+            handle={handleBack}
+          />
         </Grid>
         <Grid size={6} className="grid-detalles">
           <Grid container width={"80%"}>

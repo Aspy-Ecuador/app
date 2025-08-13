@@ -23,13 +23,6 @@ import SupervisedUserCircleOutlinedIcon from "@mui/icons-material/SupervisedUser
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 
 const columns: GridColDef[] = [
-  /*  {
-    field: "identity",
-    headerName: "Cédula",
-    disableColumnMenu: true,
-    flex: 2,
-    resizable: false,
-  },*/
   {
     field: "first_name",
     headerName: "Nombres",
@@ -78,7 +71,6 @@ export default function UsersList() {
 
   const users: User[] = getUsers(data ?? []);
 
-
   const buttonsData: ButtonAdmin[] = [
     {
       label: "Usuarios Activos",
@@ -109,7 +101,6 @@ export default function UsersList() {
       setUser(null);
     }
   }, [rowSelection]);
-
 
   const handleEdit = () => {
     if (user) {
@@ -153,7 +144,7 @@ export default function UsersList() {
 
         <Grid size={8}>
           {loading ? (
-            <Progress /> 
+            <Progress />
           ) : users.length ? (
             <Table<User>
               columns={columns}

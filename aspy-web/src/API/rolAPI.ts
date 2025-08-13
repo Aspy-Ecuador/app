@@ -1,6 +1,7 @@
 import axios from "axios";
 import apiURL from "./apiConfig";
 import { RoleAccount } from "@/types/RoleAccount";
+import { RoleResponse } from "@/typesResponse/RoleResponse";
 
 const rolAPI = {
   getAllRoles: () => axios.get(`${apiURL}/roles`),
@@ -21,7 +22,7 @@ const rolAPI = {
 
 export default rolAPI;
 
-export const getRolById = async (id: number): Promise<RoleAccount> => {
+export const getRolById = async (id: number): Promise<RoleResponse> => {
   const token = localStorage.getItem("token");
   if (!token) throw new Error("Token no encontrado");
   try {

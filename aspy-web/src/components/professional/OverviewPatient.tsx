@@ -1,20 +1,15 @@
 import { User } from "@/types/User";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
-import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import { getAge, getOccupation } from "@/utils/utils";
 
 interface OverviewPacienteProps {
   patient: User;
-  newReport: () => void;
 }
 
-export default function OverviewPatient({
-  patient,
-  newReport,
-}: OverviewPacienteProps) {
+export default function OverviewPatient({ patient }: OverviewPacienteProps) {
   return (
     <Box className="contenedor-overview">
       <Grid container rowSpacing={3} columnSpacing={{ xs: 1, sm: 1, md: 1 }}>

@@ -52,6 +52,7 @@ const staffLoaders: Loader[] = [
     name: "professionalServices",
     fn: professionalServiceAPI.getAllProfessionalServices,
   },
+  { name: "roles", fn: roleAPI.getAllRoles },
   { name: "receipts", fn: receiptAPI.getAllReceipts },
   { name: "schedules", fn: scheduleAPI.getAllSchedules },
   { name: "services", fn: serviceAPI.getAllServices },
@@ -77,6 +78,8 @@ const professionalLoaders: Loader[] = [
   { name: "appointments", fn: appointmentAPI.getAllAppointments },
   { name: "appointmentReports", fn: appointmentReportAPI.getAllReports },
   { name: "persons", fn: personAPI.getAllPersons },
+  { name: "roles", fn: roleAPI.getAllRoles },
+  { name: "professional", fn: professionalAPI.getAllProfessionals },
 ];
 
 // Recorrers para cada tipo

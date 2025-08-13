@@ -1,4 +1,4 @@
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { User } from "@/types/User";
 import { useRoleData } from "@/observer/RoleDataContext";
 import { getUsers } from "@/utils/utils";
@@ -37,15 +37,6 @@ export default function History() {
 
   const user: User | undefined = clients.find((u) => u.user_id === numericId);
 
-  const location = useLocation();
-
-  const handleNewReport = () => {
-    if (true) {
-      const newPath = `${location.pathname}/nuevoReporte`;
-      navigate(newPath);
-    }
-  };
-
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1}>
@@ -60,7 +51,7 @@ export default function History() {
           <TimeLinePatients patient={user!} />
         </Grid>
         <Grid size={4}>
-          <OverviewPatient patient={user!} newReport={handleNewReport} />
+          <OverviewPatient patient={user!} />
         </Grid>
       </Grid>
     </Box>

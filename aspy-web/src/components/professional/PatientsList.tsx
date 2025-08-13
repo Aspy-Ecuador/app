@@ -60,9 +60,8 @@ export default function PatientsList() {
   const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
   const [user, setUser] = useState<User | null>(null);
 
-  if (loading) return <Progress />;
+  const users: User[] = getUsers(data ?? []);
 
-  const users: User[] = getUsers(data);
   const clients: User[] =
     users.filter((user: User) => user.role_id === 3) || [];
 
@@ -89,6 +88,8 @@ export default function PatientsList() {
     }
   };
 
+  if (loading) return <Progress />;
+
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1}>
@@ -101,15 +102,21 @@ export default function PatientsList() {
           <Divider className="divider-paciente-historial"></Divider>
         </Grid>
         <Grid size={8}>
-          <Table<User>
-            columns={columns}
-            rows={clients}
-            getRowId={(row) => row.user_id}
-            rowSelectionModel={rowSelection}
-            onRowSelectionChange={(newSelection) =>
-              setRowSelection(newSelection)
-            }
-          />
+          {loading ? (
+            <Progress />
+          ) : clients.length ? (
+            <Table<User>
+              columns={columns}
+              rows={clients}
+              getRowId={(row) => row.user_id}
+              rowSelectionModel={rowSelection}
+              onRowSelectionChange={(newSelection) =>
+                setRowSelection(newSelection)
+              }
+            />
+          ) : (
+            <Typography>No hay Clientes</Typography>
+          )}
         </Grid>
         {user && (
           <Grid size={4}>

@@ -2,11 +2,13 @@ import axios from "axios";
 import apiURL from "./apiConfig";
 import { UserLogin } from "@/types/UserLogin";
 import { getRolById } from "../API/rolAPI";
-import { getUserById } from "../API/usuarioAPI";
 import { setAuthenticatedUser } from "@store";
-import { UserAccount } from "@/types/UserAccount";
-import { User } from "@/types/User";
 import { UserAccountRequest } from "@/typesRequest/UserAccountRequest";
+import { LoginResponse } from "@/typesResponse/LoginResponse";
+import { loginAdapter } from "@/adapters/loginAdapter";
+import personAPI from "./personAPI";
+import { RoleResponse } from "@/typesResponse/RoleResponse";
+import { PersonResponse } from "@/typesResponse/PersonResponse";
 
 export const login = async (email: string, password: string) => {
   const response = await axios.post(
@@ -18,10 +20,7 @@ export const login = async (email: string, password: string) => {
   if (!response) {
     throw new Error("Credenciales incorrectas");
   }
-
   const data = response.data;
-  console.log(data);
-  // Guarda el token
   localStorage.setItem("token", data.access_token);
   await StoreUser();
   return data;
@@ -29,7 +28,6 @@ export const login = async (email: string, password: string) => {
 
 export const StoreUser = async () => {
   const token = localStorage.getItem("token");
-
   if (!token) throw new Error("Token no encontrado");
 
   const response = await axios.get(`${apiURL}/user`, {
@@ -38,25 +36,27 @@ export const StoreUser = async () => {
     },
   });
 
-  const userData: UserLogin = response.data;
-  const roleInfo = await getRolById(userData.role_id);
-  const userInfo: User = await getUserById(userData.user_id);
+  const userLogin: LoginResponse = response.data;
+  const roleLogin: RoleResponse = await getRolById(userLogin.role_id);
+  const personsResponse = await personAPI.getAllPersons();
+  const persons: PersonResponse[] = personsResponse.data;
+  const personLogin = persons.find(
+    (person) => person.user_id === userLogin.user_id
+  );
 
-  const userWithRoleName: UserLogin = {
-    ...userData,
-    role: roleInfo.name,
-    name: userInfo.first_name + " " + userInfo.last_name,
-    person_id: userInfo.person_id,
-    first_name: userInfo.first_name,
-    last_name: userInfo.last_name,
-    birthdate: userInfo.birthdate,
-    gender_id: userInfo.gender,
-    occupation_id: userInfo.occupation,
-    marital_status_id: userInfo.marital_status,
-    education_id: userInfo.education,
-  };
-  console.log(userWithRoleName.person_id);
-  setAuthenticatedUser(userWithRoleName);
-  //Guarda el usuario logeado
-  return userWithRoleName;
+  if (!personLogin) throw new Error("Person no encontrado");
+
+  const user: UserLogin = loginAdapter(personLogin, roleLogin, userLogin);
+  console.log(user);
+  setAuthenticatedUser(user);
+  return user;
+};
+
+export const register = async (userRegister: UserAccountRequest) => {
+  try {
+    await axios.post(`${apiURL}/user-account`, userRegister);
+  } catch (error) {
+    console.error("Error al agregar persona:", error);
+    throw error;
+  }
 };

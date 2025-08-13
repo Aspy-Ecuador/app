@@ -135,7 +135,13 @@ export function getProfessionalSchedule(
 }
 
 export function getUsers(data: any): User[] {
-  if (!data || !data.persons || !data.userAccounts || !data.roles) {
+  if (
+    !data ||
+    !data.persons ||
+    !data.userAccounts ||
+    !data.roles ||
+    !data.professionals
+  ) {
     return [];
   }
   const persons: PersonResponse[] = data.persons;
