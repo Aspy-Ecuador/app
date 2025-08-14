@@ -19,6 +19,5 @@ export const AdminRoutes = [
   { path: "/nuevo-servicio", element: <CreateService /> },
   { path: "/nuevo-usuario", element: <CreateUserAdmin /> },
   { path: "/citas", element: <Appointment /> },
-  { path: "/usuarios/:id", element: <EditUserAdmin /> },
   ...SharedRoutes,
 ];

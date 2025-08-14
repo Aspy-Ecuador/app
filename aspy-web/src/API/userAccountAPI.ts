@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import apiURL from "./apiConfig";
 import { getConfig } from "./config";
+import { UserAccountRequest } from "@/typesRequest/UserAccountRequest";
 
 interface UserAccountData {
   email: string; // Email address
@@ -27,8 +28,8 @@ const userAccountAPI = {
 
   // Update user account by ID
   updateUserAccount: async (
-    id: string,
-    userAccountData: UserAccountData
+    id: number,
+    userAccountData: UserAccountRequest
   ): Promise<AxiosResponse> => {
     return axios.put(
       `${apiURL}/user-account/${id}`,

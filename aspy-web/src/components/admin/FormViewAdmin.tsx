@@ -1,32 +1,34 @@
 import { useState } from "react";
-import { inputCreateUserAdminConfig } from "@/config/userFormAdminConfig";
 import { useNavigate } from "react-router-dom";
+import { UserAccountRequest } from "@/typesRequest/UserAccountRequest";
+import { User } from "@/types/User";
+import { getUser } from "@/utils/utils";
+import { useRoleData } from "@/observer/RoleDataContext";
+//import { register } from "@/API/auth";
 import Box from "@mui/material/Box";
 import UserFormAdmin from "@admin/UserFormAdmin";
 import Steps from "@components/Steps";
 import Grid from "@mui/material/Grid2";
 import Success from "@components/Success";
-//import { addPerson } from "../API/usuarioAPI";
-import { UserAccountRequest } from "@/typesRequest/UserAccountRequest";
-import { User } from "@/types/User";
+import Progress from "@components/Progress";
+//import userAccountAPI from "@/API/userAccountAPI";
 
 interface FormViewProps {
   isEdit: boolean;
   user_id?: number;
 }
 
-const stepsName = ["Datos personales", "Hogar", "Seguridad"];
+const stepsName = ["Datos personales", "Datos generales", "Seguridad"];
 
 export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
   const [step, setStep] = useState(0);
   const totalSteps = 3;
-  const fieldsPerStep = Math.ceil(
-    inputCreateUserAdminConfig.length / totalSteps
-  );
-
+  const [roleSelect, setRoleSelect] = useState<number>(0);
   const [open, setOpen] = useState(false);
 
   const [userData, setUserData] = useState<User>();
+
+  const { data, loading } = useRoleData();
 
   const handleNext = (data: User) => {
     setUserData((prev) => ({ ...prev, ...data }));
@@ -97,18 +99,64 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
     const fullData = { ...userData, ...data };
 
     if (isEdit) {
-      console.log("se editó");
       const userEdit = formatUserEdit(fullData);
       console.log(userEdit);
-      //await register(newPerson);
+      //await userAccountAPI.updateUserAccount( user_id!, userRegister);}
     } else {
-      console.log("se debe registrar");
       const userRegister = formatUser(fullData);
       console.log(userRegister);
-      //await register(userRegister);
+      //await register(newPerson);
     }
     handleOpen();
   };
+
+  let stepsFields = [];
+  if (roleSelect === 2) {
+    stepsFields = [
+      { start: 0, end: 5 },
+      { start: 5, end: 12 },
+      { start: 12, end: 14 },
+    ];
+  } else {
+    stepsFields = [
+      { start: 0, end: 5 },
+      { start: 5, end: 9 },
+      { start: 9, end: 12 },
+    ];
+  }
+  if (loading) return <Progress />;
+
+  if (isEdit) {
+    if (user_id) {
+      const user: User = getUser(data, user_id);
+      if (user.role_id === 2) {
+        stepsFields = [
+          { start: 0, end: 5 },
+          { start: 5, end: 12 },
+          { start: 12, end: 14 },
+        ];
+      } else {
+        stepsFields = [
+          { start: 0, end: 5 },
+          { start: 5, end: 9 },
+          { start: 9, end: 12 },
+        ];
+      }
+      if (roleSelect === 2) {
+        stepsFields = [
+          { start: 0, end: 5 },
+          { start: 5, end: 12 },
+          { start: 12, end: 14 },
+        ];
+      } else {
+        stepsFields = [
+          { start: 0, end: 5 },
+          { start: 5, end: 9 },
+          { start: 9, end: 12 },
+        ];
+      }
+    }
+  }
 
   return (
     <Box>
@@ -119,13 +167,14 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
         <Grid size={12}>
           <UserFormAdmin
             isEditMode={isEdit}
-            start={step * fieldsPerStep}
-            end={(step + 1) * fieldsPerStep}
+            start={stepsFields[step].start}
+            end={stepsFields[step].end}
             onNext={handleNext}
             onBack={handleBack}
             onFinish={handleFinalSubmit}
             isLast={step === totalSteps - 1}
             userId={user_id}
+            onRoleChange={setRoleSelect}
           />
         </Grid>
       </Grid>

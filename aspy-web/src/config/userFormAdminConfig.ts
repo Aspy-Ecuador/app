@@ -105,30 +105,6 @@ export const inputCreateUserAdminConfig = [
     ],
   },
   {
-    label: "Contraseña",
-    key: "password",
-    type: "password",
-    validation: {
-      required: { value: true, message: "Campo requerido" },
-      minLength: {
-        value: 6,
-        message: "min 6 caracteres",
-      },
-    },
-  },
-  {
-    label: "Confirmar Contraseña",
-    key: "confirmPassword",
-    type: "password",
-    validation: {
-      required: { value: true, message: "Campo requerido" },
-      minLength: {
-        value: 6,
-        message: "min 6 caracteres",
-      },
-    },
-  },
-  {
     label: "Título",
     key: "title",
     type: "text",
@@ -152,6 +128,32 @@ export const inputCreateUserAdminConfig = [
       required: { value: true, message: "Campo requerido" },
     },
   },
+
+  {
+    label: "Contraseña",
+    key: "password",
+    type: "password",
+    validation: {
+      required: { value: true, message: "Campo requerido" },
+      minLength: {
+        value: 6,
+        message: "min 6 caracteres",
+      },
+    },
+  },
+  {
+    label: "Confirmar Contraseña",
+    key: "confirmPassword",
+    type: "password",
+    validation: {
+      required: { value: true, message: "Campo requerido" },
+      minLength: {
+        value: 6,
+        message: "min 6 caracteres",
+      },
+    },
+  },
+
   /*   {
     label: "Provincia",
     key: "province",

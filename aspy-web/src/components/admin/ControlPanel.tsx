@@ -14,10 +14,9 @@ import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined
 
 export default function ControlPanel() {
   const navigate = useNavigate();
-  const { data, loading } = useRoleData();
+  const { loading } = useRoleData();
 
   if (loading) return <Progress />;
-  console.log(data);
 
   const handleCreateUser = () => {
     const newPath = `/nuevo-usuario`;

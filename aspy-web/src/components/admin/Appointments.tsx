@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { getAppointmentProfessional } from "@utils/utils";
+import { Appointment } from "@/types/Appointment";
+import { userAdapter } from "@/adapters/userAdapter";
+import { appointmentAdapter } from "@/adapters/appointmentAdapter";
+import { useRoleData } from "@/observer/RoleDataContext";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import Agenda from "@components/Agenda";
 import SelectProfessional from "@components/SelectProfessional";
 import SimpleHeader from "@components/SimpleHeader";
-import { useRoleData } from "@/observer/RoleDataContext";
 import Progress from "@components/Progress";
-import { Appointment } from "@/types/Appointment";
-import { userAdapter } from "@/adapters/userAdapter";
-import { appointmentAdapter } from "@/adapters/appointmentAdapter";
 
 export default function Appointments() {
   const { data, loading } = useRoleData();
@@ -18,7 +18,7 @@ export default function Appointments() {
     setSelected(id);
   };
   if (loading) return <Progress />;
-  
+
   const appointments: Appointment[] = (data.appointments || [])
     .map((appointment: any) => {
       const service = data.services?.find(
@@ -95,7 +95,11 @@ export default function Appointments() {
           <SimpleHeader text={"Citas"} />
         </Grid>
         <Grid size={9}>
-          {loading ? <Progress /> : <Agenda appointments={appointmentProfessional} />}
+          {loading ? (
+            <Progress />
+          ) : (
+            <Agenda appointments={appointmentProfessional} />
+          )}
         </Grid>
         <Grid size={3}>
           <SelectProfessional onSelect={handleSelectProfessional} />

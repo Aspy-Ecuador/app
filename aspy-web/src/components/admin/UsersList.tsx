@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { GridRowSelectionModel } from "@mui/x-data-grid";
 import { User } from "@/types/User";
 import { ButtonAdmin } from "@/types/ButtonAdmin";
@@ -67,7 +67,6 @@ export default function UsersList() {
   const { data, loading } = useRoleData();
 
   const navigate = useNavigate();
-  const location = useLocation();
 
   const users: User[] = getUsers(data ?? []);
 
@@ -101,13 +100,6 @@ export default function UsersList() {
       setUser(null);
     }
   }, [rowSelection]);
-
-  const handleEdit = () => {
-    if (user) {
-      setRowSelection([]);
-      navigate(`${location.pathname}/${user.user_id}`);
-    }
-  };
 
   const handleCreate = () => {
     navigate(`/nuevo-usuario`);
@@ -162,11 +154,7 @@ export default function UsersList() {
 
         {user && (
           <Grid size={4}>
-            <ProfileView
-              user={user}
-              onEdit={handleEdit}
-              isRowPosition={false}
-            />
+            <ProfileView user={user} isRowPosition={false} />
           </Grid>
         )}
       </Grid>
