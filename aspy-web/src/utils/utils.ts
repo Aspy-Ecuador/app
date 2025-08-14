@@ -314,19 +314,26 @@ export function toNumber(str: string): number {
 
 export function getAppointmentProfessional(
   proffesional_id: number,
-  data: Appointment[]
+  data: any
 ): Appointment[] {
-  if (proffesional_id === 0 || !data) {
+  if (!data) {
     return [];
   }
 
-  return data.filter(
+  const appointments: Appointment[] = getAppointments(data);
+
+  if (proffesional_id === 0) {
+    return appointments;
+  }
+
+  return appointments.filter(
     (appointment) => appointment.proffesional.person_id === proffesional_id
   );
 }
 
 export function getAppointments(data: any): Appointment[] {
   const professionals: ProfessionalResponse[] = data.professional;
+
   const appointments: Appointment[] = (data.appointments || [])
     .map((appointment: any) => {
       const service = data.services?.find(
@@ -401,6 +408,16 @@ export function getAppointments(data: any): Appointment[] {
     .filter(Boolean);
 
   return appointments;
+}
+
+export function getNextAppointments(data: any): Appointment[] {
+  const appointments: Appointment[] = getAppointments(data);
+  if (!appointments) return [];
+
+  const today = new Date();
+  const todayStr = today.toISOString().split("T")[0];
+
+  return appointments.filter((app) => app.date > todayStr);
 }
 
 export function translateStatus(status: string): string {

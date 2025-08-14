@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { getAuthenticatedUserName } from "@store";
 import { ButtonControl } from "@/types/ButtonControl";
 import { Appointment } from "@/types/Appointment";
-import { getAppointments } from "@/utils/utils";
+import { getAppointments, getNextAppointments } from "@/utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Grid from "@mui/material/Grid2";
 import Box from "@mui/material/Box";
@@ -64,7 +64,7 @@ export default function ControlPanel() {
     },
   ];
 
-  const appointments: Appointment[] = getAppointments(data);
+  const appointments: Appointment[] = getNextAppointments(data);
 
   if (loading) return <Progress />;
 
@@ -76,7 +76,7 @@ export default function ControlPanel() {
         </Grid>
 
         <Grid size={8}>
-          <Typography variant="h3">Proximas citas:</Typography>
+          <Typography variant="h3">Citas de hoy:</Typography>
           <ShowAppointment appointments={appointments} />
         </Grid>
 

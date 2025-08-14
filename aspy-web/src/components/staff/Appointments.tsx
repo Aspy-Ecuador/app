@@ -26,11 +26,9 @@ export default function Appointments() {
     navigate(newPath);
   };
 
-  const appointments: Appointment[] = getAppointments(data);
-
   const appointmentProfessional: Appointment[] = getAppointmentProfessional(
     selectedId,
-    appointments
+    data
   );
 
   return (

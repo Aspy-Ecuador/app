@@ -25,6 +25,7 @@ const adminLoaders: Loader[] = [
   { name: "persons", fn: personAPI.getAllPersons },
   { name: "roles", fn: roleAPI.getAllRoles },
   { name: "professional", fn: professionalAPI.getAllProfessionals },
+  { name: "schedules", fn: scheduleAPI.getAllSchedules },
 ];
 
 const clientLoaders: Loader[] = [
@@ -61,6 +62,7 @@ const staffLoaders: Loader[] = [
   { name: "appointments", fn: appointmentAPI.getAllAppointments },
   { name: "appointmentReports", fn: appointmentReportAPI.getAllReports },
   { name: "persons", fn: personAPI.getAllPersons },
+  { name: "professional", fn: professionalAPI.getAllProfessionals },
 ];
 
 const professionalLoaders: Loader[] = [
