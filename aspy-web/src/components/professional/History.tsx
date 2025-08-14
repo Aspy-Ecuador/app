@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { User } from "@/types/User";
 import { useRoleData } from "@/observer/RoleDataContext";
-import { getUsers } from "@/utils/utils";
+import { getUser, getUsers } from "@/utils/utils";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import OverviewPatient from "@professional/OverviewPatient";
@@ -31,12 +31,8 @@ export default function History() {
     backToHome();
   }
 
-  const users: User[] = getUsers(data);
-  const clients: User[] =
-    users.filter((user: User) => user.role_id === 3) || [];
-
-  const user: User | undefined = clients.find((u) => u.user_id === numericId);
-
+  const user: User = getUser(data, numericId);
+  console.log(user);
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1}>

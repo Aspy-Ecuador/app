@@ -140,7 +140,7 @@ export function getUsers(data: any): User[] {
     !data.persons ||
     !data.userAccounts ||
     !data.roles ||
-    !data.professionals
+    !data.professional
   ) {
     return [];
   }
@@ -607,4 +607,35 @@ export function handleDownloadInvoice(invoice: Receipt) {
   doc.save(
     `Factura-${invoice.receipt.receipt_id}-${invoice.client.first_name}.pdf`
   );
+}
+
+export function getAppointmentsProfessional(
+  data: any,
+  person_id: number
+): Appointment[] {
+  const appointments: Appointment[] = getAppointments(data);
+  return appointments.filter(
+    (appointment) => appointment.proffesional.person_id === person_id
+  );
+}
+
+export function getClients(data: any, person_id: number): User[] {
+  const appointments: Appointment[] = getAppointmentsProfessional(
+    data,
+    person_id
+  );
+
+  const clients = appointments.map((app) => app.client);
+
+  const uniqueClients = clients.filter(
+    (client, index, self) =>
+      index === self.findIndex((c) => c.person_id === client.person_id)
+  );
+  return uniqueClients;
+}
+
+export function getUser(data: any, user_id: number): User {
+  const users: User[] = getUsers(data);
+  console.log(users);
+  return users.find((user) => user.user_id === user_id)!;
 }

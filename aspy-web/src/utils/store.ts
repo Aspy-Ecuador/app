@@ -124,6 +124,14 @@ export const getAuthenticatedUserIdentity = (): number => {
   return user.user_id; // Devuelve el email del usuario autenticado
 };
 
+export const getAuthenticatedUserID = (): number => {
+  const user = getAuthenticatedUser();
+  if (!user || user === null || typeof user === "string") {
+    throw new Error("No authenticated user found");
+  }
+  return user.person_id; // Devuelve el email del usuario autenticado
+};
+
 // Función para obtener el tema actual
 export const getTheme = (): string => {
   const state = store.getState();

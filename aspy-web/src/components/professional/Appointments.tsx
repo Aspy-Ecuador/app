@@ -1,16 +1,22 @@
 import { useRoleData } from "@/observer/RoleDataContext";
 import { Appointment } from "@/types/Appointment";
-import { getAppointments } from "@/utils/utils";
+import { getAppointmentsProfessional } from "@/utils/utils";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import Agenda from "@components/Agenda";
 import Progress from "@components/Progress";
 import SimpleHeader from "../SimpleHeader";
+import { getAuthenticatedUserID } from "@/utils/store";
 
 export default function Appointments() {
   const { data, loading } = useRoleData();
+
   if (loading) return <Progress />;
-  const appointments: Appointment[] = getAppointments(data);
+
+  const appointments: Appointment[] = getAppointmentsProfessional(
+    data,
+    getAuthenticatedUserID()
+  );
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>

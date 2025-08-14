@@ -6,7 +6,6 @@ import PatientsList from "@professional/PatientsList";
 import History from "@professional/History";
 import NewReport from "@professional/NewReport";
 import Detail from "@professional/Detail";
-import PaymentsList from "@professional/PaymentsList";
 
 export const ProfessionalRoutes = [
   { path: "/", element: <ControlPanel /> },
@@ -16,6 +15,5 @@ export const ProfessionalRoutes = [
   { path: "/pacientes/:id", element: <History /> },
   { path: "/pacientes/:id/:appointment/nuevoReporte", element: <NewReport /> },
   { path: "/pacientes/:id/:citaId", element: <Detail /> },
-  { path: "/pagos", element: <PaymentsList /> },
   ...SharedRoutes,
 ];

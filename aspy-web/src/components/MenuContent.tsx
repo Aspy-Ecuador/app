@@ -10,16 +10,12 @@ import Stack from "@mui/material/Stack";
 
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
-import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
-import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
-import HelpRoundedIcon from "@mui/icons-material/HelpRounded";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import AssignmentIndRoundedIcon from "@mui/icons-material/AssignmentIndRounded";
 import SwitchAccountRoundedIcon from "@mui/icons-material/SwitchAccountRounded";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
 import ReceiptLongRoundedIcon from "@mui/icons-material/ReceiptLongRounded";
-import CreditScoreRoundedIcon from "@mui/icons-material/CreditScoreRounded";
 
 type ListItem = {
   text: string;
@@ -60,7 +56,6 @@ const professionalListItems = [
     icon: <AssignmentIndRoundedIcon />,
   },
   { text: "Citas", route: "/citas", icon: <CalendarMonthRoundedIcon /> },
-  { text: "Pagos", route: "/pagos", icon: <CreditScoreRoundedIcon /> },
 ];
 
 const clientListItems = [
@@ -71,16 +66,6 @@ const clientListItems = [
     icon: <CalendarMonthRoundedIcon />,
   },
   { text: "Recibos", route: "/recibos", icon: <ReceiptLongRoundedIcon /> },
-];
-
-const secondaryListItems = [
-  {
-    text: "Preferencias",
-    route: "/preferencias",
-    icon: <SettingsRoundedIcon />,
-  },
-  { text: "Sobre ASPY", route: "/sobreAspy", icon: <InfoRoundedIcon /> },
-  { text: "Contactos", route: "/contacto", icon: <HelpRoundedIcon /> },
 ];
 
 export default function MenuContent() {
@@ -119,7 +104,7 @@ export default function MenuContent() {
           </ListItem>
         ))}
       </List>
-     {/*  <List dense>
+      {/*  <List dense>
         {secondaryListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: "block" }}>
             <ListItemButton

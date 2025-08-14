@@ -10,7 +10,8 @@ import OverviewPersona from "@professional/OverviewPersona";
 import Table from "@components/Table";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Progress from "@components/Progress";
-import { getAge, getUsers } from "@/utils/utils";
+import { getAge, getClients } from "@/utils/utils";
+import { getAuthenticatedUserID } from "@/utils/store";
 
 export const columns: GridColDef[] = [
   {
@@ -60,10 +61,7 @@ export default function PatientsList() {
   const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
   const [user, setUser] = useState<User | null>(null);
 
-  const users: User[] = getUsers(data ?? []);
-
-  const clients: User[] =
-    users.filter((user: User) => user.role_id === 3) || [];
+  const clients: User[] = getClients(data, getAuthenticatedUserID()) ?? [];
 
   useEffect(() => {
     if (rowSelection.length > 0) {
