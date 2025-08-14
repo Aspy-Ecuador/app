@@ -1,6 +1,7 @@
 import { Scheduler } from "@aldabil/react-scheduler";
 import { es } from "date-fns/locale";
 import { Appointment } from "@/types/Appointment";
+import { translateStatus } from "@/utils/utils";
 
 /* Ver documentacion en https://github.com/aldabil21/react-scheduler  */
 
@@ -12,7 +13,7 @@ export default function Agenda({
   const events = appointments.map((appointment) => ({
     event_id: `Servicio: ${appointment.service.name}`,
     title: `Paciente: ${appointment.client.full_name} | Profesional: ${appointment.proffesional.full_name}`,
-    subtitle: `Estado: ${appointment.status.name}`,
+    subtitle: `Estado: ${translateStatus(appointment.status.name)}`,
     start: new Date(`${appointment.date}T${appointment.startTime}`),
     end: new Date(`${appointment.date}T${appointment.endTime}`),
   }));

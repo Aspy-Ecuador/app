@@ -12,6 +12,7 @@ import EditUserAdmin from "@/components/admin/EditUserAdmin";
 export const AdminRoutes = [
   { path: "/", element: <ControlPanel /> },
   { path: "/perfil", element: <Profile /> },
+  { path: "/editar/:id", element: <EditUserAdmin /> },
   { path: "/usuarios", element: <UsersList /> },
   { path: "/servicios", element: <ServicesList /> },
   { path: "/servicios/:id", element: <EditService /> },

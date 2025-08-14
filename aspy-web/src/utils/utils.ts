@@ -326,6 +326,7 @@ export function getAppointmentProfessional(
 }
 
 export function getAppointments(data: any): Appointment[] {
+  const professionals: ProfessionalResponse[] = data.professional;
   const appointments: Appointment[] = (data.appointments || [])
     .map((appointment: any) => {
       const service = data.services?.find(
@@ -378,7 +379,17 @@ export function getAppointments(data: any): Appointment[] {
         professionalRole,
         professionalAccount
       );
-
+      // Si es profesional (role_id === 2), añadimos sus datos extra
+      if (professional.role_id === 2) {
+        const prof = professionals.find(
+          (p) => p.person_id === professional.person_id
+        );
+        if (prof) {
+          professional.title = prof.title;
+          professional.about = prof.about;
+          professional.specialty = prof.specialty;
+        }
+      }
       return appointmentAdapter(
         appointment,
         schedule,
@@ -446,10 +457,8 @@ export function getGender(gender: number): string {
   }
 }
 
-export function getAppointmentsReport(
-  appointments: Appointment[],
-  data: any
-): AppointmentReport[] {
+export function getAppointmentsReport(data: any): AppointmentReport[] {
+  const appointments: Appointment[] = getAppointments(data);
   const appointmentReport: AppointmentReportResponse[] =
     data.appointmentReports;
   return appointmentReport
@@ -638,4 +647,49 @@ export function getUser(data: any, user_id: number): User {
   const users: User[] = getUsers(data);
   console.log(users);
   return users.find((user) => user.user_id === user_id)!;
+}
+
+export function getUnmarkedAppointments(
+  data: any,
+  person_id: number
+): Appointment[] {
+  const appointments: Appointment[] = getAppointmentsProfessional(
+    data,
+    person_id
+  );
+  //const appointmentReport: AppointmentReport[] = getAppointmentsReport(data);
+  return appointments.filter(
+    (appointment) => appointment.status.id_status === 1
+  );
+}
+
+export function getUnreportedAppointments(
+  data: any,
+  person_id: number
+): Appointment[] {
+  const appointments: Appointment[] = getAppointmentsProfessional(
+    data,
+    person_id
+  );
+
+  const appointmentReports: AppointmentReportResponse[] =
+    data.appointmentReports;
+
+  if (!appointments || !appointmentReports) {
+    return [];
+  }
+
+  const unreported = appointments.filter(
+    (app) =>
+      !appointmentReports.some(
+        (report) => report.appointment_id === app.id_appointment
+      )
+  );
+  console.log(appointments);
+  return unreported.length > 0 ? unreported : [];
+}
+
+export function getAppointment(data: any, id: number): Appointment | undefined {
+  const appointments: Appointment[] = getAppointments(data);
+  return appointments.find((app) => app.id_appointment === id);
 }

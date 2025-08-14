@@ -5,7 +5,7 @@ import { AppointmentRequest } from "@/typesRequest/AppointmentRequest";
 import { FileData } from "@/types/FileData";
 import { ServiceResponse } from "@/typesResponse/ServiceResponse";
 import { useRoleData } from "@/observer/RoleDataContext";
-import { getAuthenticatedUser } from "@/utils/store";
+import { getAuthenticatedUserID } from "@/utils/store";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid2";
@@ -53,7 +53,7 @@ export default function CheckoutView() {
       // 2. Subir a Cloudinary
       const uploadedFileUrl = await uploadToCloudinary(file);
 
-      const hardcodedPersonId = getAuthenticatedUser()!.person_id; // Cliente
+      const hardcodedPersonId = getAuthenticatedUserID(); // Cliente
       const hardcodedScheduledBy = 5;
       const hardcodedServicePrice = selectedService!.price;
       const hardcodedTotalAmount = selectedService!.price;

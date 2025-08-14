@@ -3,45 +3,71 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Edit, UploadFile } from "@mui/icons-material";
 import { FileData } from "@/types/FileData";
 import { AppointmentReportRequest } from "@/typesRequest/AppointmentReportRequest";
-import CancelButton from "../buttons/CancelButton";
-import CreationButton from "../buttons/CreationButton";
-import UploadButton from "../buttons/UploadButton";
-import { toNumber, uploadToCloudinary } from "@/utils/utils";
+import { getAppointment, toNumber, uploadToCloudinary } from "@/utils/utils";
+import { useRoleData } from "@/observer/RoleDataContext";
+import CancelButton from "@buttons/CancelButton";
+import CreationButton from "@buttons/CreationButton";
+import UploadButton from "@buttons/UploadButton";
+import Progress from "@components/Progress";
+import appointmentReportAPI from "@/API/appointmentReportAPI";
+import Success from "../Success";
 
 interface AddReportProps {
   setReport: (file: FileData | null) => void;
 }
 
 export default function AddReport({ setReport }: AddReportProps) {
-  const { id, appointment } = useParams();
-  console.log(id);
-  const [signature, setSignature] = useState<FileData | null>(null);
+  const { appointment } = useParams();
+  //const [signature, setSignature] = useState<FileData | null>(null);
   const [reporte, setReporte] = useState<FileData | null>(null);
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
 
   const handleBack = () => {
     navigate(-1);
   };
 
-  const handleSend = async () => {
-    if (signature != null && reporte != null && appointment != null) {
-      const reportUrl = await uploadToCloudinary(reporte);
-      const signUrl = await uploadToCloudinary(signature);
+  const handleClose = () => {
+    setOpen(false);
+    navigate("/app");
+  };
 
-      const data: AppointmentReportRequest = {
-        appointmentId: toNumber(appointment),
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const { data, loading } = useRoleData();
+  if (loading) return <Progress />;
+
+  const handleSend = async () => {
+    if (reporte != null && appointment != null) {
+      const reportUrl = await uploadToCloudinary(reporte);
+      //const signUrl = await uploadToCloudinary(signature);
+      const dataAppointment = getAppointment(data, toNumber(appointment));
+
+      if (!dataAppointment) {
+        return null;
+      }
+
+      const dataRequest: AppointmentReportRequest = {
+        appointment_id: toNumber(appointment),
         comments: reportUrl,
-        sign: signUrl,
-        createdBy: "system",
+        sign:
+          dataAppointment.proffesional.title +
+          " " +
+          dataAppointment.proffesional.first_name,
+        created_by: "system",
       };
 
-      console.log(data);
-      //await appointmentReportAPI.createReport(data);
+      console.log(dataRequest);
+      await appointmentReportAPI.createReport(dataRequest);
+      handleOpen();
     }
   };
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-md w-full  space-y-6 flex flex-col relative">
+      {/*
       <div>
         <div className="flex items-center mb-2">
           <Edit className="mr-2 text-gray-600" />
@@ -73,7 +99,7 @@ export default function AddReport({ setReport }: AddReportProps) {
           </>
         )}
       </div>
-
+*/}
       <div>
         <div className="flex items-center mb-2">
           <Edit className="mr-2 text-gray-600" />
@@ -99,15 +125,21 @@ export default function AddReport({ setReport }: AddReportProps) {
       <div className="flex justify-end gap-3 mt-auto">
         <CancelButton
           onClick={() => {
-            setSignature(null);
-            setReport(null);
-            setReporte(null);
+            //setSignature(null);
+            //setReport(null);
+            //setReporte(null);
             handleBack();
           }}
           text="Cancelar"
         />
         <CreationButton text="Enviar reporte" onClick={handleSend} />
       </div>
+      <Success
+        open={open}
+        handleClose={handleClose}
+        isRegister={true}
+        message={"Se ha registrado con éxito!!"}
+      />
     </div>
   );
 }

@@ -14,6 +14,7 @@ import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 import Button from "@mui/material/Button";
 import ConfirmDialog from "@professional/ConfirmDialog";
+import appointmentAPI from "@/API/appointmentAPI";
 
 interface ShowAppointmentProps {
   unmarkedAppointmentsProp: Appointment[];
@@ -33,8 +34,8 @@ export default function ShowAppointment({
   const [assistMap, setAssistMap] = useState<Record<number, string>>({});
   const navigate = useNavigate();
 
-  const handleConfirmAssist = () => {
-    (document.activeElement as HTMLElement)?.blur(); // ✅ esto
+  const handleConfirmAssist = async () => {
+    (document.activeElement as HTMLElement)?.blur();
     if (selectedAppointment) {
       setUnmarkedAppointments((prev) =>
         prev.filter(
@@ -48,12 +49,34 @@ export default function ShowAppointment({
         return updated;
       });
     }
+    await send();
     setOpenDialog(false);
     setSelectedAppointment(null);
   };
 
+  const send = async () => {
+    const option: string = selectedAppointment
+      ? assistMap[selectedAppointment.id_appointment]
+      : "";
+    if (option !== "" && selectedAppointment !== null) {
+      await appointmentAPI.updateAppointment(
+        selectedAppointment.id_appointment,
+        {
+          status: option,
+        }
+      );
+    }
+  };
+
   const handleCancel = () => {
-    (document.activeElement as HTMLElement)?.blur(); // ✅ esto
+    (document.activeElement as HTMLElement)?.blur();
+    if (selectedAppointment) {
+      setAssistMap((prev) => {
+        const updated = { ...prev };
+        delete updated[selectedAppointment.id_appointment];
+        return updated;
+      });
+    }
     setOpenDialog(false);
     setSelectedAppointment(null);
   };
@@ -77,14 +100,64 @@ export default function ShowAppointment({
                       alignItems: "center",
                     }}
                   >
-                    <Typography gutterBottom variant="h6">
-                      Paciente: {cita.client.full_name}
+                    <Typography gutterBottom variant="body1">
+                      Paciente:
+                    </Typography>
+                    <Typography gutterBottom variant="body1">
+                      {cita.client.full_name}
+                    </Typography>
+                  </Stack>
+                  <Stack
+                    direction="row"
+                    sx={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography gutterBottom variant="body1">
+                      Servicio:
+                    </Typography>
+                    <Typography gutterBottom variant="body1">
+                      {cita.service.name}
+                    </Typography>
+                  </Stack>
+                  <Stack
+                    direction="row"
+                    sx={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography gutterBottom variant="body1">
+                      Fecha:
+                    </Typography>
+                    <Typography gutterBottom variant="body1">
+                      {cita.date}
+                    </Typography>
+                  </Stack>
+                  <Stack
+                    direction="row"
+                    sx={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography gutterBottom variant="body1">
+                      Hora:
+                    </Typography>
+                    <Typography gutterBottom variant="body1">
+                      {cita.startTime}
                     </Typography>
                   </Stack>
                 </Box>
                 <Divider />
                 <Box sx={{ p: 2 }}>
-                  <Stack direction="row" spacing={1}>
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    className="xd"
+                    sx={{ display: "flex", justifyContent: "center", mt: 1 }}
+                  >
                     <FormControl>
                       <FormLabel id={`opciones-${index}`}>
                         Seleccione una opción
@@ -105,12 +178,12 @@ export default function ShowAppointment({
                         }}
                       >
                         <FormControlLabel
-                          value="assist"
+                          value="2"
                           control={<Radio />}
                           label="Asistió"
                         />
                         <FormControlLabel
-                          value="no-assist"
+                          value="3"
                           control={<Radio />}
                           label="No asistió"
                         />
@@ -151,8 +224,53 @@ export default function ShowAppointment({
                       alignItems: "center",
                     }}
                   >
-                    <Typography gutterBottom variant="h6">
-                      Paciente: {cita.client.full_name}
+                    <Typography gutterBottom variant="body1">
+                      Paciente:
+                    </Typography>
+                    <Typography gutterBottom variant="body1">
+                      {cita.client.full_name}
+                    </Typography>
+                  </Stack>
+                  <Stack
+                    direction="row"
+                    sx={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography gutterBottom variant="body1">
+                      Servicio:
+                    </Typography>
+                    <Typography gutterBottom variant="body1">
+                      {cita.service.name}
+                    </Typography>
+                  </Stack>
+                  <Stack
+                    direction="row"
+                    sx={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography gutterBottom variant="body1">
+                      Fecha:
+                    </Typography>
+                    <Typography gutterBottom variant="body1">
+                      {cita.date}
+                    </Typography>
+                  </Stack>
+                  <Stack
+                    direction="row"
+                    sx={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography gutterBottom variant="body1">
+                      Hora:
+                    </Typography>
+                    <Typography gutterBottom variant="body1">
+                      {cita.startTime}
                     </Typography>
                   </Stack>
                 </Box>
@@ -165,7 +283,7 @@ export default function ShowAppointment({
                   >
                     <Button
                       onClick={() => {
-                        const newPath = `pacientes/${cita.client.person_id}/${cita.id_appointment}/nuevoReporte`;
+                        const newPath = `pacientes/${cita.id_appointment}/nuevoReporte`;
                         navigate(newPath);
                       }}
                       variant="outlined"

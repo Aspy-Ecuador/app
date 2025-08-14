@@ -14,10 +14,12 @@ import EditUser from "@staff/EditUser";
 import EditService from "@components/EditService";
 import AppointmentView from "@components/AppointmentView";
 import CheckoutView from "@components/CheckoutView";
+import EditUserAdmin from "@/components/admin/EditUserAdmin";
 
 export const StaffRoutes = [
   { path: "/", element: <ControlPanel /> },
   { path: "/perfil", element: <Profile /> },
+  { path: "/editar/:id", element: <EditUserAdmin /> },
   { path: "/profesionales", element: <ProffesionalList /> },
   { path: "/pacientes", element: <ClientList /> },
   { path: "/recibos", element: <ReceiptList /> },

@@ -1,7 +1,10 @@
-import { getAuthenticatedUserName } from "@store";
+import { getAuthenticatedUserID, getAuthenticatedUserName } from "@store";
 import { Appointment } from "@/types/Appointment";
 import { useRoleData } from "@/observer/RoleDataContext";
-import { getAppointments } from "@/utils/utils";
+import {
+  getUnmarkedAppointments,
+  getUnreportedAppointments,
+} from "@/utils/utils";
 import Grid from "@mui/material/Grid2";
 import Box from "@mui/material/Box";
 import ShowAppointment from "@professional/ShowAppointment";
@@ -12,7 +15,16 @@ import Progress from "@components/Progress";
 export default function ControlPanel() {
   const { data, loading } = useRoleData();
   if (loading) return <Progress />;
-  const appointments: Appointment[] = getAppointments(data);
+
+  const unmarkedAppointments: Appointment[] = getUnmarkedAppointments(
+    data,
+    getAuthenticatedUserID()
+  );
+
+  const unreportedAppointments: Appointment[] = getUnreportedAppointments(
+    data,
+    getAuthenticatedUserID()
+  );
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
@@ -23,8 +35,8 @@ export default function ControlPanel() {
 
         <Grid size={12}>
           <ShowAppointment
-            unmarkedAppointmentsProp={appointments}
-            unreportedAppointments={appointments}
+            unmarkedAppointmentsProp={unmarkedAppointments}
+            unreportedAppointments={unreportedAppointments}
           />
         </Grid>
       </Grid>

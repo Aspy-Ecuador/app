@@ -12,7 +12,6 @@ import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import {
-  getAppointments,
   getAppointmentsReport,
   getReportsUser,
   translateStatus,
@@ -33,12 +32,7 @@ export default function TimeLinePatients({ patient }: TimeLinePatientsProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const appointments: Appointment[] = getAppointments(data);
-
-  const appointmentsReport: AppointmentReport[] = getAppointmentsReport(
-    appointments,
-    data
-  );
+  const appointmentsReport: AppointmentReport[] = getAppointmentsReport(data);
 
   const appointmentsReportUser: AppointmentReport[] = getReportsUser(
     appointmentsReport,

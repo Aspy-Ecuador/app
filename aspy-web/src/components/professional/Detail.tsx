@@ -1,15 +1,13 @@
 import { useRoleData } from "@/observer/RoleDataContext";
 import { useParams, useNavigate } from "react-router-dom";
-import { Appointment } from "@/types/Appointment";
 import { AppointmentReport } from "@/types/AppointmentReport";
-import { getAppointments, getAppointmentsReport } from "@/utils/utils";
+import { getAppointmentsReport } from "@/utils/utils";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
 import LogoClaro from "@assets/logo mediano.png";
 import Divider from "@mui/material/Divider";
 import Progress from "@components/Progress";
-import PDFViewer from "@components/PDFViewer";
 import Header from "@components/Header";
 
 export default function AppointmentDetail() {
@@ -17,15 +15,11 @@ export default function AppointmentDetail() {
   if (loading) return <Progress />;
   const navigate = useNavigate();
 
-  const appointments: Appointment[] = getAppointments(data);
-
-  const appointmentsReport: AppointmentReport[] = getAppointmentsReport(
-    appointments,
-    data
-  );
+  const appointmentsReport: AppointmentReport[] = getAppointmentsReport(data);
 
   const { id, citaId } = useParams();
   console.log(id);
+
   const appointment = appointmentsReport.find(
     (a) => a.appointment.id_appointment.toString() === citaId
   );
@@ -44,8 +38,8 @@ export default function AppointmentDetail() {
             handle={handleBack}
           />
         </Grid>
-        <Grid size={6} className="grid-detalles">
-          <Grid container width={"80%"}>
+        <Grid size={6}>
+          <Grid container width={"100%"}>
             <Grid container size={12}>
               <Grid size={6} className="grid-empresa" sx={{}}>
                 <Typography variant="h2">Fundación ASPY</Typography>
@@ -126,8 +120,18 @@ export default function AppointmentDetail() {
             </Grid>
           </Grid>
         </Grid>
-        <Grid size={6} className="grid-detalles">
-          <PDFViewer url={appointment!.comments} />
+        <Grid size={6} sx={{ height: "90vh" }}>
+          {appointment?.comments && (
+            <div className="border border-gray-300 rounded-md overflow-hidden h-full">
+              <iframe
+                src={appointment.comments}
+                title="Vista previa del reporte"
+                width="100%"
+                height="100%"
+                className="rounded-md"
+              />
+            </div>
+          )}
         </Grid>
       </Grid>
     </Box>

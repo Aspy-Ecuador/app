@@ -14,7 +14,7 @@ export default function NewReport() {
         <Grid size={12} className="grid-p-patients-tittle">
           <SimpleHeader text="Nuevo Reporte" />
         </Grid>
-        <Grid size={8}>
+        <Grid size={8} sx={{ height: "90vh" }}>
           {report?.file && (
             <div className="border border-gray-300 rounded-md overflow-hidden h-full">
               <iframe

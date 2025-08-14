@@ -5,10 +5,12 @@ import AppointmentView from "@components/AppointmentView";
 import ReceiptList from "@components/ReceiptList";
 import CheckoutView from "@components/CheckoutView";
 import PDFViewer from "@/components/PDFViewer";
+import EditUserAdmin from "@/components/admin/EditUserAdmin";
 
 export const ClientRoutes = [
   { path: "/", element: <ControlPanel /> },
   { path: "/perfil", element: <Profile /> },
+  { path: "/editar/:id", element: <EditUserAdmin /> },
   { path: "/agendar-cita", element: <AppointmentView /> },
   { path: "/recibos", element: <ReceiptList /> },
   { path: "/pago/:serviceId/:scheduleId", element: <CheckoutView /> },
