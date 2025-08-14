@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { loadersByRole, UserRole } from "./loadersMap";
+import { getAuthenticatedUser } from "@/utils/store";
 
 type DataStore = Record<string, any>;
 
@@ -12,7 +13,7 @@ type RoleDataContextType = {
 const RoleDataContext = createContext<RoleDataContextType>({
   data: {},
   loading: true,
-  refreshData: async () => {},
+  refreshData: async () => { },
 });
 
 export const RoleDataProvider = ({
@@ -27,6 +28,15 @@ export const RoleDataProvider = ({
 
   const refreshData = async () => {
     setLoading(true);
+
+    // Esperar hasta que haya un token
+    const authUser = getAuthenticatedUser();
+    if (!authUser) {
+      // No hay usuario, no hacemos peticiones protegidas
+      setLoading(false);
+      return;
+    }
+
     const runLoader = loadersByRole[role];
     await runLoader();
 

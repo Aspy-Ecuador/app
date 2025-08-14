@@ -1,11 +1,16 @@
 import axios, { AxiosResponse } from "axios";
 import apiURL from "./apiConfig";
-import { getConfig } from "./config";
 
 interface RoleData {
   name: string; // Role name (e.g., 'Admin', 'User')
   description: string; // Role description
 }
+
+// Función helper para obtener la configuración con token actualizado
+const getConfig = () => {
+  const token = localStorage.getItem("token");
+  return { headers: { Authorization: `Bearer ${token}` } };
+};
 
 const roleAPI = {
   // Get all roles
