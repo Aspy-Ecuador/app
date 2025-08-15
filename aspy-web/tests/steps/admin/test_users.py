@@ -75,13 +75,20 @@ def click_button(page, boton):
 @when(parsers.parse("relleno el campo {campo} con {valor}"))
 def fill_input_field(page, campo, valor):
     mapping = {
-        "Nombres": "first_name",
-        "Apellidos": "last_name",
+        #Usuarios
+        "Nombre": "first_name",
+        "Apellido": "last_name",
         "Fecha de Nacimiento": "birthdate",
         "Correo": "email",
         "Contraseña": "password",
-        "Confirmar Contraseña": "confirmPassword"
+        "Confirmar Contraseña": "confirmPassword",
+        
+        #Servicios
+        "Nombre del servicio": "name",
+        "Precio": "price",
     }
+    if campo not in mapping:
+        raise ValueError(f"Campo '{campo}' no está en el mapping: {list(mapping.keys())}")
     selector = f'input[name="{mapping[campo]}"]'
     page.locator(selector).wait_for(state="visible", timeout=10000)
     page.locator(selector).fill(valor)
@@ -104,3 +111,69 @@ def select_option_field(page, valor, campo):
 @then(parsers.parse("deberia ver un mensaje que diga {mensaje}"))
 def verify_success_message(page, mensaje):
     expect(page.get_by_text(mensaje)).to_be_visible(timeout=5000)
+    
+    
+# -------------ver tabla de servicios-------------
+@given("que estoy en la pagina de servicios")
+def services_page(page):
+    # Login primero (igual que en tu steps de login)
+    page.goto("http://localhost:5173/app/login")
+    page.get_by_placeholder("tu@correo.com").fill("admin@aspy.com")
+    page.locator('input[name="password"]').fill("admin")
+    page.get_by_role("button", name="Iniciar sesión").click()
+    expect(page).to_have_url("http://localhost:5173/app", timeout=120000)
+    
+    # Verifica que el encabezado de bienvenida está presente
+    expect(page.get_by_role("heading", name="Bienvenid@ al Panel de Control, ASPY")).to_be_visible(timeout=120000)
+    page.get_by_role("button", name="Servicios").click()
+
+@then("deberia ver la tabla con los encabezados ID, Nombre, Costo")
+def verify_table_headers(page):
+    page.locator("div.MuiDataGrid-columnHeaderTitle").first.wait_for(state="visible", timeout=12000)
+    headers = [text.strip() for text in page.locator("div.MuiDataGrid-columnHeaderTitle").all_text_contents()]
+    expected_headers = ["ID", "Nombre", "Costo"]
+    for h in expected_headers:
+        assert h in headers, f"Encabezado '{h}' no encontrado en la tabla"
+        
+@then("deberia ver al menos un servicio en la tabla")
+def verify_table_rows(page):
+    rows = page.locator("div.MuiDataGrid-row")
+    assert rows.count() > 0
+    
+@then("deberia existir un servicio con id 1, nombre Charla y costo $ 1.00")
+def verify_user_in_table(page):
+    # Espera a que la tabla tenga al menos una fila
+    service_id = page.locator("div.MuiDataGrid-cell[data-field='service_id']").all_text_contents()
+    name = page.locator("div.MuiDataGrid-cell[data-field='name']").all_text_contents()
+    price = page.locator("div.MuiDataGrid-cell[data-field='price']").all_text_contents()
+
+    assert "1" in service_id
+    assert "Charla" in name
+    assert "$ 1.00" in price
+
+@when('escribo "Consulta" en el filtro de búsqueda')
+def search_service_by_name(page):
+    search_box = page.get_by_placeholder("Search…")  
+    search_box.fill("Consulta")
+    page.wait_for_timeout(1000) 
+
+@then('deberia ver al menos un servicio cuyo nombre contenga "Consulta"')
+def verify_service_search_result(page):
+    # Obtener todos los nombres que quedaron visibles en la tabla
+    names = page.locator("div.MuiDataGrid-cell[data-field='name']").all_text_contents()
+    assert any("Consulta" in name for name in names), \
+        f"No se encontró ningún servicio con nombre 'Consulta'. Nombres visibles: {names}"
+
+@when(parsers.parse("doy click en el boton {boton}"))
+def click_button(page, boton):
+    """Click en cualquier botón y espera que cargue la siguiente sección."""
+    page.get_by_role("button", name=boton).wait_for(state="visible", timeout=10000)
+    page.get_by_role("button", name=boton).click()
+    page.wait_for_timeout(1000)
+
+
+# --- Verificar mensaje de éxito ---
+@then(parsers.parse("deberia ver un mensaje que diga {mensaje}"))
+def verify_success_message(page, mensaje):
+    expect(page.get_by_text(mensaje)).to_be_visible(timeout=20000)
+

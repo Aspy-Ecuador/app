@@ -12,6 +12,7 @@ import Progress from "@components/Progress";
 import { getService } from "@/utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext";
 import { ServiceRequest } from "@/typesRequest/ServiceRequest";
+import axios from "axios";
 
 interface ServiceFormProps {
   isEditMode: boolean;
@@ -25,11 +26,15 @@ export default function ServiceForm({
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
-  const { data, loading } = useRoleData();
+  const [loadingSave, setLoadingSave] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const { data, loading, refreshServices } = useRoleData();
 
   const handleClose = () => {
-    navigate("/servicios");
     setOpen(false);
+    if (!isError) {
+      navigate("/servicios"); // solo navegar si no hubo error
+    }
   };
 
   const methods = useForm<Service>();
@@ -63,29 +68,72 @@ export default function ServiceForm({
 
   // TODO in a diff file
   const onClickSave = methods.handleSubmit(async (data) => {
-    try {
-      if (isEditMode && serviceId) {
-        const transformedData: Service = data;
-        await serviceAPI.updateService(serviceId, transformedData.price);
-        setMessage("¡Se ha actualizado con éxito!");
-        setOpen(true);
-      }
-    } catch (error) {
-      console.error("Error al guardar el servicio:", error);
+  try {
+    setLoadingSave(true);
+
+    if (isEditMode && serviceId) {
+      const transformedData: Service = data;
+      console.log("📤 Enviando a API:", serviceId, data.price, typeof data.price);
+      await serviceAPI.updateService(serviceId, transformedData.price);
+      const resp = await serviceAPI.updateService(serviceId, data.price);
+      console.log("📥 Respuesta de API:", resp.data);
+      // Esperar que se actualice la lista desde API
+      await refreshServices();
+
+      setMessage("¡Se ha actualizado con éxito!");
+      setIsError(false);
+      setOpen(true);
     }
-  });
+  } catch (error) {
+    console.error("Error al guardar el servicio:", error);
+    setMessage("Ocurrió un error al guardar el servicio.");
+    setIsError(true);
+    setOpen(true);
+  } finally {
+    setLoadingSave(false);
+  }
+});
+
 
   const onClickCreate = methods.handleSubmit(async (data) => {
     try {
+      setLoadingSave(true);
       const transformedData: ServiceRequest = data;
+
       console.log(transformedData);
+      console.log("📤 Enviando a API:", transformedData);
       await serviceAPI.createService(transformedData);
+      console.log("✅ Creado en API");
+
+      console.log("🔄 Refrescando servicios...");
+      await refreshServices();
+      console.log("✅ Servicios actualizados");
       setMessage("¡Se ha creado con éxito!");
+      setIsError(false);
       setOpen(true);
-    } catch (error) {
-      console.error("Error al guardar el servicio:", error);
+    } catch (error: any) {
+      console.error("❌ Error en onClickCreate:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        const errors = error.response.data?.errors;
+
+        if (errors?.name?.length) {
+          // Nombre ya registrado
+          setMessage(`⚠ ${errors.name[0]}. Intenta con otro nombre.`);
+          setIsError(true);
+        } else {
+          setMessage("Ocurrió un error al guardar el servicio.");
+          setIsError(true);
+        }
+        setOpen(true);
+      } else {
+        setMessage("Error desconocido.");
+        setOpen(true);
+      }
+    } finally {
+      setLoadingSave(false);  // Termina la bolita de cargando
     }
   });
+
 
   if (loading) return <Progress />;
 
@@ -103,9 +151,11 @@ export default function ServiceForm({
         </div>
         <div className="gap-10 mt-4 flex flex-row items-center justify-center">
           {!isEditMode && (
-            <CreationButton onClick={onClickCreate} text="Crear" />
+            loadingSave ? <Progress /> : <CreationButton onClick={onClickCreate} text="Crear" />
           )}
-          {isEditMode && <SaveButton onClick={onClickSave} text="Guardar" />}
+          {isEditMode && (
+            loadingSave ? <Progress /> : <SaveButton onClick={onClickSave} text="Guardar" />
+          )}
         </div>
       </form>
       <Success
@@ -117,3 +167,4 @@ export default function ServiceForm({
     </FormProvider>
   );
 }
+

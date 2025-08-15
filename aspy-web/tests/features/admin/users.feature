@@ -18,8 +18,8 @@ Feature: Gestion de usuarios
 Scenario: Registrar un usuario con todos los campos válidos
     Given que estoy en la pagina de usuarios
     When doy click en el boton Agregar Usuario
-    And relleno el campo Nombres con Carlos
-    And relleno el campo Apellidos con Salazar
+    And relleno el campo Nombre con Carlos
+    And relleno el campo Apellido con Salazar
     And relleno el campo Fecha de Nacimiento con 1995-03-15
     And relleno el campo Correo con carlos@example.com
     And selecciono Masculino en el campo Genero
@@ -28,8 +28,28 @@ Scenario: Registrar un usuario con todos los campos válidos
     And selecciono Casado en el campo Estado Civil
     And selecciono Postgrado en el campo Nivel Educativo
     And selecciono Administrador en el campo Rol
-    And relleno el campo Contraseña con 12345678
     And doy click en el boton Siguiente
+    And relleno el campo Contraseña con 12345678
     And relleno el campo Confirmar Contraseña con 12345678
     And doy click en el boton Crear
     Then deberia ver un mensaje que diga Se ha registrado con éxito!!
+
+Scenario: Ver la tabla de servicios con los datos correctos
+    Given que estoy en la pagina de servicios
+    Then deberia ver la tabla con los encabezados ID, Nombre, Costo
+    And deberia ver al menos un servicio en la tabla
+    And deberia existir un servicio con id 1, nombre Charla y costo $ 1.00
+
+ Scenario: Buscar un servicio por nombre en el filtro
+    Given que estoy en la pagina de servicios
+    When escribo "Consulta" en el filtro de búsqueda
+    Then deberia ver al menos un servicio cuyo nombre contenga "Consulta"
+
+Scenario: Agregar un servicio con todos los campos válidos
+    Given que estoy en la pagina de servicios
+    When doy click en el boton Agregar Servicio
+    And relleno el campo Nombre del servicio con TerapiaTTTest2
+    And relleno el campo Precio con 26
+    And doy click en el boton Crear
+    Then deberia ver un mensaje que diga ¡Se ha creado con éxito!
+
