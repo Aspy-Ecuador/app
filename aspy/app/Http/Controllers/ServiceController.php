@@ -33,7 +33,7 @@ class ServiceController extends Controller
     {
         $service = Service::findOrFail($id);
         $validated = $request->validate([
-            'name' => 'string|unique:services,name,'.$id,
+            'name' => 'string|unique:service,name,'.$id,
             'price' => 'numeric|min:0'
         ]);
         

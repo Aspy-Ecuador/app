@@ -21,7 +21,7 @@ class AppointmentReportController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'appointment_id' => 'required|integer|unique:appointment_reports,appointment_id',
+            'appointment_id' => 'required|integer|unique:appointment_report,appointment_id',
             'comments' => 'required|string',
             'sign' => 'required|string',
             
