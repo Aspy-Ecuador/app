@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { inputServiceConfig } from "@/config/serviceFormConfig";
-import { Service } from "src/types/ServiceResponse";
+import { Service } from "src/types/Service";
 import { useNavigate } from "react-router-dom";
 import serviceAPI from "@API/serviceAPI";
 import UserInput from "@forms/UserInput";
@@ -9,6 +9,9 @@ import SaveButton from "@buttons/SaveButton";
 import CreationButton from "@buttons/CreationButton";
 import Success from "@components/Success";
 import Progress from "@components/Progress";
+import { getService } from "@/utils/utils";
+import { useRoleData } from "@/observer/RoleDataContext";
+import { ServiceRequest } from "@/typesRequest/ServiceRequest";
 
 interface ServiceFormProps {
   isEditMode: boolean;
@@ -22,7 +25,7 @@ export default function ServiceForm({
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(true);
+  const { data, loading } = useRoleData();
 
   const handleClose = () => {
     navigate("/servicios");
@@ -32,31 +35,21 @@ export default function ServiceForm({
   const methods = useForm<Service>();
 
   useEffect(() => {
-    setLoading(true);
-    const fetchService = async () => {
-      if (isEditMode) {
-        try {
-          const serviceData: Service = await serviceAPI.getServiceById(
-            serviceId!
-          );
-          setLoading(false);
-          methods.reset({
-            name: serviceData.name,
-            price: serviceData.price,
-          });
-        } catch (error) {
-          console.error("Error al obtener el servicio:", error);
-        }
-      } else {
-        setLoading(false);
+    if (isEditMode && serviceId) {
+      const service = getService(data, serviceId);
+      if (service) {
         methods.reset({
-          name: "",
-          price: 0,
+          name: service.name,
+          price: service.price,
         });
       }
-    };
-    fetchService();
-  }, [isEditMode, methods]);
+    } else {
+      methods.reset({
+        name: "",
+        price: 0,
+      });
+    }
+  }, [isEditMode, serviceId]);
 
   const list_inputs = inputServiceConfig.map((input) => (
     <UserInput
@@ -71,12 +64,12 @@ export default function ServiceForm({
   // TODO in a diff file
   const onClickSave = methods.handleSubmit(async (data) => {
     try {
-      const transformedData: Service = data;
-      setLoading(true);
-      await serviceAPI.updateService(serviceId!, transformedData.price);
-      setLoading(false);
-      setMessage("¡Se ha actualizado con éxito!");
-      setOpen(true);
+      if (isEditMode && serviceId) {
+        const transformedData: Service = data;
+        await serviceAPI.updateService(serviceId, transformedData.price);
+        setMessage("¡Se ha actualizado con éxito!");
+        setOpen(true);
+      }
     } catch (error) {
       console.error("Error al guardar el servicio:", error);
     }
@@ -84,10 +77,9 @@ export default function ServiceForm({
 
   const onClickCreate = methods.handleSubmit(async (data) => {
     try {
-      const transformedData: Service = data;
-      setLoading(true);
+      const transformedData: ServiceRequest = data;
+      console.log(transformedData);
       await serviceAPI.createService(transformedData);
-      setLoading(false);
       setMessage("¡Se ha creado con éxito!");
       setOpen(true);
     } catch (error) {

@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import apiURL from "./apiConfig";
 import { getConfig } from "./config";
+import { StatusRequest } from "@/typesRequest/StatusRequest";
 
 interface PaymentData {
   person_id: number; // Person ID associated with the payment
@@ -36,6 +37,13 @@ const paymentAPI = {
     paymentData: PaymentData
   ): Promise<AxiosResponse> => {
     return axios.put(`${apiURL}/payment/${id}`, paymentData, getConfig());
+  },
+
+  updateStatus: async (
+    id: number,
+    status: StatusRequest
+  ): Promise<AxiosResponse> => {
+    return axios.put(`${apiURL}/paymentstatus/${id}`, status, getConfig());
   },
 
   // Delete payment by ID

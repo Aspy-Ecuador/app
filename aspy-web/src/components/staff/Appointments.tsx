@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAppointmentProfessional, getAppointments } from "@utils/utils";
+import { getAppointmentProfessional } from "@utils/utils";
 import { Appointment } from "@/types/Appointment";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Box from "@mui/material/Box";
@@ -14,7 +14,9 @@ export default function Appointments() {
   const navigate = useNavigate();
 
   const { data, loading } = useRoleData();
+
   if (loading) return <Progress />;
+
   const [selectedId, setSelected] = useState<number>(0);
 
   const handleSelectProfessional = (id: number) => {

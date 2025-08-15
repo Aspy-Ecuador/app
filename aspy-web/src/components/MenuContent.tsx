@@ -16,6 +16,7 @@ import SwitchAccountRoundedIcon from "@mui/icons-material/SwitchAccountRounded";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
 import ReceiptLongRoundedIcon from "@mui/icons-material/ReceiptLongRounded";
+import ArticleRoundedIcon from "@mui/icons-material/ArticleRounded";
 
 type ListItem = {
   text: string;
@@ -66,6 +67,12 @@ const clientListItems = [
     icon: <CalendarMonthRoundedIcon />,
   },
   { text: "Recibos", route: "/recibos", icon: <ReceiptLongRoundedIcon /> },
+  {
+    text: "Servicios",
+    route: "/consultarServicios",
+    icon: <AssignmentRoundedIcon />,
+  },
+  { text: "Reportes", route: "/reportes", icon: <ArticleRoundedIcon /> },
 ];
 
 export default function MenuContent() {

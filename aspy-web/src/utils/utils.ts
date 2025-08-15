@@ -72,6 +72,8 @@ import { appointmentReportResponseAdapter } from "@/adapters/appointmentReportRe
 import { CloudinaryUploadResponse } from "@/typesResponse/CloudinaryUploadResponse";
 import { FileData } from "@/types/FileData";
 import { dataPayments } from "@/data/Payment";
+import { ReceiptResponse } from "@/typesResponse/ReceiptResponse";
+import { receiptAdapter } from "@/adapters/receiptAdapter";
 
 export function getPerson(person_id: number, data: any): PersonResponse {
   const persons: PersonResponse[] = data.persons;
@@ -95,7 +97,7 @@ export function getWorkerSchedule(
   return workerschedule;
 }
 
-export function getService(service_id: number, data: any): ServiceResponse {
+export function getService(data: any, service_id: number): ServiceResponse {
   const services: ServiceResponse[] = data.services;
   const service = services.find((service) => service.service_id === service_id);
   if (!service)
@@ -709,4 +711,65 @@ export function getUnreportedAppointments(
 export function getAppointment(data: any, id: number): Appointment | undefined {
   const appointments: Appointment[] = getAppointments(data);
   return appointments.find((app) => app.id_appointment === id);
+}
+
+export function getClientsAppointment(data: any): User[] {
+  const users: User[] = getUsers(data);
+
+  return users.filter((user) => user.role_id === 3);
+}
+
+export function getAppointmentbyClient(
+  data: any,
+  client_id: number
+): Appointment[] {
+  const appointments: Appointment[] = getAppointments(data);
+  return appointments.filter((app) => app.client.user_id === client_id);
+}
+
+export function getReceipt(data: any): Receipt[] {
+  if (!data) {
+    return [];
+  }
+  const receiptsResponse: ReceiptResponse[] = data.receipts;
+  const receiptList: Receipt[] = receiptsResponse
+    .map((receipt) => {
+      const payment = dataPayments?.find(
+        (p: any) => p.payment_id === receipt.payment_id
+      );
+      if (!payment) return null;
+
+      const paymentData = data.paymentData?.find(
+        (pd: any) => pd.payment_data_id === payment.payment_data_id
+      );
+      const service = data.services?.find(
+        (s: any) => s.service_id === payment.service.id_serice
+      );
+      const person = data.persons?.find(
+        (p: any) => p.person_id === payment.person.person_id
+      );
+      const userAccount = data.userAccounts?.find(
+        (ua: any) => ua.user_id === person?.user_id
+      );
+      const role = data.roles?.find(
+        (r: any) => r.role_id === userAccount?.role_id
+      );
+
+      if (!paymentData || !service || !person || !userAccount || !role)
+        return null;
+
+      const client = userAdapter(person, role, userAccount);
+
+      return receiptAdapter(receipt, paymentData, service, client);
+    })
+    .filter(Boolean) as Receipt[];
+  return receiptList;
+}
+
+export function getReceiptByUser(data: any, user_id: number): Receipt[] {
+  if (!data || !user_id) {
+    return [];
+  }
+  const receipts: Receipt[] = getReceipt(data);
+  return receipts.filter((recp) => recp.client.user_id == user_id);
 }

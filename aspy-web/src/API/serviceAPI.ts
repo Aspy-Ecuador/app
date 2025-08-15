@@ -1,7 +1,8 @@
 import axios, { AxiosResponse } from "axios";
 import apiURL from "./apiConfig";
-import { ServiceResponse } from "src/types/ServiceResponse";
+import { ServiceRequest } from "src/typesRequest/ServiceRequest";
 import { getConfig } from "./config";
+import { ServiceResponse } from "@/typesResponse/ServiceResponse";
 
 const serviceAPI = {
   getAllServices: async (): Promise<AxiosResponse> =>
@@ -10,7 +11,7 @@ const serviceAPI = {
   getServiceById: async (id: number): Promise<ServiceResponse> =>
     (await axios.get(`${apiURL}/service/${id}`, getConfig())).data,
 
-  createService: async (data: ServiceResponse): Promise<AxiosResponse> =>
+  createService: async (data: ServiceRequest): Promise<AxiosResponse> =>
     axios.post(`${apiURL}/service`, data, getConfig()),
 
   updateService: async (id: number, data: number): Promise<AxiosResponse> => {

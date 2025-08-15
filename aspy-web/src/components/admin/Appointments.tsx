@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { getAppointmentProfessional, getAppointments } from "@utils/utils";
+import { getAppointmentProfessional } from "@utils/utils";
 import { Appointment } from "@/types/Appointment";
-import { userAdapter } from "@/adapters/userAdapter";
-import { appointmentAdapter } from "@/adapters/appointmentAdapter";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
@@ -14,9 +12,11 @@ import Progress from "@components/Progress";
 export default function Appointments() {
   const { data, loading } = useRoleData();
   const [selectedId, setSelected] = useState<number>(0);
+
   const handleSelectProfessional = (id: number) => {
     setSelected(id);
   };
+
   if (loading) return <Progress />;
 
   const appointmentProfessional: Appointment[] = getAppointmentProfessional(

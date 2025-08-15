@@ -1,8 +1,7 @@
-import { getAuthenticatedUserName } from "@store";
+import { getAuthenticatedUserIdentity, getAuthenticatedUserName } from "@store";
 import { useRoleData } from "@/observer/RoleDataContext";
-import { appointmentAdapter } from "@/adapters/appointmentAdapter";
 import { Appointment } from "@/types/Appointment";
-import { userAdapter } from "@/adapters/userAdapter";
+import { getAppointmentbyClient } from "@/utils/utils";
 import Agenda from "@components/Agenda";
 import WelcomePanel from "@components/WelcomePanel";
 import Grid from "@mui/material/Grid2";
@@ -14,68 +13,10 @@ export default function ControlPanel() {
 
   if (loading) return <Progress />;
 
-  const appointments: Appointment[] = (data.appointments || [])
-    .map((appointment: any) => {
-      const service = data.services?.find(
-        (s: any) => s.service_id === appointment.payment.service_id
-      );
-
-      const clientPerson = data.persons?.find(
-        (p: any) => p.person_id === appointment.payment.person_id
-      );
-
-      const clientAccount = data.userAccounts?.find(
-        (a: any) => a.user_id === clientPerson?.user_id
-      );
-
-      const clientRole = data.roles?.find(
-        (r: any) => r.role_id === clientAccount?.role_id
-      );
-
-      const professionalPerson = data.persons?.find(
-        (p: any) => p.person_id === appointment.scheduled_by.person_id
-      );
-      const professionalAccount = data.userAccounts?.find(
-        (a: any) => a.user_id === professionalPerson?.user_id
-      );
-
-      const professionalRole = data.roles?.find(
-        (r: any) => r.role_id === professionalAccount?.role_id
-      );
-
-      const schedule = data.schedules?.find(
-        (s: any) => s.schedule_id === appointment.worker_schedule.schedule_id
-      );
-
-      // Validación
-      if (
-        !service ||
-        !clientPerson ||
-        !clientAccount ||
-        !clientRole ||
-        !professionalPerson ||
-        !professionalAccount ||
-        !professionalRole ||
-        !schedule
-      )
-        return null;
-
-      const client = userAdapter(clientPerson, clientRole, clientAccount);
-      const professional = userAdapter(
-        professionalPerson,
-        professionalRole,
-        professionalAccount
-      );
-
-      return appointmentAdapter(
-        appointment,
-        schedule,
-        client,
-        professional,
-        service
-      );
-    })
-    .filter(Boolean);
+  const appointments: Appointment[] = getAppointmentbyClient(
+    data,
+    getAuthenticatedUserIdentity()
+  );
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>

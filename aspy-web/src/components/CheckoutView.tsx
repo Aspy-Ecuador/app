@@ -24,7 +24,11 @@ import { uploadToCloudinary } from "@/utils/utils";
 
 const steps = ["Detalles de Pago", "Revisar cita"];
 
-export default function CheckoutView() {
+interface CheckoutViewProp {
+  isClient: boolean;
+}
+
+export default function CheckoutView({ isClient }: CheckoutViewProp) {
   const { data, loading } = useRoleData();
 
   if (loading) return <Progress />;
@@ -38,11 +42,12 @@ export default function CheckoutView() {
   const [open, setOpen] = useState(false);
 
   const [file, setFile] = useState<FileData | null>(null);
-  const { serviceId, scheduleId } = useParams();
+  const { serviceId, scheduleId, clientId } = useParams();
 
   // Opcional: convertirlos a número si los necesitas como enteros
   const parsedServiceId = parseInt(serviceId || "", 10);
   const parsedScheduleId = parseInt(scheduleId || "", 10);
+  const parsedClientId = parseInt(clientId || "", 10);
 
   const handleOpen = async () => {
     if (file != null) {
@@ -53,7 +58,10 @@ export default function CheckoutView() {
       // 2. Subir a Cloudinary
       const uploadedFileUrl = await uploadToCloudinary(file);
 
-      const hardcodedPersonId = getAuthenticatedUserID(); // Cliente
+      const hardcodedPersonId = isClient
+        ? getAuthenticatedUserID()
+        : parsedClientId; // Cliente
+
       const hardcodedScheduledBy = 5;
       const hardcodedServicePrice = selectedService!.price;
       const hardcodedTotalAmount = selectedService!.price;
@@ -90,7 +98,13 @@ export default function CheckoutView() {
   const getStepContent = (step: number) => {
     switch (step) {
       case 0:
-        return <PaymentForm setIsValid={setIsPaymentValid} setFile={setFile} />;
+        return (
+          <PaymentForm
+            service_id={parsedServiceId}
+            setIsValid={setIsPaymentValid}
+            setFile={setFile}
+          />
+        );
       case 1:
         return <Review service_id={parsedServiceId} />;
       default:
@@ -144,7 +158,7 @@ export default function CheckoutView() {
               width: "100%",
               maxWidth: { sm: "100%", md: 600 },
               maxHeight: "720px",
-              gap: { xs: 5, md: "none" },
+              gap: { xs: 1, md: "none" },
             }}
           >
             {activeStep === steps.length ? (
@@ -167,7 +181,6 @@ export default function CheckoutView() {
                       gap: 1,
                       pb: { xs: 12, sm: 0 },
                       mt: { xs: 2, sm: 0 },
-                      mb: "60px",
                     },
                     activeStep !== 0
                       ? { justifyContent: "space-between" }

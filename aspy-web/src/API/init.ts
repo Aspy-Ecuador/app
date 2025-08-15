@@ -44,6 +44,7 @@ const clientLoaders: Loader[] = [
   { name: "appointments", fn: appointmentAPI.getAllAppointments },
   { name: "appointmentReports", fn: appointmentReportAPI.getAllReports },
   { name: "roles", fn: roleAPI.getAllRoles },
+  { name: "professional", fn: professionalAPI.getAllProfessionals },
 ];
 
 const staffLoaders: Loader[] = [

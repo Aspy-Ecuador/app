@@ -124,6 +124,7 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
       { start: 9, end: 12 },
     ];
   }
+
   if (loading) return <Progress />;
 
   if (isEdit) {

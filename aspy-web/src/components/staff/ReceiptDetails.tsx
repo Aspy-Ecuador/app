@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { paymentList } from "@data/Pagos";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import ReceiptRevision from "@staff/ReceiptRevision";
@@ -7,6 +6,9 @@ import CancelButton from "@buttons/CancelButton";
 import CreationButton from "@buttons/CreationButton";
 import Typography from "@mui/material/Typography";
 import { PaymentResponse } from "@/typesResponse/PaymentResponse";
+//import paymentAPI from "@/API/paymentAPI";
+//import { StatusRequest } from "@/typesRequest/StatusRequest";
+import { dataPayments } from "@/data/Payment";
 
 interface ReceiptDetailsProps {
   receiptData: PaymentResponse;
@@ -17,6 +19,23 @@ export default function ReceiptDetails({ receiptData }: ReceiptDetailsProps) {
 
   const handleBack = () => {
     navigate("/pagos");
+  };
+
+  const approve = async () => {
+    //const status: StatusRequest = { status_id: 12 };
+    const id: number = receiptData.payment_id;
+    const data: PaymentResponse[] = dataPayments;
+
+    const payment = data.find((p) => p.payment_id === id);
+    if (payment) {
+      payment.payment_status.name = "nuev";
+      payment.payment_status.status_id = 2;
+    }
+
+    console.log(data);
+
+    //await paymentAPI.updateStatus(receiptData.payment_id, status);
+    navigate(-1);
   };
 
   return (
@@ -30,8 +49,8 @@ export default function ReceiptDetails({ receiptData }: ReceiptDetailsProps) {
         </Grid>
         <Grid container size={12}>
           <div className="flex flex-row gap-9 justify-center w-full">
-            <CancelButton onClick={handleBack} text="No aprobar" />
-            <CreationButton onClick={handleBack} text="Aprobar comprobante" />
+            <CancelButton onClick={handleBack} text="Cancelar" />
+            <CreationButton onClick={approve} text="Aprobar comprobante" />
           </div>
         </Grid>
       </Grid>
