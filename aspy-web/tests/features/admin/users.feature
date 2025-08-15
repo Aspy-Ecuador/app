@@ -48,7 +48,7 @@ Scenario: Ver la tabla de servicios con los datos correctos
 Scenario: Agregar un servicio con todos los campos válidos
     Given que estoy en la pagina de servicios
     When doy click en el boton Agregar Servicio
-    And relleno el campo Nombre del servicio con TerapiaTTTest2
+    And relleno el campo Nombre del servicio con TerapiaTTTest3
     And relleno el campo Precio con 26
     And doy click en el boton Crear
     Then deberia ver un mensaje que diga ¡Se ha creado con éxito!
