@@ -99,8 +99,6 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
         worker_schedule_id: parsedScheduleId,
       };
       console.log(data);
-      {
-        /*
       await appointmentAPI.createAppointment(data);
       await refreshServices();
       await refreshPersons();
@@ -110,8 +108,6 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
       await refreshSchedules();
       await refreshAppointments();
       await refreshWorkerSchedules();
-       */
-      }
       setActiveStep(activeStep + 1);
       setLoad(false);
       setOpen(true);
