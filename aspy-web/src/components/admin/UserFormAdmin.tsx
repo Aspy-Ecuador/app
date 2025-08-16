@@ -7,6 +7,7 @@ import { getUsers } from "@utils/utils";
 import Button from "@mui/material/Button";
 import UserInput from "@forms/UserInput";
 import Progress from "@components/Progress";
+import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 
 interface UserFormProps {
   isEditMode: boolean;
@@ -18,6 +19,7 @@ interface UserFormProps {
   onFinish: (data: User) => void;
   isLast?: boolean;
   onRoleChange?: (roleId: number) => void;
+  load?: boolean;
 }
 
 export default function UserFormAdmin({
@@ -30,6 +32,7 @@ export default function UserFormAdmin({
   onFinish,
   isLast,
   onRoleChange,
+  load,
 }: UserFormProps) {
   const methods = useForm<User>();
   const { data, loading } = useRoleData();
@@ -144,7 +147,11 @@ export default function UserFormAdmin({
             onClick={onSubmit}
             className="md:w-[250px]"
           >
-            {getButtonLabel()}
+            {load ? (
+              <CircularProgress size={24} sx={{ color: "white" }} /> // Mostrar ciclo de carga
+            ) : (
+              getButtonLabel()
+            )}
           </Button>
         </div>
       </form>

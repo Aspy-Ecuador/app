@@ -130,10 +130,20 @@ export function getProfessionalSchedule(
   data: any
 ): WorkerScheduleResponse[] {
   const workerSchedules: WorkerScheduleResponse[] = data.workerSchedules;
-  const workerFilter: WorkerScheduleResponse[] = workerSchedules.filter(
-    (worker) => worker.person_id === person_id
-  );
-  return workerFilter;
+  const appointments: Appointment[] = getAppointments(data);
+
+  return workerSchedules
+    .filter((worker) => worker.person_id === person_id)
+    .filter((worker) => {
+      // Verificar si existe alguna cita con la misma fecha y hora de inicio
+      const hasAppointment = appointments.some(
+        (appt) =>
+          appt.date === worker.schedule.date &&
+          appt.startTime === worker.schedule.start_time
+      );
+      // Solo queremos los que NO tengan cita
+      return !hasAppointment;
+    });
 }
 
 export function getUsers(data: any): User[] {

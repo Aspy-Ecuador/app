@@ -2,11 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useRoleData } from "@/observer/RoleDataContext";
 import { PersonResponse } from "@/typesResponse/PersonResponse";
-import {
-  getClients,
-  getClientsAppointment,
-  getProfessionalService,
-} from "@/utils/utils";
+import { getClientsAppointment, getProfessionalService } from "@/utils/utils";
 import { getProfessionalSchedule } from "@/utils/utils";
 import { WorkerScheduleResponse } from "@/typesResponse/WorkerScheduleResponse";
 import FormControl from "@mui/material/FormControl";

@@ -14,17 +14,16 @@ import SimpleHeader from "@components/SimpleHeader";
 import Progress from "@components/Progress";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import { getAuthenticatedUserIdentity } from "@/utils/store";
+import { FlattenedReceipt } from "@/types/FlattenedReceipt";
 
 const columns: GridColDef[] = [
   {
     field: "id",
     headerName: "N° de Recibo",
     disableColumnMenu: true,
-    renderCell: (params) => {
-      return (
-        <Typography variant="body1">{params.row.receipt.receipt_id}</Typography>
-      );
-    },
+    renderCell: (params) => (
+      <Typography variant="body1">{params.row.id}</Typography>
+    ),
     flex: 2,
     resizable: false,
   },
@@ -32,11 +31,9 @@ const columns: GridColDef[] = [
     field: "client",
     headerName: "Cliente",
     disableColumnMenu: true,
-    renderCell: (params) => {
-      return (
-        <Typography variant="body1">{params.row.client.full_name}</Typography>
-      );
-    },
+    renderCell: (params) => (
+      <Typography variant="body1">{params.row.client}</Typography>
+    ),
     flex: 3,
     resizable: false,
   },
@@ -44,9 +41,9 @@ const columns: GridColDef[] = [
     field: "issueDate",
     headerName: "Fecha de Emisión",
     disableColumnMenu: true,
-    renderCell: (params) => {
-      return <Typography variant="body1">{params.row.date}</Typography>;
-    },
+    renderCell: (params) => (
+      <Typography variant="body1">{params.row.date}</Typography>
+    ),
     flex: 3,
     resizable: false,
   },
@@ -56,11 +53,9 @@ const columns: GridColDef[] = [
     disableColumnMenu: true,
     flex: 2,
     resizable: false,
-    renderCell: (params) => {
-      return (
-        <Typography variant="body1">$ {params.row.service.price}</Typography>
-      );
-    },
+    renderCell: (params) => (
+      <Typography variant="body1">$ {params.row.price}</Typography>
+    ),
   },
   {
     field: "actions",
@@ -71,7 +66,7 @@ const columns: GridColDef[] = [
     sortable: false,
     renderCell: (params) => (
       <Button
-        onClick={() => handleDownloadInvoice(params.row)}
+        onClick={() => handleDownloadInvoice(params.row.receipt)}
         variant="text"
         color="primary"
         className="boton-editar"
@@ -110,6 +105,15 @@ export default function ReceiptList() {
 
   if (loading) return <Progress />;
 
+  const flattenedRows: FlattenedReceipt[] = receiptList.map((r) => ({
+    id: r.receipt.receipt_id,
+    client: r.client.full_name,
+    service: r.service.name,
+    price: r.service.price,
+    date: r.date,
+    receipt: r,
+  }));
+
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1}>
@@ -117,10 +121,10 @@ export default function ReceiptList() {
           <SimpleHeader text={"Comprobantes de Pago"} />
         </Grid>
         <Grid size={8}>
-          <Table<Receipt>
+          <Table<FlattenedReceipt>
             columns={columns}
-            rows={receiptList}
-            getRowId={(row) => row.receipt.receipt_id}
+            rows={flattenedRows}
+            getRowId={(row) => row.receipt.receipt.receipt_id}
             rowSelectionModel={rowSelection}
             onRowSelectionChange={(newSelection) =>
               setRowSelection(newSelection)

@@ -25,10 +25,18 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
   const totalSteps = 3;
   const [roleSelect, setRoleSelect] = useState<number>(0);
   const [open, setOpen] = useState(false);
+  const [load, setLoad] = useState(false);
 
   const [userData, setUserData] = useState<User>();
 
-  const { data, loading } = useRoleData();
+  const {
+    data,
+    loading,
+    refreshPersons,
+    refreshUserAccounts,
+    refreshRoles,
+    refreshProfessionals,
+  } = useRoleData();
 
   const handleNext = (data: User) => {
     setUserData((prev) => ({ ...prev, ...data }));
@@ -56,7 +64,24 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
       3: "client",
       4: "staff",
     };
-
+    if (Number(data.role_id) === 2) {
+      return {
+        role_id: Number(data.role_id),
+        email: data.email,
+        password: data.password,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        birthdate: data.birthdate,
+        gender: Number(data.gender),
+        occupation: Number(data.occupation),
+        marital_status: Number(data.marital_status),
+        education: Number(data.education),
+        person_type: roleMap[data.role_id],
+        title: data.title,
+        about: data.about,
+        specialty: data.specialty,
+      };
+    }
     return {
       role_id: Number(data.role_id),
       email: data.email,
@@ -80,6 +105,24 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
       4: "staff",
     };
 
+    if (Number(data.role_id) === 2) {
+      return {
+        role_id: Number(data.role_id),
+        email: data.email,
+        password: data.password,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        birthdate: data.birthdate,
+        gender: Number(data.gender),
+        occupation: Number(data.occupation),
+        marital_status: Number(data.marital_status),
+        education: Number(data.education),
+        person_type: roleMap[data.role_id],
+        title: data.title,
+        about: data.about,
+        specialty: data.specialty,
+      };
+    }
     return {
       role_id: Number(data.role_id),
       email: data.email,
@@ -97,17 +140,25 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
 
   const handleFinalSubmit = async (data: User) => {
     const fullData = { ...userData, ...data };
-
+    setLoad(true);
     if (isEdit) {
       const userEdit = formatUserEdit(fullData);
       console.log(userEdit);
-      await userAccountAPI.updateUserAccount( user_id!, userEdit);
+      await userAccountAPI.updateUserAccount(user_id!, userEdit);
+      await refreshPersons();
+      await refreshUserAccounts();
+      await refreshRoles();
+      await refreshProfessionals();
     } else {
       const userRegister = formatUser(fullData);
-      console.log("Payload que se envía:", JSON.stringify(userRegister, null, 2));
       console.log(userRegister);
       await register(userRegister);
+      await refreshPersons();
+      await refreshUserAccounts();
+      await refreshRoles();
+      await refreshProfessionals();
     }
+    setLoad(false);
     handleOpen();
   };
 
@@ -177,6 +228,7 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
             isLast={step === totalSteps - 1}
             userId={user_id}
             onRoleChange={setRoleSelect}
+            load={load}
           />
         </Grid>
       </Grid>
