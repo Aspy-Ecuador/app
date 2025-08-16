@@ -11,9 +11,9 @@ export default function Agenda({
   appointments: Appointment[];
 }) {
   const events = appointments.map((appointment) => ({
-    event_id: `Servicio: ${appointment.service.name}`,
+    event_id: `Servicio: ${appointment.id_appointment}`,
     title: `Paciente: ${appointment.client.full_name} | Profesional: ${appointment.proffesional.full_name}`,
-    subtitle: `Estado: ${translateStatus(appointment.status.name)}`,
+    subtitle: `Servicio: ${appointment.service.name} | Estado: ${translateStatus(appointment.status.name)}`,
     start: new Date(`${appointment.date}T${appointment.startTime}`),
     end: new Date(`${appointment.date}T${appointment.endTime}`),
   }));

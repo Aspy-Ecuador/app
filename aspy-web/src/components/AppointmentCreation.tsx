@@ -59,7 +59,8 @@ export default function AppointmentCreation({
   }, [serviceId, data, professionalId]);
 
   const servicesOptions = data.services;
-
+  console.log(workerSchedules);
+  console.log(scheduleId);
   const handleToPay = () => {
     if (!serviceId || !scheduleId || !professionalId) {
       setErrorMessage(

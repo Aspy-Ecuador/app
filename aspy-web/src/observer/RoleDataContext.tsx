@@ -11,6 +11,12 @@ import { UserAccountResponse } from "@/typesResponse/UserAccountResponse";
 import userAccountAPI from "@/API/userAccountAPI";
 import { PersonResponse } from "@/typesResponse/PersonResponse";
 import personAPI from "@/API/personAPI";
+import { AppointmentResponse } from "@/typesResponse/AppointmentResponse";
+import appointmentAPI from "@/API/appointmentAPI";
+import { ScheduleResponse } from "@/typesResponse/ScheduleResponse";
+import scheduleAPI from "@/API/scheduleAPI";
+import { WorkerScheduleResponse } from "@/typesResponse/WorkerScheduleResponse";
+import workerScheduleAPI from "@/API/workerScheduleAPI";
 
 type DataStore = Record<string, any>;
 
@@ -23,6 +29,9 @@ type RoleDataContextType = {
   refreshUserAccounts: () => Promise<void>;
   refreshRoles: () => Promise<void>;
   refreshProfessionals: () => Promise<void>;
+  refreshSchedules: () => Promise<void>;
+  refreshAppointments: () => Promise<void>;
+  refreshWorkerSchedules: () => Promise<void>;
 };
 
 const RoleDataContext = createContext<RoleDataContextType>({
@@ -34,6 +43,9 @@ const RoleDataContext = createContext<RoleDataContextType>({
   refreshUserAccounts: async () => {},
   refreshRoles: async () => {},
   refreshProfessionals: async () => {},
+  refreshSchedules: async () => {},
+  refreshAppointments: async () => {},
+  refreshWorkerSchedules: async () => {},
 });
 
 export const RoleDataProvider = ({
@@ -184,6 +196,54 @@ export const RoleDataProvider = ({
     }
   };
 
+  const refreshSchedules = async () => {
+    try {
+      const res = await scheduleAPI.getAllSchedules();
+      const ordered = [...res.data].sort(
+        (a: ScheduleResponse, b: ScheduleResponse) =>
+          a.schedule_id - b.schedule_id
+      );
+
+      localStorage.setItem("schedules", JSON.stringify(ordered));
+      setData((prev: any) => ({ ...prev, schedules: ordered }));
+      console.log("✔️ Schedules actualizados");
+    } catch (err) {
+      console.error("❌ Error al refrescar schedules:", err);
+    }
+  };
+
+  const refreshAppointments = async () => {
+    try {
+      const res = await appointmentAPI.getAllAppointments();
+      const ordered = [...res.data].sort(
+        (a: AppointmentResponse, b: AppointmentResponse) =>
+          a.appointment_id - b.appointment_id
+      );
+
+      localStorage.setItem("appointments", JSON.stringify(ordered));
+      setData((prev: any) => ({ ...prev, appointments: ordered }));
+      console.log("✔️ Appointments actualizados");
+    } catch (err) {
+      console.error("❌ Error al refrescar appointments:", err);
+    }
+  };
+
+  const refreshWorkerSchedules = async () => {
+    try {
+      const res = await workerScheduleAPI.getAllWorkerSchedules();
+      const ordered = [...res.data].sort(
+        (a: WorkerScheduleResponse, b: WorkerScheduleResponse) =>
+          a.worker_schedule_id - b.worker_schedule_id
+      );
+
+      localStorage.setItem("workerSchedules", JSON.stringify(ordered));
+      setData((prev: any) => ({ ...prev, workerSchedules: ordered }));
+      console.log("✔️ WorkerSchedules actualizados");
+    } catch (err) {
+      console.error("❌ Error al refrescar workerSchedules:", err);
+    }
+  };
+
   useEffect(() => {
     refreshData();
   }, [role]);
@@ -199,6 +259,9 @@ export const RoleDataProvider = ({
         refreshUserAccounts,
         refreshRoles,
         refreshProfessionals,
+        refreshSchedules,
+        refreshAppointments,
+        refreshWorkerSchedules,
       }}
     >
       {children}

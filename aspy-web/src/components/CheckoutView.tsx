@@ -21,6 +21,7 @@ import Success from "@components/Success";
 import appointmentAPI from "@API/appointmentAPI";
 import Progress from "@components/Progress";
 import { uploadToCloudinary } from "@/utils/utils";
+import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 
 const steps = ["Detalles de Pago", "Revisar cita"];
 
@@ -29,7 +30,18 @@ interface CheckoutViewProp {
 }
 
 export default function CheckoutView({ isClient }: CheckoutViewProp) {
-  const { data, loading } = useRoleData();
+  const {
+    data,
+    loading,
+    refreshServices,
+    refreshPersons,
+    refreshUserAccounts,
+    refreshRoles,
+    refreshProfessionals,
+    refreshSchedules,
+    refreshAppointments,
+    refreshWorkerSchedules,
+  } = useRoleData();
 
   if (loading) return <Progress />;
 
@@ -49,8 +61,11 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
   const parsedScheduleId = parseInt(scheduleId || "", 10);
   const parsedClientId = parseInt(clientId || "", 10);
 
+  const [load, setLoad] = useState(false);
+
   const handleOpen = async () => {
     if (file != null) {
+      setLoad(true);
       const selectedService = services.find(
         (service) => service.service_id === parsedServiceId
       );
@@ -84,8 +99,21 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
         worker_schedule_id: parsedScheduleId,
       };
       console.log(data);
+      {
+        /*
       await appointmentAPI.createAppointment(data);
+      await refreshServices();
+      await refreshPersons();
+      await refreshUserAccounts();
+      await refreshRoles();
+      await refreshProfessionals();
+      await refreshSchedules();
+      await refreshAppointments();
+      await refreshWorkerSchedules();
+       */
+      }
       setActiveStep(activeStep + 1);
+      setLoad(false);
       setOpen(true);
     }
   };
@@ -216,7 +244,11 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
                       onClick={handleOpen} // o handleFinish si necesitas hacer otra cosa
                       sx={{ width: { xs: "100%", sm: "fit-content" } }}
                     >
-                      Finalizar
+                      {load ? (
+                        <CircularProgress size={24} sx={{ color: "white" }} /> // Mostrar ciclo de carga
+                      ) : (
+                        <h1>Finalizar</h1>
+                      )}
                     </Button>
                   )}
                 </Box>
