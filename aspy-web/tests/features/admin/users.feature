@@ -21,13 +21,13 @@ Scenario: Registrar un usuario con todos los campos válidos
     And relleno el campo Nombre con Carlos
     And relleno el campo Apellido con Salazar
     And relleno el campo Fecha de Nacimiento con 1995-03-15
-    And relleno el campo Correo con carlos@example.com
+    And relleno el campo Correo con carlos1@example.com 
     And selecciono Masculino en el campo Genero
     And doy click en el boton Siguiente
     And selecciono Ingeniero en el campo Ocupacion
     And selecciono Casado en el campo Estado Civil
     And selecciono Postgrado en el campo Nivel Educativo
-    And selecciono Administrador en el campo Rol
+    And selecciono Cliente en el campo Rol
     And doy click en el boton Siguiente
     And relleno el campo Contraseña con 12345678
     And relleno el campo Confirmar Contraseña con 12345678
@@ -48,7 +48,7 @@ Scenario: Ver la tabla de servicios con los datos correctos
 Scenario: Agregar un servicio con todos los campos válidos
     Given que estoy en la pagina de servicios
     When doy click en el boton Agregar Servicio
-    And relleno el campo Nombre del servicio con TerapiaTTTest3
+    And relleno el campo Nombre del servicio con TerapiaTTTest10
     And relleno el campo Precio con 26
     And doy click en el boton Crear
     Then deberia ver un mensaje que diga ¡Se ha creado con éxito!

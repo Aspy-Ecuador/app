@@ -4,14 +4,14 @@ import { UserAccountRequest } from "@/typesRequest/UserAccountRequest";
 import { User } from "@/types/User";
 import { getUser } from "@/utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext";
-//import { register } from "@/API/auth";
+import { register } from "@/API/auth";
 import Box from "@mui/material/Box";
 import UserFormAdmin from "@admin/UserFormAdmin";
 import Steps from "@components/Steps";
 import Grid from "@mui/material/Grid2";
 import Success from "@components/Success";
 import Progress from "@components/Progress";
-//import userAccountAPI from "@/API/userAccountAPI";
+import userAccountAPI from "@/API/userAccountAPI";
 
 interface FormViewProps {
   isEdit: boolean;
@@ -52,7 +52,7 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
   const formatUser = (data: any): UserAccountRequest => {
     const roleMap: { [key: number]: string } = {
       1: "admin",
-      2: "proffesional",
+      2: "professional",
       3: "client",
       4: "staff",
     };
@@ -101,11 +101,12 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
     if (isEdit) {
       const userEdit = formatUserEdit(fullData);
       console.log(userEdit);
-      //await userAccountAPI.updateUserAccount( user_id!, userRegister);}
+      await userAccountAPI.updateUserAccount( user_id!, userEdit);
     } else {
       const userRegister = formatUser(fullData);
+      console.log("Payload que se envía:", JSON.stringify(userRegister, null, 2));
       console.log(userRegister);
-      //await register(newPerson);
+      await register(userRegister);
     }
     handleOpen();
   };
