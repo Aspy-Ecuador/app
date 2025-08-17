@@ -28,6 +28,7 @@ export default function ServiceForm({
   const [message, setMessage] = useState("");
   const [loadingSave, setLoadingSave] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [fail, setFail] = useState(false);
   const { data, loading, refreshServices } = useRoleData();
 
   const handleClose = () => {
@@ -68,32 +69,37 @@ export default function ServiceForm({
 
   // TODO in a diff file
   const onClickSave = methods.handleSubmit(async (data) => {
-  try {
-    setLoadingSave(true);
+    try {
+      setLoadingSave(true);
 
-    if (isEditMode && serviceId) {
-      const transformedData: Service = data;
-      console.log("📤 Enviando a API:", serviceId, data.price, typeof data.price);
-      await serviceAPI.updateService(serviceId, transformedData.price);
-      const resp = await serviceAPI.updateService(serviceId, data.price);
-      console.log("📥 Respuesta de API:", resp.data);
-      // Esperar que se actualice la lista desde API
-      await refreshServices();
+      if (isEditMode && serviceId) {
+        const transformedData: Service = data;
+        console.log(
+          "📤 Enviando a API:",
+          serviceId,
+          data.price,
+          typeof data.price
+        );
+        await serviceAPI.updateService(serviceId, transformedData.price);
+        const resp = await serviceAPI.updateService(serviceId, data.price);
+        console.log("📥 Respuesta de API:", resp.data);
+        // Esperar que se actualice la lista desde API
+        await refreshServices();
 
-      setMessage("¡Se ha actualizado con éxito!");
-      setIsError(false);
+        setMessage("¡Se ha actualizado con éxito!");
+        setIsError(false);
+        setOpen(true);
+      }
+    } catch (error) {
+      console.error("Error al guardar el servicio:", error);
+      setMessage("Ocurrió un error al guardar el servicio.");
+      setIsError(true);
       setOpen(true);
+      setFail(true);
+    } finally {
+      setLoadingSave(false);
     }
-  } catch (error) {
-    console.error("Error al guardar el servicio:", error);
-    setMessage("Ocurrió un error al guardar el servicio.");
-    setIsError(true);
-    setOpen(true);
-  } finally {
-    setLoadingSave(false);
-  }
-});
-
+  });
 
   const onClickCreate = methods.handleSubmit(async (data) => {
     try {
@@ -120,6 +126,7 @@ export default function ServiceForm({
           // Nombre ya registrado
           setMessage(`⚠ ${errors.name[0]}. Intenta con otro nombre.`);
           setIsError(true);
+          setFail(true);
         } else {
           setMessage("Ocurrió un error al guardar el servicio.");
           setIsError(true);
@@ -130,10 +137,9 @@ export default function ServiceForm({
         setOpen(true);
       }
     } finally {
-      setLoadingSave(false);  // Termina la bolita de cargando
+      setLoadingSave(false); // Termina la bolita de cargando
     }
   });
-
 
   if (loading) return <Progress />;
 
@@ -150,12 +156,18 @@ export default function ServiceForm({
           </div>
         </div>
         <div className="gap-10 mt-4 flex flex-row items-center justify-center">
-          {!isEditMode && (
-            loadingSave ? <Progress /> : <CreationButton onClick={onClickCreate} text="Crear" />
-          )}
-          {isEditMode && (
-            loadingSave ? <Progress /> : <SaveButton onClick={onClickSave} text="Guardar" />
-          )}
+          {!isEditMode &&
+            (loadingSave ? (
+              <Progress />
+            ) : (
+              <CreationButton onClick={onClickCreate} text="Crear" />
+            ))}
+          {isEditMode &&
+            (loadingSave ? (
+              <Progress />
+            ) : (
+              <SaveButton onClick={onClickSave} text="Guardar" />
+            ))}
         </div>
       </form>
       <Success
@@ -163,8 +175,8 @@ export default function ServiceForm({
         handleClose={handleClose}
         isRegister={false}
         message={message}
+        error={fail}
       />
     </FormProvider>
   );
 }
-

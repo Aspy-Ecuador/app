@@ -6,12 +6,14 @@ import DialogContentText from "@mui/material/DialogContentText";
 
 import logo from "@assets/visto.png";
 import schedule from "@assets/cita.png";
+import errorimg from "@assets/error.png";
 
 interface SuccessDialogProps {
   open: boolean;
   handleClose: () => void;
   isRegister: boolean;
   message: string;
+  error?: boolean;
 }
 
 export default function Success({
@@ -19,6 +21,7 @@ export default function Success({
   handleClose,
   isRegister,
   message,
+  error,
 }: SuccessDialogProps) {
   return (
     <Dialog
@@ -57,7 +60,7 @@ export default function Success({
         }}
       >
         <img
-          src={isRegister ? schedule : logo}
+          src={isRegister ? schedule : error ? errorimg : logo}
           alt="Success"
           style={{ width: 100, height: 100, marginBottom: 10 }}
         />
