@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { getAuthenticatedUserName } from "@store";
 import { ButtonControl } from "@/types/ButtonControl";
 import { Appointment } from "@/types/Appointment";
-import { getAppointments } from "@/utils/utils";
+import { getNextAppointments } from "@/utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Grid from "@mui/material/Grid2";
 import Box from "@mui/material/Box";
@@ -11,7 +11,6 @@ import ShowAppointment from "@staff/ShowAppointment";
 import WelcomePanel from "@components/WelcomePanel";
 import Typography from "@mui/material/Typography";
 import PersonAddAltRoundedIcon from "@mui/icons-material/PersonAddAltRounded";
-import MedicalServicesRoundedIcon from "@mui/icons-material/MedicalServicesRounded";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
 import PermContactCalendarRoundedIcon from "@mui/icons-material/PermContactCalendarRounded";
 import Progress from "@components/Progress";
@@ -21,18 +20,13 @@ export default function ControlPanel() {
 
   const navigate = useNavigate();
 
-  const handleCreatePatient = () => {
-    const newPath = `/crear-paciente`;
+  const handleCreateUser = () => {
+    const newPath = `/registrarUsuario`;
     navigate(newPath);
   };
 
   const handleCreateService = () => {
     const newPath = `/crear-servicio`;
-    navigate(newPath);
-  };
-
-  const handleCreateProfessional = () => {
-    const newPath = `/crear-profesional`;
     navigate(newPath);
   };
 
@@ -43,18 +37,13 @@ export default function ControlPanel() {
 
   const botones: ButtonControl[] = [
     {
-      text: "Agregar Profesional",
-      icon: <PersonAddAltRoundedIcon className="boton-panelcontrol" />,
-      accion: handleCreateProfessional,
-    },
-    {
-      text: "Agregar Paciente",
+      text: "Registrar nuevo usuario",
       icon: <PermContactCalendarRoundedIcon className="boton-panelcontrol" />,
-      accion: handleCreatePatient,
+      accion: handleCreateUser,
     },
     {
       text: "Agregar Servicio",
-      icon: <MedicalServicesRoundedIcon className="boton-panelcontrol" />,
+      icon: <PersonAddAltRoundedIcon className="boton-panelcontrol" />,
       accion: handleCreateService,
     },
     {
@@ -64,7 +53,7 @@ export default function ControlPanel() {
     },
   ];
 
-  const appointments: Appointment[] = getAppointments(data);
+  const appointments: Appointment[] = getNextAppointments(data);
 
   if (loading) return <Progress />;
 
@@ -76,7 +65,7 @@ export default function ControlPanel() {
         </Grid>
 
         <Grid size={8}>
-          <Typography variant="h3">Proximas citas:</Typography>
+          <Typography variant="h3">Citas de hoy:</Typography>
           <ShowAppointment appointments={appointments} />
         </Grid>
 

@@ -21,27 +21,28 @@ import Progress from "@components/Progress";
 import { AppointmentReport } from "@/types/AppointmentReport";
 
 interface TimeLinePatientsProps {
-  patient: User;
+  patient_id: number;
+  onSelectComments: (comments: string) => void;
 }
 
-export default function TimeLinePatients({ patient }: TimeLinePatientsProps) {
+export default function TimeLinePatients({
+  patient_id,
+  onSelectComments,
+}: TimeLinePatientsProps) {
   const { data, loading } = useRoleData();
 
   if (loading) return <Progress />;
-
-  const navigate = useNavigate();
-  const location = useLocation();
 
   const appointmentsReport: AppointmentReport[] = getAppointmentsReport(data);
 
   const appointmentsReportUser: AppointmentReport[] = getReportsUser(
     appointmentsReport,
-    patient.person_id
+    patient_id
   );
 
   //const appointmentsUser: Appointment[] =
-  const handleMoreInfo = (appointment: Appointment) => {
-    navigate(`${location.pathname}/${appointment.id_appointment}`);
+  const handleMoreInfo = (report: AppointmentReport) => {
+    onSelectComments(report.comments);
   };
 
   return (
@@ -61,7 +62,7 @@ export default function TimeLinePatients({ patient }: TimeLinePatientsProps) {
           </TimelineSeparator>
           <TimelineContent>
             <Grid container spacing={10} sx={{ marginBottom: "3%" }}>
-              <Grid size={8}>
+              <Grid size={6}>
                 <Typography variant="body1">
                   <strong>Fecha:</strong> {report.appointment.date}
                 </Typography>
@@ -80,17 +81,17 @@ export default function TimeLinePatients({ patient }: TimeLinePatientsProps) {
                 </Typography>
               </Grid>
               <Grid
-                size={4}
+                size={6}
                 container
                 justifyContent="center"
                 alignItems="center"
               >
                 <Button
                   variant="outlined"
-                  onClick={() => handleMoreInfo(report.appointment)}
+                  onClick={() => handleMoreInfo(report)}
                   className="button-ver-detalles"
                 >
-                  Ver detalles
+                  Ver Reporte
                 </Button>
               </Grid>
             </Grid>

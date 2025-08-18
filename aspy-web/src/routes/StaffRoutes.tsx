@@ -14,24 +14,28 @@ import EditUser from "@staff/EditUser";
 import EditService from "@components/EditService";
 import AppointmentView from "@components/AppointmentView";
 import CheckoutView from "@components/CheckoutView";
+import EditUserAdmin from "@/components/admin/EditUserAdmin";
 
 export const StaffRoutes = [
   { path: "/", element: <ControlPanel /> },
   { path: "/perfil", element: <Profile /> },
+  { path: "/editar/:id", element: <EditUserAdmin /> },
   { path: "/profesionales", element: <ProffesionalList /> },
   { path: "/pacientes", element: <ClientList /> },
   { path: "/recibos", element: <ReceiptList /> },
   { path: "/pagos", element: <PaymentsList /> },
   { path: "/citas", element: <Appointments /> },
   { path: "/servicios", element: <Services /> },
-  { path: "/agendar-cita", element: <AppointmentView /> },
-  { path: "/crear-paciente", element: <CreateUser /> },
-  { path: "/crear-profesional", element: <CreateUser /> },
+  { path: "/agendar-cita", element: <AppointmentView isClient={false} /> },
+  { path: "/registrarUsuario", element: <CreateUser /> },
   { path: "/crear-servicio", element: <CreateService /> },
   { path: "/pagos/:id", element: <PaymentDetails /> },
   { path: "/pacientes/:id", element: <EditUser /> },
   { path: "/profesionales/:id", element: <EditUser /> },
   { path: "/servicios/:id", element: <EditService /> },
-  { path: "/pago/:serviceId/:scheduleId", element: <CheckoutView /> },
+  {
+    path: "/pago/:serviceId/:scheduleId/:clientId",
+    element: <CheckoutView isClient={false} />,
+  },
   ...SharedRoutes,
 ];

@@ -6,11 +6,12 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import Typography from "@mui/material/Typography";
 import { WorkerScheduleResponse } from "@/typesResponse/WorkerScheduleResponse";
 
 interface DateCalendarValueProps {
   availableSchedules: WorkerScheduleResponse[];
-  onScheduleSelect: (scheduleId: number) => void;
+  onScheduleSelect: (workerScheduleId: number) => void;
 }
 
 export default function DateCalendarValue({
@@ -28,9 +29,11 @@ export default function DateCalendarValue({
 
   const schedulesForSelectedDate =
     selectedDate &&
-    availableSchedules.filter(
-      (ws) => ws.schedule.date === selectedDate.format("YYYY-MM-DD")
-    );
+    availableSchedules
+      .filter((ws) => ws.schedule.date === selectedDate.format("YYYY-MM-DD"))
+      .sort((a, b) =>
+        a.schedule.start_time.localeCompare(b.schedule.start_time)
+      );
 
   const shouldDisableDate = (day: Dayjs) => {
     return !enabledDates.includes(day.format("YYYY-MM-DD"));
@@ -43,10 +46,10 @@ export default function DateCalendarValue({
 
   const handleHourChange = (
     _: React.MouseEvent<HTMLElement>,
-    newScheduleId: string | null
+    newWorkerScheduleId: string | null
   ) => {
-    if (newScheduleId === null) return; // Evitar parseInt(null)
-    const id = parseInt(newScheduleId);
+    if (newWorkerScheduleId === null) return;
+    const id = parseInt(newWorkerScheduleId);
     setSelectedScheduleId(id);
     onScheduleSelect(id);
   };
@@ -73,22 +76,24 @@ export default function DateCalendarValue({
         aria-label="Hora"
         className="flex flex-wrap justify-center w-3/5 mt-4"
       >
-        {schedulesForSelectedDate?.map((ws) => {
-          const label = `${ws.schedule.start_time.slice(0, 5)} - ${ws.schedule.end_time.slice(0, 5)}`;
-          return (
-            <ToggleButton
-              key={ws.schedule_id}
-              value={ws.schedule_id.toString()}
-              aria-label={label}
-              className="m-1 rounded-xl"
-            >
-              {label}
-            </ToggleButton>
-          );
-        }) || (
-          <p className="mt-2 text-sm text-gray-500">
+        {schedulesForSelectedDate && schedulesForSelectedDate.length > 0 ? (
+          schedulesForSelectedDate.map((ws) => {
+            const label = `${ws.schedule.start_time.slice(0, 5)} - ${ws.schedule.end_time.slice(0, 5)}`;
+            return (
+              <ToggleButton
+                key={ws.worker_schedule_id}
+                value={ws.worker_schedule_id.toString()} // ✅ ahora usamos el ID del workerSchedule
+                aria-label={label}
+                className="m-1 rounded-xl"
+              >
+                {label}
+              </ToggleButton>
+            );
+          })
+        ) : (
+          <Typography variant="body2" color="text.secondary" className="mt-2">
             Seleccione una fecha válida
-          </p>
+          </Typography>
         )}
       </ToggleButtonGroup>
     </div>

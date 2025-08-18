@@ -1,5 +1,4 @@
 import { PaymentResponse } from "@/typesResponse/PaymentResponse";
-import { FileData } from "@/types/FileData";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid2";
@@ -74,7 +73,7 @@ export default function ReceiptRevision({ receiptData }: ReceiptRevisionProps) {
             >
               <Button
                 onClick={() => {
-                  handleDownload(receiptData.paymenta_data.file);
+                  handleDownload(receiptData.payment_data.file);
                 }}
                 variant="text"
                 className="boton-editar"

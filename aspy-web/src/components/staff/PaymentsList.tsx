@@ -95,7 +95,13 @@ export default function PaymentsList() {
       sortable: false,
       align: "center",
       headerAlign: "center",
-      renderCell: (params) => getStatusIcon(params.value),
+      renderCell: (params) => {
+        return (
+          <Typography variant="body1">
+            {getStatusIcon(params.row.payment_status.status_id)}
+          </Typography>
+        );
+      },
     },
   ];
 

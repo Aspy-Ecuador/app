@@ -23,7 +23,7 @@ export const dataPayments: PaymentResponse[] = [
       },
     },
     service: { id_serice: 3, name: "Terapia", price: 34.0 },
-    paymenta_data: {
+    payment_data: {
       payment_data_id: 19,
       type: "Transferencia",
       number: 987654321,
@@ -33,12 +33,15 @@ export const dataPayments: PaymentResponse[] = [
       creation_date: "2025-07-31 18:21:12",
       modification_date: "",
     },
+    payment_status: {
+      status_id: 1,
+      name: "Pending",
+    },
     discount_id: null,
     payment_data_id: 19,
     service_price: 34.0,
     discount_percentage: null,
     total_amount: 34.0,
-    status: 3,
     created_by: "system",
     modified_by: null,
     creation_date: "2025-07-31 18:21:12",
@@ -66,7 +69,7 @@ export const dataPayments: PaymentResponse[] = [
       },
     },
     service: { id_serice: 2, name: "Consulta", price: 12.0 },
-    paymenta_data: {
+    payment_data: {
       payment_data_id: 18,
       type: "Transferencia",
       number: 987654321,
@@ -76,12 +79,15 @@ export const dataPayments: PaymentResponse[] = [
       creation_date: "2025-07-30 22:10:10",
       modification_date: "",
     },
+    payment_status: {
+      status_id: 1,
+      name: "Pending",
+    },
     discount_id: null,
     payment_data_id: 18,
     service_price: 12.0,
     discount_percentage: 0,
     total_amount: 12.0,
-    status: 2,
     created_by: "system",
     modified_by: null,
     creation_date: "2025-08-02 10:54:20",
@@ -109,7 +115,7 @@ export const dataPayments: PaymentResponse[] = [
       },
     },
     service: { id_serice: 2, name: "Consulta", price: 12.0 },
-    paymenta_data: {
+    payment_data: {
       payment_data_id: 20,
       type: "Transferencia",
       number: 987654321,
@@ -119,12 +125,15 @@ export const dataPayments: PaymentResponse[] = [
       creation_date: "2025-08-02 21:27:33",
       modification_date: "",
     },
+    payment_status: {
+      status_id: 1,
+      name: "Pending",
+    },
     discount_id: null,
     payment_data_id: 20,
     service_price: 12.0,
     discount_percentage: null,
     total_amount: 12.0,
-    status: 1,
     created_by: "system",
     modified_by: null,
     creation_date: "2025-08-02 21:27:33",
@@ -152,7 +161,7 @@ export const dataPayments: PaymentResponse[] = [
       },
     },
     service: { id_serice: 2, name: "Consulta", price: 12.0 },
-    paymenta_data: {
+    payment_data: {
       payment_data_id: 17,
       type: "Transferencia",
       number: 123456789,
@@ -162,12 +171,15 @@ export const dataPayments: PaymentResponse[] = [
       creation_date: "2025-07-30 21:38:01",
       modification_date: "",
     },
+    payment_status: {
+      status_id: 1,
+      name: "Pending",
+    },
     discount_id: null,
     payment_data_id: 17,
     service_price: 12.0,
     discount_percentage: null,
     total_amount: 12.0,
-    status: 1,
     created_by: "system",
     modified_by: null,
     creation_date: "2025-07-30 17:10:10",

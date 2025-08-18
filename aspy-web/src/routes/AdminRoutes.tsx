@@ -12,12 +12,12 @@ import EditUserAdmin from "@/components/admin/EditUserAdmin";
 export const AdminRoutes = [
   { path: "/", element: <ControlPanel /> },
   { path: "/perfil", element: <Profile /> },
+  { path: "/editar/:id", element: <EditUserAdmin /> },
   { path: "/usuarios", element: <UsersList /> },
   { path: "/servicios", element: <ServicesList /> },
   { path: "/servicios/:id", element: <EditService /> },
   { path: "/nuevo-servicio", element: <CreateService /> },
   { path: "/nuevo-usuario", element: <CreateUserAdmin /> },
   { path: "/citas", element: <Appointment /> },
-  { path: "/usuarios/:id", element: <EditUserAdmin /> },
   ...SharedRoutes,
 ];

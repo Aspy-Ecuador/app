@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { User } from "@/types/User";
 import { useRoleData } from "@/observer/RoleDataContext";
-import { getUser, getUsers } from "@/utils/utils";
+import { getUser } from "@/utils/utils";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import OverviewPatient from "@professional/OverviewPatient";

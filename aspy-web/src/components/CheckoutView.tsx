@@ -5,7 +5,7 @@ import { AppointmentRequest } from "@/typesRequest/AppointmentRequest";
 import { FileData } from "@/types/FileData";
 import { ServiceResponse } from "@/typesResponse/ServiceResponse";
 import { useRoleData } from "@/observer/RoleDataContext";
-import { getAuthenticatedUser } from "@/utils/store";
+import { getAuthenticatedUserID } from "@/utils/store";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid2";
@@ -21,11 +21,27 @@ import Success from "@components/Success";
 import appointmentAPI from "@API/appointmentAPI";
 import Progress from "@components/Progress";
 import { uploadToCloudinary } from "@/utils/utils";
+import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 
 const steps = ["Detalles de Pago", "Revisar cita"];
 
-export default function CheckoutView() {
-  const { data, loading } = useRoleData();
+interface CheckoutViewProp {
+  isClient: boolean;
+}
+
+export default function CheckoutView({ isClient }: CheckoutViewProp) {
+  const {
+    data,
+    loading,
+    refreshServices,
+    refreshPersons,
+    refreshUserAccounts,
+    refreshRoles,
+    refreshProfessionals,
+    refreshSchedules,
+    refreshAppointments,
+    refreshWorkerSchedules,
+  } = useRoleData();
 
   if (loading) return <Progress />;
 
@@ -38,14 +54,18 @@ export default function CheckoutView() {
   const [open, setOpen] = useState(false);
 
   const [file, setFile] = useState<FileData | null>(null);
-  const { serviceId, scheduleId } = useParams();
+  const { serviceId, scheduleId, clientId } = useParams();
 
   // Opcional: convertirlos a número si los necesitas como enteros
   const parsedServiceId = parseInt(serviceId || "", 10);
   const parsedScheduleId = parseInt(scheduleId || "", 10);
+  const parsedClientId = parseInt(clientId || "", 10);
+
+  const [load, setLoad] = useState(false);
 
   const handleOpen = async () => {
     if (file != null) {
+      setLoad(true);
       const selectedService = services.find(
         (service) => service.service_id === parsedServiceId
       );
@@ -53,7 +73,10 @@ export default function CheckoutView() {
       // 2. Subir a Cloudinary
       const uploadedFileUrl = await uploadToCloudinary(file);
 
-      const hardcodedPersonId = getAuthenticatedUser()!.person_id; // Cliente
+      const hardcodedPersonId = isClient
+        ? getAuthenticatedUserID()
+        : parsedClientId; // Cliente
+
       const hardcodedScheduledBy = 5;
       const hardcodedServicePrice = selectedService!.price;
       const hardcodedTotalAmount = selectedService!.price;
@@ -77,7 +100,16 @@ export default function CheckoutView() {
       };
       console.log(data);
       await appointmentAPI.createAppointment(data);
+      await refreshServices();
+      await refreshPersons();
+      await refreshUserAccounts();
+      await refreshRoles();
+      await refreshProfessionals();
+      await refreshSchedules();
+      await refreshAppointments();
+      await refreshWorkerSchedules();
       setActiveStep(activeStep + 1);
+      setLoad(false);
       setOpen(true);
     }
   };
@@ -90,7 +122,13 @@ export default function CheckoutView() {
   const getStepContent = (step: number) => {
     switch (step) {
       case 0:
-        return <PaymentForm setIsValid={setIsPaymentValid} setFile={setFile} />;
+        return (
+          <PaymentForm
+            service_id={parsedServiceId}
+            setIsValid={setIsPaymentValid}
+            setFile={setFile}
+          />
+        );
       case 1:
         return <Review service_id={parsedServiceId} />;
       default:
@@ -144,7 +182,7 @@ export default function CheckoutView() {
               width: "100%",
               maxWidth: { sm: "100%", md: 600 },
               maxHeight: "720px",
-              gap: { xs: 5, md: "none" },
+              gap: { xs: 1, md: "none" },
             }}
           >
             {activeStep === steps.length ? (
@@ -167,7 +205,6 @@ export default function CheckoutView() {
                       gap: 1,
                       pb: { xs: 12, sm: 0 },
                       mt: { xs: 2, sm: 0 },
-                      mb: "60px",
                     },
                     activeStep !== 0
                       ? { justifyContent: "space-between" }
@@ -203,7 +240,11 @@ export default function CheckoutView() {
                       onClick={handleOpen} // o handleFinish si necesitas hacer otra cosa
                       sx={{ width: { xs: "100%", sm: "fit-content" } }}
                     >
-                      Finalizar
+                      {load ? (
+                        <CircularProgress size={24} sx={{ color: "white" }} /> // Mostrar ciclo de carga
+                      ) : (
+                        <h1>Finalizar</h1>
+                      )}
                     </Button>
                   )}
                 </Box>

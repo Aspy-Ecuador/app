@@ -1,13 +1,13 @@
 import { User } from "@/types/User";
+import { getAge, getGender, translateRol } from "@/utils/utils";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import photo from "@assets/user.png";
 
 import InfoIcon from "@mui/icons-material/Info";
-import { useMemo } from "react";
-import { getAge, getGender, translateRol } from "@/utils/utils";
 
 interface OverviewPersonaProps {
   selectedData: User;
@@ -18,11 +18,6 @@ export default function Overview_persona({
   selectedData,
   moreInfo,
 }: OverviewPersonaProps) {
-  const randomIndex = useMemo(
-    () => Math.floor(Math.random() * 50) + 1,
-    [selectedData.user_id]
-  );
-  const genderFolder = selectedData.gender === 1 ? "men" : "women";
   return (
     <Box className="contenedor-overview">
       <Grid container rowSpacing={6} columnSpacing={{ xs: 1, sm: 1, md: 1 }}>
@@ -41,7 +36,7 @@ export default function Overview_persona({
         >
           <Avatar
             alt="Foto de perfil"
-            src={`https://randomuser.me/api/portraits/${genderFolder}/${randomIndex}.jpg`}
+            src={photo}
             sx={{ width: 150, height: 150 }}
           />
         </Grid>

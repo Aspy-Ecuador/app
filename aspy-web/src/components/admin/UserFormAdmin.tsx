@@ -2,11 +2,12 @@ import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { inputCreateUserAdminConfig } from "@/config/userFormAdminConfig";
 import { useRoleData } from "@/observer/RoleDataContext";
-import Button from "@mui/material/Button";
-import UserInput from "@forms/UserInput";
 import { User } from "@/types/User";
 import { getUsers } from "@utils/utils";
+import Button from "@mui/material/Button";
+import UserInput from "@forms/UserInput";
 import Progress from "@components/Progress";
+import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 
 interface UserFormProps {
   isEditMode: boolean;
@@ -17,6 +18,8 @@ interface UserFormProps {
   onBack: () => void;
   onFinish: (data: User) => void;
   isLast?: boolean;
+  onRoleChange?: (roleId: number) => void;
+  load?: boolean;
 }
 
 export default function UserFormAdmin({
@@ -28,6 +31,8 @@ export default function UserFormAdmin({
   onBack,
   onFinish,
   isLast,
+  onRoleChange,
+  load,
 }: UserFormProps) {
   const methods = useForm<User>();
   const { data, loading } = useRoleData();
@@ -66,6 +71,13 @@ export default function UserFormAdmin({
   }, [isEditMode, userId]);
 
   const roleSelect = Number(methods.watch("role_id") ?? 0);
+
+  useEffect(() => {
+    if (onRoleChange) {
+      onRoleChange(roleSelect);
+    }
+  }, [roleSelect]);
+
   const filteredInputs = inputCreateUserAdminConfig.filter((input) => {
     const isExtraField = ["title", "about", "specialty"].includes(input.key);
     return !(isExtraField && roleSelect !== 2);
@@ -135,7 +147,11 @@ export default function UserFormAdmin({
             onClick={onSubmit}
             className="md:w-[250px]"
           >
-            {getButtonLabel()}
+            {load ? (
+              <CircularProgress size={24} sx={{ color: "white" }} /> // Mostrar ciclo de carga
+            ) : (
+              getButtonLabel()
+            )}
           </Button>
         </div>
       </form>

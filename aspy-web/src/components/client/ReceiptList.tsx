@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { GridRowSelectionModel } from "@mui/x-data-grid";
 import { Receipt } from "@/types/Receipt";
 import { GridColDef } from "@mui/x-data-grid";
-import { getReceipt, handleDownloadInvoice } from "@utils/utils";
+import { getReceiptByUser, handleDownloadInvoice } from "@utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Button from "@mui/material/Button";
 import InvoiceView from "@components/InvoiceView";
@@ -13,6 +13,7 @@ import Typography from "@mui/material/Typography";
 import SimpleHeader from "@components/SimpleHeader";
 import Progress from "@components/Progress";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import { getAuthenticatedUserIdentity } from "@/utils/store";
 import { FlattenedReceipt } from "@/types/FlattenedReceipt";
 
 const columns: GridColDef[] = [
@@ -79,9 +80,13 @@ const columns: GridColDef[] = [
 export default function ReceiptList() {
   const { data, loading } = useRoleData();
 
-  const receiptList: Receipt[] = getReceipt(data);
+  const receiptList: Receipt[] = getReceiptByUser(
+    data,
+    getAuthenticatedUserIdentity()
+  );
 
   const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
+
   const [receipt, setReceipt] = useState<Receipt | null>(null);
 
   //Mostrar el usuario

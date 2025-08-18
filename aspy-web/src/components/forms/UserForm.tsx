@@ -17,6 +17,7 @@ interface UserFormProps {
   onBack: () => void;
   onFinish: (data: User) => void;
   isLast?: boolean;
+  onRoleChange?: (roleId: number) => void;
 }
 
 export default function UserForm({
@@ -28,6 +29,7 @@ export default function UserForm({
   onBack,
   onFinish,
   isLast,
+  onRoleChange,
 }: UserFormProps) {
   const methods = useForm<User>();
   const { data, loading } = useRoleData();
@@ -70,6 +72,13 @@ export default function UserForm({
   }, [isEditMode, methods]);
 
   const roleSelect = Number(methods.watch("role_id") ?? 0);
+
+  useEffect(() => {
+    if (onRoleChange) {
+      onRoleChange(roleSelect);
+    }
+  }, [roleSelect]);
+
   const filteredInputs = inputCreateUserConfig.filter((input) => {
     const isExtraField = ["title", "about", "specialty"].includes(input.key);
     return !(isExtraField && roleSelect !== 2);

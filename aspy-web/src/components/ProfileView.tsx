@@ -3,18 +3,20 @@ import penToSquare from "@assets/pen-to-square.svg";
 import { getAge, getGender } from "@/utils/utils";
 import { UserLogin } from "@/types/UserLogin";
 import photo from "@assets/user.png";
+import { useNavigate } from "react-router-dom";
 
 type ProfileProps = {
   user: User | UserLogin;
-  onEdit: () => void;
   isRowPosition: boolean;
 };
 
-export default function ProfileView({
-  user,
-  onEdit,
-  isRowPosition,
-}: ProfileProps) {
+export default function ProfileView({ user, isRowPosition }: ProfileProps) {
+  const navigate = useNavigate();
+
+  const handleEdit = () => {
+    navigate(`/editar/${user.user_id}`);
+  };
+
   return (
     <div
       className={`flex ${isRowPosition ? "flex-col md:flex-row" : "flex-col"} justify-center gap-16 p-8 m-8`}
@@ -35,7 +37,7 @@ export default function ProfileView({
         </div>
         <img
           src={penToSquare}
-          onClick={onEdit}
+          onClick={handleEdit}
           className="fill-gray-200 size-8 cursor-pointer"
           alt="Editar perfil"
         />

@@ -13,7 +13,7 @@ export default function PaymentDetails() {
   const numericId = parseInt(id!);
 
   const payment: PaymentResponse = getPayment(numericId);
-  console.log(payment);
+
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1}>
@@ -24,7 +24,7 @@ export default function PaymentDetails() {
           <ReceiptDetails receiptData={payment} />
         </Grid>
         <Grid size={6}>
-          <PDFViewer url={payment.paymenta_data.file} />
+          <PDFViewer url={payment.payment_data.file} />
         </Grid>
         <Grid size={3}>
           <InvoiceView
@@ -34,7 +34,7 @@ export default function PaymentDetails() {
             service={payment.service.name}
             price={payment.service_price}
             total={payment.total_amount}
-            paymentMethod={payment.paymenta_data.type}
+            paymentMethod={payment.payment_data.type}
           />
         </Grid>
       </Grid>

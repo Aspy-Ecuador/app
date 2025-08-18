@@ -11,4 +11,7 @@ export interface UserAccountRequest {
   marital_status: number;
   education: number;
   person_type: string;
+  title?: string;
+  about?: string;
+  specialty?: string;
 }

@@ -2,10 +2,6 @@ import { UserLogin } from "@/types/UserLogin";
 import ProfileView from "@components/ProfileView";
 
 export default function Profile() {
-  const handleImageClick = () => {
-    alert("Edicion!");
-  };
-
   const getUserInfoFromLocalStorage = (): UserLogin => {
     // query para obtener id = numericId
     const UserAccountInfo = localStorage.getItem("authenticatedUser");
@@ -22,7 +18,7 @@ export default function Profile() {
 
   return (
     <div>
-      <ProfileView user={user} onEdit={handleImageClick} isRowPosition={true} />
+      <ProfileView user={user} isRowPosition={true} />
     </div>
   );
 }

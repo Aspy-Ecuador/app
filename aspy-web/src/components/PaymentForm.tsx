@@ -16,10 +16,13 @@ import BancoPacifico from "@assets/BP.jpeg";
 import { FileData } from "@/types/FileData";
 import UploadButton from "@buttons/UploadButton";
 import { Edit, UploadFile } from "@mui/icons-material";
+import { useRoleData } from "@/observer/RoleDataContext";
+import { ServiceResponse } from "@/typesResponse/ServiceResponse";
 
 interface PaymentFormProps {
   setFile: (valid: FileData) => void;
   setIsValid: (valid: boolean) => void;
+  service_id: number;
 }
 
 const Card = styled(MuiCard)<{ selected?: boolean }>(({ theme }) => ({
@@ -55,8 +58,14 @@ const Card = styled(MuiCard)<{ selected?: boolean }>(({ theme }) => ({
   ],
 }));
 
-export default function PaymentForm({ setIsValid, setFile }: PaymentFormProps) {
+export default function PaymentForm({
+  service_id,
+  setIsValid,
+  setFile,
+}: PaymentFormProps) {
+  const { data, loading } = useRoleData();
   const [signature, setSignature] = useState<FileData | null>(null);
+  const [service, setService] = useState<ServiceResponse>();
 
   // Validación en tiempo real
   useEffect(() => {
@@ -65,10 +74,16 @@ export default function PaymentForm({ setIsValid, setFile }: PaymentFormProps) {
       setFile(signature);
     }
     setIsValid(allFilled);
+    if (!loading && data.services) {
+      const found = data.services.find(
+        (s: ServiceResponse) => s.service_id === service_id
+      );
+      setService(found);
+    }
   }, [signature]);
 
   return (
-    <Stack spacing={{ xs: 3, sm: 6 }} useFlexGap>
+    <Stack spacing={{ xs: 1, sm: 3 }} useFlexGap>
       <FormControl component="fieldset" fullWidth>
         <RadioGroup
           aria-label="Payment options"
@@ -116,10 +131,18 @@ export default function PaymentForm({ setIsValid, setFile }: PaymentFormProps) {
           </Card>
         </RadioGroup>
       </FormControl>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
         <Alert severity="warning" icon={<WarningRoundedIcon />}>
-          Su cita será agendada una vez que suba el comprobante de depósito.
+          Recuerde: una vez que suba su comprobante de pago, el personal
+          administrativo revisará y aprobará el comprobante. Cuando esto ocurra,
+          su cita quedará confirmada.
         </Alert>
+        <Typography variant="subtitle1" sx={{ fontWeight: "medium" }}>
+          Total a Pagar
+        </Typography>
+        <Typography variant="body1" gutterBottom>
+          {service?.price}
+        </Typography>
         <Typography variant="subtitle1" sx={{ fontWeight: "medium" }}>
           Cuenta Bancaria
         </Typography>
@@ -170,7 +193,7 @@ export default function PaymentForm({ setIsValid, setFile }: PaymentFormProps) {
             />
           </Grid>
           <Grid size={12}>
-            <div className="mt-10">
+            <div className="mt-4">
               <div className="flex items-center mb-2">
                 <Edit className="mr-2 text-gray-600" />
                 <h2 className="text-lg font-semibold">Comprobante de pago</h2>
