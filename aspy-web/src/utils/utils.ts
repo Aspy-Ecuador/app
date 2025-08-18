@@ -442,7 +442,7 @@ export function translateStatus(status: string): string {
     case "cancelled":
       return "Cancelado";
     case "pending":
-      return "No se ha aprobado";
+      return "Pendiente";
     default:
       return "Desconocido";
   }
