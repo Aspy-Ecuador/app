@@ -7,12 +7,13 @@ import ReceiptDetails from "@staff/ReceiptDetails";
 import SimpleHeader from "@components/SimpleHeader";
 import { PaymentResponse } from "@/typesResponse/PaymentResponse";
 import PDFViewer from "@components/PDFViewer";
+import { useRoleData } from "@/observer/RoleDataContext";
 
 export default function PaymentDetails() {
   const { id } = useParams();
   const numericId = parseInt(id!);
-
-  const payment: PaymentResponse = getPayment(numericId);
+  const { data } = useRoleData();
+  const payment: PaymentResponse = getPayment(numericId, data);
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
@@ -30,10 +31,10 @@ export default function PaymentDetails() {
           <InvoiceView
             id={payment.payment_id}
             date={payment.creation_date}
-            client={payment.person.full_name}
+            client={payment.person.first_name + " " + payment.person.last_name}
             service={payment.service.name}
-            price={payment.service_price}
-            total={payment.total_amount}
+            price={Number(payment.total_amount)}
+            total={Number(payment.total_amount)}
             paymentMethod={payment.payment_data.type}
           />
         </Grid>

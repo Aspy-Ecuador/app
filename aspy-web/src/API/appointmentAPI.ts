@@ -24,7 +24,7 @@ const appointmentAPI = {
   // Update appointment by ID
   updateAppointment: async (
     id: number,
-    appointmentData: { status: string }
+    appointmentData: { status: number }
   ): Promise<AxiosResponse> => {
     return axios.put(
       `${apiURL}/appointment/${id}`,

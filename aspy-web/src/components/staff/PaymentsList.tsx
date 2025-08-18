@@ -14,10 +14,14 @@ import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import AccessTimeFilledRoundedIcon from "@mui/icons-material/AccessTimeFilledRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import CancelRoundedIcon from "@mui/icons-material/CancelRounded";
+import { useRoleData } from "@/observer/RoleDataContext";
+import { getPayments } from "@/utils/utils";
+import Progress from "../Progress";
 
 export default function PaymentsList() {
   const rowSelection: GridRowSelectionModel = [];
-
+  //const { data, loading } = useRoleData();
+  //const payments: PaymentResponse[] = getPayments(data);
   //Ruta para aprobar
   const navigate = useNavigate();
   const location = useLocation();
@@ -42,7 +46,9 @@ export default function PaymentsList() {
       flex: 3,
       renderCell: (params) => {
         return (
-          <Typography variant="body1">{params.row.person.full_name}</Typography>
+          <Typography variant="body1">
+            {params.row.person.first_name} {params.row.person.last_name}
+          </Typography>
         );
       },
       resizable: false,
@@ -53,6 +59,13 @@ export default function PaymentsList() {
       disableColumnMenu: true,
       flex: 3,
       resizable: false,
+      renderCell: (params) => {
+        return (
+          <Typography variant="body1">
+            {params.row.creation_date.split(" ")[0]}
+          </Typography>
+        );
+      },
     },
     {
       field: "total_amount",
@@ -98,13 +111,13 @@ export default function PaymentsList() {
       renderCell: (params) => {
         return (
           <Typography variant="body1">
-            {getStatusIcon(params.row.payment_status.status_id)}
+            {getStatusIcon(params.row.status.status_id)}
           </Typography>
         );
       },
     },
   ];
-
+  //if (loading) return <Progress />;
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1}>

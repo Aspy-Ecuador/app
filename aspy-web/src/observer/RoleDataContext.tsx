@@ -17,6 +17,16 @@ import { ScheduleResponse } from "@/typesResponse/ScheduleResponse";
 import scheduleAPI from "@/API/scheduleAPI";
 import { WorkerScheduleResponse } from "@/typesResponse/WorkerScheduleResponse";
 import workerScheduleAPI from "@/API/workerScheduleAPI";
+import paymentDataAPI from "@/API/paymentDataAPI";
+import { PaymentDataResponse } from "@/typesResponse/PaymentDataResponse";
+import professionalServiceAPI from "@/API/professionalServiceAPI";
+import { ProfessionalServiceResponse } from "@/typesResponse/ProfessionalServiceResponse";
+import receiptAPI from "@/API/receiptAPI";
+import { ReceiptResponse } from "@/typesResponse/ReceiptResponse";
+import appointmentReportAPI from "@/API/appointmentReportAPI";
+import { AppointmentReportResponse } from "@/typesResponse/AppointmentReportResponse";
+import paymentAPI from "@/API/paymentAPI";
+import { PaymentResponse } from "@typesResponse/PaymentResponse";
 
 type DataStore = Record<string, any>;
 
@@ -32,6 +42,11 @@ type RoleDataContextType = {
   refreshSchedules: () => Promise<void>;
   refreshAppointments: () => Promise<void>;
   refreshWorkerSchedules: () => Promise<void>;
+  refreshPaymentData: () => Promise<void>;
+  refreshProfessionalServices: () => Promise<void>;
+  refreshReceipts: () => Promise<void>;
+  refreshAppointmentReports: () => Promise<void>;
+  refreshPayments: () => Promise<void>;
 };
 
 const RoleDataContext = createContext<RoleDataContextType>({
@@ -46,6 +61,11 @@ const RoleDataContext = createContext<RoleDataContextType>({
   refreshSchedules: async () => {},
   refreshAppointments: async () => {},
   refreshWorkerSchedules: async () => {},
+  refreshPaymentData: async () => {},
+  refreshProfessionalServices: async () => {},
+  refreshReceipts: async () => {},
+  refreshAppointmentReports: async () => {},
+  refreshPayments: async () => {},
 });
 
 export const RoleDataProvider = ({
@@ -244,6 +264,84 @@ export const RoleDataProvider = ({
     }
   };
 
+  const refreshPaymentData = async () => {
+    try {
+      const res = await paymentDataAPI.getAllPaymentData();
+      const ordered = [...res.data].sort(
+        (a: PaymentDataResponse, b: PaymentDataResponse) =>
+          a.payment_data_id - b.payment_data_id
+      );
+
+      localStorage.setItem("paymentData", JSON.stringify(ordered));
+      setData((prev: any) => ({ ...prev, paymentData: ordered }));
+      console.log("✔️ PaymentData actualizado");
+    } catch (err) {
+      console.error("❌ Error al refrescar paymentData:", err);
+    }
+  };
+
+  const refreshProfessionalServices = async () => {
+    try {
+      const res = await professionalServiceAPI.getAllProfessionalServices();
+      const ordered = [...res.data].sort(
+        (a: ProfessionalServiceResponse, b: ProfessionalServiceResponse) =>
+          a.professional_service_id - b.professional_service_id
+      );
+
+      localStorage.setItem("professionalServices", JSON.stringify(ordered));
+      setData((prev: any) => ({ ...prev, professionalServices: ordered }));
+      console.log("✔️ ProfessionalServices actualizados");
+    } catch (err) {
+      console.error("❌ Error al refrescar professionalServices:", err);
+    }
+  };
+
+  const refreshReceipts = async () => {
+    try {
+      const res = await receiptAPI.getAllReceipts();
+      const ordered = [...res.data].sort(
+        (a: ReceiptResponse, b: ReceiptResponse) => a.receipt_id - b.receipt_id
+      );
+
+      localStorage.setItem("receipts", JSON.stringify(ordered));
+      setData((prev: any) => ({ ...prev, receipts: ordered }));
+      console.log("✔️ Receipts actualizados");
+    } catch (err) {
+      console.error("❌ Error al refrescar receipts:", err);
+    }
+  };
+
+  const refreshAppointmentReports = async () => {
+    try {
+      const res = await appointmentReportAPI.getAllReports();
+      const ordered = [...res.data].sort(
+        (a: AppointmentReportResponse, b: AppointmentReportResponse) =>
+          a.appointment_report_id - b.appointment_report_id
+      );
+
+      localStorage.setItem("appointmentReports", JSON.stringify(ordered));
+      setData((prev: any) => ({ ...prev, appointmentReports: ordered }));
+      console.log("✔️ AppointmentReports actualizados");
+    } catch (err) {
+      console.error("❌ Error al refrescar appointmentReports:", err);
+    }
+  };
+
+  const refreshPayments = async () => {
+    try {
+      const res = await paymentAPI.getAllPayments();
+      const ordered = [...res.data].sort(
+        (a: PaymentResponse, b: PaymentResponse) => a.payment_id - b.payment_id
+      );
+
+      localStorage.setItem("payments", JSON.stringify(ordered));
+      setData((prev: any) => ({ ...prev, payments: ordered }));
+      console.log("✔️ Payments actualizados");
+    } catch (err) {
+      console.error("❌ Error al refrescar payments:", err);
+    }
+  };
+
   useEffect(() => {
     refreshData();
   }, [role]);
@@ -262,6 +360,11 @@ export const RoleDataProvider = ({
         refreshSchedules,
         refreshAppointments,
         refreshWorkerSchedules,
+        refreshPaymentData,
+        refreshProfessionalServices,
+        refreshReceipts,
+        refreshAppointmentReports,
+        refreshPayments,
       }}
     >
       {children}

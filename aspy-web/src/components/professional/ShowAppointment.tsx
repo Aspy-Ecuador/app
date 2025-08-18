@@ -15,6 +15,7 @@ import FormLabel from "@mui/material/FormLabel";
 import Button from "@mui/material/Button";
 import ConfirmDialog from "@professional/ConfirmDialog";
 import appointmentAPI from "@/API/appointmentAPI";
+import { useRoleData } from "@/observer/RoleDataContext";
 
 interface ShowAppointmentProps {
   unmarkedAppointmentsProp: Appointment[];
@@ -33,6 +34,16 @@ export default function ShowAppointment({
   const [openDialog, setOpenDialog] = useState(false);
   const [assistMap, setAssistMap] = useState<Record<number, string>>({});
   const navigate = useNavigate();
+  const {
+    refreshPaymentData,
+    refreshProfessionals,
+    refreshAppointments,
+    refreshServices,
+    refreshPersons,
+    refreshUserAccounts,
+    refreshRoles,
+    refreshSchedules,
+  } = useRoleData();
 
   const handleConfirmAssist = async () => {
     (document.activeElement as HTMLElement)?.blur();
@@ -49,8 +60,16 @@ export default function ShowAppointment({
         return updated;
       });
     }
-    await send();
     setOpenDialog(false);
+    await send();
+    await refreshPaymentData();
+    await refreshProfessionals();
+    await refreshAppointments();
+    await refreshServices();
+    await refreshPersons();
+    await refreshUserAccounts();
+    await refreshRoles();
+    await refreshSchedules();
     setSelectedAppointment(null);
   };
 
@@ -62,7 +81,7 @@ export default function ShowAppointment({
       await appointmentAPI.updateAppointment(
         selectedAppointment.id_appointment,
         {
-          status: option,
+          status: Number(option),
         }
       );
     }

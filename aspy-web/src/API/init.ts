@@ -11,6 +11,7 @@ import userAccountAPI from "./userAccountAPI";
 import personAPI from "./personAPI";
 import roleAPI from "./roleAPI";
 import professionalAPI from "./professionalAPI";
+import paymentAPI from "./paymentAPI";
 
 type Loader = {
   name: string;
@@ -48,7 +49,7 @@ const clientLoaders: Loader[] = [
 ];
 
 const staffLoaders: Loader[] = [
-  //{ name: "payments", fn: paymentAPI.getAllPayments },
+  { name: "payments", fn: paymentAPI.getAllPayments },
   { name: "paymentData", fn: paymentDataAPI.getAllPaymentData },
   {
     name: "professionalServices",

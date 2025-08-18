@@ -1,7 +1,7 @@
 // SÍ SE USA
 export type AppointmentReportRequest = {
-  appointment_id: number;
+  "appointment-id": number;
   comments: string;
   sign: string;
-  created_by: string;
+  //"created-by": string;
 };

@@ -189,10 +189,11 @@ export function getIncome(data: PaymentResponse[]): number[] {
 
   data.forEach((payment) => {
     const creationMonth = new Date(payment.creation_date).getMonth(); // Obtenemos el mes (0-11)
+
     const totalAmount = payment.total_amount;
 
     // Sumamos el total_amount al mes correspondiente
-    monthlyIncome[creationMonth] += totalAmount;
+    monthlyIncome[creationMonth] += Number(totalAmount);
   });
 
   return monthlyIncome;
@@ -440,6 +441,8 @@ export function translateStatus(status: string): string {
       return "Completado";
     case "cancelled":
       return "Cancelado";
+    case "pending":
+      return "No se ha aprobado";
     default:
       return "Desconocido";
   }
@@ -547,7 +550,8 @@ export const uploadToCloudinary = async (file: FileData): Promise<string> => {
   }
 };
 
-export const getPayment = (id: number): PaymentResponse => {
+export const getPayment = (id: number, data: any): PaymentResponse => {
+  //const payments: PaymentResponse[] = getPayments(data);
   const payment = dataPayments.find((p) => p.payment_id === id);
   if (!payment) {
     throw new Error(`No se encontró el pago con ID ${id}`);
@@ -712,9 +716,8 @@ export function getUnreportedAppointments(
     (app) =>
       !appointmentReports.some(
         (report) => report.appointment_id === app.id_appointment
-      )
+      ) && app.status.id_status === 2 // 🔹 solo citas con status_id = 1
   );
-  console.log(appointments);
   return unreported.length > 0 ? unreported : [];
 }
 
@@ -753,7 +756,7 @@ export function getReceipt(data: any): Receipt[] {
         (pd: any) => pd.payment_data_id === payment.payment_data_id
       );
       const service = data.services?.find(
-        (s: any) => s.service_id === payment.service.id_serice
+        (s: any) => s.service_id === payment.service.service_id
       );
       const person = data.persons?.find(
         (p: any) => p.person_id === payment.person.person_id
@@ -782,4 +785,8 @@ export function getReceiptByUser(data: any, user_id: number): Receipt[] {
   }
   const receipts: Receipt[] = getReceipt(data);
   return receipts.filter((recp) => recp.client.user_id == user_id);
+}
+
+export function getPayments(data: any): PaymentResponse[] {
+  return data.payments;
 }

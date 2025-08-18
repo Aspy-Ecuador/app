@@ -10,9 +10,7 @@ const appointmentReportAPI = {
   getReportById: async (id: string): Promise<AxiosResponse> =>
     axios.get(`${apiURL}/appointment-report/${id}`, getConfig()),
 
-  createReport: async (
-    data: AppointmentReportRequest
-  ): Promise<AxiosResponse> =>
+  createReport: async (data: any): Promise<AxiosResponse> =>
     axios.post(`${apiURL}/appointment-report`, data, getConfig()),
 
   updateReport: async (

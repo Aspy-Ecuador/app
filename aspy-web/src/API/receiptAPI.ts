@@ -14,7 +14,7 @@ const receiptAPI = {
   getReceiptById: async (id: string): Promise<AxiosResponse> =>
     axios.get(`${apiURL}/receipt/${id}`, getConfig()),
 
-  createReceipt: async (data: ReceiptData): Promise<AxiosResponse> =>
+  createReceipt: async (data: any): Promise<AxiosResponse> =>
     axios.post(`${apiURL}/receipt`, data, getConfig()),
 
   updateReceipt: async (

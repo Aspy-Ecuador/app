@@ -6,7 +6,7 @@ export type AppointmentResponse = {
     person_id: number;
     user_id: number;
     first_name: string;
-    middle_name: string | null;
+    last_name: string | null;
     birthdate: string;
     gender: string;
     occupation: string;

@@ -158,7 +158,7 @@ export default function AppointmentCreation({
                 <option value="">Escoja el profesional</option>
                 {professionalsOptions?.map((option) => (
                   <option key={option.person_id} value={option.person_id}>
-                    {option.first_name} {option.middle_name}
+                    {option.first_name} {option.last_name}
                   </option>
                 ))}
               </select>

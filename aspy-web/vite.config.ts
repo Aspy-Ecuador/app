@@ -31,5 +31,14 @@ export default defineConfig({
   build: {
     outDir: "dist", // Especifica la carpeta de salida
   },
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
   base: "/app", // Aquí se debe poner el nombre del repositorio en GitHub
 });

@@ -29,14 +29,26 @@ export default function AddReport({ setReport }: AddReportProps) {
 
   const handleClose = () => {
     setOpen(false);
-    navigate("/app");
+    navigate("/");
   };
 
   const handleOpen = () => {
     setOpen(true);
   };
 
-  const { data, loading } = useRoleData();
+  const {
+    data,
+    loading,
+    refreshPaymentData,
+    refreshProfessionals,
+    refreshAppointments,
+    refreshServices,
+    refreshPersons,
+    refreshUserAccounts,
+    refreshRoles,
+    refreshSchedules,
+    refreshAppointmentReports,
+  } = useRoleData();
   if (loading) return <Progress />;
 
   const handleSend = async () => {
@@ -49,18 +61,27 @@ export default function AddReport({ setReport }: AddReportProps) {
         return null;
       }
 
-      const dataRequest: AppointmentReportRequest = {
-        appointment_id: toNumber(appointment),
+      const dataRequest = {
+        appointment_id: Number(appointment!),
         comments: reportUrl,
         sign:
           dataAppointment.proffesional.title +
           " " +
           dataAppointment.proffesional.first_name,
-        created_by: "system",
+        "created-by": "system",
       };
 
       console.log(dataRequest);
       await appointmentReportAPI.createReport(dataRequest);
+      await refreshPaymentData();
+      await refreshProfessionals();
+      await refreshAppointments();
+      await refreshServices();
+      await refreshPersons();
+      await refreshUserAccounts();
+      await refreshRoles();
+      await refreshSchedules();
+      await refreshAppointmentReports();
       handleOpen();
     }
   };

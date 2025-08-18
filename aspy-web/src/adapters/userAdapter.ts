@@ -14,8 +14,8 @@ export function userAdapter(
     person_id: person.person_id,
     role_id: role.role_id,
     first_name: person.first_name,
-    last_name: person.middle_name,
-    full_name: person.first_name + " " + person.middle_name,
+    last_name: person.last_name,
+    full_name: person.first_name + " " + person.last_name,
     role: {
       role_id: role.role_id,
       name: role.name,

@@ -97,12 +97,7 @@ export const inputRegisterUserConfig = [
     validation: {
       required: { value: true, message: "Debe seleccionar un rol" },
     },
-    options: [
-      { label: "Administrador", value: 1 },
-      { label: "Profesional", value: 2 },
-      { label: "Cliente", value: 3 },
-      { label: "Secretario", value: 4 },
-    ],
+    options: [{ label: "Cliente", value: 3 }],
   },
   {
     label: "Contraseña",

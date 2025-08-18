@@ -50,7 +50,7 @@ export default function SessionsChart({ income }: SessionsChartProps) {
     theme.palette.primary.main,
     theme.palette.primary.dark,
   ];
-
+  console.log(income);
   return (
     <Card variant="outlined" sx={{ width: "100%" }}>
       <CardContent>

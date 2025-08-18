@@ -88,14 +88,15 @@ export default function ServiceForm({
 
         setMessage("¡Se ha actualizado con éxito!");
         setIsError(false);
+        setFail(false);
         setOpen(true);
       }
     } catch (error) {
       console.error("Error al guardar el servicio:", error);
+      setFail(true);
       setMessage("Ocurrió un error al guardar el servicio.");
       setIsError(true);
       setOpen(true);
-      setFail(true);
     } finally {
       setLoadingSave(false);
     }
@@ -116,6 +117,7 @@ export default function ServiceForm({
       console.log("✅ Servicios actualizados");
       setMessage("¡Se ha creado con éxito!");
       setIsError(false);
+      setFail(false);
       setOpen(true);
     } catch (error: any) {
       console.error("❌ Error en onClickCreate:", error);
@@ -124,9 +126,9 @@ export default function ServiceForm({
 
         if (errors?.name?.length) {
           // Nombre ya registrado
-          setMessage(`⚠ ${errors.name[0]}. Intenta con otro nombre.`);
-          setIsError(true);
+          setMessage(`⚠ Este servicio ya ha sido registrado`);
           setFail(true);
+          setIsError(true);
         } else {
           setMessage("Ocurrió un error al guardar el servicio.");
           setIsError(true);
@@ -175,7 +177,7 @@ export default function ServiceForm({
         handleClose={handleClose}
         isRegister={false}
         message={message}
-        error={fail}
+        fail={fail}
       />
     </FormProvider>
   );

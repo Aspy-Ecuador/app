@@ -3,7 +3,7 @@ export type PersonResponse = {
   person_id: number;
   user_id: number;
   first_name: string;
-  middle_name: string;
+  last_name: string;
   birthdate: string; // formato ISO: "YYYY-MM-DD"
   gender: string;
   occupation: string;

@@ -20,7 +20,7 @@ import ReplyRoundedIcon from "@mui/icons-material/ReplyRounded";
 import Success from "@components/Success";
 import appointmentAPI from "@API/appointmentAPI";
 import Progress from "@components/Progress";
-import { uploadToCloudinary } from "@/utils/utils";
+import { getAppointments, uploadToCloudinary } from "@/utils/utils";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 
 const steps = ["Detalles de Pago", "Revisar cita"];
@@ -83,7 +83,7 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
       const hardcodedPaymentType = "Transferencia";
       const hardcodedAccountNumber = 987654321;
 
-      const data: AppointmentRequest = {
+      const dataSend: AppointmentRequest = {
         payment_data: {
           type: hardcodedPaymentType,
           number: hardcodedAccountNumber,
@@ -98,8 +98,7 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
         scheduled_by: hardcodedScheduledBy,
         worker_schedule_id: parsedScheduleId,
       };
-      console.log(data);
-      await appointmentAPI.createAppointment(data);
+      await appointmentAPI.createAppointment(dataSend);
       await refreshServices();
       await refreshPersons();
       await refreshUserAccounts();

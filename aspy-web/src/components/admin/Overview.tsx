@@ -2,16 +2,23 @@ import { useRoleData } from "@/observer/RoleDataContext";
 import PageViewsBarChart, {
   PageViewsBarChartProps,
 } from "@admin/PageViewsBarChart";
-import { getDataAppointment, getDataCard, getIncome } from "@/utils/utils";
+import {
+  getDataAppointment,
+  getDataCard,
+  getIncome,
+  getPayments,
+} from "@/utils/utils";
 import { dataPayments } from "@/data/Payment";
 import StatCard, { StatCardProps } from "@admin/StatCard";
 import Grid from "@mui/material/Grid2";
 import Box from "@mui/material/Box";
 import SessionsChart from "@admin/SessionsChart";
+import { PaymentResponse } from "@typesResponse/PaymentResponse";
 
 export default function MainGrid() {
   const { data } = useRoleData();
   const dataAppointment: PageViewsBarChartProps = getDataAppointment(data);
+  //const paymentsData: PaymentResponse[] = getPayments(data);
   const income: number[] = getIncome(dataPayments);
   const dataCard: StatCardProps[] = getDataCard(data);
   return (

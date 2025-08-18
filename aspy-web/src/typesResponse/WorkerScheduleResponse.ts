@@ -23,7 +23,7 @@ export type WorkerScheduleResponse = {
     person_id: number;
     user_id: number;
     first_name: string;
-    middle_name: string | null;
+    last_name: string | null;
     birthdate: string; // formato: "YYYY-MM-DD"
     gender: string;
     occupation: string;

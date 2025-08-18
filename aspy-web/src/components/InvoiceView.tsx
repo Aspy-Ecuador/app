@@ -38,16 +38,16 @@ export default function InvoiceView({
       borderColor="#000000"
     >
       <Typography variant="h6" fontWeight="bold">
-        Invoice
+        Recibo de pago
       </Typography>
       <Typography variant="h4" fontWeight="bold" gutterBottom>
         #{id}
       </Typography>
 
-      <Typography fontWeight="bold">Issue Date:</Typography>
+      <Typography fontWeight="bold">Fecha:</Typography>
       <Typography gutterBottom>{date}</Typography>
 
-      <Typography fontWeight="bold">Client Name:</Typography>
+      <Typography fontWeight="bold">Nombre de cliente:</Typography>
       <Typography gutterBottom>{client}</Typography>
 
       {/*<Typography fontWeight="bold">Address:</Typography>*/}
@@ -62,7 +62,7 @@ export default function InvoiceView({
                   colSpan={2}
                   sx={{ fontWeight: "bold", backgroundColor: "#f5f5f5" }}
                 >
-                  Service
+                  Servicio
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -101,7 +101,7 @@ export default function InvoiceView({
 
       <Grid container mt={4} spacing={2}>
         <Grid size={6}>
-          <Typography fontWeight="bold">Payment Method:</Typography>
+          <Typography fontWeight="bold">Método de pago:</Typography>
           <Typography>{paymentMethod}</Typography>
         </Grid>
         {/*<Grid size={6}>

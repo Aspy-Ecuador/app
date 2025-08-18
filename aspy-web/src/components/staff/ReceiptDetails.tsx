@@ -9,6 +9,8 @@ import { PaymentResponse } from "@/typesResponse/PaymentResponse";
 //import paymentAPI from "@/API/paymentAPI";
 //import { StatusRequest } from "@/typesRequest/StatusRequest";
 import { dataPayments } from "@/data/Payment";
+import receiptAPI from "@/API/receiptAPI";
+import { useRoleData } from "@/observer/RoleDataContext";
 
 interface ReceiptDetailsProps {
   receiptData: PaymentResponse;
@@ -16,7 +18,7 @@ interface ReceiptDetailsProps {
 
 export default function ReceiptDetails({ receiptData }: ReceiptDetailsProps) {
   const navigate = useNavigate();
-
+  const { refreshReceipts } = useRoleData();
   const handleBack = () => {
     navigate("/pagos");
   };
@@ -28,12 +30,17 @@ export default function ReceiptDetails({ receiptData }: ReceiptDetailsProps) {
 
     const payment = data.find((p) => p.payment_id === id);
     if (payment) {
-      payment.payment_status.name = "nuev";
-      payment.payment_status.status_id = 2;
+      payment.status.name = "Paid";
+      payment.status.status_id = 2;
     }
 
     console.log(data);
-
+    const nuevo = {
+      payment_id: receiptData.payment_id,
+      status: "Paid",
+    };
+    await receiptAPI.createReceipt(nuevo);
+    await refreshReceipts();
     //await paymentAPI.updateStatus(receiptData.payment_id, status);
     navigate(-1);
   };
@@ -49,7 +56,7 @@ export default function ReceiptDetails({ receiptData }: ReceiptDetailsProps) {
         </Grid>
         <Grid container size={12}>
           <div className="flex flex-row gap-9 justify-center w-full">
-            <CancelButton onClick={handleBack} text="Cancelar" />
+            <CancelButton onClick={handleBack} text="No aprobar" />
             <CreationButton onClick={approve} text="Aprobar comprobante" />
           </div>
         </Grid>

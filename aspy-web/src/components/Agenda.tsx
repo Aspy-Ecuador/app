@@ -17,7 +17,6 @@ export default function Agenda({
     start: new Date(`${appointment.date}T${appointment.startTime}`),
     end: new Date(`${appointment.date}T${appointment.endTime}`),
   }));
-
   return (
     <Scheduler
       locale={es}
