@@ -37,6 +37,7 @@ export default function OptionsMenu() {
     logout();
     navigate("/login");
   };
+
   return (
     <React.Fragment>
       <MenuButton

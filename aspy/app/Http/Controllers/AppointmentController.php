@@ -66,7 +66,7 @@ class AppointmentController extends Controller
                 'tracking_appointment' => $validated['tracking_appointment'] ?? null,
             ];
 
-            $appointmentData['status'] = 1; //Pendiente
+            $appointmentData['status'] = 4; //Pendiente
 
             $appointment = Appointment::create($appointmentData);
 

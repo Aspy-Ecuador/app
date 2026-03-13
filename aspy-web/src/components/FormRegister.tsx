@@ -54,8 +54,6 @@ export default function FormRegister({
           : input.validation
       }
       options={input.options}
-      //dependsOn={input.dependsOn}
-      //getOptions={input.getOptions}
     />
   ));
 

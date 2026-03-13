@@ -1,10 +1,11 @@
-import { useMemo } from "react";
 import { User } from "@/types/User";
 import penToSquare from "@assets/pen-to-square.svg";
-import { getGender } from "@/utils/utils";
+import { getAge, getGender } from "@/utils/utils";
+import { UserLogin } from "@/types/UserLogin";
+import photo from "@assets/user.png";
 
 type ProfileProps = {
-  user: User;
+  user: User | UserLogin;
   onEdit: () => void;
   isRowPosition: boolean;
 };
@@ -14,26 +15,14 @@ export default function ProfileView({
   onEdit,
   isRowPosition,
 }: ProfileProps) {
-  // Generar imagen aleatoria solo cuando cambia el usuario
-  const randomIndex = useMemo(
-    () => Math.floor(Math.random() * 50) + 1,
-    [user.user_id]
-  );
-
-  const genderFolder = user.gender === 1 ? "men" : "women";
-
-  const imageUrl = `https://randomuser.me/api/portraits/${genderFolder}/${randomIndex}.jpg`;
-
-  const age_calculated = calcularEdad(user.birthdate);
-
   return (
     <div
       className={`flex ${isRowPosition ? "flex-col md:flex-row" : "flex-col"} justify-center gap-16 p-8 m-8`}
     >
       <div className="flex flex-col gap-16 items-center">
         <img
-          className="rounded-full w-auto h-auto"
-          src={imageUrl}
+          className="rounded-full w-[200px] h-auto"
+          src={photo}
           alt={user.first_name}
         />
         <div className="flex flex-col gap-1 justify-center items-center">
@@ -66,7 +55,7 @@ export default function ProfileView({
               Edad
             </h2>
             <p className="font-kumbh text-sm text-secondaryAspy">
-              {age_calculated}
+              {getAge(user.birthdate)}
             </p>
           </div>
           <div className="flex flex-col gap-2">
@@ -81,16 +70,4 @@ export default function ProfileView({
       </div>
     </div>
   );
-}
-
-function calcularEdad(fechaNacimiento: string): number | null {
-  if (!fechaNacimiento) return null;
-  const nacimiento = new Date(fechaNacimiento);
-  const hoy = new Date();
-  let edad = hoy.getFullYear() - nacimiento.getFullYear();
-  const antesCumple =
-    hoy.getMonth() < nacimiento.getMonth() ||
-    (hoy.getMonth() === nacimiento.getMonth() &&
-      hoy.getDate() < nacimiento.getDate());
-  return antesCumple ? edad - 1 : edad;
 }

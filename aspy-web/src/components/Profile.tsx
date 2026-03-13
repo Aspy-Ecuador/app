@@ -1,4 +1,4 @@
-import { User } from "@/types/User";
+import { UserLogin } from "@/types/UserLogin";
 import ProfileView from "@components/ProfileView";
 
 export default function Profile() {
@@ -6,14 +6,14 @@ export default function Profile() {
     alert("Edicion!");
   };
 
-  const getUserInfoFromLocalStorage = (): User => {
+  const getUserInfoFromLocalStorage = (): UserLogin => {
     // query para obtener id = numericId
     const UserAccountInfo = localStorage.getItem("authenticatedUser");
     if (UserAccountInfo) {
       const userAccounts = JSON.parse(UserAccountInfo);
-      return userAccounts as User;
+      return userAccounts as UserLogin;
     }
-    return {} as User;
+    return {} as UserLogin;
   };
 
   //const user_from_local_storage = getUserFromLocalStorage();

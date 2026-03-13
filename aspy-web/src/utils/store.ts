@@ -3,7 +3,7 @@ import { UserLogin } from "@/types/UserLogin";
 
 // Definir el estado inicial y el tipo de estado
 interface State {
-  user: UserLogin | null; // El usuario puede ser null si no hay un usuario autenticado
+  user: UserLogin | null | string; // El usuario puede ser null si no hay un usuario autenticado
   theme: string | "light"; // Tema del UI (light/dark)
 }
 
@@ -13,24 +13,13 @@ const loadUserFromLocalStorage = (): UserLogin | null => {
   return user ? JSON.parse(user) : null;
 };
 
-// Cargar el tema desde localStorage o usar "light" como valor predeterminado
-const loadThemeFromLocalStorage = (): string => {
-  const theme = localStorage.getItem("mui-mode");
-  return theme ? theme : "light"; // Si no hay valor en localStorage, se usa "light" por defecto
-};
-
 // Guardar el usuario en localStorage
-const saveUserToLocalStorage = (user: UserLogin | null): void => {
+const saveUserToLocalStorage = (user: UserLogin | null | string): void => {
   if (user) {
     localStorage.setItem("authenticatedUser", JSON.stringify(user));
   } else {
     localStorage.removeItem("authenticatedUser");
   }
-};
-
-// Guardar el tema en localStorage
-const saveThemeToLocalStorage = (theme: string): void => {
-  // localStorage.setItem("mui-mode", theme);
 };
 
 // Establecer el valor inicial de 'mui-mode' en localStorage
@@ -85,7 +74,7 @@ const rootReducer = (state = initialState, action: Action): State => {
 const store = createStore(rootReducer);
 
 // Función para obtener el usuario autenticado
-export const getAuthenticatedUser = (): UserLogin | null => {
+export const getAuthenticatedUser = (): UserLogin | null | string => {
   const state = store.getState();
   return state.user; // Devuelve el usuario autenticado
 };
@@ -96,27 +85,31 @@ export const setAuthenticatedUser = (user: UserLogin | null): void => {
 };
 
 // Función para obtener el rol del usuario autenticado
-export const getAuthenticatedUserRole = (): string => {
+export const getAuthenticatedUserRole = (): string | null | undefined => {
   const user = getAuthenticatedUser();
-  if (!user) {
+  if (!user || user === null || typeof user === "string") {
     throw new Error("No authenticated user found");
   }
-  return user.role; // Devuelve el rol del usuario autenticado
+  return user.role.name; // Devuelve el rol del usuario autenticado
 };
 
 // Función para obtener el nombre del usuario autenticado
 export const getAuthenticatedUserName = (): string => {
   const userAuthenticated = getAuthenticatedUser();
-  if (!userAuthenticated) {
+  if (
+    !userAuthenticated ||
+    userAuthenticated === null ||
+    typeof userAuthenticated === "string"
+  ) {
     throw new Error("No authenticated user found");
   }
-  return userAuthenticated.name; // Devuelve el nombre del usuario autenticado
+  return userAuthenticated.full_name; // Devuelve el nombre del usuario autenticado
 };
 
 // Función para obtener el correo del usuario autenticado
 export const getAuthenticatedUserEmail = (): string => {
   const user = getAuthenticatedUser();
-  if (!user) {
+  if (!user || user === null || typeof user === "string") {
     throw new Error("No authenticated user found");
   }
   return user.email; // Devuelve el email del usuario autenticado
@@ -125,7 +118,7 @@ export const getAuthenticatedUserEmail = (): string => {
 // Función para obtener la identidad del usuario autenticado
 export const getAuthenticatedUserIdentity = (): number => {
   const user = getAuthenticatedUser();
-  if (!user) {
+  if (!user || user === null || typeof user === "string") {
     throw new Error("No authenticated user found");
   }
   return user.user_id; // Devuelve el email del usuario autenticado
@@ -144,10 +137,12 @@ export const setThemeMode = (theme: string): void => {
 
 // Logout
 export const logout = (): void => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("authenticatedUser");
-  localStorage.removeItem("role");
-  localStorage.removeItem("mui-mode"); // Eliminar el tema en el logout
+  //localStorage.removeItem("token");
+  //localStorage.removeItem("authenticatedUser");
+  //localStorage.removeItem("role");
+  //localStorage.removeItem("mui-mode"); // Eliminar el tema en el logout
+  //setAuthenticatedUser(null); // borra en Redux
+  localStorage.clear(); // Elimina TODO el localStorage
   setAuthenticatedUser(null); // borra en Redux
 };
 

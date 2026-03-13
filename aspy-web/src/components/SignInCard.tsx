@@ -1,21 +1,19 @@
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { login } from "@API/auth";
+import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import MuiCard from "@mui/material/Card";
-import Checkbox from "@mui/material/Checkbox";
 import Divider from "@mui/material/Divider";
 import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import Link from "@mui/material/Link";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { styled } from "@mui/material/styles";
 import ForgotPassword from "./ForgotPassword";
-import { useNavigate } from "react-router-dom";
 import ThemedLogo from "@/shared-theme/ThemedLogo";
-import { login } from "../API/auth";
-import CircularProgress from "@mui/material/CircularProgress"; // Importar CircularProgress
+import CircularProgress from "@mui/material/CircularProgress";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -46,10 +44,6 @@ export default function SignInCard() {
   const [loginError, setLoginError] = useState("");
   const [loading, setLoading] = useState(false); // Estado de carga
   const navigate = useNavigate();
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
 
   const handleClose = () => {
     setOpen(false);
@@ -92,7 +86,7 @@ export default function SignInCard() {
     if (!password || password.length < 4) {
       setPasswordError(true);
       setPasswordErrorMessage(
-        "La contraseña debe tener al menos 3 caracteres."
+        "La contraseña debe tener al menos 4 caracteres."
       );
       isValid = false;
     } else {
@@ -145,18 +139,7 @@ export default function SignInCard() {
           />
         </FormControl>
         <FormControl>
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            <FormLabel htmlFor="password">Contraseña</FormLabel>
-            <Link
-              component="button"
-              type="button"
-              onClick={handleClickOpen}
-              variant="body2"
-              sx={{ alignSelf: "baseline" }}
-            >
-              ¿Olvidaste tu contraseña?
-            </Link>
-          </Box>
+          <FormLabel htmlFor="email">Contraseña</FormLabel>
           <TextField
             error={passwordError}
             helperText={passwordErrorMessage}
@@ -173,10 +156,6 @@ export default function SignInCard() {
             color={passwordError ? "error" : "primary"}
           />
         </FormControl>
-        <FormControlLabel
-          control={<Checkbox value="remember" color="primary" />}
-          label="Recordarme"
-        />
         <ForgotPassword open={open} handleClose={handleClose} />
         <Button
           type="submit"

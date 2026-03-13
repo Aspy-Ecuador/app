@@ -1,22 +1,19 @@
 import { useState } from "react";
-import { inputRegisterUserConfig } from "@/config/userFormRegister";
 import { useNavigate } from "react-router-dom";
 import { User } from "@/types/User";
+import { register } from "@/API/auth";
 import { UserAccountRequest } from "@/typesRequest/UserAccountRequest";
 import Box from "@mui/material/Box";
 import Steps from "@components/Steps";
 import Grid from "@mui/material/Grid2";
 import Success from "@components/Success";
-//import { addPerson } from "../API/usuarioAPI";
-//import { register } from "@API/auth";
 import FormRegister from "@components/FormRegister";
 
-const stepsName = ["Datos personales", "Hogar", "Seguridad"];
+const stepsName = ["Datos personales", "Datos generales", "Seguridad"];
 
 export default function RegisterView() {
   const [step, setStep] = useState(0);
   const totalSteps = 3;
-  const fieldsPerStep = Math.ceil(inputRegisterUserConfig.length / totalSteps);
 
   const [open, setOpen] = useState(false);
 
@@ -58,12 +55,21 @@ export default function RegisterView() {
   };
 
   const handleFinalSubmit = async (data: User) => {
-    const fullData = { ...userData, ...data, role_id: 3 };
+    const fullData = { ...userData, ...data };
     const userRegister = formatUserAccount(fullData);
-    console.log(userRegister);
-    //await register(userRegister);
-    handleOpen();
+    try {
+      await register(userRegister);
+      handleOpen();
+    } catch (error) {
+      console.error("Register failed:", error);
+    }
   };
+
+  const stepsFields = [
+    { start: 0, end: 5 },
+    { start: 5, end: 9 },
+    { start: 9, end: 11 },
+  ];
 
   return (
     <Box>
@@ -73,8 +79,8 @@ export default function RegisterView() {
         </Grid>
         <Grid size={12}>
           <FormRegister
-            start={step * fieldsPerStep}
-            end={(step + 1) * fieldsPerStep}
+            start={stepsFields[step].start}
+            end={stepsFields[step].end}
             onNext={handleNext}
             onBack={handleBack}
             onFinish={handleFinalSubmit}

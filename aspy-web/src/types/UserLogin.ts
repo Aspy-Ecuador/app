@@ -1,16 +1,17 @@
+import { RoleResponse } from "@/typesResponse/RoleResponse";
+
 // SÍ SE USA
 export interface UserLogin {
   user_id: number;
-  role_id: number;
-  email: string;
-  role: string;
-  name: string;
   person_id: number;
+  role: RoleResponse;
+  email: string;
   first_name: string;
   last_name: string;
+  full_name: string;
   birthdate: string;
-  gender_id: string;
-  occupation_id: string;
-  marital_status_id: string;
-  education_id: string;
+  gender: number;
+  occupation: number;
+  marital_status: number;
+  education: number;
 }
