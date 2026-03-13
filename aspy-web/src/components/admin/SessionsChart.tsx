@@ -43,14 +43,27 @@ export default function SessionsChart({ income }: SessionsChartProps) {
 
   const mesActual = fechaActual.getMonth() + 1;
   const anioActual = fechaActual.getFullYear();
-  const data = getDaysInMonth(mesActual, anioActual);
+  const data = [
+    "Ene",
+    "Feb",
+    "Mar",
+    "Abr",
+    "May",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dic",
+  ];
 
   const colorPalette = [
     theme.palette.primary.light,
     theme.palette.primary.main,
     theme.palette.primary.dark,
   ];
-  console.log(income);
+
   return (
     <Card variant="outlined" sx={{ width: "100%" }}>
       <CardContent>
@@ -76,7 +89,7 @@ export default function SessionsChart({ income }: SessionsChartProps) {
             />
           </Stack>
           <Typography variant="caption" sx={{ color: "text.secondary" }}>
-            Ingresos en los últimos 30 días
+            Ingresos del mes pasado
           </Typography>
         </Stack>
         <LineChart

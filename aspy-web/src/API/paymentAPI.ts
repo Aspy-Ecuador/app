@@ -4,15 +4,15 @@ import { getConfig } from "./config";
 import { StatusRequest } from "@/typesRequest/StatusRequest";
 
 interface PaymentData {
-  person_id: number; // Person ID associated with the payment
-  service_id: number; // Service ID related to the payment
-  discount_id?: number; // Optional, discount ID applied
-  payment_data_id: number; // Payment data ID (e.g., credit card or bank transfer)
-  service_price: number; // Service price
-  discount_percentage?: number; // Optional, discount percentage
-  total_amount: number; // Total amount to be paid
-  status: number; // Payment status (e.g., 'completed', 'pending')
-  created_by: string; // Creator of the payment
+  person_id: number;
+  service_id: number;
+  discount_id?: number;
+  payment_data_id: number;
+  service_price: number;
+  discount_percentage?: number;
+  total_amount: number;
+  status: number;
+  created_by: string;
 }
 
 const paymentAPI = {
@@ -34,14 +34,14 @@ const paymentAPI = {
   // Update payment by ID
   updatePayment: async (
     id: string,
-    paymentData: PaymentData
+    paymentData: PaymentData,
   ): Promise<AxiosResponse> => {
     return axios.put(`${apiURL}/payment/${id}`, paymentData, getConfig());
   },
 
   updateStatus: async (
     id: number,
-    status: StatusRequest
+    status: StatusRequest,
   ): Promise<AxiosResponse> => {
     return axios.put(`${apiURL}/paymentstatus/${id}`, status, getConfig());
   },

@@ -45,7 +45,7 @@ export default function PageViewsBarChart({
             </Typography>
           </Stack>
           <Typography variant="caption" sx={{ color: "text.secondary" }}>
-            Cantidad de citas del año pasado
+            Cantidad de citas del año
           </Typography>
         </Stack>
         <BarChart

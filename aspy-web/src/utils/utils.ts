@@ -84,15 +84,16 @@ export function getPerson(person_id: number, data: any): PersonResponse {
 
 export function getWorkerSchedule(
   worker_schedule_id: number,
-  data: any
+  data: any,
 ): WorkerScheduleResponse {
   const workerschedules: WorkerScheduleResponse[] = data.workerSchedules;
   const workerschedule = workerschedules.find(
-    (workerschedule) => workerschedule.worker_schedule_id === worker_schedule_id
+    (workerschedule) =>
+      workerschedule.worker_schedule_id === worker_schedule_id,
   );
   if (!workerschedule)
     throw new Error(
-      `No se encontró el worker schedule con ID ${worker_schedule_id}`
+      `No se encontró el worker schedule con ID ${worker_schedule_id}`,
     );
   return workerschedule;
 }
@@ -107,19 +108,19 @@ export function getService(data: any, service_id: number): ServiceResponse {
 
 export function getProfessionalService(
   service_id: number,
-  data: any
+  data: any,
 ): PersonResponse[] {
   const professionals: ProfessionalServiceResponse[] =
     data.professionalServices;
 
   const professionalsFilter = professionals.filter(
-    (service) => service.service_id === service_id
+    (service) => service.service_id === service_id,
   );
 
   const persons: PersonResponse[] = data.persons;
 
   const professionalIds = new Set(
-    professionalsFilter.map((prof) => prof.person_id)
+    professionalsFilter.map((prof) => prof.person_id),
   );
 
   return persons.filter((person) => professionalIds.has(person.person_id));
@@ -127,7 +128,7 @@ export function getProfessionalService(
 
 export function getProfessionalSchedule(
   person_id: number,
-  data: any
+  data: any,
 ): WorkerScheduleResponse[] {
   const workerSchedules: WorkerScheduleResponse[] = data.workerSchedules;
   const appointments: Appointment[] = getAppointments(data);
@@ -139,7 +140,7 @@ export function getProfessionalSchedule(
       const hasAppointment = appointments.some(
         (appt) =>
           appt.date === worker.schedule.date &&
-          appt.startTime === worker.schedule.start_time
+          appt.startTime === worker.schedule.start_time,
       );
       // Solo queremos los que NO tengan cita
       return !hasAppointment;
@@ -171,7 +172,7 @@ export function getUsers(data: any): User[] {
       // Si es profesional (role_id === 2), añadimos sus datos extra
       if (role.role_id === 2) {
         const prof = professionals.find(
-          (p) => p.person_id === person.person_id
+          (p) => p.person_id === person.person_id,
         );
         if (prof) {
           user.title = prof.title;
@@ -184,65 +185,79 @@ export function getUsers(data: any): User[] {
     .filter((user): user is User => user !== null);
 }
 
+//SÍ SE USA
 export function getIncome(data: PaymentResponse[]): number[] {
-  const monthlyIncome = Array(12).fill(0); // Inicializamos un arreglo con 12 ceros (uno por cada mes)
+  const currentYear = new Date().getFullYear();
+  const monthlyIncome = Array(12).fill(0);
 
-  data.forEach((payment) => {
-    const creationMonth = new Date(payment.creation_date).getMonth(); // Obtenemos el mes (0-11)
+  (data ?? []).forEach((payment) => {
+    const date = new Date(payment.creation_date);
 
-    const totalAmount = payment.total_amount;
+    if (date.getFullYear() !== currentYear) return;
 
-    // Sumamos el total_amount al mes correspondiente
-    monthlyIncome[creationMonth] += Number(totalAmount);
+    const month = date.getMonth();
+    monthlyIncome[month] = parseFloat(
+      (monthlyIncome[month] + Number(payment.total_amount)).toFixed(2),
+    );
   });
 
   return monthlyIncome;
 }
 
+//SÍ SE USA
 export function getDataAppointment(data: any): PageViewsBarChartProps {
-  const appointments: AppointmentResponse[] = data.appointments;
+  const appointments: AppointmentResponse[] = data.appointments ?? [];
+  const currentYear = new Date().getFullYear();
+
   const scheduled = Array(12).fill(0);
   const completed = Array(12).fill(0);
   const cancelled = Array(12).fill(0);
 
   appointments.forEach((appointment) => {
-    const creationMonth = new Date(appointment.creation_date).getMonth(); // Obtenemos el mes (0-11)
-    const statusName = appointment.status.name.toLowerCase(); // Obtenemos el estado de la cita (scheduled, completed, cancelled)
+    const date = new Date(appointment.creation_date);
+
+    // Solo contamos citas del año actual
+    if (date.getFullYear() !== currentYear) return;
+
+    const month = date.getMonth(); // 0–11
+    const statusName = appointment.status?.name?.toLowerCase() ?? "";
 
     if (statusName === "scheduled") {
-      scheduled[creationMonth] += 1;
+      scheduled[month] += 1;
     } else if (statusName === "completed") {
-      completed[creationMonth] += 1;
+      completed[month] += 1;
     } else if (statusName === "cancelled") {
-      cancelled[creationMonth] += 1;
+      cancelled[month] += 1;
     }
   });
 
-  const total = appointments.length; // Total de citas es la longitud de la lista de datos
+  const total =
+    scheduled.reduce((a, b) => a + b, 0) +
+    completed.reduce((a, b) => a + b, 0) +
+    cancelled.reduce((a, b) => a + b, 0);
 
-  return {
-    total,
-    scheduled,
-    completed,
-    cancelled,
-  };
+  return { total, scheduled, completed, cancelled };
 }
 
+//SÍ SE USA
 export function getDataCard(data: any): StatCardProps[] {
-  const users: UserAccountResponse[] = data.userAccounts;
-  const appointments: AppointmentResponse[] = data.appointments;
+  const users: UserAccountResponse[] = data.userAccounts ?? [];
+  const appointments: AppointmentResponse[] = data.appointments ?? [];
+
   const today = new Date();
-
-  const lastMonth = today.getMonth() - 1 < 0 ? 11 : today.getMonth() - 1;
+  const lastMonth = today.getMonth() === 0 ? 11 : today.getMonth() - 1;
   const lastMonthYear =
-    today.getMonth() - 1 < 0 ? today.getFullYear() - 1 : today.getFullYear();
+    today.getMonth() === 0 ? today.getFullYear() - 1 : today.getFullYear();
 
+  // Días reales del mes pasado (28, 29, 30 o 31 según corresponda)
   const daysInLastMonth = new Date(lastMonthYear, lastMonth + 1, 0).getDate();
 
-  function countMonthDays<T>(
-    items: T[],
-    getDate: (item: T) => string
-  ): number[] {
+  /**
+   * Cuenta cuántos items caen en cada día del mes pasado.
+   * Retorna un arreglo de exactamente `daysInLastMonth` posiciones,
+   * sin padding — el componente gráfico debe respetar este tamaño real.
+   */
+  function countByDay<T>(items: T[], getDate: (item: T) => string): number[] {
     const counts = Array(daysInLastMonth).fill(0);
 
     items.forEach((item) => {
@@ -251,54 +266,51 @@ export function getDataCard(data: any): StatCardProps[] {
         date.getMonth() === lastMonth &&
         date.getFullYear() === lastMonthYear
       ) {
-        const day = date.getDate() - 1;
-        counts[day] += 1;
+        const day = date.getDate();
+        if (day >= 1 && day <= daysInLastMonth) {
+          counts[day - 1] += 1;
+        }
       }
     });
-
-    while (counts.length < 31) {
-      counts.push(0);
-    }
 
     return counts;
   }
 
-  const usuariosData = countMonthDays(users, (u) => u.creation_date);
-  const citasData = countMonthDays(appointments, (c) => c.creation_date);
-  const pacientesData = countMonthDays(
-    users.filter((u) => u.role_id === 3),
-    (u) => u.creation_date
-  );
-  const inactivosData = countMonthDays(
-    users.filter((u) => u.status === 2),
-    (u) => u.creation_date
-  );
+  const clientUsers = users.filter((u) => u.role_id === 3);
+  const inactiveUsers = users.filter((u) => u.status === 2);
+
+  const usuariosData = countByDay(users, (u) => u.creation_date);
+  const citasData = countByDay(appointments, (a) => a.creation_date);
+  const pacientesData = countByDay(clientUsers, (u) => u.creation_date);
+  const inactivosData = countByDay(inactiveUsers, (u) => u.creation_date);
+
+  const sum = (arr: number[]) => arr.reduce((a, b) => a + b, 0);
 
   return [
     {
       title: "Usuarios",
-      value: usuariosData.reduce((a, b) => a + b, 0).toString(),
+      value: sum(usuariosData).toString(),
       interval: "Mes pasado",
       trend: "usuarios",
       data: usuariosData,
     },
     {
       title: "Citas",
-      value: citasData.reduce((a, b) => a + b, 0).toString(),
+      value: sum(citasData).toString(),
       interval: "Mes pasado",
       trend: "citas",
       data: citasData,
     },
     {
       title: "Pacientes",
-      value: pacientesData.reduce((a, b) => a + b, 0).toString(),
+      value: sum(pacientesData).toString(),
       interval: "Mes pasado",
       trend: "pacientes",
       data: pacientesData,
     },
     {
       title: "Usuarios inactivos",
-      value: inactivosData.reduce((a, b) => a + b, 0).toString(),
+      value: sum(inactivosData).toString(),
       interval: "Mes pasado",
       trend: "inactivos",
       data: inactivosData,
@@ -327,7 +339,7 @@ export function toNumber(str: string): number {
 
 export function getAppointmentProfessional(
   proffesional_id: number,
-  data: any
+  data: any,
 ): Appointment[] {
   if (!data) {
     return [];
@@ -340,7 +352,7 @@ export function getAppointmentProfessional(
   }
 
   return appointments.filter(
-    (appointment) => appointment.proffesional.person_id === proffesional_id
+    (appointment) => appointment.proffesional.person_id === proffesional_id,
   );
 }
 
@@ -350,34 +362,34 @@ export function getAppointments(data: any): Appointment[] {
   const appointments: Appointment[] = (data.appointments || [])
     .map((appointment: any) => {
       const service = data.services?.find(
-        (s: any) => s.service_id === appointment.payment.service_id
+        (s: any) => s.service_id === appointment.payment.service_id,
       );
 
       const clientPerson = data.persons?.find(
-        (p: any) => p.person_id === appointment.payment.person_id
+        (p: any) => p.person_id === appointment.payment.person_id,
       );
 
       const clientAccount = data.userAccounts?.find(
-        (a: any) => a.user_id === clientPerson?.user_id
+        (a: any) => a.user_id === clientPerson?.user_id,
       );
 
       const clientRole = data.roles?.find(
-        (r: any) => r.role_id === clientAccount?.role_id
+        (r: any) => r.role_id === clientAccount?.role_id,
       );
 
       const professionalPerson = data.persons?.find(
-        (p: any) => p.person_id === appointment.worker_schedule.person_id
+        (p: any) => p.person_id === appointment.worker_schedule.person_id,
       );
       const professionalAccount = data.userAccounts?.find(
-        (a: any) => a.user_id === professionalPerson?.user_id
+        (a: any) => a.user_id === professionalPerson?.user_id,
       );
 
       const professionalRole = data.roles?.find(
-        (r: any) => r.role_id === professionalAccount?.role_id
+        (r: any) => r.role_id === professionalAccount?.role_id,
       );
 
       const schedule = data.schedules?.find(
-        (s: any) => s.schedule_id === appointment.worker_schedule.schedule_id
+        (s: any) => s.schedule_id === appointment.worker_schedule.schedule_id,
       );
 
       // Validación
@@ -397,12 +409,12 @@ export function getAppointments(data: any): Appointment[] {
       const professional = userAdapter(
         professionalPerson,
         professionalRole,
-        professionalAccount
+        professionalAccount,
       );
       // Si es profesional (role_id === 2), añadimos sus datos extra
       if (professional.role_id === 2) {
         const prof = professionals.find(
-          (p) => p.person_id === professional.person_id
+          (p) => p.person_id === professional.person_id,
         );
         if (prof) {
           professional.title = prof.title;
@@ -415,7 +427,7 @@ export function getAppointments(data: any): Appointment[] {
         schedule,
         client,
         professional,
-        service
+        service,
       );
     })
     .filter(Boolean);
@@ -496,7 +508,7 @@ export function getAppointmentsReport(data: any): AppointmentReport[] {
   return appointmentReport
     .map((report) => {
       const appointment = appointments.find(
-        (a) => a.id_appointment === report.appointment_id
+        (a) => a.id_appointment === report.appointment_id,
       );
 
       if (!appointment) return null;
@@ -508,10 +520,10 @@ export function getAppointmentsReport(data: any): AppointmentReport[] {
 
 export function getReportsUser(
   appointmentsReport: AppointmentReport[],
-  patient_id: number
+  patient_id: number,
 ): AppointmentReport[] {
   return appointmentsReport.filter(
-    (report) => report.appointment.client.person_id === patient_id
+    (report) => report.appointment.client.person_id === patient_id,
   );
 }
 
@@ -578,7 +590,7 @@ export function handleDownloadInvoice(invoice: Receipt) {
     "Teléfono: 0999616051 | Email: fundacionaspyecuador@gmail.com",
     105,
     34,
-    { align: "center" }
+    { align: "center" },
   );
 
   // Línea divisoria
@@ -647,31 +659,31 @@ export function handleDownloadInvoice(invoice: Receipt) {
   doc.text("Gracias por confiar en nosotros.", 105, 290, { align: "center" });
 
   doc.save(
-    `Factura-${invoice.receipt.receipt_id}-${invoice.client.first_name}.pdf`
+    `Factura-${invoice.receipt.receipt_id}-${invoice.client.first_name}.pdf`,
   );
 }
 
 export function getAppointmentsProfessional(
   data: any,
-  person_id: number
+  person_id: number,
 ): Appointment[] {
   const appointments: Appointment[] = getAppointments(data);
   return appointments.filter(
-    (appointment) => appointment.proffesional.person_id === person_id
+    (appointment) => appointment.proffesional.person_id === person_id,
   );
 }
 
 export function getClients(data: any, person_id: number): User[] {
   const appointments: Appointment[] = getAppointmentsProfessional(
     data,
-    person_id
+    person_id,
   );
 
   const clients = appointments.map((app) => app.client);
 
   const uniqueClients = clients.filter(
     (client, index, self) =>
-      index === self.findIndex((c) => c.person_id === client.person_id)
+      index === self.findIndex((c) => c.person_id === client.person_id),
   );
   return uniqueClients;
 }
@@ -684,25 +696,25 @@ export function getUser(data: any, user_id: number): User {
 
 export function getUnmarkedAppointments(
   data: any,
-  person_id: number
+  person_id: number,
 ): Appointment[] {
   const appointments: Appointment[] = getAppointmentsProfessional(
     data,
-    person_id
+    person_id,
   );
   //const appointmentReport: AppointmentReport[] = getAppointmentsReport(data);
   return appointments.filter(
-    (appointment) => appointment.status.id_status === 1
+    (appointment) => appointment.status.id_status === 1,
   );
 }
 
 export function getUnreportedAppointments(
   data: any,
-  person_id: number
+  person_id: number,
 ): Appointment[] {
   const appointments: Appointment[] = getAppointmentsProfessional(
     data,
-    person_id
+    person_id,
   );
 
   const appointmentReports: AppointmentReportResponse[] =
@@ -715,8 +727,8 @@ export function getUnreportedAppointments(
   const unreported = appointments.filter(
     (app) =>
       !appointmentReports.some(
-        (report) => report.appointment_id === app.id_appointment
-      ) && app.status.id_status === 2 // 🔹 solo citas con status_id = 1
+        (report) => report.appointment_id === app.id_appointment,
+      ) && app.status.id_status === 2, // 🔹 solo citas con status_id = 1
   );
   return unreported.length > 0 ? unreported : [];
 }
@@ -734,7 +746,7 @@ export function getClientsAppointment(data: any): User[] {
 
 export function getAppointmentbyClient(
   data: any,
-  client_id: number
+  client_id: number,
 ): Appointment[] {
   const appointments: Appointment[] = getAppointments(data);
   return appointments.filter((app) => app.client.user_id === client_id);
@@ -748,24 +760,24 @@ export function getReceipt(data: any): Receipt[] {
   const receiptList: Receipt[] = receiptsResponse
     .map((receipt) => {
       const payment = dataPayments?.find(
-        (p: any) => p.payment_id === receipt.payment_id
+        (p: any) => p.payment_id === receipt.payment_id,
       );
       if (!payment) return null;
 
       const paymentData = data.paymentData?.find(
-        (pd: any) => pd.payment_data_id === payment.payment_data_id
+        (pd: any) => pd.payment_data_id === payment.payment_data_id,
       );
       const service = data.services?.find(
-        (s: any) => s.service_id === payment.service.service_id
+        (s: any) => s.service_id === payment.service.service_id,
       );
       const person = data.persons?.find(
-        (p: any) => p.person_id === payment.person.person_id
+        (p: any) => p.person_id === payment.person.person_id,
       );
       const userAccount = data.userAccounts?.find(
-        (ua: any) => ua.user_id === person?.user_id
+        (ua: any) => ua.user_id === person?.user_id,
       );
       const role = data.roles?.find(
-        (r: any) => r.role_id === userAccount?.role_id
+        (r: any) => r.role_id === userAccount?.role_id,
       );
 
       if (!paymentData || !service || !person || !userAccount || !role)

@@ -70,6 +70,8 @@ export default function StatCard({
   const { month, year } = getLastMonthAndYear();
   const theme = useTheme();
   const daysInWeek = getDaysInMonth(month, year);
+  console.log(data);
+  console.log(daysInWeek);
 
   const trendColors = {
     usuarios:

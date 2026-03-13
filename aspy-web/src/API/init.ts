@@ -27,6 +27,7 @@ const adminLoaders: Loader[] = [
   { name: "roles", fn: roleAPI.getAllRoles },
   { name: "professional", fn: professionalAPI.getAllProfessionals },
   { name: "schedules", fn: scheduleAPI.getAllSchedules },
+  { name: "payments", fn: paymentAPI.getAllPayments },
 ];
 
 const clientLoaders: Loader[] = [
@@ -96,6 +97,7 @@ export const runAdminLoaders = async () => {
     try {
       const response = await fn();
       localStorage.setItem(name, JSON.stringify(response.data));
+      console.log(response.data);
       console.log(`✔️ Loaded: ${name}`);
     } catch (error) {
       console.error(`❌ Error loading ${name}:`, error);

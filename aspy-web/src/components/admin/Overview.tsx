@@ -8,7 +8,6 @@ import {
   getIncome,
   getPayments,
 } from "@/utils/utils";
-import { dataPayments } from "@/data/Payment";
 import StatCard, { StatCardProps } from "@admin/StatCard";
 import Grid from "@mui/material/Grid2";
 import Box from "@mui/material/Box";
@@ -17,15 +16,17 @@ import { PaymentResponse } from "@typesResponse/PaymentResponse";
 
 export default function MainGrid() {
   const { data } = useRoleData();
+
   const dataAppointment: PageViewsBarChartProps = getDataAppointment(data);
-  //const paymentsData: PaymentResponse[] = getPayments(data);
-  const income: number[] = getIncome(dataPayments);
+  const paymentsData: PaymentResponse[] = getPayments(data);
+  const income: number[] = getIncome(paymentsData);
   const dataCard: StatCardProps[] = getDataCard(data);
+
+  console.log("Aquí", dataCard);
+  console.log("Aquí", income);
+  console.log("Aquí", dataAppointment);
   return (
-    <Box
-      sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}
-      className="xd"
-    >
+    <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
       <Grid
         container
         spacing={2}
@@ -37,9 +38,11 @@ export default function MainGrid() {
             <StatCard {...card} />
           </Grid>
         ))}
+
         <Grid size={{ xs: 12, md: 6 }}>
           <SessionsChart income={income} />
         </Grid>
+
         <Grid size={{ xs: 12, md: 6 }}>
           <PageViewsBarChart {...dataAppointment} />
         </Grid>
