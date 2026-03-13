@@ -1,28 +1,46 @@
-import { useState } from "react";
-import { getAppointmentProfessional } from "@utils/utils";
-import { Appointment } from "@/types/Appointment";
-import { useRoleData } from "@/observer/RoleDataContext";
+import { useEffect, useState } from "react";
+import { getAppointmentByProfessional } from "@utils/utils";
+import { AppointmentResponse } from "@/typesResponse/AppointmentResponse";
+import axios from "axios";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import Agenda from "@components/Agenda";
 import SelectProfessional from "@components/SelectProfessional";
 import SimpleHeader from "@components/SimpleHeader";
 import Progress from "@components/Progress";
+import apiURL from "@/API/apiConfig";
 
 export default function Appointments() {
-  const { data, loading } = useRoleData();
   const [selectedId, setSelected] = useState<number>(0);
+  const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
 
   const handleSelectProfessional = (id: number) => {
     setSelected(id);
   };
 
-  if (loading) return <Progress />;
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      console.log("Tenemos:", appointments.length);
+      const token = localStorage.getItem("token");
+      try {
+        const responseAppointments = await axios.get(`${apiURL}/appointments`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-  const appointmentProfessional: Appointment[] = getAppointmentProfessional(
-    selectedId,
-    data
-  );
+        const appointments: AppointmentResponse[] =
+          getAppointmentByProfessional(selectedId, responseAppointments.data);
+        console.log(appointments);
+        setAppointments(appointments);
+      } catch (error) {
+        console.error("Error loading appointments", error);
+      }
+      console.log("Tenemos:", appointments.length);
+    };
+
+    fetchAppointments();
+  }, [selectedId]);
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
@@ -31,10 +49,10 @@ export default function Appointments() {
           <SimpleHeader text={"Citas"} />
         </Grid>
         <Grid size={9}>
-          {loading ? (
+          {appointments.length === 0 ? (
             <Progress />
           ) : (
-            <Agenda appointments={appointmentProfessional} />
+            <Agenda appointments={appointments} />
           )}
         </Grid>
         <Grid size={3}>

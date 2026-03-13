@@ -3,23 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class UserAccountStatus extends Model
 {
-    use HasFactory;
-
     protected $table = 'user_account_status';
     protected $primaryKey = 'status_id';
-    
+    public $timestamps = false;
+
     protected $fillable = [
         'name',
     ];
 
-    public $timestamps = false;
-
-    public function users()
+    // Relationships
+    public function userAccounts()
     {
-        return $this->hasMany(UserAccount::class, 'status');
+        return $this->hasMany(UserAccount::class, 'status', 'status_id');
     }
 }

@@ -2,7 +2,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { GridRowSelectionModel } from "@mui/x-data-grid";
 import { PaymentResponse } from "@/typesResponse/PaymentResponse";
 import { GridColDef } from "@mui/x-data-grid";
-import { dataPayments } from "@data/Payment";
+//import { dataPayments } from "@data/Payment";
 import Button from "@mui/material/Button";
 import Table from "@components/Table";
 import Box from "@mui/material/Box";
@@ -15,13 +15,14 @@ import AccessTimeFilledRoundedIcon from "@mui/icons-material/AccessTimeFilledRou
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import CancelRoundedIcon from "@mui/icons-material/CancelRounded";
 import { useRoleData } from "@/observer/RoleDataContext";
-import { getPayments } from "@/utils/utils";
+import { getPaymentsPending } from "@/utils/utils";
 import Progress from "../Progress";
 
 export default function PaymentsList() {
   const rowSelection: GridRowSelectionModel = [];
-  //const { data, loading } = useRoleData();
-  //const payments: PaymentResponse[] = getPayments(data);
+  const { data, loading } = useRoleData();
+  const dataPayments: PaymentResponse[] = getPaymentsPending(data);
+
   //Ruta para aprobar
   const navigate = useNavigate();
   const location = useLocation();
@@ -117,7 +118,7 @@ export default function PaymentsList() {
       },
     },
   ];
-  //if (loading) return <Progress />;
+  if (loading) return <Progress />;
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1}>

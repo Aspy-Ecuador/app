@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAppointmentProfessional } from "@utils/utils";
+import { getAppointmentByProfessional } from "@utils/utils";
 import { Appointment } from "@/types/Appointment";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Box from "@mui/material/Box";
@@ -9,6 +9,7 @@ import Agenda from "@components/Agenda";
 import SelectProfessional from "@components/SelectProfessional";
 import Header from "@components/Header";
 import Progress from "@components/Progress";
+import { AppointmentResponse } from "@/typesResponse/AppointmentResponse";
 
 export default function Appointments() {
   const navigate = useNavigate();
@@ -28,10 +29,8 @@ export default function Appointments() {
     navigate(newPath);
   };
 
-  const appointmentProfessional: Appointment[] = getAppointmentProfessional(
-    selectedId,
-    data
-  );
+  const appointmentProfessional: AppointmentResponse[] =
+    getAppointmentByProfessional(selectedId, data);
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>

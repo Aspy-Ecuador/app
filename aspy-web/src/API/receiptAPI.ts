@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import apiURL from "./apiConfig";
 import { getConfig } from "./config";
+import { ReceiptRequest } from "@/typesRequest/ReceiptRequest";
 
 interface ReceiptData {
   appointment_id: number;
@@ -14,7 +15,7 @@ const receiptAPI = {
   getReceiptById: async (id: string): Promise<AxiosResponse> =>
     axios.get(`${apiURL}/receipt/${id}`, getConfig()),
 
-  createReceipt: async (data: any): Promise<AxiosResponse> =>
+  createReceipt: async (data: ReceiptRequest): Promise<AxiosResponse> =>
     axios.post(`${apiURL}/receipt`, data, getConfig()),
 
   updateReceipt: async (

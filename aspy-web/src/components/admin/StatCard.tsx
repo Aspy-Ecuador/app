@@ -1,11 +1,9 @@
 import { useTheme } from "@mui/material/styles";
 import { SparkLineChart } from "@mui/x-charts/SparkLineChart";
 import { areaElementClasses } from "@mui/x-charts/LineChart";
-import { CalcularTendenciaDiaria } from "@utils/utils";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
@@ -17,19 +15,21 @@ export type StatCardProps = {
   data: number[];
 };
 
-function getDaysInMonth(month: number, year: number) {
-  const date = new Date(year, month, 0);
-  const monthName = date.toLocaleDateString("en-US", {
-    month: "short",
-  });
-  const daysInMonth = date.getDate();
-  const days = [];
-  let i = 1;
-  while (days.length < daysInMonth) {
-    days.push(`${monthName} ${i}`);
-    i += 1;
-  }
-  return days;
+function getMonthsOfYear() {
+  return [
+    "Ene",
+    "Feb",
+    "Mar",
+    "Abr",
+    "May",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dic",
+  ];
 }
 
 function AreaGradient({ color, id }: { color: string; id: string }) {
@@ -43,23 +43,6 @@ function AreaGradient({ color, id }: { color: string; id: string }) {
   );
 }
 
-function getLastMonthAndYear(): { month: number; year: number } {
-  const today = new Date();
-  let year = today.getFullYear();
-  let month = today.getMonth(); // 0-based: enero=0, diciembre=11
-
-  if (month === 0) {
-    // Si es enero, el mes pasado es diciembre del año anterior
-    month = 11;
-    year = year - 1;
-  } else {
-    month = month - 1;
-  }
-
-  // Queremos el mes 1-based para tu función getDaysInMonth
-  return { month: month + 1, year };
-}
-
 export default function StatCard({
   title,
   value,
@@ -67,9 +50,8 @@ export default function StatCard({
   trend,
   data,
 }: StatCardProps) {
-  const { month, year } = getLastMonthAndYear();
   const theme = useTheme();
-  const daysInWeek = getDaysInMonth(month, year);
+  const monthsLabels = getMonthsOfYear();
 
   const trendColors = {
     usuarios:
@@ -90,21 +72,7 @@ export default function StatCard({
         : theme.palette.error.dark,
   };
 
-  const labelColors = {
-    usuarios: "info" as const,
-    pacientes: "default" as const,
-    citas: "warning" as const,
-    inactivos: "error" as const,
-  };
-
-  const color = labelColors[trend];
   const chartColor = trendColors[trend];
-  const trendValues = {
-    usuarios: CalcularTendenciaDiaria(data).promedioPorcentual + "%",
-    pacientes: CalcularTendenciaDiaria(data).promedioPorcentual + "%",
-    citas: CalcularTendenciaDiaria(data).promedioPorcentual + "%",
-    inactivos: CalcularTendenciaDiaria(data).promedioPorcentual + "%",
-  };
 
   return (
     <Card variant="outlined" sx={{ height: "100%", flexGrow: 1 }}>
@@ -124,7 +92,6 @@ export default function StatCard({
               <Typography variant="h4" component="p">
                 {value}
               </Typography>
-              <Chip size="small" color={color} label={trendValues[trend]} />
             </Stack>
             <Typography variant="caption" sx={{ color: "text.secondary" }}>
               {interval}
@@ -139,7 +106,7 @@ export default function StatCard({
               showTooltip
               xAxis={{
                 scaleType: "band",
-                data: daysInWeek, // Use the correct property 'data' for xAxis
+                data: monthsLabels,
               }}
               sx={{
                 [`& .${areaElementClasses.root}`]: {

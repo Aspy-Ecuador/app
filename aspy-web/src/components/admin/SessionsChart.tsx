@@ -1,9 +1,8 @@
 import { useTheme } from "@mui/material/styles";
 import { LineChart } from "@mui/x-charts/LineChart";
-import { CalcularTendenciaDiaria, TotalIngresosMensual } from "@utils/utils";
+import { totalIngresosMensual } from "@utils/utils";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 
@@ -22,35 +21,34 @@ function AreaGradient({ color, id }: { color: string; id: string }) {
   );
 }
 
-function getDaysInMonth(month: number, year: number) {
-  const date = new Date(year, month, 0);
-  const monthName = date.toLocaleDateString("es-ES", { month: "short" });
-  const formattedMonthName =
-    monthName.charAt(0).toUpperCase() + monthName.slice(1);
-  const daysInMonth = date.getDate();
-  const days = [];
-  let i = 1;
-  while (days.length < daysInMonth) {
-    days.push(`${formattedMonthName} ${i}`);
-    i += 1;
-  }
-  return days;
+function getMonthsOfYear() {
+  return [
+    "Ene",
+    "Feb",
+    "Mar",
+    "Abr",
+    "May",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dic",
+  ];
 }
 
 export default function SessionsChart({ income }: SessionsChartProps) {
   const theme = useTheme();
-  const fechaActual = new Date();
-
-  const mesActual = fechaActual.getMonth() + 1;
-  const anioActual = fechaActual.getFullYear();
-  const data = getDaysInMonth(mesActual, anioActual);
+  const currentYear = new Date().getFullYear();
+  const monthsLabels = getMonthsOfYear();
 
   const colorPalette = [
     theme.palette.primary.light,
     theme.palette.primary.main,
     theme.palette.primary.dark,
   ];
-  console.log(income);
+
   return (
     <Card variant="outlined" sx={{ width: "100%" }}>
       <CardContent>
@@ -67,16 +65,11 @@ export default function SessionsChart({ income }: SessionsChartProps) {
             }}
           >
             <Typography variant="h4" component="p">
-              $ {TotalIngresosMensual(income).total}
+              $ {totalIngresosMensual(income).total}
             </Typography>
-            <Chip
-              size="small"
-              color="success"
-              label={CalcularTendenciaDiaria(income).promedioPorcentual + "%"}
-            />
           </Stack>
           <Typography variant="caption" sx={{ color: "text.secondary" }}>
-            Ingresos en los últimos 30 días
+            Ingresos del año {currentYear}
           </Typography>
         </Stack>
         <LineChart
@@ -84,8 +77,8 @@ export default function SessionsChart({ income }: SessionsChartProps) {
           xAxis={[
             {
               scaleType: "point",
-              data,
-              tickInterval: (index) => (index + 1) % 5 === 0,
+              data: monthsLabels,
+              tickInterval: () => true, // Mostrar todos los meses
             },
           ]}
           series={[

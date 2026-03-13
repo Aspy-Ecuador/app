@@ -1,26 +1,59 @@
-import { useRoleData } from "@/observer/RoleDataContext";
 import PageViewsBarChart, {
   PageViewsBarChartProps,
 } from "@admin/PageViewsBarChart";
-import {
-  getDataAppointment,
-  getDataCard,
-  getIncome,
-  getPayments,
-} from "@/utils/utils";
-import { dataPayments } from "@/data/Payment";
+import { useRoleData } from "@/observer/RoleDataContext";
+import { AppointmentResponse } from "@/types/responses/AppointmentResponse";
+import { PaymentResponse } from "@/types/responses/PaymentResponse";
+import { PersonResponse } from "@/types/responses/PersonResponse";
+import { getDataAppointment, getDataCard, getIncome } from "@/utils/utils";
+import { useEffect, useState } from "react";
 import StatCard, { StatCardProps } from "@admin/StatCard";
 import Grid from "@mui/material/Grid2";
 import Box from "@mui/material/Box";
 import SessionsChart from "@admin/SessionsChart";
-import { PaymentResponse } from "@typesResponse/PaymentResponse";
+import Progress from "@components/Progress";
 
 export default function MainGrid() {
-  const { data } = useRoleData();
-  const dataAppointment: PageViewsBarChartProps = getDataAppointment(data);
-  //const paymentsData: PaymentResponse[] = getPayments(data);
-  const income: number[] = getIncome(dataPayments);
-  const dataCard: StatCardProps[] = getDataCard(data);
+  const { loading } = useRoleData();
+
+  const [dataAppointment, setDataAppointment] =
+    useState<PageViewsBarChartProps | null>(null);
+  const [dataCard, setDataCard] = useState<StatCardProps[]>([]);
+  const [income, setIncome] = useState<number[]>([]);
+
+  useEffect(() => {
+    if (!loading) {
+      const appointments: AppointmentResponse[] = JSON.parse(
+        localStorage.getItem("appointments") || "[]",
+      );
+      const payments: PaymentResponse[] = JSON.parse(
+        localStorage.getItem("payments") || "[]",
+      );
+      const persons: PersonResponse[] = JSON.parse(
+        localStorage.getItem("persons") || "[]",
+      );
+
+      const formattedData: PageViewsBarChartProps =
+        getDataAppointment(appointments);
+      setDataAppointment(formattedData);
+
+      const incomeData: number[] = getIncome(payments);
+      setIncome(incomeData);
+
+      const cardData: StatCardProps[] = getDataCard(persons, appointments);
+      setDataCard(cardData);
+    }
+  }, [loading]);
+
+  if (
+    loading ||
+    !dataAppointment ||
+    dataCard.length === 0 ||
+    income.length === 0
+  ) {
+    return <Progress />;
+  }
+
   return (
     <Box
       sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}

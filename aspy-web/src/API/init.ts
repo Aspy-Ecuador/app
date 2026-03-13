@@ -20,18 +20,23 @@ type Loader = {
 
 const adminLoaders: Loader[] = [
   { name: "services", fn: serviceAPI.getAllServices },
+  { name: "payments", fn: paymentAPI.getAllPayments },
   { name: "userAccounts", fn: userAccountAPI.getAllUserAccounts },
   { name: "appointments", fn: appointmentAPI.getAllAppointments },
   { name: "appointmentReports", fn: appointmentReportAPI.getAllReports },
   { name: "persons", fn: personAPI.getAllPersons },
-  { name: "roles", fn: roleAPI.getAllRoles },
   { name: "professional", fn: professionalAPI.getAllProfessionals },
   { name: "schedules", fn: scheduleAPI.getAllSchedules },
+  { name: "workerSchedules", fn: workerScheduleAPI.getAllWorkerSchedules },
+  {
+    name: "professionalServices",
+    fn: professionalServiceAPI.getAllProfessionalServices,
+  },
 ];
 
 const clientLoaders: Loader[] = [
   { name: "persons", fn: personAPI.getAllPersons },
-  //{ name: "payments", fn: paymentAPI.getAllPayments },
+  { name: "payments", fn: paymentAPI.getAllPayments },
   { name: "paymentData", fn: paymentDataAPI.getAllPaymentData },
   {
     name: "professionalServices",
@@ -68,7 +73,7 @@ const staffLoaders: Loader[] = [
 ];
 
 const professionalLoaders: Loader[] = [
-  //{ name: "payments", fn: paymentAPI.getAllPayments },
+  { name: "payments", fn: paymentAPI.getAllPayments },
   { name: "paymentData", fn: paymentDataAPI.getAllPaymentData },
   {
     name: "professionalServices",
@@ -96,6 +101,7 @@ export const runAdminLoaders = async () => {
     try {
       const response = await fn();
       localStorage.setItem(name, JSON.stringify(response.data));
+      console.log(response.data);
       console.log(`✔️ Loaded: ${name}`);
     } catch (error) {
       console.error(`❌ Error loading ${name}:`, error);

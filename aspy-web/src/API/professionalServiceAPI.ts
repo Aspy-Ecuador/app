@@ -10,24 +10,24 @@ interface ProfessionalServiceData {
 
 const professionalServiceAPI = {
   getAllProfessionalServices: async (): Promise<AxiosResponse> =>
-    axios.get(`${apiURL}/professional-service`, getConfig()),
+    axios.get(`${apiURL}/professional-services`, getConfig()),
 
   getProfessionalServiceById: async (id: string): Promise<AxiosResponse> =>
-    axios.get(`${apiURL}/professional-service/${id}`, getConfig()),
+    axios.get(`${apiURL}/professional-services/${id}`, getConfig()),
 
   createProfessionalService: async (
-    data: ProfessionalServiceData
+    data: ProfessionalServiceData,
   ): Promise<AxiosResponse> =>
-    axios.post(`${apiURL}/professional-service`, data, getConfig()),
+    axios.post(`${apiURL}/professional-services`, data, getConfig()),
 
   updateProfessionalService: async (
     id: string,
-    data: ProfessionalServiceData
+    data: ProfessionalServiceData,
   ): Promise<AxiosResponse> =>
-    axios.put(`${apiURL}/professional-service/${id}`, data, getConfig()),
+    axios.put(`${apiURL}/professional-services/${id}`, data, getConfig()),
 
   deleteProfessionalService: async (id: string): Promise<AxiosResponse> =>
-    axios.delete(`${apiURL}/professional-service/${id}`, getConfig()),
+    axios.delete(`${apiURL}/professional-services/${id}`, getConfig()),
 };
 
 export default professionalServiceAPI;

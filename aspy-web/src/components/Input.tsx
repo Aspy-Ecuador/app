@@ -53,7 +53,7 @@ export default function Input({
           className="border border-gray-300 rounded-md p-2 w-full"
           disabled={label === "Rol"}
         >
-          <option value="">Seleccione una opción</option>
+          <option value="0">Seleccione una opción</option>
           {options?.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}

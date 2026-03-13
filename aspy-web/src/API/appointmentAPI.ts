@@ -6,36 +6,36 @@ import { getConfig } from "./config";
 const appointmentAPI = {
   // Get all appointments
   getAllAppointments: async (): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/appointment`, getConfig());
+    return axios.get(`${apiURL}/appointments`, getConfig());
   },
 
   // Get appointment by ID
   getAppointmentById: async (id: string): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/appointment/${id}`, getConfig());
+    return axios.get(`${apiURL}/appointments/${id}`, getConfig());
   },
 
   // Create a new appointment
   createAppointment: async (
-    appointmentData: AppointmentRequest
+    appointmentData: AppointmentRequest,
   ): Promise<AxiosResponse> => {
-    return axios.post(`${apiURL}/appointment`, appointmentData, getConfig());
+    return axios.post(`${apiURL}/appointments`, appointmentData, getConfig());
   },
 
   // Update appointment by ID
   updateAppointment: async (
     id: number,
-    appointmentData: { status: number }
+    appointmentData: { status: number },
   ): Promise<AxiosResponse> => {
     return axios.put(
-      `${apiURL}/appointment/${id}`,
+      `${apiURL}/appointments/${id}`,
       appointmentData,
-      getConfig()
+      getConfig(),
     );
   },
 
   // Delete appointment by ID
-  deleteAppointment: async (id: string): Promise<AxiosResponse> => {
-    return axios.delete(`${apiURL}/appointment/${id}`, getConfig());
+  deleteAppointment: async (id: number): Promise<AxiosResponse> => {
+    return axios.delete(`${apiURL}/appointments/${id}`, getConfig());
   },
 };
 

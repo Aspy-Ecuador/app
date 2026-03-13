@@ -5,22 +5,22 @@ import { AppointmentReportRequest } from "@/typesRequest/AppointmentReportReques
 
 const appointmentReportAPI = {
   getAllReports: async (): Promise<AxiosResponse> =>
-    axios.get(`${apiURL}/appointment-report`, getConfig()),
+    axios.get(`${apiURL}/appointment-reports`, getConfig()),
 
   getReportById: async (id: string): Promise<AxiosResponse> =>
-    axios.get(`${apiURL}/appointment-report/${id}`, getConfig()),
+    axios.get(`${apiURL}/appointment-reports/${id}`, getConfig()),
 
   createReport: async (data: any): Promise<AxiosResponse> =>
-    axios.post(`${apiURL}/appointment-report`, data, getConfig()),
+    axios.post(`${apiURL}/appointment-reports`, data, getConfig()),
 
   updateReport: async (
     id: string,
-    data: AppointmentReportRequest
+    data: AppointmentReportRequest,
   ): Promise<AxiosResponse> =>
-    axios.put(`${apiURL}/appointment-report/${id}`, data, getConfig()),
+    axios.put(`${apiURL}/appointment-reports/${id}`, data, getConfig()),
 
   deleteReport: async (id: string): Promise<AxiosResponse> =>
-    axios.delete(`${apiURL}/appointment-report/${id}`, getConfig()),
+    axios.delete(`${apiURL}/appointment-reports/${id}`, getConfig()),
 };
 
 export default appointmentReportAPI;

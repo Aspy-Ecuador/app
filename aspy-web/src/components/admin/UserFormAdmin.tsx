@@ -1,17 +1,15 @@
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { inputCreateUserAdminConfig } from "@/config/userFormAdminConfig";
-import { useRoleData } from "@/observer/RoleDataContext";
 import { User } from "@/types/User";
-import { getUsers } from "@utils/utils";
+import { PersonResponse } from "@/types/responses/PersonResponse";
 import Button from "@mui/material/Button";
 import UserInput from "@forms/UserInput";
-import Progress from "@components/Progress";
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
 
 interface UserFormProps {
   isEditMode: boolean;
-  userId?: number;
+  user?: PersonResponse | null;
   start: number;
   end: number;
   onNext: (data: User) => void;
@@ -24,7 +22,7 @@ interface UserFormProps {
 
 export default function UserFormAdmin({
   isEditMode,
-  userId,
+  user,
   start,
   end,
   onNext,
@@ -35,40 +33,39 @@ export default function UserFormAdmin({
   load,
 }: UserFormProps) {
   const methods = useForm<User>();
-  const { data, loading } = useRoleData();
-  const users: User[] = getUsers(data);
 
   useEffect(() => {
-    if (isEditMode) {
-      const user = users.find((u) => u.user_id === userId);
-      if (user) {
-        methods.reset({
-          first_name: user.first_name,
-          last_name: user.last_name,
-          email: user.email,
-          birthdate: user.birthdate,
-          gender: user.gender,
-          occupation: user.occupation,
-          marital_status: user.marital_status,
-          education: user.education,
-          role_id: user.role.role_id,
-          title: user.title,
-          about: user.about,
-          specialty: user.specialty,
-        });
-      }
-    } else {
+    if (isEditMode && user) {
+      methods.reset({
+        first_name: user.first_name || "",
+        last_name: user.last_name || "",
+        email: user.email || "",
+        birthdate: user.birthdate || "",
+        gender: user.gender || "",
+        occupation: user.occupation || "",
+        marital_status: user.marital_status || "",
+        education: user.education || "",
+        role_id: user.user_account?.role?.role_id,
+        title: user.professional_info?.title || "",
+        specialty: user.professional_info?.specialty || "",
+      });
+    } else if (!isEditMode) {
       methods.reset({
         first_name: "",
         last_name: "",
         email: "",
         birthdate: "",
+        gender: "0",
+        occupation: "0",
+        marital_status: "0",
+        education: "0",
+        role_id: 0,
         title: "",
-        about: "",
         specialty: "",
+        password: "",
       });
     }
-  }, [isEditMode, userId]);
+  }, [isEditMode, user, methods]);
 
   const roleSelect = Number(methods.watch("role_id") ?? 0);
 
@@ -76,10 +73,10 @@ export default function UserFormAdmin({
     if (onRoleChange) {
       onRoleChange(roleSelect);
     }
-  }, [roleSelect]);
+  }, [roleSelect, onRoleChange]);
 
   const filteredInputs = inputCreateUserAdminConfig.filter((input) => {
-    const isExtraField = ["title", "about", "specialty"].includes(input.key);
+    const isExtraField = ["title", "specialty"].includes(input.key);
     return !(isExtraField && roleSelect !== 2);
   });
 
@@ -102,6 +99,7 @@ export default function UserFormAdmin({
       options={input.options}
     />
   ));
+
   const onSubmit = methods.handleSubmit((data) => {
     if (isLast) {
       onFinish(data);
@@ -117,8 +115,6 @@ export default function UserFormAdmin({
     return "Siguiente";
   };
 
-  if (loading) return <Progress />;
-
   return (
     <FormProvider {...methods}>
       <form
@@ -132,7 +128,7 @@ export default function UserFormAdmin({
           </div>
         </div>
         <div className="gap-10 mt-4 flex flex-row items-center justify-center">
-          {start != 0 && (
+          {start !== 0 && (
             <Button
               variant="outlined"
               onClick={onBack}
@@ -146,9 +142,10 @@ export default function UserFormAdmin({
             variant="contained"
             onClick={onSubmit}
             className="md:w-[250px]"
+            disabled={load}
           >
             {load ? (
-              <CircularProgress size={24} sx={{ color: "white" }} /> // Mostrar ciclo de carga
+              <CircularProgress size={24} sx={{ color: "white" }} />
             ) : (
               getButtonLabel()
             )}

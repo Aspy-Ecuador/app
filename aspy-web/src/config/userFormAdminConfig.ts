@@ -27,18 +27,6 @@ export const inputCreateUserAdminConfig = [
     },
   },
   {
-    label: "Email",
-    key: "email",
-    type: "email",
-    validation: {
-      required: { value: true, message: "Campo requerido" },
-      pattern: {
-        value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-        message: "Email no válido",
-      },
-    },
-  },
-  {
     label: "Género",
     key: "gender",
     type: "select",
@@ -98,6 +86,7 @@ export const inputCreateUserAdminConfig = [
       required: { value: true, message: "Debe seleccionar un rol" },
     },
     options: [
+      { label: "Administrador", value: 1 },
       { label: "Profesional", value: 2 },
       { label: "Cliente", value: 3 },
       { label: "Secretario", value: 4 },
@@ -112,14 +101,6 @@ export const inputCreateUserAdminConfig = [
     },
   },
   {
-    label: "Descripción",
-    key: "about",
-    type: "text",
-    validation: {
-      required: { value: true, message: "Campo requerido" },
-    },
-  },
-  {
     label: "Especialidad",
     key: "specialty",
     type: "text",
@@ -127,7 +108,18 @@ export const inputCreateUserAdminConfig = [
       required: { value: true, message: "Campo requerido" },
     },
   },
-
+  {
+    label: "Email",
+    key: "email",
+    type: "email",
+    validation: {
+      required: { value: true, message: "Campo requerido" },
+      pattern: {
+        value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+        message: "Email no válido",
+      },
+    },
+  },
   {
     label: "Contraseña",
     key: "password",

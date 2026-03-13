@@ -14,30 +14,30 @@ interface PersonData {
 const personAPI = {
   // Get all persons
   getAllPersons: async (): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/person`, getConfig());
+    return axios.get(`${apiURL}/persons`, getConfig());
   },
 
   // Get person by ID
   getPersonById: async (id: number): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/person/${id - 1}`, getConfig());
+    return axios.get(`${apiURL}/persons/${id}`, getConfig());
   },
 
   // Create a new person
   createPerson: async (personData: PersonData): Promise<AxiosResponse> => {
-    return axios.post(`${apiURL}/person`, personData, getConfig());
+    return axios.post(`${apiURL}/persons`, personData, getConfig());
   },
 
   // Update person by ID
   updatePerson: async (
     id: string,
-    personData: PersonData
+    personData: PersonData,
   ): Promise<AxiosResponse> => {
-    return axios.put(`${apiURL}/person/${id}`, personData, getConfig());
+    return axios.put(`${apiURL}/persons/${id}`, personData, getConfig());
   },
 
   // Delete person by ID
   deletePerson: async (id: string): Promise<AxiosResponse> => {
-    return axios.delete(`${apiURL}/person/${id}`, getConfig());
+    return axios.delete(`${apiURL}/persons/${id}`, getConfig());
   },
 };
 

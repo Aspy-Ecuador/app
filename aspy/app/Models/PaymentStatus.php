@@ -3,23 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PaymentStatus extends Model
 {
-    use HasFactory;
-
     protected $table = 'payment_status';
     protected $primaryKey = 'status_id';
-    
+    public $timestamps = false;
+
     protected $fillable = [
         'name',
     ];
 
-    public $timestamps = false;
-
+    // Relationships
     public function payments()
     {
-        return $this->hasMany(Payment::class, 'status');
+        return $this->hasMany(Payment::class, 'status', 'status_id');
     }
 }

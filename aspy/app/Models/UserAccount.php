@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 
 class UserAccount extends Authenticatable
 {
-    use HasApiTokens, HasFactory;
-
+    use HasApiTokens;
+    
     protected $table = 'user_account';
     protected $primaryKey = 'user_id';
     public $timestamps = false;
@@ -22,26 +22,37 @@ class UserAccount extends Authenticatable
         'last_login',
         'created_by',
         'modified_by',
-        'creation_date',
-        'modification_date',
     ];
 
     protected $hidden = [
         'password_hash',
     ];
 
-    public function role()
+    protected $dates = [
+        'last_login',
+        'creation_date',
+        'modification_date',
+    ];
+
+    // Override password column name
+    public function getAuthPassword()
     {
-        return $this->belongsTo(Role::class, 'role_id');
+        return $this->password_hash;
     }
 
-    public function status()
+    // Relationships
+    public function role()
     {
-        return $this->belongsTo(UserAccountStatus::class, 'status');
+        return $this->belongsTo(Role::class, 'role_id', 'role_id');
+    }
+
+    public function accountStatus()
+    {
+        return $this->belongsTo(UserAccountStatus::class, 'status', 'status_id');
     }
 
     public function person()
     {
-        return $this->hasOne(Person::class, 'user_id');
+        return $this->hasOne(Person::class, 'user_id', 'user_id');
     }
 }

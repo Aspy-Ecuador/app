@@ -6,11 +6,18 @@ import CancelButton from "@buttons/CancelButton";
 import CreationButton from "@buttons/CreationButton";
 import Typography from "@mui/material/Typography";
 import { PaymentResponse } from "@/typesResponse/PaymentResponse";
-//import paymentAPI from "@/API/paymentAPI";
-//import { StatusRequest } from "@/typesRequest/StatusRequest";
-import { dataPayments } from "@/data/Payment";
+import paymentAPI from "@/API/paymentAPI";
+import { StatusRequest } from "@/typesRequest/StatusRequest";
+//import { dataPayments } from "@/data/Payment";
 import receiptAPI from "@/API/receiptAPI";
 import { useRoleData } from "@/observer/RoleDataContext";
+import {
+  getAppointmentByPayment,
+  getPayment,
+  getPayments,
+} from "@/utils/utils";
+import { ReceiptRequest } from "@/typesRequest/ReceiptRequest";
+import appointmentAPI from "@/API/appointmentAPI";
 
 interface ReceiptDetailsProps {
   receiptData: PaymentResponse;
@@ -18,30 +25,33 @@ interface ReceiptDetailsProps {
 
 export default function ReceiptDetails({ receiptData }: ReceiptDetailsProps) {
   const navigate = useNavigate();
-  const { refreshReceipts } = useRoleData();
-  const handleBack = () => {
+  const { refreshReceipts, refreshPayments, data, refreshAppointments } =
+    useRoleData();
+
+  const handleBack = async () => {
+    const appointmentId: number = getAppointmentByPayment(
+      receiptData.payment_id,
+      data
+    );
+    console.log(appointmentId);
+    await appointmentAPI.deleteAppointment(appointmentId);
+    await paymentAPI.deletePayment(receiptData.payment_id);
+    await refreshPayments();
+    await refreshAppointments();
     navigate("/pagos");
+    //SE DEBE COREREGIN CUANDO SE ELIMINA EL PAYMENT EL PAYMENTDetail queda sin id, borré el 9
   };
 
   const approve = async () => {
-    //const status: StatusRequest = { status_id: 12 };
-    const id: number = receiptData.payment_id;
-    const data: PaymentResponse[] = dataPayments;
-
-    const payment = data.find((p) => p.payment_id === id);
-    if (payment) {
-      payment.status.name = "Paid";
-      payment.status.status_id = 2;
-    }
-
-    console.log(data);
-    const nuevo = {
+    const status: StatusRequest = { status: 2 };
+    const newReceipt: ReceiptRequest = {
       payment_id: receiptData.payment_id,
       status: "Paid",
     };
-    await receiptAPI.createReceipt(nuevo);
+    await receiptAPI.createReceipt(newReceipt);
     await refreshReceipts();
-    //await paymentAPI.updateStatus(receiptData.payment_id, status);
+    await paymentAPI.updateStatus(receiptData.payment_id, status);
+    await refreshPayments();
     navigate(-1);
   };
 

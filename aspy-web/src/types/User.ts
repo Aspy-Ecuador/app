@@ -1,22 +1,18 @@
-// SÍ SE USA
-import { RoleResponse } from "@/typesResponse/RoleResponse";
+// FINAL
 
 export type User = {
   user_id: number;
   person_id: number;
-  role_id: number;
   first_name: string;
   last_name: string;
-  full_name: string;
-  role: RoleResponse;
+  role_id: number;
   birthdate: string;
-  education: number;
   email: string;
-  gender: number;
-  marital_status: number;
-  occupation: number;
+  gender: string;
+  marital_status: string;
+  education: string;
+  occupation: string;
   title?: string;
-  about?: string;
   specialty?: string;
   password: string;
 };

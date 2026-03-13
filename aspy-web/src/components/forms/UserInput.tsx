@@ -85,7 +85,7 @@ export default function UserInput({
           className="border border-gray-300 rounded-md p-2 w-full"
           disabled={dependsOn ? !dependentValue : false} // Deshabilitar si depende de otro campo que no tiene valor
         >
-          <option value="">Seleccione una opción</option>
+          <option value="0">Seleccione una opción</option>
           {dynamicOptions?.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -100,6 +100,15 @@ export default function UserInput({
           variant="outlined"
           size="small"
           className="w-full md:w-[300px]"
+          autoComplete={
+            id === "email"
+              ? "username"
+              : id === "password"
+                ? "new-password"
+                : id === "confirmPassword"
+                  ? "new-password"
+                  : undefined
+          }
           sx={{
             "& input::-webkit-outer-spin-button": {
               WebkitAppearance: "none",

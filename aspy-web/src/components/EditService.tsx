@@ -13,6 +13,7 @@ export default function EditService() {
   const handleBack = () => {
     navigate(-1);
   };
+
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={2}>

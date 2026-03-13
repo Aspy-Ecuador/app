@@ -18,37 +18,37 @@ interface PaymentData {
 const paymentAPI = {
   // Get all payments
   getAllPayments: async (): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/payment`, getConfig());
+    return axios.get(`${apiURL}/payments`, getConfig());
   },
 
   // Get payment by ID
   getPaymentById: async (id: string): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/payment/${id}`, getConfig());
+    return axios.get(`${apiURL}/payments/${id}`, getConfig());
   },
 
   // Create a new payment
   createPayment: async (paymentData: PaymentData): Promise<AxiosResponse> => {
-    return axios.post(`${apiURL}/payment`, paymentData, getConfig());
+    return axios.post(`${apiURL}/payments`, paymentData, getConfig());
   },
 
   // Update payment by ID
   updatePayment: async (
     id: string,
-    paymentData: PaymentData
+    paymentData: PaymentData,
   ): Promise<AxiosResponse> => {
-    return axios.put(`${apiURL}/payment/${id}`, paymentData, getConfig());
+    return axios.put(`${apiURL}/payments/${id}`, paymentData, getConfig());
   },
 
   updateStatus: async (
     id: number,
-    status: StatusRequest
+    status: StatusRequest,
   ): Promise<AxiosResponse> => {
-    return axios.put(`${apiURL}/paymentstatus/${id}`, status, getConfig());
+    return axios.put(`${apiURL}/payments/${id}`, status, getConfig());
   },
 
   // Delete payment by ID
-  deletePayment: async (id: string): Promise<AxiosResponse> => {
-    return axios.delete(`${apiURL}/payment/${id}`, getConfig());
+  deletePayment: async (id: number): Promise<AxiosResponse> => {
+    return axios.delete(`${apiURL}/payments/${id}`, getConfig());
   },
 };
 

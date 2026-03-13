@@ -3,286 +3,196 @@
 namespace App\Http\Controllers;
 
 use App\Models\UserAccount;
-use App\Models\Person;
-use App\Models\Professional;
-use App\Models\Staff;
-use App\Models\Client;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
-use Illuminate\Validation\ValidationException;
 
 class UserAccountController extends Controller
 {
+    /**
+     * Display a listing of user accounts
+     */
     public function index()
     {
-        $users = UserAccount::with('person')->get();
+        $users = UserAccount::with([
+            'role',
+            'accountStatus',
+            'person.client',
+            'person.staff',
+            'person.professional',
+        ])->get();
 
-        $users->transform(function ($user) {
-            if ($user->person) {
-                $person = $user->person;
-
-                $userData = [
-                    'user_id'        => $user->user_id,
-                    'role_id'        => $user->role_id,
-                    'email'          => $user->email,
-                    'status'         => $user->status,
-                    'person_id'      => $person->person_id,
-                    'first_name'     => $person->first_name,
-                    'last_name'      => $person->last_name,
-                    'birthdate'      => $person->birthdate,
-                    'gender'         => $person->gender,
-                    'occupation'     => $person->occupation,
-                    'marital_status' => $person->marital_status,
-                    'education'      => $person->education,
-                ];
-
-                $userData['role'] = match ($user->role_id) {
-                    1 => 'Administrador',
-                    2 => 'Profesional',
-                    3 => 'Paciente',
-                    4 => 'Secretario'
-                };
-
-                $professional = Professional::where('person_id', $person->person_id)->first();
-                if ($professional) {
-                    $userData['person_type'] = 'professional';
-                    $userData['specialty']   = $professional->specialty;
-                    $userData['title']       = $professional->title;
-                    $userData['about']       = $professional->about;
-                } else {
-                    $staff = Staff::where('person_id', $person->person_id)->first();
-                    if ($staff) {
-                        $userData['person_type'] = 'staff';
-                    } else {
-                        $client = Client::where('person_id', $person->person_id)->first();
-                        if ($client) {
-                            $userData['person_type'] = 'client';
-                        }
-                    }
-                }
-
-                return $userData;
-            }
-
-            return null;
-        });
-
-        return $users->filter()->values();
+        return response()->json($users->map(function ($user) {
+            return $this->formatUserAccount($user);
+        }), 200);
     }
 
-
-    public function show($id)
-    {
-        $user = UserAccount::with('person')->findOrFail($id);
-
-        if ($user->person) {
-            $person = $user->person;
-
-            $userData = [
-                'user_id'        => $user->user_id,
-                'role_id'        => $user->role_id,
-                'email'          => $user->email,
-                'status'         => $user->status,
-                'person_id'      => $person->person_id,
-                'first_name'     => $person->first_name,
-                'last_name'      => $person->last_name,
-                'birthdate'      => $person->birthdate,
-                'gender'         => $person->gender,
-                'occupation'     => $person->occupation,
-                'marital_status' => $person->marital_status,
-                'education'      => $person->education,
-            ];
-
-            $userData['role'] = match ($user->role_id) {
-                1 => 'Administrador',
-                2 => 'Profesional',
-                3 => 'Paciente',
-                4 => 'Secretario'
-            };
-
-            $professional = Professional::where('person_id', $person->person_id)->first();
-            if ($professional) {
-                $userData['person_type'] = 'professional';
-                $userData['specialty']   = $professional->specialty;
-                $userData['title']       = $professional->title;
-                $userData['about']       = $professional->about;
-            } else {
-                $staff = Staff::where('person_id', $person->person_id)->first();
-                if ($staff) {
-                    $userData['person_type'] = 'staff';
-                } else {
-                    $client = Client::where('person_id', $person->person_id)->first();
-                    if ($client) {
-                        $userData['person_type'] = 'client';
-                    }
-                }
-            }
-
-            return response()->json($userData);
-        }
-
-        return response()->json(['message' => 'No person data found'], 404);
-    }
-
-    
-
+    /**
+     * Store a newly created user account
+     */
     public function store(Request $request)
     {
-        DB::beginTransaction();
+        $validated = $request->validate([
+            'role_id' => 'required|exists:role,role_id',
+            'email' => 'required|email|unique:user_account,email',
+            'password' => 'required|string|min:8',
+            'status' => 'required|exists:user_account_status,status_id',
+        ]);
 
-        try {
-            // Validación agrupada
-            $validated = $request->validate([
-                // UserAccount
-                'role_id' => 'required|integer',
-                'email' => 'required|email|unique:user_account,email',
-                'password' => 'required|string',
+        $validated['password_hash'] = Hash::make($validated['password']);
+        $validated['created_by'] = auth()->user()->email ?? 'system';
+        unset($validated['password']);
 
-                // Person
-                'first_name' => 'required|string',
-                'last_name' => 'nullable|string',
-                'birthdate' => 'required|date|before_or_equal:today',
-                'gender' => 'required|integer',
-                'occupation' => 'required|integer',
-                'marital_status' => 'required|integer',
-                'education' => 'required|integer',
+        $user = UserAccount::create($validated);
 
-                // person_type
-                'person_type' => 'required|string|in:professional,staff,client',
+        $user->load([
+            'role',
+            'accountStatus',
+        ]);
 
-                // Professional (solo si aplica)
-                'specialty' => 'required_if:person_type,professional|string|nullable',
-                'title' => 'required_if:person_type,professional|string|nullable',
-                'about' => 'nullable|string',
-            ]);
-
-            // Crear usuario
-            $user = UserAccount::create([
-                'role_id' => $validated['role_id'],
-                'email' => $validated['email'],
-                'password_hash' => Hash::make($validated['password']),
-                'status' => 1
-            ]);
-
-            // Crear persona
-            $person = Person::create([
-                'user_id' => $user->user_id,
-                'first_name' => $validated['first_name'],
-                'last_name' => $validated['last_name'] ?? null,
-                'birthdate' => $validated['birthdate'],
-                'gender' => $validated['gender'],
-                'occupation' => $validated['occupation'],
-                'marital_status' => $validated['marital_status'],
-                'education' => $validated['education'],
-            ]);
-
-            // Crear hijo
-            switch ($validated['person_type']) {
-                case 'professional':
-                    Professional::create([
-                        'person_id' => $person->person_id,
-                        'specialty' => $validated['specialty'],
-                        'title' => $validated['title'],
-                        'about' => $validated['about'] ?? null,
-                    ]);
-                    break;
-                case 'staff':
-                    Staff::create(['person_id' => $person->person_id]);
-                    break;
-                case 'client':
-                    Client::create(['person_id' => $person->person_id]);
-                    break;
-            }
-
-            DB::commit();
-
-            return response()->json([
-                'user' => $user,
-                'person' => $person,
-                'person_type' => $validated['person_type']
-            ], 201);
-
-        } catch (ValidationException $e) {
-            DB::rollBack();
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $e->errors()
-            ], 422);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'message' => 'Internal server error',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'message' => 'Usuario creado exitosamente',
+            'user' => $this->formatUserAccount($user),
+        ], 201);
     }
 
+    /**
+     * Display the specified user account
+     */
+    public function show($id)
+    {
+        $user = UserAccount::with([
+            'role',
+            'accountStatus',
+            'person.client',
+            'person.staff',
+            'person.professional.professionalServices.service',
+            'person.identifications',
+            'person.addresses.countryData',
+            'person.addresses.state',
+            'person.addresses.cityData',
+            'person.phones',
+        ])->findOrFail($id);
 
+        return response()->json($this->formatUserAccount($user), 200);
+    }
+
+    /**
+     * Update the specified user account
+     */
     public function update(Request $request, $id)
     {
         $user = UserAccount::findOrFail($id);
+
         $validated = $request->validate([
-            'role_id' => 'integer',
-            'email' => 'email|unique:user_account,email,'.$id,
-            'status' => 'integer'
+            'role_id' => 'sometimes|exists:role,role_id',
+            'email' => 'sometimes|email|unique:user_account,email,' . $id . ',user_id',
+            'password' => 'sometimes|string|min:8',
+            'status' => 'sometimes|exists:user_account_status,status_id',
         ]);
-        
-        $validated['password_hash'] = Hash::make($request->password); 
-        $validated['modification_date'] = Carbon::now();
-        $validated['modified_by'] = 'system';
-        
-        $user->update($validated);
-        return $user;
-    }
 
-    public function destroy($id)
-{
-    \DB::beginTransaction();
-
-    try {
-        $user = UserAccount::findOrFail($id);
-
-        // Buscar persona relacionada
-        $person = Person::where('user_id', $user->user_id)->first();
-
-        if ($person) {
-            // Borrar el hijo relacionado (professional, staff o client)
-
-            // Intentamos borrar Professional
-            $professional = Professional::where('person_id', $person->person_id)->first();
-            if ($professional) {
-                $professional->delete();
-            }
-
-            // Intentamos borrar Staff
-            $staff = Staff::where('person_id', $person->person_id)->first();
-            if ($staff) {
-                $staff->delete();
-            }
-
-            // Intentamos borrar Client
-            $client = Client::where('person_id', $person->person_id)->first();
-            if ($client) {
-                $client->delete();
-            }
-
-            // Borrar la persona
-            $person->delete();
+        if (isset($validated['password'])) {
+            $validated['password_hash'] = Hash::make($validated['password']);
+            unset($validated['password']);
         }
 
-        // Borrar el usuario
+        $validated['modified_by'] = auth()->user()->email ?? 'system';
+        $validated['modification_date'] = now();
+
+        $user->update($validated);
+
+        $user->load([
+            'role',
+            'accountStatus',
+            'person',
+        ]);
+
+        return response()->json([
+            'message' => 'Usuario actualizado exitosamente',
+            'user' => $this->formatUserAccount($user),
+        ], 200);
+    }
+
+    /**
+     * Remove the specified user account
+     */
+    public function destroy($id)
+    {
+        $user = UserAccount::findOrFail($id);
         $user->delete();
 
-        \DB::commit();
-
-        return response()->json(['message' => 'Usuario y datos relacionados eliminados correctamente'], 200);
-    } catch (\Exception $e) {
-        \DB::rollBack();
-        return response()->json(['error' => 'Error al eliminar usuario: ' . $e->getMessage()], 500);
+        return response()->json([
+            'message' => 'Usuario eliminado exitosamente',
+        ], 200);
     }
-}
 
+    /**
+     * Format user account with cascading data
+     */
+    private function formatUserAccount($user)
+    {
+        return [
+            'user_id' => $user->user_id,
+            'email' => $user->email,
+            'role' => [
+                'role_id' => $user->role->role_id,
+                'name' => $user->role->name,
+            ],
+            'status' => [
+                'status_id' => $user->accountStatus->status_id,
+                'name' => $user->accountStatus->name,
+            ],
+            'last_login' => $user->last_login,
+            'person' => $user->person ? [
+                'person_id' => $user->person->person_id,
+                'first_name' => $user->person->first_name,
+                'last_name' => $user->person->last_name,
+                'birthdate' => $user->person->birthdate,
+                'gender' => $user->person->gender,
+                'occupation' => $user->person->occupation,
+                'marital_status' => $user->person->marital_status,
+                'education' => $user->person->education,
+                'is_client' => $user->person->client ? true : false,
+                'is_staff' => $user->person->staff ? true : false,
+                'is_professional' => $user->person->professional ? true : false,
+                'professional_info' => $user->person->professional ? [
+                    'specialty' => $user->person->professional->specialty,
+                    'title' => $user->person->professional->title,                                        
+                ] : null,
+                'identifications' => $user->person->identifications ? [
+                    'identification_id' => $user->person->identifications->identification_id,
+                    'type' => $user->person->identifications->type,
+                    'number' => $user->person->identifications->number,
+                    'due_date' => $user->person->identifications->due_date,
+                ] : null,                    
+                'addresses' => $user->person->addresses ? [
+                    'address_id' =>  $user->person->addresses->address_id,
+                    'type' => $user->person->addresses->type,
+                    'primary_address' => $user->person->addresses->primary_address,
+                    'secondary_address' => $user->person->addresses->secondary_address,
+                    'country' => [
+                        'country_id' => $user->person->addresses->countryData->country_id,
+                        'name' => $user->person->addresses->countryData->name,
+                        'phone_code' => $user->person->addresses->countryData->phone_code,
+                    ],
+                    'state' => [
+                        'state_id' => $user->person->addresses->state->state_id,
+                        'name' => $user->person->addresses->state->name,
+                    ],
+                    'city' => [
+                        'city_id' => $user->person->addresses->cityData->city_id,
+                        'name' => $user->person->addresses->cityData->name,
+                    ],
+                ] : null,
+                'phones' => $user->person->phones ? [
+                    'phone_id' =>  $user->person->phones->phone_id,
+                    'type' => $user->person->phones->type,
+                    'number' => $user->person->phones->number,
+                ] : null,                    
+            ] : null,
+            'created_by' => $user->created_by,
+            'creation_date' => $user->creation_date,
+            'modified_by' => $user->modified_by,
+            'modification_date' => $user->modification_date,
+        ];
+    }
 }

@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import { columnsServiceAdmin } from "@utils/columns";
 import { ServiceResponse } from "@/typesResponse/ServiceResponse";
-import { useRoleData } from "@/observer/RoleDataContext";
+import axios from "axios";
 import Grid from "@mui/material/Grid2";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -12,24 +12,22 @@ import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import Table from "@components/Table";
-import Progress from "@components/Progress";
+import apiURL from "@/API/apiConfig";
 
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import AssignmentTurnedInRoundedIcon from "@mui/icons-material/AssignmentTurnedInRounded";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 
 export default function ServicesList() {
-  const { data, loading  } = useRoleData();
   const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
+  const [services, setServices] = useState<ServiceResponse[]>([]);
 
   //Ruta para editar y crear
   const navigate = useNavigate();
   const location = useLocation();
 
-  const services: ServiceResponse[] = data?.services ?? [];
-
-  const handleEdit = (id: number) => {
-    const newPath = `${location.pathname}/${id}`;
+  const handleEdit = (id: number, name: string) => {
+    const newPath = `${location.pathname}/${id}-${name}`;
     navigate(newPath);
   };
 
@@ -61,7 +59,7 @@ export default function ServicesList() {
       headerAlign: "center",
       renderCell: (params) => (
         <Button
-          onClick={() => handleEdit(params.row.service_id)}
+          onClick={() => handleEdit(params.row.service_id, params.row.name)}
           variant="text"
           className="boton-editar"
         >
@@ -73,7 +71,25 @@ export default function ServicesList() {
 
   const newColumns: GridColDef[] = [...columnsServiceAdmin, ...columnsExtra];
 
- 
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const responseServices = await axios.get(`${apiURL}/services`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        localStorage["services"] = responseServices.data;
+        const services: ServiceResponse[] = responseServices.data;
+        setServices(services);
+      } catch (error) {
+        console.error("Error loading appointments", error);
+      }
+    };
+
+    fetchAppointments();
+  }, []);
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
@@ -117,19 +133,19 @@ export default function ServicesList() {
         </Grid>
 
         <Grid size={12}>
-           {loading ? (
-              <Progress /> 
-            ) : (
-          <Table<ServiceResponse>
-            columns={newColumns}
-            rows={services}
-            getRowId={(row) => row.service_id}
-            rowSelectionModel={rowSelection}
-            onRowSelectionChange={(newSelection) =>
-              setRowSelection(newSelection)
-            }
-          />
-            )}
+          {services.length ? (
+            <Table<ServiceResponse>
+              columns={newColumns}
+              rows={services}
+              getRowId={(row) => row.service_id}
+              rowSelectionModel={rowSelection}
+              onRowSelectionChange={(newSelection) =>
+                setRowSelection(newSelection)
+              }
+            />
+          ) : (
+            <Typography>No hay servicios</Typography>
+          )}
         </Grid>
       </Grid>
     </Box>

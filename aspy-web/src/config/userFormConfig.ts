@@ -136,14 +136,6 @@ export const inputCreateUserConfig = [
     },
   },
   {
-    label: "Descripción",
-    key: "about",
-    type: "text",
-    validation: {
-      required: { value: true, message: "Campo requerido" },
-    },
-  },
-  {
     label: "Especialidad",
     key: "specialty",
     type: "text",

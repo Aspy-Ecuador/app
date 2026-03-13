@@ -2,20 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Person extends Model
 {
-    use HasFactory;
-
     protected $table = 'person';
     protected $primaryKey = 'person_id';
     public $timestamps = false;
+
     protected $fillable = [
         'user_id',
         'first_name',
-        'middle_name',
+        'last_name',
         'birthdate',
         'gender',
         'occupation',
@@ -23,42 +21,57 @@ class Person extends Model
         'education',
         'created_by',
         'modified_by',
+    ];
+
+    protected $dates = [
+        'birthdate',
         'creation_date',
         'modification_date',
     ];
 
-    public function user()
+    // Relationships
+    public function userAccount()
     {
-        return $this->belongsTo(UserAccount::class, 'user_id');
+        return $this->belongsTo(UserAccount::class, 'user_id', 'user_id');
     }
 
     public function client()
     {
-        return $this->hasOne(Client::class, 'person_id');
+        return $this->hasOne(Client::class, 'person_id', 'person_id');
     }
 
     public function staff()
     {
-        return $this->hasOne(Staff::class, 'person_id');
+        return $this->hasOne(Staff::class, 'person_id', 'person_id');
     }
 
     public function professional()
     {
-        return $this->hasOne(Professional::class, 'person_id');
+        return $this->hasOne(Professional::class, 'person_id', 'person_id');
     }
 
     public function identifications()
     {
-        return $this->hasMany(Identification::class, 'person_id');
+        return $this->hasOne(Identification::class, 'person_id', 'person_id');
     }
 
     public function addresses()
     {
-        return $this->hasMany(Address::class, 'person_id');
+        return $this->hasOne(Address::class, 'person_id', 'person_id');
     }
 
     public function phones()
     {
-        return $this->hasMany(Phone::class, 'person_id');
+        return $this->hasOne(Phone::class, 'person_id', 'person_id');
+    }
+
+    public function workerSchedules()
+    {
+        return $this->hasMany(WorkerSchedule::class, 'person_id', 'person_id');
+    }
+
+    public function scheduledAppointments()
+    {
+        return $this->hasMany(Appointment::class, 'scheduled_by', 'person_id');
     }
 }

@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { GridRowSelectionModel } from "@mui/x-data-grid";
-import { User } from "@/types/User";
 import { ButtonAdmin } from "@/types/ButtonAdmin";
-import { useRoleData } from "@/observer/RoleDataContext";
 import { GridColDef } from "@mui/x-data-grid";
-import { getUsers } from "@/utils/utils";
-import { translateRol } from "@/utils/utils";
+import { PersonResponse } from "@/types/responses/PersonResponse";
+import { useRoleData } from "@/observer/RoleDataContext";
 import Progress from "@components/Progress";
 import SimpleHeader from "@components/SimpleHeader";
 import Box from "@mui/material/Box";
@@ -28,7 +26,6 @@ const columns: GridColDef[] = [
     headerName: "Nombres",
     disableColumnMenu: true,
     flex: 2,
-
     resizable: false,
   },
   {
@@ -46,7 +43,7 @@ const columns: GridColDef[] = [
     renderCell: (params) => {
       return (
         <Typography variant="body1">
-          {translateRol(params.row.role.name)}
+          {params.row.user_account.role.name}
         </Typography>
       );
     },
@@ -62,13 +59,34 @@ const columns: GridColDef[] = [
 ];
 
 export default function UsersList() {
+  const { loading } = useRoleData();
   const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
-  const [user, setUser] = useState<User | null>(null);
-  const { data, loading } = useRoleData();
-
+  const [user, setUser] = useState<PersonResponse | null>(null);
+  const [users, setUsers] = useState<PersonResponse[]>([]);
   const navigate = useNavigate();
 
-  const users: User[] = getUsers(data ?? []);
+  useEffect(() => {
+    if (!loading) {
+      const personsData = localStorage.getItem("persons");
+      if (personsData) {
+        const persons: PersonResponse[] = JSON.parse(personsData);
+        setUsers(persons);
+      }
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    if (rowSelection.length > 0) {
+      const selectedUser = users.find(
+        (item) => item.person_id === rowSelection[0],
+      );
+      if (selectedUser) {
+        setUser(selectedUser);
+      }
+    } else {
+      setUser(null);
+    }
+  }, [rowSelection, users]);
 
   const buttonsData: ButtonAdmin[] = [
     {
@@ -78,34 +96,25 @@ export default function UsersList() {
     },
     {
       label: "Profesionales",
-      value: users.filter((user) => user.role.name === "Profesional").length,
+      value: users.filter((user) => user.user_account.role.role_id === 2)
+        .length,
       icon: <SupervisedUserCircleOutlinedIcon fontSize="inherit" />,
     },
     {
       label: "Pacientes",
-      value: users.filter((user) => user.role.name === "Paciente").length,
+      value: users.filter((user) => user.user_account.role.role_id === 3)
+        .length,
       icon: <AttributionOutlinedIcon fontSize="inherit" />,
     },
   ];
-
-  useEffect(() => {
-    if (rowSelection.length > 0) {
-      const selectedUser = users.find(
-        (item) => item.user_id === rowSelection[0]
-      );
-      if (selectedUser) {
-        setUser(selectedUser);
-      }
-    } else {
-      setUser(null);
-    }
-  }, [rowSelection]);
 
   const handleCreate = () => {
     navigate(`/nuevo-usuario`);
   };
 
-  if (loading) return <Progress />;
+  if (loading || users.length === 0) {
+    return <Progress />;
+  }
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
@@ -135,13 +144,11 @@ export default function UsersList() {
         </Grid>
 
         <Grid size={8}>
-          {loading ? (
-            <Progress />
-          ) : users.length ? (
-            <Table<User>
+          {users.length ? (
+            <Table<PersonResponse>
               columns={columns}
               rows={users}
-              getRowId={(row) => row.user_id}
+              getRowId={(row) => row.person_id}
               rowSelectionModel={rowSelection}
               onRowSelectionChange={(newSelection) =>
                 setRowSelection(newSelection)

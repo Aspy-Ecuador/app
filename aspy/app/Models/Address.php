@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -8,6 +9,7 @@ class Address extends Model
     protected $table = 'address';
     protected $primaryKey = 'address_id';
     public $timestamps = false;
+
     protected $fillable = [
         'person_id',
         'type',
@@ -16,33 +18,33 @@ class Address extends Model
         'city',
         'primary_address',
         'secondary_address',
-        'aga',
         'created_by',
         'modified_by',
     ];
 
+    protected $dates = [
+        'creation_date',
+        'modification_date',
+    ];
+
+    // Relationships
     public function person()
     {
-        return $this->belongsTo(Person::class);
+        return $this->belongsTo(Person::class, 'person_id', 'person_id');
     }
 
-    public function countryRelation()
+    public function countryData()
     {
-        return $this->belongsTo(Country::class, 'country');
+        return $this->belongsTo(Country::class, 'country', 'country_id');
     }
 
-    public function provinceRelation()
+    public function state()
     {
-        return $this->belongsTo(State::class, 'province');
+        return $this->belongsTo(State::class, 'province', 'state_id');
     }
 
-    public function cityRelation()
+    public function cityData()
     {
-        return $this->belongsTo(City::class, 'city');
-    }
-
-    public function agaRelation()
-    {
-        return $this->belongsTo(Aga::class, 'aga');
+        return $this->belongsTo(City::class, 'city', 'city_id');
     }
 }

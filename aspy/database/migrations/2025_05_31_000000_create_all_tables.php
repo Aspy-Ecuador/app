@@ -55,11 +55,6 @@ class CreateAllTables extends Migration
             $table->foreignId('state_id')->constrained('state', 'state_id');
         });
 
-        Schema::create('aga', function (Blueprint $table) {
-            $table->id('aga_id');
-            $table->string('name');
-        });
-
         Schema::create('user_account_status', function (Blueprint $table) {
             $table->id('status_id');
             $table->string('name');
@@ -92,7 +87,7 @@ class CreateAllTables extends Migration
             $table->id('person_id');
             $table->foreignId('user_id')->unique()->constrained('user_account', 'user_id');
             $table->string('first_name');
-            $table->string('middle_name')->nullable();
+            $table->string('last_name');
             $table->date('birthdate');
             $table->string('gender');
             $table->string('occupation');
@@ -136,10 +131,12 @@ class CreateAllTables extends Migration
 
         Schema::create('identification', function (Blueprint $table) {
             $table->id('identification_id');
-            $table->foreignId('person_id')->constrained('person', 'person_id');
+            $table->foreignId('person_id')
+                ->unique()
+                ->constrained('person', 'person_id');
             $table->string('type', 50);
             $table->string('number', 13)->unique();
-            $table->timestamp('due_date')->nullable();
+            $table->date('due_date')->nullable();
             $table->string('created_by')->default('system');
             $table->string('modified_by')->nullable();
             $table->timestamp('creation_date')->useCurrent();
@@ -148,14 +145,15 @@ class CreateAllTables extends Migration
 
         Schema::create('address', function (Blueprint $table) {
             $table->id('address_id');
-            $table->foreignId('person_id')->constrained('person', 'person_id');
+            $table->foreignId('person_id')
+                ->unique()
+                ->constrained('person', 'person_id');
             $table->string('type', 50);
             $table->foreignId('country')->constrained('country', 'country_id');
             $table->foreignId('province')->constrained('state', 'state_id');
             $table->foreignId('city')->constrained('city', 'city_id');
             $table->text('primary_address');
             $table->text('secondary_address')->nullable();
-            $table->foreignId('aga')->constrained('aga', 'aga_id');
             $table->string('created_by')->default('system');
             $table->string('modified_by')->nullable();
             $table->timestamp('creation_date')->useCurrent();
@@ -164,33 +162,24 @@ class CreateAllTables extends Migration
 
         Schema::create('phone', function (Blueprint $table) {
             $table->id('phone_id');
-            $table->foreignId('person_id')->constrained('person', 'person_id');
+            $table->foreignId('person_id')
+                ->unique()
+                ->constrained('person', 'person_id');
             $table->string('type', 50);
             $table->string('number', 10);
-            $table->string('name')->nullable();
-            $table->string('relationship', 50);
             $table->string('created_by')->default('system');
             $table->string('modified_by')->nullable();
             $table->timestamp('creation_date')->useCurrent();
             $table->timestamp('modification_date')->nullable();
         });
 
-        Schema::create('medical_profile', function (Blueprint $table) {
-            $table->id('medical_profile_id');
-            $table->foreignId('person_id')->constrained('client', 'person_id');
-            $table->string('diagnose')->unique();
-            $table->string('created_by')->default('system');
-            $table->string('modified_by')->nullable();
-            $table->timestamp('creation_date')->useCurrent();
-            $table->timestamp('modification_date')->nullable();
-        });
 
         Schema::create('schedule', function (Blueprint $table) {
             $table->id('schedule_id');
             $table->date('date');
             $table->time('start_time');
             $table->time('end_time');
-            $table->string('name')->nullable();
+            $table->string('name');
             $table->string('created_by')->default('system');
             $table->string('modified_by')->nullable();
             $table->timestamp('creation_date')->useCurrent();
@@ -207,16 +196,6 @@ class CreateAllTables extends Migration
             $table->timestamp('creation_date')->useCurrent();
             $table->timestamp('modification_date')->nullable();
             $table->unique(['schedule_id', 'person_id']);
-        });
-
-        Schema::create('discount', function (Blueprint $table) {
-            $table->id('discount_id');
-            $table->string('name')->unique();
-            $table->integer('discount');
-            $table->string('created_by')->default('system');
-            $table->string('modified_by')->nullable();
-            $table->timestamp('creation_date')->useCurrent();
-            $table->timestamp('modification_date')->nullable();
         });
 
         Schema::create('service', function (Blueprint $table) {
@@ -253,11 +232,9 @@ class CreateAllTables extends Migration
         Schema::create('payment', function (Blueprint $table) {
             $table->id('payment_id');
             $table->foreignId('person_id')->constrained('client', 'person_id');
-            $table->foreignId('service_id')->constrained('service', 'service_id');
-            $table->foreignId('discount_id')->nullable()->constrained('discount', 'discount_id');
+            $table->foreignId('service_id')->constrained('service', 'service_id');            
             $table->foreignId('payment_data_id')->constrained('payment_data', 'payment_data_id');
             $table->decimal('service_price', 10, 2);
-            $table->integer('discount_percentage')->nullable();
             $table->decimal('total_amount', 10, 2);
             $table->foreignId('status')->constrained('payment_status', 'status_id');
             $table->string('created_by')->default('system');
@@ -280,8 +257,7 @@ class CreateAllTables extends Migration
             $table->id('appointment_id');
             $table->foreignId('payment_id')->constrained('payment', 'payment_id');
             $table->foreignId('scheduled_by')->constrained('person', 'person_id');
-            $table->foreignId('worker_schedule_id')->unique()->constrained('worker_schedule', 'worker_schedule_id');
-            $table->foreignId('tracking_appointment')->nullable()->unique()->constrained('appointment', 'appointment_id');
+            $table->foreignId('worker_schedule_id')->unique()->constrained('worker_schedule', 'worker_schedule_id');           
             $table->foreignId('status')->constrained('appointment_status', 'status_id');
             $table->string('created_by')->default('system');
             $table->string('modified_by')->nullable();

@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserAccountRequest } from "@/typesRequest/UserAccountRequest";
 import { User } from "@/types/User";
 import { getUser } from "@/utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext";
 import { register } from "@/API/auth";
+import { PersonResponse } from "@/types/responses/PersonResponse";
 import Box from "@mui/material/Box";
 import UserFormAdmin from "@admin/UserFormAdmin";
 import Steps from "@components/Steps";
@@ -12,6 +13,7 @@ import Grid from "@mui/material/Grid2";
 import Success from "@components/Success";
 import Progress from "@components/Progress";
 import userAccountAPI from "@/API/userAccountAPI";
+import Error from "@components/Error";
 
 interface FormViewProps {
   isEdit: boolean;
@@ -22,21 +24,33 @@ const stepsName = ["Datos personales", "Datos generales", "Seguridad"];
 
 export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
   const [step, setStep] = useState(0);
-  const totalSteps = 3;
   const [roleSelect, setRoleSelect] = useState<number>(0);
   const [open, setOpen] = useState(false);
   const [load, setLoad] = useState(false);
-
   const [userData, setUserData] = useState<User>();
+  const [user, setUser] = useState<PersonResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const {
-    data,
-    loading,
-    refreshPersons,
-    refreshUserAccounts,
-    refreshRoles,
-    refreshProfessionals,
-  } = useRoleData();
+  const totalSteps = 3;
+  const navigate = useNavigate();
+
+  const { loading, refreshPersons, refreshUserAccounts, refreshProfessionals } =
+    useRoleData();
+
+  // Cargar usuario al montar el componente (solo en modo edición)
+  useEffect(() => {
+    if (isEdit && user_id && !loading) {
+      const person: PersonResponse | null = getUser(user_id);
+
+      if (!person) {
+        setError("Usuario no encontrado");
+      } else {
+        setUser(person);
+        // Establecer el rol inicial basado en el usuario cargado
+        setRoleSelect(person.user_account.role.role_id);
+      }
+    }
+  }, [isEdit, user_id, loading]);
 
   const handleNext = (data: User) => {
     setUserData((prev) => ({ ...prev, ...data }));
@@ -46,6 +60,7 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
   const handleBack = () => {
     if (step > 0) setStep(step - 1);
   };
+
   const handleOpen = () => {
     setOpen(true);
   };
@@ -55,8 +70,6 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
     navigate(-1);
   };
 
-  const navigate = useNavigate();
-
   const formatUser = (data: any): UserAccountRequest => {
     const roleMap: { [key: number]: string } = {
       1: "admin",
@@ -64,25 +77,8 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
       3: "client",
       4: "staff",
     };
-    if (Number(data.role_id) === 2) {
-      return {
-        role_id: Number(data.role_id),
-        email: data.email,
-        password: data.password,
-        first_name: data.first_name,
-        last_name: data.last_name,
-        birthdate: data.birthdate,
-        gender: Number(data.gender),
-        occupation: Number(data.occupation),
-        marital_status: Number(data.marital_status),
-        education: Number(data.education),
-        person_type: roleMap[data.role_id],
-        title: data.title,
-        about: data.about,
-        specialty: data.specialty,
-      };
-    }
-    return {
+
+    const baseUser = {
       role_id: Number(data.role_id),
       email: data.email,
       password: data.password,
@@ -95,35 +91,28 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
       education: Number(data.education),
       person_type: roleMap[data.role_id],
     };
+
+    if (Number(data.role_id) === 2) {
+      return {
+        ...baseUser,
+        title: data.title,
+        about: data.about,
+        specialty: data.specialty,
+      };
+    }
+
+    return baseUser;
   };
 
   const formatUserEdit = (data: any): UserAccountRequest => {
     const roleMap: { [key: number]: string } = {
       1: "admin",
-      2: "proffesional",
+      2: "professional",
       3: "client",
       4: "staff",
     };
 
-    if (Number(data.role_id) === 2) {
-      return {
-        role_id: Number(data.role_id),
-        email: data.email,
-        password: data.password,
-        first_name: data.first_name,
-        last_name: data.last_name,
-        birthdate: data.birthdate,
-        gender: Number(data.gender),
-        occupation: Number(data.occupation),
-        marital_status: Number(data.marital_status),
-        education: Number(data.education),
-        person_type: roleMap[data.role_id],
-        title: data.title,
-        about: data.about,
-        specialty: data.specialty,
-      };
-    }
-    return {
+    const baseUser = {
       role_id: Number(data.role_id),
       email: data.email,
       password: data.password,
@@ -136,80 +125,70 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
       education: Number(data.education),
       person_type: roleMap[data.role_id],
     };
+
+    if (Number(data.role_id) === 2) {
+      return {
+        ...baseUser,
+        title: data.title,
+        about: data.about,
+        specialty: data.specialty,
+      };
+    }
+
+    return baseUser;
   };
 
   const handleFinalSubmit = async (data: User) => {
     const fullData = { ...userData, ...data };
     setLoad(true);
-    if (isEdit) {
-      const userEdit = formatUserEdit(fullData);
-      console.log(userEdit);
-      await userAccountAPI.updateUserAccount(user_id!, userEdit);
+
+    try {
+      if (isEdit) {
+        const userEdit = formatUserEdit(fullData);
+        await userAccountAPI.updateUserAccount(user_id!, userEdit);
+      } else {
+        const userRegister = formatUser(fullData);
+        await register(userRegister);
+      }
+
       await refreshPersons();
       await refreshUserAccounts();
-      await refreshRoles();
       await refreshProfessionals();
-    } else {
-      const userRegister = formatUser(fullData);
-      console.log(userRegister);
-      await register(userRegister);
-      await refreshPersons();
-      await refreshUserAccounts();
-      await refreshRoles();
-      await refreshProfessionals();
+
+      handleOpen();
+    } catch (error) {
+      console.error("Error al guardar usuario:", error);
+      setError("Error al guardar el usuario");
+    } finally {
+      setLoad(false);
     }
-    setLoad(false);
-    handleOpen();
   };
 
-  let stepsFields = [];
-  if (roleSelect === 2) {
-    stepsFields = [
-      { start: 0, end: 5 },
-      { start: 5, end: 12 },
-      { start: 12, end: 14 },
-    ];
-  } else {
-    stepsFields = [
-      { start: 0, end: 5 },
-      { start: 5, end: 9 },
-      { start: 9, end: 12 },
-    ];
-  }
+  // Calcular stepsFields basado en el rol seleccionado o el rol del usuario
+  const getStepsFields = () => {
+    const currentRole =
+      isEdit && user ? user.user_account.role.role_id : roleSelect;
 
-  if (loading) return <Progress />;
-
-  if (isEdit) {
-    if (user_id) {
-      const user: User = getUser(data, user_id);
-      if (user.role_id === 2) {
-        stepsFields = [
-          { start: 0, end: 5 },
-          { start: 5, end: 12 },
-          { start: 12, end: 14 },
-        ];
-      } else {
-        stepsFields = [
-          { start: 0, end: 5 },
-          { start: 5, end: 9 },
-          { start: 9, end: 12 },
-        ];
-      }
-      if (roleSelect === 2) {
-        stepsFields = [
-          { start: 0, end: 5 },
-          { start: 5, end: 12 },
-          { start: 12, end: 14 },
-        ];
-      } else {
-        stepsFields = [
-          { start: 0, end: 5 },
-          { start: 5, end: 9 },
-          { start: 9, end: 12 },
-        ];
-      }
+    if (currentRole === 2) {
+      return [
+        { start: 0, end: 4 },
+        { start: 4, end: 10 },
+        { start: 10, end: 13 },
+      ];
+    } else {
+      return [
+        { start: 0, end: 4 },
+        { start: 4, end: 8 },
+        { start: 8, end: 11 },
+      ];
     }
-  }
+  };
+
+  const stepsFields = getStepsFields();
+
+  // Estados de carga y error
+  if (loading) return <Progress />;
+  if (error) return <Error mensaje={error} />;
 
   return (
     <Box>
@@ -226,7 +205,7 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
             onBack={handleBack}
             onFinish={handleFinalSubmit}
             isLast={step === totalSteps - 1}
-            userId={user_id}
+            user={user}
             onRoleChange={setRoleSelect}
             load={load}
           />
@@ -242,7 +221,6 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
             : "Se ha registrado con éxito!!"
         }
       />
-      ;
     </Box>
   );
 }

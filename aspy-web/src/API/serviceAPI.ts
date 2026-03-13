@@ -6,21 +6,21 @@ import { ServiceResponse } from "@/typesResponse/ServiceResponse";
 
 const serviceAPI = {
   getAllServices: async (): Promise<AxiosResponse> =>
-    axios.get(`${apiURL}/service`, getConfig()),
+    axios.get(`${apiURL}/services`, getConfig()),
 
   getServiceById: async (id: number): Promise<ServiceResponse> =>
-    (await axios.get(`${apiURL}/service/${id}`, getConfig())).data,
+    (await axios.get(`${apiURL}/services/${id}`, getConfig())).data,
 
   createService: async (data: ServiceRequest): Promise<AxiosResponse> =>
-    axios.post(`${apiURL}/service`, data, getConfig()),
+    axios.post(`${apiURL}/services`, data, getConfig()),
 
   updateService: async (id: number, data: number): Promise<AxiosResponse> => {
     const data_update = { price: data };
-    return axios.put(`${apiURL}/service/${id}`, data_update, getConfig());
+    return axios.put(`${apiURL}/services/${id}`, data_update, getConfig());
   },
 
   deleteService: async (id: string): Promise<AxiosResponse> =>
-    axios.delete(`${apiURL}/service/${id}`, getConfig()),
+    axios.delete(`${apiURL}/services/${id}`, getConfig()),
 };
 
 export default serviceAPI;

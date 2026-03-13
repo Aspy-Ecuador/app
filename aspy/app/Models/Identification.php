@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -8,6 +9,7 @@ class Identification extends Model
     protected $table = 'identification';
     protected $primaryKey = 'identification_id';
     public $timestamps = false;
+
     protected $fillable = [
         'person_id',
         'type',
@@ -17,8 +19,15 @@ class Identification extends Model
         'modified_by',
     ];
 
+    protected $dates = [
+        'due_date',
+        'creation_date',
+        'modification_date',
+    ];
+
+    // Relationships
     public function person()
     {
-        return $this->belongsTo(Person::class);
+        return $this->belongsTo(Person::class, 'person_id', 'person_id');
     }
 }

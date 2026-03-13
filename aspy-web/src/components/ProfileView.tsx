@@ -1,12 +1,11 @@
-import { User } from "@/types/User";
-import penToSquare from "@assets/pen-to-square.svg";
-import { getAge, getGender } from "@/utils/utils";
-import { UserLogin } from "@/types/UserLogin";
-import photo from "@assets/user.png";
 import { useNavigate } from "react-router-dom";
+import { PersonResponse } from "@/types/responses/PersonResponse";
+import { getAge, getGender } from "@/utils/utils";
+import penToSquare from "@assets/editUser.svg";
+import photo from "@assets/user.png";
 
 type ProfileProps = {
-  user: User | UserLogin;
+  user: PersonResponse;
   isRowPosition: boolean;
 };
 
@@ -14,7 +13,7 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
   const navigate = useNavigate();
 
   const handleEdit = () => {
-    navigate(`/editar/${user.user_id}`);
+    navigate(`/editar/${user.person_id}`);
   };
 
   return (
@@ -29,10 +28,10 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
         />
         <div className="flex flex-col gap-1 justify-center items-center">
           <h1 className="font-kumbh text-primaryAspy font-semibold text-base">
-            {user.full_name}
+            {user.first_name} {user.last_name}
           </h1>
           <h2 className="font-kumbh text-secondaryAspy text-sm">
-            {user.role.name}
+            {user.user_account.role.name}
           </h2>
         </div>
         <img
@@ -48,7 +47,7 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
             Sobre mí
           </h1>
           <p className="font-kumbh text-sm text-secondaryAspy">
-            Hola, soy {user.role.name} en Fundación ASPY :)
+            Hola, soy {user.user_account.role.name} en Fundación ASPY :)
           </p>
         </div>
         <div className="flex flex-row gap-16">

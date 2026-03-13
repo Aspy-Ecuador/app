@@ -77,6 +77,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // AGA
+        /*
         DB::table('aga')->insert([
             ['name' => 'Zona 1: Esmeraldas, Imbabura, Carchi, Sucumbíos'],
             ['name' => 'Zona 2: Pichincha (excepto Quito), Napo, Orellana'],
@@ -88,6 +89,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Zona 8: Guayaquil, Samborondón y Durán'],
             ['name' => 'Zona 9: Distrito Metropolitano de Quito'],
         ]);
+        */
 
         // Usuarios de ejemplo
         DB::table('user_account')->insert([
@@ -99,10 +101,10 @@ class DatabaseSeeder extends Seeder
 
         // Personas
         DB::table('person')->insert([
-            ['user_id' => 1, 'first_name' => 'Administrador', 'middle_name' => null, 'birthdate' => '1980-01-01', 'gender' => 1, 'occupation' => 3, 'marital_status' => 2, 'education' => 3, 'created_by' => 'system'],
-            ['user_id' => 2, 'first_name' => 'Juan', 'middle_name' => 'Carlos', 'birthdate' => '1975-05-10', 'gender' => 1, 'occupation' => 1, 'marital_status' => 2, 'education' => 3, 'created_by' => 'system'],
-            ['user_id' => 3, 'first_name' => 'María', 'middle_name' => null, 'birthdate' => '1990-12-20', 'gender' => 2, 'occupation' => 4, 'marital_status' => 1, 'education' => 2, 'created_by' => 'system'],
-            ['user_id' => 4, 'first_name' => 'Luisa', 'middle_name' => null, 'birthdate' => '1985-07-15', 'gender' => 2, 'occupation' => 2, 'marital_status' => 1, 'education' => 2, 'created_by' => 'system'],
+            ['user_id' => 1, 'first_name' => 'Administrador', 'last_name' => "Admin", 'birthdate' => '1980-01-01', 'gender' => 1, 'occupation' => 3, 'marital_status' => 2, 'education' => 3, 'created_by' => 'system'],
+            ['user_id' => 2, 'first_name' => 'Carlos', 'last_name' => 'Flores', 'birthdate' => '1975-05-10', 'gender' => 1, 'occupation' => 1, 'marital_status' => 2, 'education' => 3, 'created_by' => 'system'],
+            ['user_id' => 3, 'first_name' => 'Juan Pablo', 'last_name' => "Pluas", 'birthdate' => '1990-12-20', 'gender' => 2, 'occupation' => 4, 'marital_status' => 1, 'education' => 2, 'created_by' => 'system'],
+            ['user_id' => 4, 'first_name' => 'Melissa', 'last_name' => "Ayllon", 'birthdate' => '1985-07-15', 'gender' => 2, 'occupation' => 2, 'marital_status' => 1, 'education' => 2, 'created_by' => 'system'],
         ]);
 
         // Clientes, Staff y Profesionales
@@ -111,39 +113,126 @@ class DatabaseSeeder extends Seeder
         DB::table('client')->insert([['person_id' => 3, 'created_by' => 'system']]);
 
         // Identificaciones
-        DB::table('identification')->insert([['person_id' => 3, 'type' => 'Cedula', 'number' => '1712345678', 'created_by' => 'system']]);
+        DB::table('identification')->insert([
+            [
+                'person_id' => 1,
+                'type' => 'Cedula',
+                'number' => '1700000001',
+                'due_date' => '2030-12-31',
+                'created_by' => 'system'
+            ],
+            [
+                'person_id' => 2,
+                'type' => 'Cedula',
+                'number' => '1700000002',
+                'due_date' => '2030-12-31',
+                'created_by' => 'system'
+            ],
+            [
+                'person_id' => 3,
+                'type' => 'Cedula',
+                'number' => '1700000003',
+                'due_date' => '2030-12-31',
+                'created_by' => 'system'
+            ],
+            [
+                'person_id' => 4,
+                'type' => 'Cedula',
+                'number' => '1700000004',
+                'due_date' => '2030-12-31',
+                'created_by' => 'system'
+            ],
+        ]);
 
         // Direcciones
         DB::table('address')->insert([
-            ['person_id' => 3, 'type' => 'Domicilio', 'country' => 1, 'province' => 1, 'city' => 1, 'primary_address' => 'Av. Siempre Viva 742', 'aga' => 1, 'created_by' => 'system']
+            [
+                'person_id' => 1,
+                'type' => 'Domicilio',
+                'country' => 1,
+                'province' => 1,
+                'city' => 1,
+                'primary_address' => 'Av. Amazonas N34-120',
+                'created_by' => 'system'
+            ],
+            [
+                'person_id' => 2,
+                'type' => 'Domicilio',
+                'country' => 1,
+                'province' => 1,
+                'city' => 1,
+                'primary_address' => 'Av. Colón y 6 de Diciembre',
+                'created_by' => 'system'
+            ],
+            [
+                'person_id' => 3,
+                'type' => 'Domicilio',
+                'country' => 1,
+                'province' => 1,
+                'city' => 1,
+                'primary_address' => 'Av. Siempre Viva 742',
+                'created_by' => 'system'
+            ],
+            [
+                'person_id' => 4,
+                'type' => 'Domicilio',
+                'country' => 1,
+                'province' => 1,
+                'city' => 1,
+                'primary_address' => 'Av. 10 de Agosto y Patria',
+                'created_by' => 'system'
+            ],
         ]);
+
 
         // Teléfonos
         DB::table('phone')->insert([
-            ['person_id' => 3, 'type' => 'Personal', 'number' => '0998765432', 'relationship' => 'Cliente', 'created_by' => 'system'],
-            ['person_id' => 4, 'type' => 'Trabajo', 'number' => '0991234567', 'relationship' => 'Staff', 'created_by' => 'system'],
+            ['person_id' => 1, 'type' => 'Personal', 'number' => '0991111111', 'created_by' => 'system'],
+            ['person_id' => 2, 'type' => 'Trabajo', 'number' => '0992222222', 'created_by' => 'system'],
+            ['person_id' => 3, 'type' => 'Personal', 'number' => '0993333333', 'created_by' => 'system'],
+            ['person_id' => 4, 'type' => 'Trabajo', 'number' => '0994444444', 'created_by' => 'system'],
         ]);
 
         // Servicios y descuentos
-        DB::table('discount')->insert([['name' => 'Descuento Promo', 'discount' => 10, 'created_by' => 'system']]);
-        DB::table('service')->insert([['name' => 'Consulta General', 'price' => 50.00, 'created_by' => 'system']]);
+        DB::table('service')->insert([
+            ['name' => 'Consulta General', 'price' => 50.00, 'created_by' => 'system'],
+            ['name' => 'Consulta Especializada', 'price' => 80.00, 'created_by' => 'system'],
+            ['name' => 'Chequeo Preventivo', 'price' => 40.00, 'created_by' => 'system'],
+            ['name' => 'Control Cardiológico', 'price' => 100.00, 'created_by' => 'system'],
+        ]);
+
 
         // Vincular profesional con servicio
-        DB::table('professional_service')->insert([['service_id' => 1, 'person_id' => 2, 'created_by' => 'system']]);
+        DB::table('professional_service')->insert([
+            ['service_id' => 1, 'person_id' => 2, 'created_by' => 'system'],
+            ['service_id' => 2, 'person_id' => 2, 'created_by' => 'system'],
+            ['service_id' => 3, 'person_id' => 2, 'created_by' => 'system'],
+            ['service_id' => 4, 'person_id' => 2, 'created_by' => 'system'],
+        ]);
+
 
         // Agenda y horarios
-        DB::table('schedule')->insert([['date' => '2025-05-10', 'start_time' => '08:00:00', 'end_time' => '09:00:00', 'name' => 'Turno mañana', 'created_by' => 'system']]);
-        DB::table('worker_schedule')->insert([
-            ['schedule_id' => 1, 'person_id' => 2, 'is_available' => true, 'created_by' => 'system'], 
-            ['schedule_id' => 1, 'person_id' => 4, 'is_available' => true, 'created_by' => 'system']
+        DB::table('schedule')->insert([
+            ['date' => '2025-05-10', 'start_time' => '08:00:00', 'end_time' => '09:00:00', 'name' => 'Turno mañana', 'created_by' => 'system'],
+            ['date' => '2025-05-10', 'start_time' => '09:00:00', 'end_time' => '10:00:00', 'name' => 'Turno media mañana', 'created_by' => 'system'],
+            ['date' => '2025-05-10', 'start_time' => '14:00:00', 'end_time' => '15:00:00', 'name' => 'Turno tarde', 'created_by' => 'system'],
+            ['date' => '2025-05-11', 'start_time' => '08:00:00', 'end_time' => '09:00:00', 'name' => 'Turno mañana día 2', 'created_by' => 'system'],
         ]);
+
+        DB::table('worker_schedule')->insert([
+            ['schedule_id' => 1, 'person_id' => 2, 'is_available' => true, 'created_by' => 'system'],
+            ['schedule_id' => 2, 'person_id' => 2, 'is_available' => true, 'created_by' => 'system'],
+            ['schedule_id' => 3, 'person_id' => 2, 'is_available' => true, 'created_by' => 'system'],
+            ['schedule_id' => 4, 'person_id' => 2, 'is_available' => true, 'created_by' => 'system'],        
+        ]);
+
 
         // Método de pago
         DB::table('payment_data')->insert([['type' => 'Tarjeta Crédito', 'number' => 123456789, 'file' => 'file_path', 'created_by' => 'system']]);
 
         // Pago
         DB::table('payment')->insert([
-            ['person_id' => 3, 'service_id' => 1, 'discount_id' => 1, 'payment_data_id' => 1, 'service_price' => 50.00, 'discount_percentage' => 10, 'total_amount' => 45.00, 'status' => 2, 'created_by' => 'system']
+            ['person_id' => 3, 'service_id' => 1, 'payment_data_id' => 1, 'service_price' => 50.00, 'total_amount' => 45.00, 'status' => 2, 'created_by' => 'system']
         ]);
 
         // Recibo

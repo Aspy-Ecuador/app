@@ -1,20 +1,21 @@
 import { createStore } from "redux";
 import { UserLogin } from "@/types/UserLogin";
+import { LoginResponse } from "@/types/responses/LoginResponse";
 
 // Definir el estado inicial y el tipo de estado
 interface State {
-  user: UserLogin | null | string; // El usuario puede ser null si no hay un usuario autenticado
+  user: LoginResponse | null | string; // El usuario puede ser null si no hay un usuario autenticado
   theme: string | "light"; // Tema del UI (light/dark)
 }
 
 // Cargar el usuario desde localStorage
-const loadUserFromLocalStorage = (): UserLogin | null => {
+const loadUserFromLocalStorage = (): LoginResponse | null => {
   const user = localStorage.getItem("authenticatedUser");
   return user ? JSON.parse(user) : null;
 };
 
 // Guardar el usuario en localStorage
-const saveUserToLocalStorage = (user: UserLogin | null | string): void => {
+const saveUserToLocalStorage = (user: LoginResponse | null | string): void => {
   if (user) {
     localStorage.setItem("authenticatedUser", JSON.stringify(user));
   } else {
@@ -35,11 +36,11 @@ const initialState: State = {
 // Definir las acciones posibles
 interface Action {
   type: string;
-  payload: UserLogin | null | string; // Puede ser UserLogin o un string (tema)
+  payload: LoginResponse | null | string; // Puede ser LoginResponse o un string (tema)
 }
 
 // Acción para establecer el usuario
-const setUser = (user: UserLogin | null): Action => ({
+const setUser = (user: LoginResponse | null): Action => ({
   type: "SET_USER",
   payload: user,
 });
@@ -74,13 +75,13 @@ const rootReducer = (state = initialState, action: Action): State => {
 const store = createStore(rootReducer);
 
 // Función para obtener el usuario autenticado
-export const getAuthenticatedUser = (): UserLogin | null | string => {
+export const getAuthenticatedUser = (): LoginResponse | null | string => {
   const state = store.getState();
   return state.user; // Devuelve el usuario autenticado
 };
 
 // Función para establecer el usuario autenticado
-export const setAuthenticatedUser = (user: UserLogin | null): void => {
+export const setAuthenticatedUser = (user: LoginResponse | null): void => {
   store.dispatch(setUser(user)); // Despacha la acción para actualizar el usuario
 };
 
@@ -103,7 +104,11 @@ export const getAuthenticatedUserName = (): string => {
   ) {
     throw new Error("No authenticated user found");
   }
-  return userAuthenticated.full_name; // Devuelve el nombre del usuario autenticado
+  return (
+    userAuthenticated.person.first_name +
+    " " +
+    userAuthenticated.person.last_name
+  );
 };
 
 // Función para obtener el correo del usuario autenticado
@@ -121,7 +126,7 @@ export const getAuthenticatedUserIdentity = (): number => {
   if (!user || user === null || typeof user === "string") {
     throw new Error("No authenticated user found");
   }
-  return user.user_id; // Devuelve el email del usuario autenticado
+  return user.user_id; // Devuelve el ID del usuario autenticado
 };
 
 export const getAuthenticatedUserID = (): number => {
@@ -129,7 +134,7 @@ export const getAuthenticatedUserID = (): number => {
   if (!user || user === null || typeof user === "string") {
     throw new Error("No authenticated user found");
   }
-  return user.person_id; // Devuelve el email del usuario autenticado
+  return user.person.person_id; // Devuelve el email del usuario autenticado
 };
 
 // Función para obtener el tema actual

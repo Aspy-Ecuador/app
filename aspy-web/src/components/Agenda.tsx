@@ -1,6 +1,6 @@
 import { Scheduler } from "@aldabil/react-scheduler";
 import { es } from "date-fns/locale";
-import { Appointment } from "@/types/Appointment";
+import { AppointmentResponse } from "@/typesResponse/AppointmentResponse";
 import { translateStatus } from "@/utils/utils";
 
 /* Ver documentacion en https://github.com/aldabil21/react-scheduler  */
@@ -8,14 +8,18 @@ import { translateStatus } from "@/utils/utils";
 export default function Agenda({
   appointments,
 }: {
-  appointments: Appointment[];
+  appointments: AppointmentResponse[];
 }) {
   const events = appointments.map((appointment) => ({
-    event_id: `Servicio: ${appointment.id_appointment}`,
-    title: `Paciente: ${appointment.client.full_name} | ${appointment.id_appointment}| Profesional: ${appointment.proffesional.full_name}`,
+    event_id: `Servicio: ${appointment.appointment_id}`,
+    title: `Paciente: ${appointment.client.first_name} ${appointment.client.last_name} | Profesional: ${appointment.professional.first_name} ${appointment.professional.last_name}`,
     subtitle: `Servicio: ${appointment.service.name} | Estado: ${translateStatus(appointment.status.name)}`,
-    start: new Date(`${appointment.date}T${appointment.startTime}`),
-    end: new Date(`${appointment.date}T${appointment.endTime}`),
+    start: new Date(
+      `${appointment.schedule.date}T${appointment.schedule.start_time}`
+    ),
+    end: new Date(
+      `${appointment.schedule.date}T${appointment.schedule.end_time}`
+    ),
   }));
   return (
     <Scheduler
