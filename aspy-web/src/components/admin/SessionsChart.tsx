@@ -22,27 +22,9 @@ function AreaGradient({ color, id }: { color: string; id: string }) {
   );
 }
 
-function getDaysInMonth(month: number, year: number) {
-  const date = new Date(year, month, 0);
-  const monthName = date.toLocaleDateString("es-ES", { month: "short" });
-  const formattedMonthName =
-    monthName.charAt(0).toUpperCase() + monthName.slice(1);
-  const daysInMonth = date.getDate();
-  const days = [];
-  let i = 1;
-  while (days.length < daysInMonth) {
-    days.push(`${formattedMonthName} ${i}`);
-    i += 1;
-  }
-  return days;
-}
-
 export default function SessionsChart({ income }: SessionsChartProps) {
   const theme = useTheme();
-  const fechaActual = new Date();
 
-  const mesActual = fechaActual.getMonth() + 1;
-  const anioActual = fechaActual.getFullYear();
   const data = [
     "Ene",
     "Feb",

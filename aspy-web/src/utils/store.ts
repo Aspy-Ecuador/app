@@ -103,6 +103,7 @@ export const getAuthenticatedUserName = (): string => {
   ) {
     throw new Error("No authenticated user found");
   }
+  console.log(userAuthenticated);
   return userAuthenticated.full_name; // Devuelve el nombre del usuario autenticado
 };
 
