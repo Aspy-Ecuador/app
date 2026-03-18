@@ -22,4 +22,4 @@ class PaymentDataFactory extends Factory
             'modification_date' => null,
         ];
     }
-} 
+}

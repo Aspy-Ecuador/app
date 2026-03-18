@@ -35,6 +35,7 @@ class CityController extends Controller
             'state_id' => 'integer|exists:state,state_id',
         ]);
         $city->update($validated);
+
         return $city;
     }
 
@@ -42,6 +43,7 @@ class CityController extends Controller
     {
         $city = City::findOrFail($id);
         $city->delete();
+
         return response()->noContent();
     }
 }

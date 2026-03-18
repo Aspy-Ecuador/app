@@ -1,5 +1,7 @@
 <?php
 
+// FINAL
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,18 +12,26 @@ class Role extends Model
     use HasFactory;
 
     protected $table = 'role';
+
     protected $primaryKey = 'role_id';
-    public $timestamps = false;
+
     protected $fillable = [
         'name',
         'created_by',
         'modified_by',
-        'creation_date',
-        'modification_date',
     ];
 
-    public function users()
+    protected $casts = [
+        'creation_date' => 'datetime',
+        'modification_date' => 'datetime',
+    ];
+
+    const CREATED_AT = 'creation_date';
+
+    const UPDATED_AT = 'modification_date';
+
+    public function userAccounts()
     {
-        return $this->hasMany(UserAccount::class, 'role_id');
+        return $this->hasMany(UserAccount::class, 'role_id', 'role_id');
     }
 }

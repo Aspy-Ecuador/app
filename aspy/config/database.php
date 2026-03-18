@@ -112,7 +112,7 @@ return [
             // Al activar ATTR_PERSISTENT se reutiliza la conexión entre
             // peticiones, evitando el coste de establecerla cada vez.
             'options' => extension_loaded('pdo_pgsql') ? [
-                \PDO::ATTR_PERSISTENT => true,
+                PDO::ATTR_PERSISTENT => true,
             ] : [],
         ],
 

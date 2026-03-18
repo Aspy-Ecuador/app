@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
+use App\Models\Appointment;
+use App\Models\Role;
+use App\Models\UserAccount;
+use App\Models\UserAccountStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
-use App\Models\UserAccount;
-use App\Models\Role;
-use App\Models\UserAccountStatus;
-use App\Models\Appointment;
 
 uses(RefreshDatabase::class);
 
@@ -24,13 +24,13 @@ test('TC21 Subir reporte — ID Cita 1 válida => Se asocia correctamente (201)'
     $this->withoutExceptionHandling();
 
     // Auth
-    $role   = Role::factory()->create();
+    $role = Role::factory()->create();
     $status = UserAccountStatus::factory()->create();
     $user = UserAccount::create([
-        'role_id'       => $role->role_id,
-        'email'         => 'uploader'.uniqid().'@aspy.com',
+        'role_id' => $role->role_id,
+        'email' => 'uploader'.uniqid().'@aspy.com',
         'password_hash' => Hash::make('secret'),
-        'status'        => $status->status_id ?? 1,
+        'status' => $status->status_id ?? 1,
     ]);
     Sanctum::actingAs($user);
 
@@ -44,10 +44,10 @@ test('TC21 Subir reporte — ID Cita 1 válida => Se asocia correctamente (201)'
     // POST multipart
     $res = $this->postJson(REPORT_ROUTE, [
         'appointment_id' => $appointment->appointment_id,
-        'sign'       => 'Reporte TC21',
+        'sign' => 'Reporte TC21',
         // Nombre de campo del archivo (común: "file" o "pdf").
         // Si tu controlador usa otro nombre (p.ej. "sign"), cámbialo aquí:
-        'comments'           => strval($file),
+        'comments' => strval($file),
     ]);
 
     if ($res->status() !== 201) {
@@ -61,13 +61,13 @@ test('TC21 Subir reporte — ID Cita 1 válida => Se asocia correctamente (201)'
 
 test('TC22 Subir reporte — ID Cita 999 inválida => (comportamiento actual) 500', function () {
     // No usamos withoutExceptionHandling para que el framework genere la respuesta
-    $role   = Role::factory()->create();
+    $role = Role::factory()->create();
     $status = UserAccountStatus::factory()->create();
     $user = UserAccount::create([
-        'role_id'       => $role->role_id,
-        'email'         => 'uploader'.uniqid().'@aspy.com',
+        'role_id' => $role->role_id,
+        'email' => 'uploader'.uniqid().'@aspy.com',
         'password_hash' => Hash::make('secret'),
-        'status'        => $status->status_id ?? 1,
+        'status' => $status->status_id ?? 1,
     ]);
     Sanctum::actingAs($user);
 
@@ -77,8 +77,8 @@ test('TC22 Subir reporte — ID Cita 999 inválida => (comportamiento actual) 50
 
     $res = $this->postJson(REPORT_ROUTE, [
         'appointment_id' => 999,             // cita inexistente
-        'sign'           => 'Reporte TC22',
-        'comments'       => strval($file),
+        'sign' => 'Reporte TC22',
+        'comments' => strval($file),
     ]);
 
     if ($res->status() !== 500) {
@@ -94,13 +94,13 @@ test('TC23 Subir reporte — Archivo "reporte.pdf" válido => Archivo subido cor
     $this->withoutExceptionHandling();
 
     // Auth
-    $role   = Role::factory()->create();
+    $role = Role::factory()->create();
     $status = UserAccountStatus::factory()->create();
     $user = UserAccount::create([
-        'role_id'       => $role->role_id,
-        'email'         => 'uploader'.uniqid().'@aspy.com',
+        'role_id' => $role->role_id,
+        'email' => 'uploader'.uniqid().'@aspy.com',
         'password_hash' => Hash::make('secret'),
-        'status'        => $status->status_id ?? 1,
+        'status' => $status->status_id ?? 1,
     ]);
     Sanctum::actingAs($user);
 
@@ -114,8 +114,8 @@ test('TC23 Subir reporte — Archivo "reporte.pdf" válido => Archivo subido cor
     // POST multipart — usa las keys que ya te funcionaron en TC21
     $res = $this->postJson(REPORT_ROUTE, [
         'appointment_id' => $appointment->appointment_id,
-        'sign'           => 'Reporte TC23',
-        'comments'       => strval($file),
+        'sign' => 'Reporte TC23',
+        'comments' => strval($file),
     ]);
 
     if ($res->status() !== 201) {
@@ -131,13 +131,13 @@ test('TC24 Subir reporte — Archivo inválido ".txt" => Aceptado (201) por comp
     $this->withoutExceptionHandling();
 
     // Auth
-    $role   = Role::factory()->create();
+    $role = Role::factory()->create();
     $status = UserAccountStatus::factory()->create();
     $user = UserAccount::create([
-        'role_id'       => $role->role_id,
-        'email'         => 'uploader'.uniqid().'@aspy.com',
+        'role_id' => $role->role_id,
+        'email' => 'uploader'.uniqid().'@aspy.com',
         'password_hash' => Hash::make('secret'),
-        'status'        => $status->status_id ?? 1,
+        'status' => $status->status_id ?? 1,
     ]);
     Sanctum::actingAs($user);
 
@@ -151,8 +151,8 @@ test('TC24 Subir reporte — Archivo inválido ".txt" => Aceptado (201) por comp
     // POST reutilizando las mismas keys que ya te funcionan (TC21/TC23)
     $res = $this->postJson(REPORT_ROUTE, [
         'appointment_id' => $appointment->appointment_id,
-        'sign'           => 'Reporte TC24',
-        'comments'       => strval($file), // mimetizamos el patrón actual
+        'sign' => 'Reporte TC24',
+        'comments' => strval($file), // mimetizamos el patrón actual
     ]);
 
     if ($res->status() !== 201) {

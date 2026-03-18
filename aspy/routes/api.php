@@ -1,42 +1,40 @@
 <?php
-use Illuminate\Support\Facades\Route;
+
+use App\Http\Controllers\AddressController;
+use App\Http\Controllers\AgaController;
+use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\AppointmentReportController;
+use App\Http\Controllers\AppointmentStatusController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CityController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\CountryController;
+use App\Http\Controllers\DiscountController;
+use App\Http\Controllers\EducationController;
+use App\Http\Controllers\GenderController;
+use App\Http\Controllers\IdentificationController;
+use App\Http\Controllers\MaritalStatusController;
+use App\Http\Controllers\MedicalProfileController;
+use App\Http\Controllers\OccupationController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PaymentDataController;
+use App\Http\Controllers\PaymentStatusController;
+use App\Http\Controllers\PersonController;
+use App\Http\Controllers\PhoneController;
+use App\Http\Controllers\ProfessionalController;
+use App\Http\Controllers\ProfessionalServiceController;
+use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\StaffController;
+use App\Http\Controllers\StateController;
+use App\Http\Controllers\UserAccountController;
+use App\Http\Controllers\UserAccountStatusController;
+use App\Http\Controllers\WorkerScheduleController;
+use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\{
-    RoleController,
-    UserAccountController,
-    PersonController,
-    ClientController,
-    StaffController,
-    ProfessionalController,
-    IdentificationController,
-    AddressController,
-    PhoneController,
-    MedicalProfileController,
-    ScheduleController,
-    WorkerScheduleController,
-    DiscountController,
-    ServiceController,
-    ProfessionalServiceController,
-    PaymentDataController,
-    PaymentController,
-    ReceiptController,
-    AppointmentController,
-    AppointmentReportController,
-    GenderController,
-    OccupationController,
-    MaritalStatusController,
-    EducationController,
-    CountryController,
-    StateController,
-    CityController,
-    AgaController,
-    UserAccountStatusController,
-    PaymentStatusController,
-    AppointmentStatusController,
-};
-
-Route::get('/login', function () { 
+Route::get('/login', function () {
     return response()->json(['message' => 'Unauthorized, Redirected to Login']);
 })->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -64,7 +62,6 @@ Route::middleware('auth:sanctum')->prefix('user-account')->group(function () {
     Route::put('/{id}', [UserAccountController::class, 'update']);
     Route::delete('/{id}', [UserAccountController::class, 'destroy']);
 });
-
 
 // Person
 Route::middleware('auth:sanctum')->prefix('person')->group(function () {
@@ -102,15 +99,6 @@ Route::middleware('auth:sanctum')->prefix('professional')->group(function () {
     Route::delete('/{id}', [ProfessionalController::class, 'destroy']);
 });
 
-// Identification
-Route::middleware('auth:sanctum')->prefix('identification')->group(function () {
-    Route::get('/', [IdentificationController::class, 'index']);
-    Route::get('/{id}', [IdentificationController::class, 'show']);
-    Route::post('/', [IdentificationController::class, 'store']);
-    Route::put('/{id}', [IdentificationController::class, 'update']);
-    Route::delete('/{id}', [IdentificationController::class, 'destroy']);
-});
-
 // Address
 Route::middleware('auth:sanctum')->prefix('address')->group(function () {
     Route::get('/', [AddressController::class, 'index']);
@@ -120,23 +108,7 @@ Route::middleware('auth:sanctum')->prefix('address')->group(function () {
     Route::delete('/{id}', [AddressController::class, 'destroy']);
 });
 
-// Phone
-Route::middleware('auth:sanctum')->prefix('phone')->group(function () {
-    Route::get('/', [PhoneController::class, 'index']);
-    Route::get('/{id}', [PhoneController::class, 'show']);
-    Route::post('/', [PhoneController::class, 'store']);
-    Route::put('/{id}', [PhoneController::class, 'update']);
-    Route::delete('/{id}', [PhoneController::class, 'destroy']);
-});
 
-// MedicalProfile
-Route::middleware('auth:sanctum')->prefix('medical-profile')->group(function () {
-    Route::get('/', [MedicalProfileController::class, 'index']);
-    Route::get('/{id}', [MedicalProfileController::class, 'show']);
-    Route::post('/', [MedicalProfileController::class, 'store']);
-    Route::put('/{id}', [MedicalProfileController::class, 'update']);
-    Route::delete('/{id}', [MedicalProfileController::class, 'destroy']);
-});
 
 // Schedule
 Route::middleware('auth:sanctum')->prefix('schedule')->group(function () {
@@ -156,14 +128,6 @@ Route::middleware('auth:sanctum')->prefix('worker-schedule')->group(function () 
     Route::delete('/{id}', [WorkerScheduleController::class, 'destroy']);
 });
 
-// Discount
-Route::middleware('auth:sanctum')->prefix('discount')->group(function () {
-    Route::get('/', [DiscountController::class, 'index']);
-    Route::get('/{id}', [DiscountController::class, 'show']);
-    Route::post('/', [DiscountController::class, 'store']);
-    Route::put('/{id}', [DiscountController::class, 'update']);
-    Route::delete('/{id}', [DiscountController::class, 'destroy']);
-});
 
 // Service
 Route::middleware('auth:sanctum')->prefix('service')->group(function () {
@@ -228,41 +192,6 @@ Route::middleware('auth:sanctum')->prefix('appointment-report')->group(function 
     Route::delete('/{id}', [AppointmentReportController::class, 'destroy']);
 });
 
-// Gender
-Route::middleware('auth:sanctum')->prefix('gender')->group(function () {
-    Route::get('/', [GenderController::class, 'index']);
-    Route::get('/{id}', [GenderController::class, 'show']);
-    Route::post('/', [GenderController::class, 'store']);
-    Route::put('/{id}', [GenderController::class, 'update']);
-    Route::delete('/{id}', [GenderController::class, 'destroy']);
-});
-
-// Occupation
-Route::middleware('auth:sanctum')->prefix('occupation')->group(function () {
-    Route::get('/', [OccupationController::class, 'index']);
-    Route::get('/{id}', [OccupationController::class, 'show']);
-    Route::post('/', [OccupationController::class, 'store']);
-    Route::put('/{id}', [OccupationController::class, 'update']);
-    Route::delete('/{id}', [OccupationController::class, 'destroy']);
-});
-
-// MaritalStatus
-Route::middleware('auth:sanctum')->prefix('marital-status')->group(function () {
-    Route::get('/', [MaritalStatusController::class, 'index']);
-    Route::get('/{id}', [MaritalStatusController::class, 'show']);
-    Route::post('/', [MaritalStatusController::class, 'store']);
-    Route::put('/{id}', [MaritalStatusController::class, 'update']);
-    Route::delete('/{id}', [MaritalStatusController::class, 'destroy']);
-});
-
-// Education
-Route::middleware('auth:sanctum')->prefix('education')->group(function () {
-    Route::get('/', [EducationController::class, 'index']);
-    Route::get('/{id}', [EducationController::class, 'show']);
-    Route::post('/', [EducationController::class, 'store']);
-    Route::put('/{id}', [EducationController::class, 'update']);
-    Route::delete('/{id}', [EducationController::class, 'destroy']);
-});
 
 // Country
 Route::middleware('auth:sanctum')->prefix('country')->group(function () {
@@ -289,40 +218,4 @@ Route::middleware('auth:sanctum')->prefix('city')->group(function () {
     Route::post('/', [CityController::class, 'store']);
     Route::put('/{id}', [CityController::class, 'update']);
     Route::delete('/{id}', [CityController::class, 'destroy']);
-});
-
-// Aga
-Route::middleware('auth:sanctum')->prefix('aga')->group(function () {
-    Route::get('/', [AgaController::class, 'index']);
-    Route::get('/{id}', [AgaController::class, 'show']);
-    Route::post('/', [AgaController::class, 'store']);
-    Route::put('/{id}', [AgaController::class, 'update']);
-    Route::delete('/{id}', [AgaController::class, 'destroy']);
-});
-
-// UserAccountStatus
-Route::middleware('auth:sanctum')->prefix('user-account-status')->group(function () {
-    Route::get('/', [UserAccountStatusController::class, 'index']);
-    Route::get('/{id}', [UserAccountStatusController::class, 'show']);
-    Route::post('/', [UserAccountStatusController::class, 'store']);
-    Route::put('/{id}', [UserAccountStatusController::class, 'update']);
-    Route::delete('/{id}', [UserAccountStatusController::class, 'destroy']);
-});
-
-// PaymentStatus
-Route::middleware('auth:sanctum')->prefix('payment-status')->group(function () {
-    Route::get('/', [PaymentStatusController::class, 'index']);
-    Route::get('/{id}', [PaymentStatusController::class, 'show']);
-    Route::post('/', [PaymentStatusController::class, 'store']);
-    Route::put('/{id}', [PaymentStatusController::class, 'update']);
-    Route::delete('/{id}', [PaymentStatusController::class, 'destroy']);
-});
-
-// AppointmentStatus
-Route::middleware('auth:sanctum')->prefix('appointment-status')->group(function () {
-    Route::get('/', [AppointmentStatusController::class, 'index']);
-    Route::get('/{id}', [AppointmentStatusController::class, 'show']);
-    Route::post('/', [AppointmentStatusController::class, 'store']);
-    Route::put('/{id}', [AppointmentStatusController::class, 'update']);
-    Route::delete('/{id}', [AppointmentStatusController::class, 'destroy']);
 });

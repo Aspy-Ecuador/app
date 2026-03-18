@@ -16,4 +16,4 @@ class AppointmentStatusFactory extends Factory
             'name' => $this->faker->randomElement(['confirmed', 'pending', 'cancelled', 'completed']),
         ];
     }
-} 
+}

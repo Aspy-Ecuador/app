@@ -20,4 +20,4 @@ class RoleFactory extends Factory
             'modification_date' => null,
         ];
     }
-} 
+}

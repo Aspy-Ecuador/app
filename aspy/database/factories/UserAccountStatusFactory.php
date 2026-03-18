@@ -16,4 +16,4 @@ class UserAccountStatusFactory extends Factory
             'name' => $this->faker->randomElement(['active', 'inactive', 'pending']),
         ];
     }
-} 
+}

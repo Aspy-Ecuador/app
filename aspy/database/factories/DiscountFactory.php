@@ -21,4 +21,4 @@ class DiscountFactory extends Factory
             'modification_date' => null,
         ];
     }
-} 
+}

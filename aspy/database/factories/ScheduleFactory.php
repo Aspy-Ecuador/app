@@ -23,4 +23,4 @@ class ScheduleFactory extends Factory
             'modification_date' => null,
         ];
     }
-} 
+}

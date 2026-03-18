@@ -10,7 +10,7 @@ class RolService
         return [
             ['id' => 1, 'nombre' => 'Administrador'],
             ['id' => 2, 'nombre' => 'Usuario'],
-            ['id' => 3, 'nombre' => 'Invitado']
+            ['id' => 3, 'nombre' => 'Invitado'],
         ];
     }
 
@@ -25,7 +25,7 @@ class RolService
         // Simulación de creación de un rol
         return [
             'message' => 'Rol creado exitosamente',
-            'data' => $request
+            'data' => $request,
         ];
     }
 
@@ -35,7 +35,7 @@ class RolService
         return [
             'message' => 'Rol actualizado exitosamente',
             'data' => $request,
-            'id' => $id
+            'id' => $id,
         ];
     }
 }

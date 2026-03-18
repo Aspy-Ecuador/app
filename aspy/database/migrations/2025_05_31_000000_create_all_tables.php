@@ -55,11 +55,6 @@ class CreateAllTables extends Migration
             $table->foreignId('state_id')->constrained('state', 'state_id');
         });
 
-        Schema::create('aga', function (Blueprint $table) {
-            $table->id('aga_id');
-            $table->string('name');
-        });
-
         Schema::create('user_account_status', function (Blueprint $table) {
             $table->id('status_id');
             $table->string('name');
@@ -91,13 +86,13 @@ class CreateAllTables extends Migration
         Schema::create('person', function (Blueprint $table) {
             $table->id('person_id');
             $table->foreignId('user_id')->unique()->constrained('user_account', 'user_id');
-            $table->string('first_name');
-            $table->string('last_name')->nullable();
-            $table->date('birthdate');
             $table->foreignId('gender_id')->constrained('gender', 'gender_id');
             $table->foreignId('occupation_id')->constrained('occupation', 'occupation_id');
             $table->foreignId('marital_status_id')->constrained('marital_status', 'marital_status_id');
             $table->foreignId('education_id')->constrained('education', 'education_id');
+            $table->string('first_name');
+            $table->string('last_name')->nullable();
+            $table->date('birthdate');
             $table->string('created_by')->default('system');
             $table->string('modified_by')->nullable();
             $table->timestamp('creation_date')->useCurrent();

@@ -3,10 +3,10 @@
 namespace Database\Factories;
 
 use App\Models\Appointment;
+use App\Models\AppointmentStatus;
 use App\Models\Payment;
 use App\Models\Person;
 use App\Models\WorkerSchedule;
-use App\Models\AppointmentStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AppointmentFactory extends Factory
@@ -28,4 +28,4 @@ class AppointmentFactory extends Factory
             'modification_date' => null,
         ];
     }
-} 
+}

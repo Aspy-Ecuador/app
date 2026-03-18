@@ -2,11 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Role;
 use App\Models\UserAccount;
+use App\Models\UserAccountStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
-use App\Models\Role;
-use App\Models\UserAccountStatus;
+
 class UserAccountFactory extends Factory
 {
     protected $model = UserAccount::class;
@@ -26,4 +27,4 @@ class UserAccountFactory extends Factory
             'modification_date' => null,
         ];
     }
-} 
+}

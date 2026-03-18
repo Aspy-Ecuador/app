@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Models\Payment;
 use App\Models\Client;
-use App\Models\Service;
 use App\Models\Discount;
+use App\Models\Payment;
 use App\Models\PaymentData;
 use App\Models\PaymentStatus;
+use App\Models\Service;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class PaymentFactory extends Factory
@@ -32,4 +32,4 @@ class PaymentFactory extends Factory
             'modification_date' => null,
         ];
     }
-} 
+}

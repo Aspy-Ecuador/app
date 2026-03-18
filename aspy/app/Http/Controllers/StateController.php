@@ -35,6 +35,7 @@ class StateController extends Controller
             'country_id' => 'integer|exists:country,country_id',
         ]);
         $state->update($validated);
+
         return $state;
     }
 
@@ -42,6 +43,7 @@ class StateController extends Controller
     {
         $state = State::findOrFail($id);
         $state->delete();
+
         return response()->noContent();
     }
 }

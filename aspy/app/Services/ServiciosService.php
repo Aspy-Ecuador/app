@@ -10,7 +10,7 @@ class ServiciosService
         return [
             ['id' => 1, 'nombre' => 'Servicio 1'],
             ['id' => 2, 'nombre' => 'Servicio 2'],
-            ['id' => 3, 'nombre' => 'Servicio 3']
+            ['id' => 3, 'nombre' => 'Servicio 3'],
         ];
     }
 
@@ -25,7 +25,7 @@ class ServiciosService
         // Simulación de creación de un servicio
         return [
             'message' => 'Servicio creado exitosamente',
-            'data' => $request
+            'data' => $request,
         ];
     }
 
@@ -34,7 +34,7 @@ class ServiciosService
         // Simulación de actualización de un servicio
         return [
             'message' => 'Servicio actualizado exitosamente',
-            'data' => $request
+            'data' => $request,
         ];
     }
 }

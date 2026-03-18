@@ -16,4 +16,4 @@ class PaymentStatusFactory extends Factory
             'name' => $this->faker->randomElement(['Pending', 'Paid', 'Failed']),
         ];
     }
-} 
+}

@@ -1,5 +1,7 @@
 <?php
 
+// FINAL
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,55 +12,89 @@ class Person extends Model
     use HasFactory;
 
     protected $table = 'person';
+
     protected $primaryKey = 'person_id';
-    public $timestamps = false;
+
     protected $fillable = [
         'user_id',
+        'gender_id',
+        'occupation_id',
+        'marital_status_id',
+        'education_id',
         'first_name',
-        'middle_name',
+        'last_name',
         'birthdate',
-        'gender',
-        'occupation',
-        'marital_status',
-        'education',
         'created_by',
         'modified_by',
-        'creation_date',
-        'modification_date',
     ];
 
-    public function user()
+    protected $casts = [
+        'birthdate' => 'date',
+        'creation_date' => 'datetime',
+        'modification_date' => 'datetime',
+    ];
+
+    const CREATED_AT = 'creation_date';
+
+    const UPDATED_AT = 'modification_date';
+
+    public function userAccount()
     {
-        return $this->belongsTo(UserAccount::class, 'user_id');
+        return $this->belongsTo(UserAccount::class, 'user_id', 'user_account_id');
     }
 
-    public function client()
+    public function gender()
     {
-        return $this->hasOne(Client::class, 'person_id');
+        return $this->belongsTo(Gender::class, 'gender_id', 'gender_id');
     }
 
-    public function staff()
+    public function occupation()
     {
-        return $this->hasOne(Staff::class, 'person_id');
+        return $this->belongsTo(Occupation::class, 'occupation_id', 'occupation_id');
     }
 
-    public function professional()
+    public function maritalStatus()
     {
-        return $this->hasOne(Professional::class, 'person_id');
+        return $this->belongsTo(MaritalStatus::class, 'marital_status_id', 'marital_status_id');
     }
 
-    public function identifications()
+    public function education()
     {
-        return $this->hasMany(Identification::class, 'person_id');
-    }
-
-    public function addresses()
-    {
-        return $this->hasMany(Address::class, 'person_id');
+        return $this->belongsTo(Education::class, 'education_id', 'education_id');
     }
 
     public function phones()
     {
-        return $this->hasMany(Phone::class, 'person_id');
+        return $this->hasMany(Phone::class, 'person_id', 'person_id');
+    }
+
+    public function addresses()
+    {
+        return $this->hasMany(Address::class, 'person_id', 'person_id');
+    }
+
+    public function identifications()
+    {
+        return $this->hasMany(Identification::class, 'person_id', 'person_id');
+    }
+
+    public function client()
+    {
+        return $this->hasOne(Client::class, 'person_id', 'person_id');
+    }
+
+    public function professional()
+    {
+        return $this->hasOne(Professional::class, 'person_id', 'person_id');
+    }
+
+    public function staff()
+    {
+        return $this->hasOne(Staff::class, 'person_id', 'person_id');
+    }
+
+    public function getFullNameAttribute(): string
+    {
+        return "{$this->first_name} {$this->last_name}";
     }
 }

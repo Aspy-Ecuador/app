@@ -1,24 +1,28 @@
 <?php
 
+// FINAL
+
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class AppointmentStatus extends Model
 {
     use HasFactory;
+
     protected $table = 'appointment_status';
-    protected $primaryKey = 'status_id';
-    
+
+    protected $primaryKey = 'appointment_status_id';
+
+    public $timestamps = false;
+
     protected $fillable = [
         'name',
     ];
 
-    public $timestamps = false;
-
     public function appointments()
     {
-        return $this->hasMany(Appointment::class, 'status');
+        return $this->hasMany(Appointment::class, 'appointment_status_id', 'appointment_status_id');
     }
 }

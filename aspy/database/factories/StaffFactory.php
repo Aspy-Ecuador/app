@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Staff;
 use App\Models\Person;
+use App\Models\Staff;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class StaffFactory extends Factory
@@ -20,4 +20,4 @@ class StaffFactory extends Factory
             'modification_date' => null,
         ];
     }
-} 
+}

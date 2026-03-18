@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\WorkerSchedule;
 use App\Models\Schedule;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
+use App\Models\WorkerSchedule;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class WorkerScheduleController extends Controller
 {
@@ -42,7 +42,7 @@ class WorkerScheduleController extends Controller
                 ->where('end_time', $validated['end_time'])
                 ->first();
 
-            if (!$schedule) {
+            if (! $schedule) {
                 // Crear Schedule si no existe
                 $scheduleData = [
                     'date' => $validated['date'],
@@ -73,22 +73,23 @@ class WorkerScheduleController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Error al crear worker schedule: ' . $e->getMessage()], 500);
+
+            return response()->json(['error' => 'Error al crear worker schedule: '.$e->getMessage()], 500);
         }
     }
-
 
     public function update(Request $request, $id)
     {
         $workerSchedule = WorkerSchedule::findOrFail($id);
         $validated = $request->validate([
-            'is_available' => 'boolean'
+            'is_available' => 'boolean',
         ]);
-        
+
         $validated['modification_date'] = Carbon::now();
         $validated['modified_by'] = 'system';
 
         $workerSchedule->update($validated);
+
         return $workerSchedule;
     }
 
@@ -96,6 +97,7 @@ class WorkerScheduleController extends Controller
     {
         $workerSchedule = WorkerSchedule::findOrFail($id);
         $workerSchedule->delete();
+
         return response()->noContent();
     }
 }

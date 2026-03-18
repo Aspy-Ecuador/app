@@ -35,6 +35,7 @@ class CountryController extends Controller
             'phone_code' => 'string',
         ]);
         $country->update($validated);
+
         return $country;
     }
 
@@ -42,6 +43,7 @@ class CountryController extends Controller
     {
         $country = Country::findOrFail($id);
         $country->delete();
+
         return response()->noContent();
     }
 }

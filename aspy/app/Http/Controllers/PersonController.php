@@ -3,62 +3,117 @@
 namespace App\Http\Controllers;
 
 use App\Models\Person;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class PersonController extends Controller
 {
     public function index()
     {
-        return Person::all();
+        $persons = Person::with([
+            'gender',
+            'occupation',
+            'maritalStatus',
+            'education',
+            'userAccount',
+            'phones',
+            'addresses',
+            'identifications',
+        ])->get();
+ 
+        return response()->json($persons);
     }
 
-    public function show($id)
+    public function show(int $id)
     {
-        return Person::findOrFail($id);
+        $person = Person::with([
+            'gender',
+            'occupation',
+            'maritalStatus',
+            'education',
+            'userAccount',
+            'phones',
+            'addresses',
+            'identifications',
+        ])->find($id);
+ 
+        if (!$person) {
+            return response()->json(['message' => 'Person not found'], 404);
+        }
+ 
+        return response()->json($person);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => 'required|integer|unique:people,user_id',
-            'first_name' => 'required|string',
-            'last_name' => 'nullable|string',
-            'birthdate' => 'required|date|before_or_equal:today',
-            'gender' => 'required|integer',
-            'occupation' => 'required|integer',
-            'marital_status' => 'required|integer',
-            'education' => 'required|integer',
-            
+            'user_id'           => 'nullable|integer|exists:user_account,user_account_id',
+            'gender_id'         => 'nullable|integer|exists:gender,gender_id',
+            'occupation_id'     => 'nullable|integer|exists:occupation,occupation_id',
+            'marital_status_id' => 'nullable|integer|exists:marital_status,marital_status_id',
+            'education_id'      => 'nullable|integer|exists:education,education_id',
+            'first_name'        => 'required|string|max:100',
+            'last_name'         => 'required|string|max:100',
+            'birthdate'         => 'nullable|date',
+            'created_by'        => 'nullable|integer',
         ]);
+ 
+        $validated['created_by'] = 1;
 
-        return Person::create($validated);
+        $person = Person::create($validated);
+ 
+        return response()->json($person->load([
+            'gender',
+            'occupation',
+            'maritalStatus',
+            'education',
+            'userAccount',
+        ]), 201);
     }
 
     public function update(Request $request, $id)
     {
-        $person = Person::findOrFail($id);
+        $person = Person::find($id);
+ 
+        if (!$person) {
+            return response()->json(['message' => 'Person not found'], 404);
+        }
+ 
         $validated = $request->validate([
-            'first_name' => 'string',
-            'last_name' => 'nullable|string',
-            'birthdate' => 'date|before_or_equal:today',
-            'gender' => 'integer',
-            'occupation' => 'integer',
-            'marital_status' => 'integer',
-            'education' => 'integer'
+            'user_id'           => 'nullable|integer|exists:user_account,user_account_id',
+            'gender_id'         => 'nullable|integer|exists:gender,gender_id',
+            'occupation_id'     => 'nullable|integer|exists:occupation,occupation_id',
+            'marital_status_id' => 'nullable|integer|exists:marital_status,marital_status_id',
+            'education_id'      => 'nullable|integer|exists:education,education_id',
+            'first_name'        => 'sometimes|required|string|max:100',
+            'last_name'         => 'sometimes|required|string|max:100',
+            'birthdate'         => 'nullable|date',
+            'modified_by'       => 'nullable|integer',
         ]);
-        
-        $validated['modification_date'] = Carbon::now();
-        $validated['modified_by'] = 'system';
+ 
+        $validated['modified_by'] = 1;
 
         $person->update($validated);
-        return $person;
+ 
+        return response()->json($person->load([
+            'gender',
+            'occupation',
+            'maritalStatus',
+            'education',
+            'userAccount',
+        ]));
     }
 
     public function destroy($id)
     {
-        $person = Person::findOrFail($id);
+        $person = Person::find($id);
+ 
+        if (!$person) {
+            return response()->json(['message' => 'Person not found'], 404);
+        }
+ 
         $person->delete();
-        return response()->noContent();
+ 
+        return response()->json(['message' => 'Person deleted successfully']);
     }
 }

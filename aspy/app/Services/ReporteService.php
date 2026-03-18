@@ -9,13 +9,13 @@ class ReporteService
         // Simulación de datos de un reporte
         $data = [
             'id' => $id,
-            'nombre' => 'Reporte ' . $id,
+            'nombre' => 'Reporte '.$id,
             'fecha' => '2023-10-01',
             'hora' => '10:00 AM',
             'paciente' => 'Juan Perez',
-            'doctor' => 'Dr. Smith'
+            'doctor' => 'Dr. Smith',
         ];
-        
+
         return $data;
     }
 
@@ -24,7 +24,7 @@ class ReporteService
         // Simulación de creación de un reporte
         return [
             'message' => 'Reporte creado exitosamente',
-            'data' => $request
+            'data' => $request,
         ];
     }
 
@@ -38,7 +38,7 @@ class ReporteService
                 'fecha' => '2023-10-01',
                 'hora' => '10:00 AM',
                 'paciente' => 'Juan Perez',
-                'doctor' => 'Dr. Smith'
+                'doctor' => 'Dr. Smith',
             ],
             [
                 'id' => 2,
@@ -46,8 +46,8 @@ class ReporteService
                 'fecha' => '2023-10-02',
                 'hora' => '11:00 AM',
                 'paciente' => 'Juan Perez',
-                'doctor' => 'Dr. Smith'
-            ]
+                'doctor' => 'Dr. Smith',
+            ],
         ];
     }
 
@@ -61,7 +61,7 @@ class ReporteService
                 'fecha' => '2023-10-01',
                 'hora' => '10:00 AM',
                 'paciente' => 'Juan Perez',
-                'doctor' => 'Dr. Smith'
+                'doctor' => 'Dr. Smith',
             ],
             [
                 'id' => 2,
@@ -69,8 +69,8 @@ class ReporteService
                 'fecha' => '2023-10-02',
                 'hora' => '11:00 AM',
                 'paciente' => 'Juan Perez',
-                'doctor' => 'Dr. Smith'
-            ]
+                'doctor' => 'Dr. Smith',
+            ],
         ];
     }
 
@@ -84,8 +84,8 @@ class ReporteService
                 'fecha' => '2023-10-01',
                 'hora' => '10:00 AM',
                 'paciente' => 'Juan Perez',
-                'doctor' => 'Dr. Smith'
-            ]
+                'doctor' => 'Dr. Smith',
+            ],
         ];
     }
 }

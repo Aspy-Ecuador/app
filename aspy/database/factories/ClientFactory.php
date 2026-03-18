@@ -20,4 +20,4 @@ class ClientFactory extends Factory
             'modification_date' => null,
         ];
     }
-} 
+}

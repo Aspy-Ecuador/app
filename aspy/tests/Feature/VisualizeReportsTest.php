@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
+use App\Models\Appointment;
+use App\Models\AppointmentReport;
+use App\Models\Role;
+use App\Models\UserAccount;
+use App\Models\UserAccountStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Sanctum\Sanctum;
-use Illuminate\Support\Facades\Hash;
-use App\Models\UserAccount;
-use App\Models\Role;
-use App\Models\UserAccountStatus;
-use App\Models\AppointmentReport;
-use App\Models\Appointment;
 
 uses(RefreshDatabase::class);
 
@@ -20,15 +20,15 @@ uses(RefreshDatabase::class);
  */
 test('TC17 Ver reportes — ID 1 válido => Reporte cargado correctamente (200)', function () {
     // Usuario autenticado con Sanctum
-    $role   = Role::factory()->create();
+    $role = Role::factory()->create();
     $status = UserAccountStatus::factory()->create();
     $appointment = Appointment::factory()->create();
 
     $user = UserAccount::create([
-        'role_id'       => $role->role_id,
-        'email'         => 'viewer'.uniqid().'@aspy.com',
+        'role_id' => $role->role_id,
+        'email' => 'viewer'.uniqid().'@aspy.com',
         'password_hash' => Hash::make('secret'),
-        'status'        => $status->status_id ?? 1,
+        'status' => $status->status_id ?? 1,
     ]);
 
     Sanctum::actingAs($user);
@@ -39,10 +39,10 @@ test('TC17 Ver reportes — ID 1 válido => Reporte cargado correctamente (200)'
     // Sembrar un reporte con appointment_id arbitrario
     $report = AppointmentReport::create([
         'appointment_id' => $appointment->appointment_id,
-        'comments'       => 'Reporte de prueba',
-        'sign'           => "firma",
-        'created_by'     => $user->user_id,
-        'modified_by'    => null,
+        'comments' => 'Reporte de prueba',
+        'sign' => 'firma',
+        'created_by' => $user->user_id,
+        'modified_by' => null,
     ]);
 
     Schema::enableForeignKeyConstraints();
@@ -61,14 +61,14 @@ test('TC17 Ver reportes — ID 1 válido => Reporte cargado correctamente (200)'
 
 test('TC18 Ver reportes — ID 999 inválido => Error: reporte no encontrado (404)', function () {
     // Usuario autenticado con Sanctum
-    $role   = Role::factory()->create();
+    $role = Role::factory()->create();
     $status = UserAccountStatus::factory()->create();
 
     $user = UserAccount::create([
-        'role_id'       => $role->role_id,
-        'email'         => 'viewer'.uniqid().'@aspy.com',
+        'role_id' => $role->role_id,
+        'email' => 'viewer'.uniqid().'@aspy.com',
         'password_hash' => Hash::make('secret'),
-        'status'        => $status->status_id ?? 1,
+        'status' => $status->status_id ?? 1,
     ]);
 
     Sanctum::actingAs($user);
@@ -85,16 +85,16 @@ test('TC18 Ver reportes — ID 999 inválido => Error: reporte no encontrado (40
     expect($res->status(), 'Body: '.$res->getContent())->toBe(404);
 });
 
-#TODO url es el comment y sign es como profesional name
+// TODO url es el comment y sign es como profesional name
 test('TC19 Ver reportes — PDF "archivo.pdf" válido => Archivo válido mostrado (200)', function () {
     // Usuario autenticado
-    $role   = Role::factory()->create();
+    $role = Role::factory()->create();
     $status = UserAccountStatus::factory()->create();
     $user = UserAccount::create([
-        'role_id'       => $role->role_id,
-        'email'         => 'viewer'.uniqid().'@aspy.com',
+        'role_id' => $role->role_id,
+        'email' => 'viewer'.uniqid().'@aspy.com',
         'password_hash' => Hash::make('secret'),
-        'status'        => $status->status_id ?? 1,
+        'status' => $status->status_id ?? 1,
     ]);
     Sanctum::actingAs($user);
 
@@ -108,10 +108,10 @@ test('TC19 Ver reportes — PDF "archivo.pdf" válido => Archivo válido mostrad
     // El reporte hace referencia al PDF válido
     AppointmentReport::create([
         'appointment_id' => $appointment->appointment_id,
-        'comments'       => 'Reporte con PDF válido',
-        'sign'           => 'reports/archivo.pdf',
-        'created_by'     => $user->user_id,
-        'modified_by'    => null,
+        'comments' => 'Reporte con PDF válido',
+        'sign' => 'reports/archivo.pdf',
+        'created_by' => $user->user_id,
+        'modified_by' => null,
     ]);
 
     // Act: GET /api/appointment-report (lista donde se "muestra" el registro con su PDF asociado)
@@ -128,13 +128,13 @@ test('TC19 Ver reportes — PDF "archivo.pdf" válido => Archivo válido mostrad
 
 test('TC20 Ver reportes — PDF ausente => Listado responde 200 (comportamiento actual)', function () {
     // Usuario autenticado
-    $role   = Role::factory()->create();
+    $role = Role::factory()->create();
     $status = UserAccountStatus::factory()->create();
     $user = UserAccount::create([
-        'role_id'       => $role->role_id,
-        'email'         => 'viewer'.uniqid().'@aspy.com',
+        'role_id' => $role->role_id,
+        'email' => 'viewer'.uniqid().'@aspy.com',
         'password_hash' => Hash::make('secret'),
-        'status'        => $status->status_id ?? 1,
+        'status' => $status->status_id ?? 1,
     ]);
     Sanctum::actingAs($user);
 
@@ -142,10 +142,10 @@ test('TC20 Ver reportes — PDF ausente => Listado responde 200 (comportamiento 
     $appointment = Appointment::factory()->create();
     AppointmentReport::create([
         'appointment_id' => $appointment->appointment_id,
-        'comments'       => 'Reporte sin PDF físico',
-        'sign'           => 'reports/no-existe.pdf', // <- no creamos este archivo
-        'created_by'     => $user->user_id,
-        'modified_by'    => null,
+        'comments' => 'Reporte sin PDF físico',
+        'sign' => 'reports/no-existe.pdf', // <- no creamos este archivo
+        'created_by' => $user->user_id,
+        'modified_by' => null,
     ]);
 
     $res = $this->getJson('/api/appointment-report');

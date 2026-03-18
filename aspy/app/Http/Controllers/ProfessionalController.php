@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Professional;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class ProfessionalController extends Controller
 {
@@ -25,7 +25,7 @@ class ProfessionalController extends Controller
             'specialty' => 'required|string',
             'title' => 'required|string',
             'about' => 'nullable|string',
-            
+
         ]);
 
         return Professional::create($validated);
@@ -37,13 +37,14 @@ class ProfessionalController extends Controller
         $validated = $request->validate([
             'specialty' => 'string',
             'title' => 'string',
-            'about' => 'nullable|string'
+            'about' => 'nullable|string',
         ]);
-        
+
         $validated['modification_date'] = Carbon::now();
         $validated['modified_by'] = 'system';
 
         $professional->update($validated);
+
         return $professional;
     }
 
@@ -51,6 +52,7 @@ class ProfessionalController extends Controller
     {
         $professional = Professional::findOrFail($id);
         $professional->delete();
+
         return response()->noContent();
     }
 }

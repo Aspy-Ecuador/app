@@ -1,51 +1,73 @@
 <?php
-
+// FINAL
 namespace App\Http\Controllers;
 
 use App\Models\Role;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 
 class RoleController extends Controller
 {
-    public function index()
+    public function index(): JsonResponse
     {
-        return Role::all();
+        $roles = Role::all();
+        return response()->json($roles);
     }
 
-    public function show($id)
+    public function show(int $id): JsonResponse
     {
-        return Role::findOrFail($id);
+        $role = Role::find($id);
+ 
+        if (!$role) {
+            return response()->json(['message' => 'Role not found'], 404);
+        }
+ 
+        return response()->json($role);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|unique:role,name',
-            
+            'name' => 'required|string|max:100',
+
         ]);
 
-        return Role::create($validated);
+        $validated['created_by'] = 1;
+
+        $role = Role::create($validated);
+ 
+        return response()->json($role, 201);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
-        $role = Role::findOrFail($id);
+        $role = Role::find($id);
+ 
+        if (!$role) {
+            return response()->json(['message' => 'Role not found'], 404);
+        }
+ 
         $validated = $request->validate([
-            'name' => 'string|unique:role,name,'.$id
+            'name'        => 'sometimes|required|string|max:100',
         ]);
-        
-        $validated['modification_date'] = Carbon::now();
-        $validated['modified_by'] = 'system';
+ 
+        $validated['modified_by'] = 1;
 
         $role->update($validated);
-        return $role;
+
+        return response()->json($role);
     }
 
     public function destroy($id)
     {
-        $role = Role::findOrFail($id);
+        $role = Role::find($id);
+ 
+        if (!$role) {
+            return response()->json(['message' => 'Role not found'], 404);
+        }
+ 
         $role->delete();
-        return response()->noContent();
+ 
+        return response()->json(['message' => 'Role deleted successfully']);
     }
 }

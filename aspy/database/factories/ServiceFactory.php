@@ -21,4 +21,4 @@ class ServiceFactory extends Factory
             'modification_date' => null,
         ];
     }
-} 
+}

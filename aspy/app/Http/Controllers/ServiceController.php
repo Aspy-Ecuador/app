@@ -1,53 +1,74 @@
 <?php
-//SÍ SE USA
+// FINAL
 namespace App\Http\Controllers;
 
 use App\Models\Service;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class ServiceController extends Controller
 {
     public function index()
     {
-        return Service::all();
+        $services = Service::all();
+        return response()->json($services);
     }
 
-    public function show($id)
+    public function show(int $id)
     {
-        return Service::findOrFail($id);
+        $service = Service::find($id);
+ 
+        if (!$service) {
+            return response()->json(['message' => 'Service not found'], 404);
+        }
+ 
+        return response()->json($service);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|unique:service,name',
-            'price' => 'required|numeric|min:0',
-            
+            'name'       => 'required|string|max:150',
+            'price'      => 'required|numeric|min:0',            
         ]);
+ 
+        $validated['created_by'] = 1;
 
-        return Service::create($validated);
+        $service = Service::create($validated);
+ 
+        return response()->json($service, 201);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
-        $service = Service::findOrFail($id);
+        $service = Service::find($id);
+ 
+        if (!$service) {
+            return response()->json(['message' => 'Service not found'], 404);
+        }
+ 
         $validated = $request->validate([
-            'name' => 'string|unique:service,name,'.$id,
-            'price' => 'numeric|min:0'
+            'name'        => 'sometimes|required|string|max:150',
+            'price'       => 'sometimes|required|numeric|min:0',
         ]);
-        
-        $validated['modification_date'] = Carbon::now();
-        $validated['modified_by'] = 'system';
+ 
+        $validated['modified_by'] = 1;
 
         $service->update($validated);
-        return $service;
+ 
+        return response()->json($service);
     }
 
     public function destroy($id)
     {
-        $service = Service::findOrFail($id);
+        $service = Service::find($id);
+ 
+        if (!$service) {
+            return response()->json(['message' => 'Service not found'], 404);
+        }
+ 
         $service->delete();
-        return response()->noContent();
+ 
+        return response()->json(['message' => 'Service deleted successfully']);
     }
 }

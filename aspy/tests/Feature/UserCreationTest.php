@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Role;
-use App\Models\State;
 use App\Models\UserAccountStatus;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
@@ -15,25 +14,25 @@ test('TC09 Registrar nuevo usuario — Cédula 0912345678 (válida) => Registro 
     $status = UserAccountStatus::factory()->create();
 
     $payload = [
-        'role_id'        => $role->role_id,
-        'email'          => 'newuser'.uniqid().'@aspy.com',
-        'password'       => 'Secret123!',
-        'first_name'     => 'Ana',
-        'last_name'      => 'Pérez',
-        'birthdate'      => '2000-01-01',
-        'gender'         => 1,
-        'occupation'     => 1,
+        'role_id' => $role->role_id,
+        'email' => 'newuser'.uniqid().'@aspy.com',
+        'password' => 'Secret123!',
+        'first_name' => 'Ana',
+        'last_name' => 'Pérez',
+        'birthdate' => '2000-01-01',
+        'gender' => 1,
+        'occupation' => 1,
         'marital_status' => 1,
-        'education'      => 1,
-        'person_type'    => 'client',
-        'cedula'         => '0912345678',
+        'education' => 1,
+        'person_type' => 'client',
+        'cedula' => '0912345678',
     ];
 
     $res = $this->postJson('/api/user-account/', $payload);
 
     if ($res->status() !== 201) {
-        $res->dump();        
-        $res->dumpHeaders();  
+        $res->dump();
+        $res->dumpHeaders();
     }
 
     expect(
@@ -49,17 +48,17 @@ test('TC10 Registrar nuevo usuario — Cédula vacía => Registro exitoso (compo
     $status = UserAccountStatus::factory()->create();
 
     $payload = [
-        'role_id'        => $role->role_id,
-        'email'          => 'newuser'.uniqid().'@aspy.com',
-        'password'       => 'Secret123!',
-        'first_name'     => 'Ana',
-        'last_name'      => 'Pérez',
-        'birthdate'      => '2000-01-01',
-        'gender'         => 1,
-        'occupation'     => 1,
+        'role_id' => $role->role_id,
+        'email' => 'newuser'.uniqid().'@aspy.com',
+        'password' => 'Secret123!',
+        'first_name' => 'Ana',
+        'last_name' => 'Pérez',
+        'birthdate' => '2000-01-01',
+        'gender' => 1,
+        'occupation' => 1,
         'marital_status' => 1,
-        'education'      => 1,
-        'person_type'    => 'client',
+        'education' => 1,
+        'person_type' => 'client',
         // cedula omitida
     ];
 
@@ -75,17 +74,17 @@ test('TC11 Registrar nuevo usuario — first_name "Ana Pérez" (válido) => Se r
     $status = UserAccountStatus::factory()->create();
 
     $payload = [
-        'role_id'        => $role->role_id,
-        'email'          => 'newuser'.uniqid().'@aspy.com',
-        'password'       => 'Secret123!',
-        'first_name'     => 'Ana Pérez', // nombre válido
-        'last_name'      => 'Pérez',
-        'birthdate'      => '2000-01-01',
-        'gender'         => 1,
-        'occupation'     => 1,
+        'role_id' => $role->role_id,
+        'email' => 'newuser'.uniqid().'@aspy.com',
+        'password' => 'Secret123!',
+        'first_name' => 'Ana Pérez', // nombre válido
+        'last_name' => 'Pérez',
+        'birthdate' => '2000-01-01',
+        'gender' => 1,
+        'occupation' => 1,
         'marital_status' => 1,
-        'education'      => 1,
-        'person_type'    => 'client',
+        'education' => 1,
+        'person_type' => 'client',
     ];
 
     $res = $this->postJson('/api/user-account/', $payload);
@@ -101,17 +100,17 @@ test('TC12 Registrar nuevo usuario — first_name "@@@" (comportamiento actual) 
     $status = UserAccountStatus::factory()->create();
 
     $payload = [
-        'role_id'        => $role->role_id,
-        'email'          => 'newuser'.uniqid().'@aspy.com',
-        'password'       => 'Secret123!',
-        'first_name'     => '@@@', // con las reglas actuales es válido (required|string)
-        'last_name'      => 'Pérez',
-        'birthdate'      => '2000-01-01',
-        'gender'         => 1,
-        'occupation'     => 1,
+        'role_id' => $role->role_id,
+        'email' => 'newuser'.uniqid().'@aspy.com',
+        'password' => 'Secret123!',
+        'first_name' => '@@@', // con las reglas actuales es válido (required|string)
+        'last_name' => 'Pérez',
+        'birthdate' => '2000-01-01',
+        'gender' => 1,
+        'occupation' => 1,
         'marital_status' => 1,
-        'education'      => 1,
-        'person_type'    => 'client',
+        'education' => 1,
+        'person_type' => 'client',
     ];
 
     $res = $this->postJson('/api/user-account/', $payload);

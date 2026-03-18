@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
+use App\Models\Person;
+use App\Models\UserAccount;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
-
-use App\Models\UserAccount;
-use App\Models\Person;
 
 uses(RefreshDatabase::class);
 
 const USER_LIST_ROUTE_VIEW = '/api/user-account';
 
 /** 🔧 Siembra roles (IDs fijos 1..4) y un status (ID=1) para satisfacer FKs + match() del controlador */
-function seedRolesAndUserStatus(): void {
+function seedRolesAndUserStatus(): void
+{
     // Roles con IDs exactos que tu controlador espera (1..4)
     DB::table('role')->insertOrIgnore([
         ['role_id' => 1, 'name' => 'Administrador', 'created_by' => 'seed'],
@@ -28,39 +28,41 @@ function seedRolesAndUserStatus(): void {
     if (DB::getSchemaBuilder()->hasTable('user_account_status')) {
         DB::table('user_account_status')->insertOrIgnore([
             'status_id' => 1,
-            'name'      => 'Activo',
+            'name' => 'Activo',
         ]);
     }
 }
 
 /** 🔐 Autentica un viewer (Administrador) usando las FKs sembradas */
-function authViewerForUsers(): void {
+function authViewerForUsers(): void
+{
     seedRolesAndUserStatus();
 
     $viewer = UserAccount::create([
-        'role_id'       => 1, // Administrador
-        'email'         => 'viewer'.uniqid().'@aspy.com',
+        'role_id' => 1, // Administrador
+        'email' => 'viewer'.uniqid().'@aspy.com',
         'password_hash' => Hash::make('secret'),
-        'status'        => 1,
+        'status' => 1,
     ]);
 
     Sanctum::actingAs($viewer);
 }
 
 /** 👤 Crea un usuario con su Person relacionada (Person.user_id) y rol válido 1..4 */
-function makeUserWithPerson(int $roleId, string $email): UserAccount {
+function makeUserWithPerson(int $roleId, string $email): UserAccount
+{
     seedRolesAndUserStatus();
 
     $user = UserAccount::create([
-        'role_id'       => $roleId, // 1..4
-        'email'         => $email,
+        'role_id' => $roleId, // 1..4
+        'email' => $email,
         'password_hash' => Hash::make('secret'),
-        'status'        => 1,
+        'status' => 1,
     ]);
 
     Person::factory()->create([
-        'user_id'     => $user->user_id,
-        'first_name'  => 'User',
+        'user_id' => $user->user_id,
+        'first_name' => 'User',
         // Si tu schema usa middle_name en lugar de last_name, la factory lo maneja.
     ]);
 
@@ -79,7 +81,10 @@ test('TC45 Usuarios — Rol "Administrador" => Lista (200)', function () {
 
     $res = $this->getJson(USER_LIST_ROUTE_VIEW.'?role=Administrador');
 
-    if ($res->status() !== 200) { $res->dump(); $res->dumpHeaders(); }
+    if ($res->status() !== 200) {
+        $res->dump();
+        $res->dumpHeaders();
+    }
     expect($res->status(), 'Body: '.$res->getContent())->toBe(200);
 });
 
@@ -93,7 +98,10 @@ test('TC46 Usuarios — Rol inválido => Lista vacía (200)', function () {
     // Sin crear usuarios adicionales → respuesta 200 (posible lista vacía)
     $res = $this->getJson(USER_LIST_ROUTE_VIEW.'?role=NoExiste');
 
-    if ($res->status() !== 200) { $res->dump(); $res->dumpHeaders(); }
+    if ($res->status() !== 200) {
+        $res->dump();
+        $res->dumpHeaders();
+    }
     expect($res->status(), 'Body: '.$res->getContent())->toBe(200);
 });
 
@@ -110,7 +118,10 @@ test('TC47 Usuarios — Paginación página 2 => Lista (200)', function () {
 
     $res = $this->getJson(USER_LIST_ROUTE_VIEW.'?page=2');
 
-    if ($res->status() !== 200) { $res->dump(); $res->dumpHeaders(); }
+    if ($res->status() !== 200) {
+        $res->dump();
+        $res->dumpHeaders();
+    }
     expect($res->status(), 'Body: '.$res->getContent())->toBe(200);
 });
 
@@ -126,6 +137,9 @@ test('TC48 Usuarios — Email "admin@aspy.com" => Usuario visible (200)', functi
 
     $res = $this->getJson(USER_LIST_ROUTE_VIEW);
 
-    if ($res->status() !== 200) { $res->dump(); $res->dumpHeaders(); }
+    if ($res->status() !== 200) {
+        $res->dump();
+        $res->dumpHeaders();
+    }
     expect($res->status(), 'Body: '.$res->getContent())->toBe(200);
 });

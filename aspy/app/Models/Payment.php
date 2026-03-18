@@ -1,5 +1,7 @@
 <?php
 
+// FINAL
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,55 +12,54 @@ class Payment extends Model
     use HasFactory;
 
     protected $table = 'payment';
+
     protected $primaryKey = 'payment_id';
-    public $timestamps = false;
+
     protected $fillable = [
-        'person_id',
+        'client_id',
         'service_id',
-        'discount_id',
         'payment_data_id',
-        'service_price',
-        'discount_percentage',
-        'total_amount',
-        'status',
+        'payment_status_id',
         'created_by',
         'modified_by',
-        'creation_date',
-        'modification_date',
     ];
 
-    public function person()
+    protected $casts = [
+        'creation_date' => 'datetime',
+        'modification_date' => 'datetime',
+    ];
+
+    const CREATED_AT = 'creation_date';
+
+    const UPDATED_AT = 'modification_date';
+
+    public function client()
     {
-        return $this->belongsTo(Person::class, 'person_id');
+        return $this->belongsTo(Client::class, 'client_id', 'person_id');
     }
 
     public function service()
     {
-        return $this->belongsTo(Service::class, 'service_id');
-    }
-
-    public function discount()
-    {
-        return $this->belongsTo(Discount::class, 'discount_id');
+        return $this->belongsTo(Service::class, 'service_id', 'service_id');
     }
 
     public function paymentData()
     {
-        return $this->belongsTo(PaymentData::class, 'payment_data_id');
+        return $this->belongsTo(PaymentData::class, 'payment_data_id', 'payment_data_id');
     }
 
-    public function status()
+    public function paymentStatus()
     {
-        return $this->belongsTo(PaymentStatus::class, 'status');
+        return $this->belongsTo(PaymentStatus::class, 'payment_status_id', 'payment_status_id');
     }
 
-    public function receipts()
+    public function receipt()
     {
-        return $this->hasMany(Receipt::class, 'payment_id');
+        return $this->hasOne(Receipt::class, 'payment_id', 'payment_id');
     }
 
     public function appointments()
     {
-        return $this->hasMany(Appointment::class, 'payment_id');
+        return $this->hasMany(Appointment::class, 'payment_id', 'payment_id');
     }
 }

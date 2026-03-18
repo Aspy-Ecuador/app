@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Appointment;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Models\Payment;
 use App\Models\PaymentData;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AppointmentController extends Controller
 {
@@ -55,7 +55,6 @@ class AppointmentController extends Controller
             $paymentDataValidated['payment_data_id'] = $paymentData->payment_data_id;
             $paymentDataValidated['status'] = 1; // Pendiente
 
-
             $payment = Payment::create($paymentDataValidated);
 
             // Crear Appointment vinculando payment_id recién creado
@@ -66,7 +65,7 @@ class AppointmentController extends Controller
                 'tracking_appointment' => $validated['tracking_appointment'] ?? null,
             ];
 
-            $appointmentData['status'] = 1; //Pendiente
+            $appointmentData['status'] = 1; // Pendiente
 
             $appointment = Appointment::create($appointmentData);
 
@@ -75,27 +74,28 @@ class AppointmentController extends Controller
             return response()->json([
                 'payment_data' => $paymentData,
                 'payment' => $payment,
-                'appointment' => $appointment
+                'appointment' => $appointment,
             ], 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Error al crear cita: ' . $e->getMessage()], 500);
+
+            return response()->json(['error' => 'Error al crear cita: '.$e->getMessage()], 500);
         }
     }
-
 
     public function update(Request $request, $id)
     {
         $appointment = Appointment::findOrFail($id);
         $validated = $request->validate([
-            'status' => 'integer'
+            'status' => 'integer',
         ]);
-        
+
         $validated['modification_date'] = Carbon::now();
         $validated['modified_by'] = 'system';
 
         $appointment->update($validated);
+
         return $appointment;
     }
 
@@ -103,6 +103,7 @@ class AppointmentController extends Controller
     {
         $appointment = Appointment::findOrFail($id);
         $appointment->delete();
+
         return response()->noContent();
     }
 }

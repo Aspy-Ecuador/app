@@ -1,5 +1,7 @@
 <?php
 
+// FINAL
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,8 +12,9 @@ class Schedule extends Model
     use HasFactory;
 
     protected $table = 'schedule';
+
     protected $primaryKey = 'schedule_id';
-    public $timestamps = false;
+
     protected $fillable = [
         'date',
         'start_time',
@@ -19,12 +22,34 @@ class Schedule extends Model
         'name',
         'created_by',
         'modified_by',
-        'creation_date',
-        'modification_date',
     ];
+
+    protected $casts = [
+        'date' => 'date',
+        'creation_date' => 'datetime',
+        'modification_date' => 'datetime',
+    ];
+
+    const CREATED_AT = 'creation_date';
+
+    const UPDATED_AT = 'modification_date';
 
     public function workerSchedules()
     {
-        return $this->hasMany(WorkerSchedule::class, 'schedule_id');
+        return $this->hasMany(WorkerSchedule::class, 'schedule_id', 'schedule_id');
     }
+
+    /*
+    public function professionals()
+    {
+        return $this->belongsToMany(
+            Professional::class,
+            'worker_schedule',
+            'schedule_id',
+            'professional_id',
+            'schedule_id',
+            'person_id'
+        );
+    }
+    */
 }

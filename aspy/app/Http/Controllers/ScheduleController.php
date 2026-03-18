@@ -1,57 +1,77 @@
 <?php
-
+// FINAL
 namespace App\Http\Controllers;
 
 use App\Models\Schedule;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 
 class ScheduleController extends Controller
 {
     public function index()
     {
-        return Schedule::all();
+        $schedules = Schedule::all();
+        return response()->json($schedules);
     }
 
     public function show($id)
     {
-        return Schedule::findOrFail($id);
+        $schedule = Schedule::find($id);
+ 
+        if (!$schedule) {
+            return response()->json(['message' => 'Schedule not found'], 404);
+        }
+ 
+        return response()->json($schedule);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'date' => 'required|date',
+            'date'       => 'required|date',
             'start_time' => 'required|date_format:H:i:s',
-            'end_time' => 'required|date_format:H:i:s|after:start_time',
-            'name' => 'nullable|string',
-            
+            'end_time'   => 'required|date_format:H:i:s|after:start_time',
+            'name'       => 'nullable|string|max:150',            
         ]);
+ 
+        $validated['created_by'] = 1;
 
-        return Schedule::create($validated);
+        $schedule = Schedule::create($validated);
+ 
+        return response()->json($schedule, 201);
     }
 
     public function update(Request $request, $id)
     {
-        $schedule = Schedule::findOrFail($id);
+        $schedule = Schedule::find($id);
+ 
+        if (!$schedule) {
+            return response()->json(['message' => 'Schedule not found'], 404);
+        }
+ 
         $validated = $request->validate([
-            'date' => 'date',
-            'start_time' => 'date_format:H:i:s',
-            'end_time' => 'date_format:H:i:s|after:start_time',
-            'name' => 'string'
+            'date'        => 'sometimes|required|date',
+            'start_time'  => 'sometimes|required|date_format:H:i:s',
+            'end_time'    => 'sometimes|required|date_format:H:i:s|after:start_time',
+            'name'        => 'nullable|string|max:150',            
         ]);
-        
-        $validated['modification_date'] = Carbon::now();
-        $validated['modified_by'] = 'system';
+         
+        $validated['modified_by'] = 1;
 
         $schedule->update($validated);
-        return $schedule;
+
+        return response()->json($schedule);
     }
 
     public function destroy($id)
     {
-        $schedule = Schedule::findOrFail($id);
+        $schedule = Schedule::find($id);
+ 
+        if (!$schedule) {
+            return response()->json(['message' => 'Schedule not found'], 404);
+        }
+ 
         $schedule->delete();
-        return response()->noContent();
+ 
+        return response()->json(['message' => 'Schedule deleted successfully']);
     }
 }

@@ -28,4 +28,4 @@ class PersonFactory extends Factory
             'modification_date' => null,
         ];
     }
-} 
+}

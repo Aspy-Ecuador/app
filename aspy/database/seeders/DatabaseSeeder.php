@@ -9,9 +9,9 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        //$this->seedCatalogues();
-        //$this->seedLocation();
-        //$this->seedUsers();
+        // $this->seedCatalogues();
+        // $this->seedLocation();
+        // $this->seedUsers();
         $this->seedPersons();
         $this->seedPersonSubtypes();
         $this->seedContactData();
@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
         $this->seedSchedulesAndWorkerSchedules();
         $this->seedPaymentsAndAppointments();
     }
+
     // =========================================================================
     // CATÁLOGOS
     // =========================================================================
@@ -139,75 +140,75 @@ class DatabaseSeeder extends Seeder
         DB::table('person')->insert([
             // Admin
             [
-                'user_id'           => 1,
-                'first_name'        => 'Administrador',
-                'last_name'       => null,
-                'birthdate'         => '1980-01-01',
-                'gender_id'         => 1,
-                'occupation_id'     => 3,
+                'user_id' => 1,
+                'first_name' => 'Administrador',
+                'last_name' => null,
+                'birthdate' => '1980-01-01',
+                'gender_id' => 1,
+                'occupation_id' => 3,
                 'marital_status_id' => 2,
-                'education_id'      => 3,
-                'created_by'        => 'system',
+                'education_id' => 3,
+                'created_by' => 'system',
             ],
             // Prof 1 — Juan Carlos (Cardiología)
             [
-                'user_id'           => 2,
-                'first_name'        => 'Juan',
-                'last_name'       => 'Carlos',
-                'birthdate'         => '1975-05-10',
-                'gender_id'         => 1,
-                'occupation_id'     => 1,
+                'user_id' => 2,
+                'first_name' => 'Juan',
+                'last_name' => 'Carlos',
+                'birthdate' => '1975-05-10',
+                'gender_id' => 1,
+                'occupation_id' => 1,
                 'marital_status_id' => 2,
-                'education_id'      => 3,
-                'created_by'        => 'system',
+                'education_id' => 3,
+                'created_by' => 'system',
             ],
             // Cliente — María
             [
-                'user_id'           => 3,
-                'first_name'        => 'María',
-                'last_name'       => null,
-                'birthdate'         => '1990-12-20',
-                'gender_id'         => 2,
-                'occupation_id'     => 4,
+                'user_id' => 3,
+                'first_name' => 'María',
+                'last_name' => null,
+                'birthdate' => '1990-12-20',
+                'gender_id' => 2,
+                'occupation_id' => 4,
                 'marital_status_id' => 1,
-                'education_id'      => 2,
-                'created_by'        => 'system',
+                'education_id' => 2,
+                'created_by' => 'system',
             ],
             // Staff — Luisa
             [
-                'user_id'           => 4,
-                'first_name'        => 'Luisa',
-                'last_name'       => null,
-                'birthdate'         => '1985-07-15',
-                'gender_id'         => 2,
-                'occupation_id'     => 2,
+                'user_id' => 4,
+                'first_name' => 'Luisa',
+                'last_name' => null,
+                'birthdate' => '1985-07-15',
+                'gender_id' => 2,
+                'occupation_id' => 2,
                 'marital_status_id' => 1,
-                'education_id'      => 2,
-                'created_by'        => 'system',
+                'education_id' => 2,
+                'created_by' => 'system',
             ],
             // Prof 2 — Carlos Andres (Neurología)
             [
-                'user_id'           => 5,
-                'first_name'        => 'Carlos',
-                'last_name'       => 'Andres',
-                'birthdate'         => '1980-03-22',
-                'gender_id'         => 1,
-                'occupation_id'     => 1,
+                'user_id' => 5,
+                'first_name' => 'Carlos',
+                'last_name' => 'Andres',
+                'birthdate' => '1980-03-22',
+                'gender_id' => 1,
+                'occupation_id' => 1,
                 'marital_status_id' => 1,
-                'education_id'      => 3,
-                'created_by'        => 'system',
+                'education_id' => 3,
+                'created_by' => 'system',
             ],
             // Prof 3 — Sofia (Pediatría)
             [
-                'user_id'           => 6,
-                'first_name'        => 'Sofia',
-                'last_name'       => null,
-                'birthdate'         => '1988-09-05',
-                'gender_id'         => 2,
-                'occupation_id'     => 1,
+                'user_id' => 6,
+                'first_name' => 'Sofia',
+                'last_name' => null,
+                'birthdate' => '1988-09-05',
+                'gender_id' => 2,
+                'occupation_id' => 1,
                 'marital_status_id' => 2,
-                'education_id'      => 3,
-                'created_by'        => 'system',
+                'education_id' => 3,
+                'created_by' => 'system',
             ],
         ]);
         // person_id: 1=Admin, 2=Juan, 3=María, 4=Luisa, 5=Carlos, 6=Sofia
@@ -227,23 +228,23 @@ class DatabaseSeeder extends Seeder
             [
                 'person_id' => 2,
                 'specialty' => 'Cardiología',
-                'title'     => 'Médico',
-                'about'     => 'Especialista en enfermedades cardiovasculares con 15 años de experiencia.',
-                'created_by'=> 'system',
+                'title' => 'Médico',
+                'about' => 'Especialista en enfermedades cardiovasculares con 15 años de experiencia.',
+                'created_by' => 'system',
             ],
             [
                 'person_id' => 5,
                 'specialty' => 'Neurología',
-                'title'     => 'Médico',
-                'about'     => 'Especialista en enfermedades del sistema nervioso con 12 años de experiencia.',
-                'created_by'=> 'system',
+                'title' => 'Médico',
+                'about' => 'Especialista en enfermedades del sistema nervioso con 12 años de experiencia.',
+                'created_by' => 'system',
             ],
             [
                 'person_id' => 6,
                 'specialty' => 'Pediatría',
-                'title'     => 'Médico',
-                'about'     => 'Especialista en salud infantil y adolescente con 10 años de experiencia.',
-                'created_by'=> 'system',
+                'title' => 'Médico',
+                'about' => 'Especialista en salud infantil y adolescente con 10 años de experiencia.',
+                'created_by' => 'system',
             ],
         ]);
 
@@ -294,14 +295,14 @@ class DatabaseSeeder extends Seeder
     private function seedServicesAndProfessionalServices(): void
     {
         DB::table('service')->insert([
-            ['name' => 'Consulta General',      'price' =>  50.00, 'created_by' => 'system'], // service_id: 1
-            ['name' => 'Consulta Especializada','price' =>  80.00, 'created_by' => 'system'], // service_id: 2
-            ['name' => 'Consulta Neurológica',  'price' =>  90.00, 'created_by' => 'system'], // service_id: 3
-            ['name' => 'Consulta Pediátrica',   'price' =>  60.00, 'created_by' => 'system'], // service_id: 4
-            ['name' => 'Electrocardiograma',    'price' =>  45.00, 'created_by' => 'system'], // service_id: 5
+            ['name' => 'Consulta General',      'price' => 50.00, 'created_by' => 'system'], // service_id: 1
+            ['name' => 'Consulta Especializada', 'price' => 80.00, 'created_by' => 'system'], // service_id: 2
+            ['name' => 'Consulta Neurológica',  'price' => 90.00, 'created_by' => 'system'], // service_id: 3
+            ['name' => 'Consulta Pediátrica',   'price' => 60.00, 'created_by' => 'system'], // service_id: 4
+            ['name' => 'Electrocardiograma',    'price' => 45.00, 'created_by' => 'system'], // service_id: 5
             ['name' => 'Resonancia Magnética',  'price' => 250.00, 'created_by' => 'system'], // service_id: 6
-            ['name' => 'Examen de Laboratorio', 'price' =>  35.00, 'created_by' => 'system'], // service_id: 7
-            ['name' => 'Terapia Física',        'price' =>  40.00, 'created_by' => 'system'], // service_id: 8
+            ['name' => 'Examen de Laboratorio', 'price' => 35.00, 'created_by' => 'system'], // service_id: 7
+            ['name' => 'Terapia Física',        'price' => 40.00, 'created_by' => 'system'], // service_id: 8
         ]);
 
         DB::table('professional_service')->insert([
@@ -352,15 +353,15 @@ class DatabaseSeeder extends Seeder
             [18, '2026-02-25', '10:00:00', '11:00:00', 'Turno feb26 13',        2], // Juan
         ];
 
-        $scheduleRows       = [];
+        $scheduleRows = [];
         $workerScheduleRows = [];
 
-        foreach ($scheduleAssignments as [, $date, $start, $end, $name,]) {
+        foreach ($scheduleAssignments as [, $date, $start, $end, $name]) {
             $scheduleRows[] = [
-                'date'       => $date,
+                'date' => $date,
                 'start_time' => $start,
-                'end_time'   => $end,
-                'name'       => $name,
+                'end_time' => $end,
+                'name' => $name,
                 'created_by' => 'system',
             ];
         }
@@ -373,10 +374,10 @@ class DatabaseSeeder extends Seeder
 
         foreach ($scheduleAssignments as $i => [, , , , , $personId]) {
             $workerScheduleRows[] = [
-                'schedule_id'  => $scheduleIds[$i],
-                'person_id'    => $personId,
+                'schedule_id' => $scheduleIds[$i],
+                'person_id' => $personId,
                 'is_available' => true,
-                'created_by'   => 'system',
+                'created_by' => 'system',
             ];
         }
 
@@ -421,53 +422,53 @@ class DatabaseSeeder extends Seeder
         foreach ($entries as $i => [$wsId, $serviceId, $price, $payStatus, $apptStatus, $createdAt]) {
             // Payment data — PK: payment_data_id
             $paymentDataId = DB::table('payment_data')->insertGetId([
-                'type'       => $i % 2 === 0 ? 'Transferencia' : 'Tarjeta Débito',
-                'number'     => 100000000 + ($i + 1),
-                'file'       => 'comprobantes/pago_' . str_pad($i + 1, 3, '0', STR_PAD_LEFT) . '.pdf',
+                'type' => $i % 2 === 0 ? 'Transferencia' : 'Tarjeta Débito',
+                'number' => 100000000 + ($i + 1),
+                'file' => 'comprobantes/pago_'.str_pad($i + 1, 3, '0', STR_PAD_LEFT).'.pdf',
                 'created_by' => 'system',
             ], 'payment_data_id');
 
             // Pago — PK: payment_id
             $paymentId = DB::table('payment')->insertGetId([
-                'person_id'       => 3,
-                'service_id'      => $serviceId,
+                'person_id' => 3,
+                'service_id' => $serviceId,
                 'payment_data_id' => $paymentDataId,
-                'service_price'   => $price,
-                'total_amount'    => $price,
-                'status'          => $payStatus,
-                'created_by'      => 'system',
-                'creation_date'   => $createdAt,
+                'service_price' => $price,
+                'total_amount' => $price,
+                'status' => $payStatus,
+                'created_by' => 'system',
+                'creation_date' => $createdAt,
             ], 'payment_id');
 
             // Recibo — solo si el pago fue exitoso (Paid)
             if ($payStatus === 2) {
                 DB::table('receipt')->insert([
-                    'payment_id'    => $paymentId,
-                    'status'        => 'Emitido',
-                    'created_by'    => 'system',
+                    'payment_id' => $paymentId,
+                    'status' => 'Emitido',
+                    'created_by' => 'system',
                     'creation_date' => $createdAt,
                 ]);
             }
 
             // Cita — PK: appointment_id
             $appointmentId = DB::table('appointment')->insertGetId([
-                'payment_id'           => $paymentId,
-                'scheduled_by'         => 1,
-                'worker_schedule_id'   => $wsId,
+                'payment_id' => $paymentId,
+                'scheduled_by' => 1,
+                'worker_schedule_id' => $wsId,
                 'tracking_appointment' => null,
-                'status'               => $apptStatus,
-                'created_by'           => 'system',
-                'creation_date'        => $createdAt,
+                'status' => $apptStatus,
+                'created_by' => 'system',
+                'creation_date' => $createdAt,
             ], 'appointment_id');
 
             // Reporte — solo si la cita fue completada
             if ($apptStatus === 2) {
                 DB::table('appointment_report')->insert([
                     'appointment_id' => $appointmentId,
-                    'comments'       => 'Consulta realizada sin novedades. Paciente en buen estado general.',
-                    'sign'           => 'Firma Digital - Sistema',
-                    'created_by'     => 'system',
-                    'creation_date'  => $createdAt,
+                    'comments' => 'Consulta realizada sin novedades. Paciente en buen estado general.',
+                    'sign' => 'Firma Digital - Sistema',
+                    'created_by' => 'system',
+                    'creation_date' => $createdAt,
                 ]);
             }
 

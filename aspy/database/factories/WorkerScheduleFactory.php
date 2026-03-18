@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\WorkerSchedule;
-use App\Models\Schedule;
 use App\Models\Person;
+use App\Models\Schedule;
+use App\Models\WorkerSchedule;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class WorkerScheduleFactory extends Factory
@@ -24,4 +24,4 @@ class WorkerScheduleFactory extends Factory
             'modification_date' => null,
         ];
     }
-} 
+}
