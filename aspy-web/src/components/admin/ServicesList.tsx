@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import { columnsServiceAdmin } from "@utils/columns";
-import { ServiceResponse } from "@/typesResponse/ServiceResponse";
+import { ServiceResponse } from "@typesResponse/Service";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Grid from "@mui/material/Grid2";
 import Box from "@mui/material/Box";
@@ -19,7 +19,7 @@ import AssignmentTurnedInRoundedIcon from "@mui/icons-material/AssignmentTurnedI
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 
 export default function ServicesList() {
-  const { data, loading  } = useRoleData();
+  const { data, loading } = useRoleData();
   const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
 
   //Ruta para editar y crear
@@ -73,8 +73,6 @@ export default function ServicesList() {
 
   const newColumns: GridColDef[] = [...columnsServiceAdmin, ...columnsExtra];
 
- 
-
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1}>
@@ -117,19 +115,19 @@ export default function ServicesList() {
         </Grid>
 
         <Grid size={12}>
-           {loading ? (
-              <Progress /> 
-            ) : (
-          <Table<ServiceResponse>
-            columns={newColumns}
-            rows={services}
-            getRowId={(row) => row.service_id}
-            rowSelectionModel={rowSelection}
-            onRowSelectionChange={(newSelection) =>
-              setRowSelection(newSelection)
-            }
-          />
-            )}
+          {loading ? (
+            <Progress />
+          ) : (
+            <Table<ServiceResponse>
+              columns={newColumns}
+              rows={services}
+              getRowId={(row) => row.service_id}
+              rowSelectionModel={rowSelection}
+              onRowSelectionChange={(newSelection) =>
+                setRowSelection(newSelection)
+              }
+            />
+          )}
         </Grid>
       </Grid>
     </Box>

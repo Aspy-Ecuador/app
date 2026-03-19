@@ -1,6 +1,6 @@
-import axios, { AxiosResponse } from "axios";
-import apiURL from "./apiConfig";
-import { getConfig } from "./config";
+import { AxiosResponse } from "axios";
+import api from "@API/api";
+import { Person } from "@/typesResponse/Person";
 
 interface PersonData {
   first_name: string; // First name of the person
@@ -13,31 +13,29 @@ interface PersonData {
 
 const personAPI = {
   // Get all persons
-  getAllPersons: async (): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/person`, getConfig());
-  },
+  getAllPersons: async (): Promise<Person[]> => (await api.get(`/person`)).data,
 
   // Get person by ID
   getPersonById: async (id: number): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/person/${id - 1}`, getConfig());
+    return api.get(`/person/${id - 1}`);
   },
 
   // Create a new person
   createPerson: async (personData: PersonData): Promise<AxiosResponse> => {
-    return axios.post(`${apiURL}/person`, personData, getConfig());
+    return api.post(`/person`, personData);
   },
 
   // Update person by ID
   updatePerson: async (
     id: string,
-    personData: PersonData
+    personData: PersonData,
   ): Promise<AxiosResponse> => {
-    return axios.put(`${apiURL}/person/${id}`, personData, getConfig());
+    return api.put(`/person/${id}`, personData);
   },
 
   // Delete person by ID
   deletePerson: async (id: string): Promise<AxiosResponse> => {
-    return axios.delete(`${apiURL}/person/${id}`, getConfig());
+    return api.delete(`/person/${id}`);
   },
 };
 

@@ -16,15 +16,14 @@ import { PaymentResponse } from "@typesResponse/PaymentResponse";
 
 export default function MainGrid() {
   const { data } = useRoleData();
-
-  const dataAppointment: PageViewsBarChartProps = getDataAppointment(data);
-  const paymentsData: PaymentResponse[] = getPayments(data);
-  const income: number[] = getIncome(paymentsData);
+  //const dataAppointment: PageViewsBarChartProps = getDataAppointment(data);
+  //const paymentsData: PaymentResponse[] = getPayments(data);
+  //const income: number[] = getIncome(paymentsData);
   const dataCard: StatCardProps[] = getDataCard(data);
 
   console.log("Aquí", dataCard);
-  console.log("Aquí", income);
-  console.log("Aquí", dataAppointment);
+  //console.log("Aquí", income);
+  //console.log("Aquí", dataAppointment);
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
       <Grid
@@ -38,14 +37,6 @@ export default function MainGrid() {
             <StatCard {...card} />
           </Grid>
         ))}
-
-        <Grid size={{ xs: 12, md: 6 }}>
-          <SessionsChart income={income} />
-        </Grid>
-
-        <Grid size={{ xs: 12, md: 6 }}>
-          <PageViewsBarChart {...dataAppointment} />
-        </Grid>
       </Grid>
     </Box>
   );

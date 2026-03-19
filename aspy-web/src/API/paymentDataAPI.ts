@@ -1,6 +1,5 @@
-import axios, { AxiosResponse } from "axios";
-import apiURL from "./apiConfig";
-import { getConfig } from "./config";
+import { AxiosResponse } from "axios";
+import api from "@API/api";
 
 interface PaymentDataStructure {
   type: string; // Type of payment (e.g., 'Credit Card', 'Transfer')
@@ -11,32 +10,32 @@ interface PaymentDataStructure {
 const paymentDataAPI = {
   // Get all payment data
   getAllPaymentData: async (): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/payment-data`, getConfig());
+    return api.get(`/payment-data`);
   },
 
   // Get payment data by ID
   getPaymentDataById: async (id: string): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/payment-data/${id}`, getConfig());
+    return api.get(`/payment-data/${id}`);
   },
 
   // Create new payment data
   createPaymentData: async (
-    paymentData: PaymentDataStructure
+    paymentData: PaymentDataStructure,
   ): Promise<AxiosResponse> => {
-    return axios.post(`${apiURL}/payment-data`, paymentData, getConfig());
+    return api.post(`/payment-data`, paymentData);
   },
 
   // Update payment data by ID
   updatePaymentData: async (
     id: string,
-    paymentData: PaymentDataStructure
+    paymentData: PaymentDataStructure,
   ): Promise<AxiosResponse> => {
-    return axios.put(`${apiURL}/payment-data/${id}`, paymentData, getConfig());
+    return api.put(`/payment-data/${id}`, paymentData);
   },
 
   // Delete payment data by ID
   deletePaymentData: async (id: string): Promise<AxiosResponse> => {
-    return axios.delete(`${apiURL}/payment-data/${id}`, getConfig());
+    return api.delete(`/payment-data/${id}`);
   },
 };
 

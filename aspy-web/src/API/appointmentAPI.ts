@@ -1,41 +1,36 @@
-import axios, { AxiosResponse } from "axios";
-import apiURL from "./apiConfig";
+import { AxiosResponse } from "axios";
+import api from "@API/api";
 import { AppointmentRequest } from "@/typesRequest/AppointmentRequest";
-import { getConfig } from "./config";
+import { Appointment } from "@/typesResponse/Appointment";
 
 const appointmentAPI = {
   // Get all appointments
-  getAllAppointments: async (): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/appointment`, getConfig());
-  },
+  getAllAppointments: async (): Promise<Appointment[]> =>
+    (await api.get(`/appointment`)).data,
 
   // Get appointment by ID
   getAppointmentById: async (id: string): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/appointment/${id}`, getConfig());
+    return api.get(`/appointment/${id}`);
   },
 
   // Create a new appointment
   createAppointment: async (
-    appointmentData: AppointmentRequest
+    appointmentData: AppointmentRequest,
   ): Promise<AxiosResponse> => {
-    return axios.post(`${apiURL}/appointment`, appointmentData, getConfig());
+    return api.post(`/appointment`, appointmentData);
   },
 
   // Update appointment by ID
   updateAppointment: async (
     id: number,
-    appointmentData: { status: number }
+    appointmentData: { status: number },
   ): Promise<AxiosResponse> => {
-    return axios.put(
-      `${apiURL}/appointment/${id}`,
-      appointmentData,
-      getConfig()
-    );
+    return api.put(`/appointment/${id}`, appointmentData);
   },
 
   // Delete appointment by ID
   deleteAppointment: async (id: string): Promise<AxiosResponse> => {
-    return axios.delete(`${apiURL}/appointment/${id}`, getConfig());
+    return api.delete(`/appointment/${id}`);
   },
 };
 

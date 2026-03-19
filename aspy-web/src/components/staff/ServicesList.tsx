@@ -11,7 +11,7 @@ import Header from "@components/Header";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { useRoleData } from "@/observer/RoleDataContext";
 import { useState } from "react";
-import { ServiceResponse } from "@/typesResponse/ServiceResponse";
+import { ServiceResponse } from "@typesResponse/Service";
 
 export default function Services() {
   const { data } = useRoleData();

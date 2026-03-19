@@ -1,16 +1,13 @@
-import { Role } from "@/typesResponse/Role";
-import { UserAccountStatus } from "@/typesResponse/UserAccountStatus";
-import { Person } from "@/typesResponse/Person";
-
 // FINAL
-export interface UserLogin {
+import { Role } from "@/typesResponse/Role";
+
+export interface UserAccount {
   user_account_id: number;
+
   role_id: number;
   status_id: number;
 
   email: string;
-  password_hash?: string;
-
   last_login: string | null;
 
   created_by: number | null;
@@ -20,6 +17,4 @@ export interface UserLogin {
   modification_date: string;
 
   role: Role;
-  status: UserAccountStatus;
-  person: Person;
 }

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { AppointmentRequest } from "@/typesRequest/AppointmentRequest";
 import { FileData } from "@/types/FileData";
-import { ServiceResponse } from "@/typesResponse/ServiceResponse";
+import { ServiceResponse } from "@typesResponse/Service";
 import { useRoleData } from "@/observer/RoleDataContext";
 import { getAuthenticatedUserID } from "@/utils/store";
 import Box from "@mui/material/Box";
@@ -67,7 +67,7 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
     if (file != null) {
       setLoad(true);
       const selectedService = services.find(
-        (service) => service.service_id === parsedServiceId
+        (service) => service.service_id === parsedServiceId,
       );
 
       // 2. Subir a Cloudinary

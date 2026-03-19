@@ -1,5 +1,5 @@
 import { useRoleData } from "@/observer/RoleDataContext";
-import { ServiceResponse } from "@/typesResponse/ServiceResponse";
+import { ServiceResponse } from "@typesResponse/Service";
 import Divider from "@mui/material/Divider";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -19,7 +19,7 @@ export default function Review({ service_id }: ReviewProps) {
   useEffect(() => {
     if (!loading && data.services) {
       const found = data.services.find(
-        (s: ServiceResponse) => s.service_id === service_id
+        (s: ServiceResponse) => s.service_id === service_id,
       );
       setService(found);
     }

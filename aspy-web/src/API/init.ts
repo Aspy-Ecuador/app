@@ -13,20 +13,15 @@ import roleAPI from "./roleAPI";
 import professionalAPI from "./professionalAPI";
 import paymentAPI from "./paymentAPI";
 
-type Loader = {
+type Loader<T = any> = {
   name: string;
-  fn: () => Promise<{ data: any }>;
+  fn: () => Promise<T>;
 };
 
 const adminLoaders: Loader[] = [
   { name: "services", fn: serviceAPI.getAllServices },
-  { name: "userAccounts", fn: userAccountAPI.getAllUserAccounts },
   { name: "appointments", fn: appointmentAPI.getAllAppointments },
-  { name: "appointmentReports", fn: appointmentReportAPI.getAllReports },
   { name: "persons", fn: personAPI.getAllPersons },
-  { name: "roles", fn: roleAPI.getAllRoles },
-  { name: "professional", fn: professionalAPI.getAllProfessionals },
-  { name: "schedules", fn: scheduleAPI.getAllSchedules },
   { name: "payments", fn: paymentAPI.getAllPayments },
 ];
 
@@ -96,9 +91,10 @@ export const runAdminLoaders = async () => {
   for (const { name, fn } of adminLoaders) {
     try {
       const response = await fn();
-      localStorage.setItem(name, JSON.stringify(response.data));
-      console.log(response.data);
+      console.log(response);
+      localStorage.setItem(name, JSON.stringify(response));
       console.log(`✔️ Loaded: ${name}`);
+      console.log(typeof localStorage.getItem(name));
     } catch (error) {
       console.error(`❌ Error loading ${name}:`, error);
     }

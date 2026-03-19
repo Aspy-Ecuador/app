@@ -17,7 +17,7 @@ import { FileData } from "@/types/FileData";
 import UploadButton from "@buttons/UploadButton";
 import { Edit, UploadFile } from "@mui/icons-material";
 import { useRoleData } from "@/observer/RoleDataContext";
-import { ServiceResponse } from "@/typesResponse/ServiceResponse";
+import { ServiceResponse } from "@typesResponse/Service";
 
 interface PaymentFormProps {
   setFile: (valid: FileData) => void;
@@ -76,7 +76,7 @@ export default function PaymentForm({
     setIsValid(allFilled);
     if (!loading && data.services) {
       const found = data.services.find(
-        (s: ServiceResponse) => s.service_id === service_id
+        (s: ServiceResponse) => s.service_id === service_id,
       );
       setService(found);
     }

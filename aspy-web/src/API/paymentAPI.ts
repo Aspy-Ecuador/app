@@ -1,7 +1,7 @@
-import axios, { AxiosResponse } from "axios";
-import apiURL from "./apiConfig";
-import { getConfig } from "./config";
+import { AxiosResponse } from "axios";
+import api from "@API/api";
 import { StatusRequest } from "@/typesRequest/StatusRequest";
+import { Payment } from "@/typesResponse/Payment";
 
 interface PaymentData {
   person_id: number;
@@ -17,18 +17,16 @@ interface PaymentData {
 
 const paymentAPI = {
   // Get all payments
-  getAllPayments: async (): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/payment`, getConfig());
-  },
+  getAllPayments: async (): Promise<Payment[]> =>
+    (await api.get(`/payment`)).data,
 
   // Get payment by ID
-  getPaymentById: async (id: string): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/payment/${id}`, getConfig());
-  },
+  getPaymentById: async (id: string): Promise<Payment> =>
+    (await api.get(`/payment/${id}`)).data,
 
   // Create a new payment
   createPayment: async (paymentData: PaymentData): Promise<AxiosResponse> => {
-    return axios.post(`${apiURL}/payment`, paymentData, getConfig());
+    return api.post(`/payment`, paymentData);
   },
 
   // Update payment by ID
@@ -36,19 +34,19 @@ const paymentAPI = {
     id: string,
     paymentData: PaymentData,
   ): Promise<AxiosResponse> => {
-    return axios.put(`${apiURL}/payment/${id}`, paymentData, getConfig());
+    return api.put(`/payment/${id}`, paymentData);
   },
 
   updateStatus: async (
     id: number,
     status: StatusRequest,
   ): Promise<AxiosResponse> => {
-    return axios.put(`${apiURL}/paymentstatus/${id}`, status, getConfig());
+    return api.put(`/paymentstatus/${id}`, status);
   },
 
   // Delete payment by ID
   deletePayment: async (id: string): Promise<AxiosResponse> => {
-    return axios.delete(`${apiURL}/payment/${id}`, getConfig());
+    return api.delete(`/payment/${id}`);
   },
 };
 

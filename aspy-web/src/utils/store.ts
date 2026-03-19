@@ -95,16 +95,11 @@ export const getAuthenticatedUserRole = (): string | null | undefined => {
 
 // Función para obtener el nombre del usuario autenticado
 export const getAuthenticatedUserName = (): string => {
-  const userAuthenticated = getAuthenticatedUser();
-  if (
-    !userAuthenticated ||
-    userAuthenticated === null ||
-    typeof userAuthenticated === "string"
-  ) {
+  const user = getAuthenticatedUser();
+  if (!user || user === null || typeof user === "string") {
     throw new Error("No authenticated user found");
   }
-  console.log(userAuthenticated);
-  return userAuthenticated.full_name; // Devuelve el nombre del usuario autenticado
+  return `${user.person.first_name} ${user.person.last_name}`; // Devuelve el nombre del usuario autenticado
 };
 
 // Función para obtener el correo del usuario autenticado
@@ -117,12 +112,12 @@ export const getAuthenticatedUserEmail = (): string => {
 };
 
 // Función para obtener la identidad del usuario autenticado
-export const getAuthenticatedUserIdentity = (): number => {
+export const getAuthenticatedUserIdentity = (): string => {
   const user = getAuthenticatedUser();
   if (!user || user === null || typeof user === "string") {
     throw new Error("No authenticated user found");
   }
-  return user.user_id; // Devuelve el email del usuario autenticado
+  return user.person.identification.number; // Devuelve el email del usuario autenticado
 };
 
 export const getAuthenticatedUserID = (): number => {
@@ -130,7 +125,7 @@ export const getAuthenticatedUserID = (): number => {
   if (!user || user === null || typeof user === "string") {
     throw new Error("No authenticated user found");
   }
-  return user.person_id; // Devuelve el email del usuario autenticado
+  return user.user_account_id; // Devuelve el email del usuario autenticado
 };
 
 // Función para obtener el tema actual

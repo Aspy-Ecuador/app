@@ -1,14 +1,14 @@
 import { Receipt } from "@/types/Receipt";
 import { ReceiptResponse } from "@/typesResponse/ReceiptResponse";
 import { PaymentDataResponse } from "@/typesResponse/PaymentDataResponse";
-import { ServiceResponse } from "@/typesResponse/ServiceResponse";
+import { ServiceResponse } from "@typesResponse/Service";
 import { User } from "@/types/User";
 
 export function receiptAdapter(
   receipt: ReceiptResponse,
   paymentData: PaymentDataResponse,
   service: ServiceResponse,
-  client: User
+  client: User,
 ): Receipt {
   const datehour: string = receipt.creation_date.split(" ")[0];
   return {

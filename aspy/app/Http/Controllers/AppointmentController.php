@@ -13,12 +13,38 @@ class AppointmentController extends Controller
 {
     public function index()
     {
-        return Appointment::with(['payment', 'scheduledBy', 'workerSchedule', 'status', 'trackingAppointment'])->get();
+        $appointments = Appointment::with([
+            'client.person',
+            'professional.person',
+            'workerSchedule.schedule',
+            'appointmentStatus',
+            'service'
+        ])->get();
+
+        return $appointments->map(function ($appointment) {
+            return [
+                'appointment_id' => $appointment->appointment_id,
+                'appointment_status' => $appointment->appointmentStatus,
+                'client' => $appointment->client->person,
+                'professional' => $appointment->professional->person,
+                'service' => $appointment->service,
+                'worker_schedule' => $appointment->workerSchedule
+            ];
+        });
     }
 
     public function show($id)
     {
-        return Appointment::with(['payment', 'scheduledBy', 'workerSchedule', 'status', 'trackingAppointment'])->findOrFail($id);
+        $appointment = Appointment::with(['client.person', 'professional.person', 'workerSchedule.schedule', 'appointmentStatus', 'service'])->findOrFail($id);
+        return [
+            'appointment_id' => $appointment->appointment_id,
+            'appointment_status' => $appointment->appointment_status,
+            'date' => $appointment->date,
+            'client' => $appointment->client->person,
+            'professional' => $appointment->professional->person,
+            'service' => $appointment->service,
+            'worker_schedule' => $appointment->worker_schedule
+        ];
     }
 
     public function store(Request $request)

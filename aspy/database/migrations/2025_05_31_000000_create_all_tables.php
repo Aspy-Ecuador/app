@@ -4,306 +4,386 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAllTables extends Migration
+return new class extends Migration
 {
-    public function up()
+    /**
+     * PostgreSQL no permite ejecutar DDL (CREATE TABLE) dentro de una
+     * transacción que ya tuvo un error. Al poner esto en false, Laravel
+     * no envuelve toda la migración en una sola transacción, evitando
+     * el error 25P02 "current transaction is aborted".
+     */
+    public $withinTransaction = false;
+
+    public function up(): void
     {
+        // ============================================================
+        // TABLAS DE CATÁLOGO / LOOKUP (sin dependencias)
+        // ============================================================
+
         Schema::create('role', function (Blueprint $table) {
-            $table->id('role_id');
-            $table->string('name')->unique();
-            $table->string('created_by')->default('system');
-            $table->string('modified_by')->nullable();
+            $table->increments('role_id');
+            $table->string('name', 100);
+            $table->integer('created_by')->nullable();
+            $table->integer('modified_by')->nullable();
             $table->timestamp('creation_date')->useCurrent();
-            $table->timestamp('modification_date')->nullable();
-        });
-
-        Schema::create('gender', function (Blueprint $table) {
-            $table->id('gender_id');
-            $table->string('name');
-        });
-
-        Schema::create('occupation', function (Blueprint $table) {
-            $table->id('occupation_id');
-            $table->string('name');
-        });
-
-        Schema::create('marital_status', function (Blueprint $table) {
-            $table->id('marital_status_id');
-            $table->string('name');
-        });
-
-        Schema::create('education', function (Blueprint $table) {
-            $table->id('education_id');
-            $table->string('name');
-        });
-
-        Schema::create('country', function (Blueprint $table) {
-            $table->id('country_id');
-            $table->string('name');
-            $table->string('phone_code', 4);
-        });
-
-        Schema::create('state', function (Blueprint $table) {
-            $table->id('state_id');
-            $table->string('name');
-            $table->foreignId('country_id')->constrained('country', 'country_id');
-        });
-
-        Schema::create('city', function (Blueprint $table) {
-            $table->id('city_id');
-            $table->string('name');
-            $table->foreignId('state_id')->constrained('state', 'state_id');
+            $table->timestamp('modification_date')->useCurrent();
         });
 
         Schema::create('user_account_status', function (Blueprint $table) {
-            $table->id('status_id');
-            $table->string('name');
+            $table->increments('user_account_status_id');
+            $table->string('name', 100);
         });
 
-        Schema::create('appointment_status', function (Blueprint $table) {
-            $table->id('status_id');
-            $table->string('name');
+        Schema::create('gender', function (Blueprint $table) {
+            $table->increments('gender_id');
+            $table->string('name', 50);
+        });
+
+        Schema::create('occupation', function (Blueprint $table) {
+            $table->increments('occupation_id');
+            $table->string('name', 100);
+        });
+
+        Schema::create('marital_status', function (Blueprint $table) {
+            $table->increments('marital_status_id');
+            $table->string('name', 100);
+        });
+
+        Schema::create('education', function (Blueprint $table) {
+            $table->increments('education_id');
+            $table->string('name', 100);
         });
 
         Schema::create('payment_status', function (Blueprint $table) {
-            $table->id('status_id');
-            $table->string('name');
+            $table->increments('payment_status_id');
+            $table->string('name', 100);
         });
 
-        Schema::create('user_account', function (Blueprint $table) {
-            $table->id('user_id');
-            $table->foreignId('role_id')->constrained('role', 'role_id');
-            $table->string('email')->unique();
-            $table->string('password_hash');
-            $table->foreignId('status')->constrained('user_account_status', 'status_id');
-            $table->timestamp('last_login')->nullable();
-            $table->string('created_by')->default('system');
-            $table->string('modified_by')->nullable();
-            $table->timestamp('creation_date')->useCurrent();
-            $table->timestamp('modification_date')->nullable();
+        Schema::create('receipt_status', function (Blueprint $table) {
+            $table->increments('receipt_status_id');
+            $table->string('name', 100);
         });
 
-        Schema::create('person', function (Blueprint $table) {
-            $table->id('person_id');
-            $table->foreignId('user_id')->unique()->constrained('user_account', 'user_id');
-            $table->foreignId('gender_id')->constrained('gender', 'gender_id');
-            $table->foreignId('occupation_id')->constrained('occupation', 'occupation_id');
-            $table->foreignId('marital_status_id')->constrained('marital_status', 'marital_status_id');
-            $table->foreignId('education_id')->constrained('education', 'education_id');
-            $table->string('first_name');
-            $table->string('last_name')->nullable();
-            $table->date('birthdate');
-            $table->string('created_by')->default('system');
-            $table->string('modified_by')->nullable();
-            $table->timestamp('creation_date')->useCurrent();
-            $table->timestamp('modification_date')->nullable();
-        });
-
-        Schema::create('client', function (Blueprint $table) {
-            $table->unsignedBigInteger('person_id')->primary();
-            $table->foreign('person_id')->references('person_id')->on('person');
-            $table->string('created_by')->default('system');
-            $table->string('modified_by')->nullable();
-            $table->timestamp('creation_date')->useCurrent();
-            $table->timestamp('modification_date')->nullable();
-        });
-
-        Schema::create('staff', function (Blueprint $table) {
-            $table->unsignedBigInteger('person_id')->primary();
-            $table->foreign('person_id')->references('person_id')->on('person');
-            $table->string('created_by')->default('system');
-            $table->string('modified_by')->nullable();
-            $table->timestamp('creation_date')->useCurrent();
-            $table->timestamp('modification_date')->nullable();
-        });
-
-        Schema::create('professional', function (Blueprint $table) {
-            $table->unsignedBigInteger('person_id')->primary();
-            $table->foreign('person_id')->references('person_id')->on('person');
-            $table->string('specialty');
-            $table->string('title', 50);
-            $table->text('about')->nullable();
-            $table->string('created_by')->default('system');
-            $table->string('modified_by')->nullable();
-            $table->timestamp('creation_date')->useCurrent();
-            $table->timestamp('modification_date')->nullable();
-        });
-
-        Schema::create('identification', function (Blueprint $table) {
-            $table->id('identification_id');
-            $table->foreignId('person_id')->constrained('person', 'person_id');
-            $table->string('type', 50);
-            $table->string('number', 13)->unique();
-            $table->timestamp('due_date')->nullable();
-            $table->string('created_by')->default('system');
-            $table->string('modified_by')->nullable();
-            $table->timestamp('creation_date')->useCurrent();
-            $table->timestamp('modification_date')->nullable();
-        });
-
-        Schema::create('address', function (Blueprint $table) {
-            $table->id('address_id');
-            $table->foreignId('person_id')->constrained('person', 'person_id');
-            $table->string('type', 50);
-            $table->foreignId('country_id')->constrained('country', 'country_id');
-            $table->foreignId('state_id')->constrained('state', 'state_id');
-            $table->foreignId('city_id')->constrained('city', 'city_id');
-            $table->text('primary_address');
-            $table->text('secondary_address')->nullable();
-            $table->foreignId('aga_id')->constrained('aga', 'aga_id');
-            $table->string('created_by')->default('system');
-            $table->string('modified_by')->nullable();
-            $table->timestamp('creation_date')->useCurrent();
-            $table->timestamp('modification_date')->nullable();
-        });
-
-        Schema::create('phone', function (Blueprint $table) {
-            $table->id('phone_id');
-            $table->foreignId('person_id')->constrained('person', 'person_id');
-            $table->string('type', 50);
-            $table->string('number', 10);
-            $table->string('name')->nullable();
-            $table->string('relationship', 50);
-            $table->string('created_by')->default('system');
-            $table->string('modified_by')->nullable();
-            $table->timestamp('creation_date')->useCurrent();
-            $table->timestamp('modification_date')->nullable();
-        });
-
-        Schema::create('schedule', function (Blueprint $table) {
-            $table->id('schedule_id');
-            $table->date('date');
-            $table->time('start_time');
-            $table->time('end_time');
-            $table->string('name')->nullable();
-            $table->string('created_by')->default('system');
-            $table->string('modified_by')->nullable();
-            $table->timestamp('creation_date')->useCurrent();
-            $table->timestamp('modification_date')->nullable();
-        });
-
-        Schema::create('worker_schedule', function (Blueprint $table) {
-            $table->id('worker_schedule_id');
-            $table->foreignId('schedule_id')->constrained('schedule', 'schedule_id');
-            $table->foreignId('person_id')->constrained('person', 'person_id');
-            $table->boolean('is_available');
-            $table->string('created_by')->default('system');
-            $table->string('modified_by')->nullable();
-            $table->timestamp('creation_date')->useCurrent();
-            $table->timestamp('modification_date')->nullable();
-            $table->unique(['schedule_id', 'person_id']);
+        Schema::create('appointment_status', function (Blueprint $table) {
+            $table->increments('appointment_status_id');
+            $table->string('name', 100);
         });
 
         Schema::create('service', function (Blueprint $table) {
-            $table->id('service_id');
-            $table->string('name')->unique();
+            $table->increments('service_id');
+            $table->string('name', 150);
             $table->decimal('price', 10, 2);
-            $table->string('created_by')->default('system');
-            $table->string('modified_by')->nullable();
+            $table->integer('created_by')->nullable();
+            $table->integer('modified_by')->nullable();
             $table->timestamp('creation_date')->useCurrent();
-            $table->timestamp('modification_date')->nullable();
+            $table->timestamp('modification_date')->useCurrent();
         });
+
+        // ============================================================
+        // GEOGRAFÍA
+        // ============================================================
+
+        Schema::create('country', function (Blueprint $table) {
+            $table->increments('country_id');
+            $table->string('name', 100);
+            $table->string('phone_code', 10)->nullable();
+        });
+
+        Schema::create('state', function (Blueprint $table) {
+            $table->increments('state_id');
+            $table->unsignedInteger('country_id');
+            $table->string('name', 100);
+            $table->foreign('country_id')->references('country_id')->on('country');
+        });
+
+        Schema::create('city', function (Blueprint $table) {
+            $table->increments('city_id');
+            $table->unsignedInteger('state_id');
+            $table->string('name', 100);
+            $table->foreign('state_id')->references('state_id')->on('state');
+        });
+
+        // ============================================================
+        // CUENTA DE USUARIO
+        // ============================================================
+
+        Schema::create('user_account', function (Blueprint $table) {
+            $table->increments('user_account_id');
+            $table->unsignedInteger('role_id');
+            $table->unsignedInteger('status_id');
+            $table->string('email', 150)->unique();
+            $table->string('password_hash', 255);
+            $table->timestamp('last_login')->nullable();
+            $table->integer('created_by')->nullable();
+            $table->integer('modified_by')->nullable();
+            $table->timestamp('creation_date')->useCurrent();
+            $table->timestamp('modification_date')->useCurrent();
+            $table->foreign('role_id')->references('role_id')->on('role');
+            $table->foreign('status_id')->references('user_account_status_id')->on('user_account_status');
+        });
+
+        // ============================================================
+        // PERSONA BASE
+        // ============================================================
+
+        Schema::create('person', function (Blueprint $table) {
+            $table->increments('person_id');
+            $table->unsignedInteger('user_id')->nullable();
+            $table->unsignedInteger('gender_id')->nullable();
+            $table->unsignedInteger('occupation_id')->nullable();
+            $table->unsignedInteger('marital_status_id')->nullable();
+            $table->unsignedInteger('education_id')->nullable();
+            $table->string('first_name', 100);
+            $table->string('last_name', 100);
+            $table->date('birthdate')->nullable();
+            $table->integer('created_by')->nullable();
+            $table->integer('modified_by')->nullable();
+            $table->timestamp('creation_date')->useCurrent();
+            $table->timestamp('modification_date')->useCurrent();
+            $table->foreign('user_id')->references('user_account_id')->on('user_account');
+            $table->foreign('gender_id')->references('gender_id')->on('gender');
+            $table->foreign('occupation_id')->references('occupation_id')->on('occupation');
+            $table->foreign('marital_status_id')->references('marital_status_id')->on('marital_status');
+            $table->foreign('education_id')->references('education_id')->on('education');
+        });
+
+        // ============================================================
+        // SUBTIPOS DE PERSONA
+        // ============================================================
+
+        Schema::create('client', function (Blueprint $table) {
+            $table->unsignedInteger('person_id')->primary();
+            $table->integer('created_by')->nullable();
+            $table->integer('modified_by')->nullable();
+            $table->timestamp('creation_date')->useCurrent();
+            $table->timestamp('modification_date')->useCurrent();
+            $table->foreign('person_id')->references('person_id')->on('person');
+        });
+
+        Schema::create('professional', function (Blueprint $table) {
+            $table->unsignedInteger('person_id')->primary();
+            $table->string('specialty', 150)->nullable();
+            $table->string('title', 150)->nullable();
+            $table->integer('created_by')->nullable();
+            $table->integer('modified_by')->nullable();
+            $table->timestamp('creation_date')->useCurrent();
+            $table->timestamp('modification_date')->useCurrent();
+            $table->foreign('person_id')->references('person_id')->on('person');
+        });
+
+        Schema::create('staff', function (Blueprint $table) {
+            $table->unsignedInteger('person_id')->primary();
+            $table->integer('created_by')->nullable();
+            $table->integer('modified_by')->nullable();
+            $table->timestamp('creation_date')->useCurrent();
+            $table->timestamp('modification_date')->useCurrent();
+            $table->foreign('person_id')->references('person_id')->on('person');
+        });
+
+        // ============================================================
+        // DATOS DE CONTACTO Y UBICACIÓN
+        // ============================================================
+
+        Schema::create('phone', function (Blueprint $table) {
+            $table->increments('phone_id');
+            $table->unsignedInteger('person_id');
+            $table->string('number', 30);
+            $table->string('type', 50)->nullable();
+            $table->integer('created_by')->nullable();
+            $table->integer('modified_by')->nullable();
+            $table->timestamp('creation_date')->useCurrent();
+            $table->timestamp('modification_date')->useCurrent();
+            $table->foreign('person_id')->references('person_id')->on('person');
+        });
+
+        Schema::create('address', function (Blueprint $table) {
+            $table->increments('address_id');
+            $table->unsignedInteger('person_id');
+            $table->string('type', 50)->nullable();
+            $table->unsignedInteger('country_id')->nullable();
+            $table->unsignedInteger('state_id')->nullable();
+            $table->unsignedInteger('city_id')->nullable();
+            $table->string('primary_address', 255)->nullable();
+            $table->string('secondary_address', 255)->nullable();
+            $table->integer('created_by')->nullable();
+            $table->integer('modified_by')->nullable();
+            $table->timestamp('creation_date')->useCurrent();
+            $table->timestamp('modification_date')->useCurrent();
+            $table->foreign('person_id')->references('person_id')->on('person');
+            $table->foreign('country_id')->references('country_id')->on('country');
+            $table->foreign('state_id')->references('state_id')->on('state');
+            $table->foreign('city_id')->references('city_id')->on('city');
+        });
+
+        Schema::create('identification', function (Blueprint $table) {
+            $table->increments('identification_id');
+            $table->unsignedInteger('person_id');
+            $table->string('type', 50);
+            $table->string('number', 50);
+            $table->integer('created_by')->nullable();
+            $table->integer('modified_by')->nullable();
+            $table->timestamp('creation_date')->useCurrent();
+            $table->timestamp('modification_date')->useCurrent();
+            $table->foreign('person_id')->references('person_id')->on('person');
+        });
+
+        // ============================================================
+        // SERVICIOS POR PROFESIONAL
+        // ============================================================
 
         Schema::create('professional_service', function (Blueprint $table) {
-            $table->id('professional_service_id');
-            $table->foreignId('service_id')->constrained('service', 'service_id');
-            $table->foreignId('person_id')->constrained('professional', 'person_id');
-            $table->string('created_by')->default('system');
-            $table->string('modified_by')->nullable();
+            $table->increments('professional_service_id');
+            $table->unsignedInteger('service_id');
+            $table->unsignedInteger('professional_id');
+            $table->integer('created_by')->nullable();
+            $table->integer('modified_by')->nullable();
             $table->timestamp('creation_date')->useCurrent();
-            $table->timestamp('modification_date')->nullable();
+            $table->timestamp('modification_date')->useCurrent();
+            $table->foreign('service_id')->references('service_id')->on('service');
+            $table->foreign('professional_id')->references('person_id')->on('professional');
         });
 
-        Schema::create('payment_data', function (Blueprint $table) {
-            $table->id('payment_data_id');
-            $table->string('type');
-            $table->integer('number');
-            $table->string('file')->unique();
-            $table->string('created_by')->default('system');
-            $table->string('modified_by')->nullable();
+        // ============================================================
+        // AGENDA / HORARIOS
+        // ============================================================
+
+        Schema::create('schedule', function (Blueprint $table) {
+            $table->increments('schedule_id');
+            $table->date('date');
+            $table->time('start_time');
+            $table->time('end_time');
+            $table->string('name', 150)->nullable();
+            $table->integer('created_by')->nullable();
+            $table->integer('modified_by')->nullable();
             $table->timestamp('creation_date')->useCurrent();
-            $table->timestamp('modification_date')->nullable();
+            $table->timestamp('modification_date')->useCurrent();
+        });
+
+        Schema::create('worker_schedule', function (Blueprint $table) {
+            $table->increments('worker_schedule_id');
+            $table->unsignedInteger('schedule_id');
+            $table->unsignedInteger('professional_id');
+            $table->boolean('is_available')->default(true);
+            $table->integer('created_by')->nullable();
+            $table->integer('modified_by')->nullable();
+            $table->timestamp('creation_date')->useCurrent();
+            $table->timestamp('modification_date')->useCurrent();
+            $table->foreign('schedule_id')->references('schedule_id')->on('schedule');
+            $table->foreign('professional_id')->references('person_id')->on('professional');
+        });
+
+        // ============================================================
+        // PAGOS
+        // ============================================================
+
+        Schema::create('payment_data', function (Blueprint $table) {
+            $table->increments('payment_data_id');
+            $table->unsignedInteger('client_id');
+            $table->string('type', 50)->nullable();
+            $table->string('file', 255)->nullable();
+            $table->integer('created_by')->nullable();
+            $table->integer('modified_by')->nullable();
+            $table->timestamp('creation_date')->useCurrent();
+            $table->timestamp('modification_date')->useCurrent();
+            $table->foreign('client_id')->references('person_id')->on('client');
         });
 
         Schema::create('payment', function (Blueprint $table) {
-            $table->id('payment_id');
-            $table->foreignId('person_id')->constrained('client', 'person_id');
-            $table->foreignId('service_id')->constrained('service', 'service_id');
-            $table->foreignId('payment_data_id')->constrained('payment_data', 'payment_data_id');
-            $table->decimal('service_price', 10, 2);
-            $table->decimal('total_amount', 10, 2);
-            $table->foreignId('status')->constrained('payment_status', 'status_id');
-            $table->string('created_by')->default('system');
-            $table->string('modified_by')->nullable();
+            $table->increments('payment_id');
+            $table->unsignedInteger('client_id');
+            $table->unsignedInteger('service_id');
+            $table->unsignedInteger('payment_data_id')->nullable();
+            $table->unsignedInteger('payment_status_id');
+            $table->integer('created_by')->nullable();
+            $table->integer('modified_by')->nullable();
             $table->timestamp('creation_date')->useCurrent();
-            $table->timestamp('modification_date')->nullable();
+            $table->timestamp('modification_date')->useCurrent();
+            $table->foreign('client_id')->references('person_id')->on('client');
+            $table->foreign('service_id')->references('service_id')->on('service');
+            $table->foreign('payment_data_id')->references('payment_data_id')->on('payment_data');
+            $table->foreign('payment_status_id')->references('payment_status_id')->on('payment_status');
         });
 
         Schema::create('receipt', function (Blueprint $table) {
-            $table->id('receipt_id');
-            $table->foreignId('payment_id')->unique()->constrained('payment', 'payment_id');
-            $table->string('status');
-            $table->string('created_by')->default('system');
-            $table->string('modified_by')->nullable();
+            $table->increments('receipt_id');
+            $table->unsignedInteger('payment_id');
+            $table->unsignedInteger('receipt_status_id');
+            $table->integer('created_by')->nullable();
+            $table->integer('modified_by')->nullable();
             $table->timestamp('creation_date')->useCurrent();
-            $table->timestamp('modification_date')->nullable();
+            $table->timestamp('modification_date')->useCurrent();
+            $table->foreign('payment_id')->references('payment_id')->on('payment');
+            $table->foreign('receipt_status_id')->references('receipt_status_id')->on('receipt_status');
         });
 
+        // ============================================================
+        // CITAS / APPOINTMENTS
+        // ============================================================
+
         Schema::create('appointment', function (Blueprint $table) {
-            $table->id('appointment_id');
-            $table->foreignId('payment_id')->constrained('payment', 'payment_id');
-            $table->foreignId('scheduled_by')->constrained('person', 'person_id');
-            $table->foreignId('worker_schedule_id')->unique()->constrained('worker_schedule', 'worker_schedule_id');
-            $table->foreignId('tracking_appointment')->nullable()->unique()->constrained('appointment', 'appointment_id');
-            $table->foreignId('status')->constrained('appointment_status', 'status_id');
-            $table->string('created_by')->default('system');
-            $table->string('modified_by')->nullable();
+            $table->increments('appointment_id');
+            $table->unsignedInteger('payment_id')->nullable();
+            $table->unsignedInteger('client_id');
+            $table->unsignedInteger('professional_id');
+            $table->unsignedInteger('worker_schedule_id');
+            $table->unsignedInteger('appointment_status_id');
+            $table->unsignedInteger('service_id');
+            $table->integer('created_by')->nullable();
+            $table->integer('modified_by')->nullable();
             $table->timestamp('creation_date')->useCurrent();
-            $table->timestamp('modification_date')->nullable();
+            $table->timestamp('modification_date')->useCurrent();
+            $table->foreign('payment_id')->references('payment_id')->on('payment');
+            $table->foreign('client_id')->references('person_id')->on('client');
+            $table->foreign('professional_id')->references('person_id')->on('professional');
+            $table->foreign('worker_schedule_id')->references('worker_schedule_id')->on('worker_schedule');
+            $table->foreign('appointment_status_id')->references('appointment_status_id')->on('appointment_status');
+            $table->foreign('service_id')->references('service_id')->on('service');
         });
 
         Schema::create('appointment_report', function (Blueprint $table) {
-            $table->id('appointment_report_id');
-            $table->foreignId('appointment_id')->unique()->constrained('appointment', 'appointment_id');
-            $table->text('comments');
-            $table->string('sign');
-            $table->string('created_by')->default('system');
-            $table->string('modified_by')->nullable();
+            $table->increments('appointment_report_id');
+            $table->unsignedInteger('appointment_id');
+            $table->string('file', 255)->nullable();
+            $table->string('sign', 255)->nullable();
+            $table->integer('created_by')->nullable();
+            $table->integer('modified_by')->nullable();
             $table->timestamp('creation_date')->useCurrent();
-            $table->timestamp('modification_date')->nullable();
+            $table->timestamp('modification_date')->useCurrent();
+            $table->foreign('appointment_id')->references('appointment_id')->on('appointment');
         });
     }
 
-    public function down()
+    public function down(): void
     {
+        // Eliminar en orden inverso para respetar las FK
         Schema::dropIfExists('appointment_report');
         Schema::dropIfExists('appointment');
         Schema::dropIfExists('receipt');
         Schema::dropIfExists('payment');
         Schema::dropIfExists('payment_data');
-        Schema::dropIfExists('professional_service');
-        Schema::dropIfExists('service');
         Schema::dropIfExists('worker_schedule');
         Schema::dropIfExists('schedule');
-        Schema::dropIfExists('phone');
-        Schema::dropIfExists('address');
+        Schema::dropIfExists('professional_service');
         Schema::dropIfExists('identification');
-        Schema::dropIfExists('professional');
+        Schema::dropIfExists('address');
+        Schema::dropIfExists('phone');
         Schema::dropIfExists('staff');
+        Schema::dropIfExists('professional');
         Schema::dropIfExists('client');
         Schema::dropIfExists('person');
         Schema::dropIfExists('user_account');
-        Schema::dropIfExists('payment_status');
-        Schema::dropIfExists('appointment_status');
-        Schema::dropIfExists('user_account_status');
-        Schema::dropIfExists('aga');
         Schema::dropIfExists('city');
         Schema::dropIfExists('state');
         Schema::dropIfExists('country');
+        Schema::dropIfExists('service');
+        Schema::dropIfExists('appointment_status');
+        Schema::dropIfExists('receipt_status');
+        Schema::dropIfExists('payment_status');
         Schema::dropIfExists('education');
         Schema::dropIfExists('marital_status');
         Schema::dropIfExists('occupation');
         Schema::dropIfExists('gender');
+        Schema::dropIfExists('user_account_status');
         Schema::dropIfExists('role');
     }
-}
+};

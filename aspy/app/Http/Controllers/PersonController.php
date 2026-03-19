@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Person;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class PersonController extends Controller
@@ -15,10 +14,10 @@ class PersonController extends Controller
             'occupation',
             'maritalStatus',
             'education',
-            'userAccount',
-            'phones',
-            'addresses',
-            'identifications',
+            'userAccount.role',
+            'phone',
+            'address.city.state.country',            
+            'identification',
         ])->get();
  
         return response()->json($persons);
@@ -32,9 +31,9 @@ class PersonController extends Controller
             'maritalStatus',
             'education',
             'userAccount',
-            'phones',
-            'addresses',
-            'identifications',
+            'phone',
+            'address',
+            'identification',
         ])->find($id);
  
         if (!$person) {

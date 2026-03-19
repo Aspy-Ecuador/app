@@ -1,6 +1,5 @@
-import axios, { AxiosResponse } from "axios";
-import apiURL from "./apiConfig";
-import { getConfig } from "./config";
+import { AxiosResponse } from "axios";
+import api from "@API/api";
 
 interface WorkerScheduleData {
   schedule_id: number;
@@ -9,24 +8,22 @@ interface WorkerScheduleData {
 
 const workerScheduleAPI = {
   getAllWorkerSchedules: async (): Promise<AxiosResponse> =>
-    await axios.get(`${apiURL}/worker-schedule`, getConfig()),
+    await api.get(`/worker-schedule`),
 
   getWorkerScheduleById: async (id: string): Promise<AxiosResponse> =>
-    axios.get(`${apiURL}/worker-schedule/${id}`, getConfig()),
+    api.get(`/worker-schedule/${id}`),
 
   createWorkerSchedule: async (
-    data: WorkerScheduleData
-  ): Promise<AxiosResponse> =>
-    axios.post(`${apiURL}/worker-schedule`, data, getConfig()),
+    data: WorkerScheduleData,
+  ): Promise<AxiosResponse> => api.post(`/worker-schedule`, data),
 
   updateWorkerSchedule: async (
     id: string,
-    data: WorkerScheduleData
-  ): Promise<AxiosResponse> =>
-    axios.put(`${apiURL}/worker-schedule/${id}`, data, getConfig()),
+    data: WorkerScheduleData,
+  ): Promise<AxiosResponse> => api.put(`/worker-schedule/${id}`, data),
 
   deleteWorkerSchedule: async (id: string): Promise<AxiosResponse> =>
-    axios.delete(`${apiURL}/worker-schedule/${id}`, getConfig()),
+    api.delete(`/worker-schedule/${id}`),
 };
 
 export default workerScheduleAPI;

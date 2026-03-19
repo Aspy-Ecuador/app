@@ -1,6 +1,5 @@
-import axios, { AxiosResponse } from "axios";
-import apiURL from "./apiConfig";
-import { getConfig } from "./config";
+import { AxiosResponse } from "axios";
+import api from "@API/api";
 
 interface ReceiptData {
   appointment_id: number;
@@ -8,23 +7,21 @@ interface ReceiptData {
 }
 
 const receiptAPI = {
-  getAllReceipts: async (): Promise<AxiosResponse> =>
-    axios.get(`${apiURL}/receipt`, getConfig()),
+  getAllReceipts: async (): Promise<AxiosResponse> => api.get(`/receipt`),
 
   getReceiptById: async (id: string): Promise<AxiosResponse> =>
-    axios.get(`${apiURL}/receipt/${id}`, getConfig()),
+    api.get(`/receipt/${id}`),
 
   createReceipt: async (data: any): Promise<AxiosResponse> =>
-    axios.post(`${apiURL}/receipt`, data, getConfig()),
+    api.post(`/receipt`, data),
 
   updateReceipt: async (
     id: string,
-    data: ReceiptData
-  ): Promise<AxiosResponse> =>
-    axios.put(`${apiURL}/receipt/${id}`, data, getConfig()),
+    data: ReceiptData,
+  ): Promise<AxiosResponse> => api.put(`/receipt/${id}`, data),
 
   deleteReceipt: async (id: string): Promise<AxiosResponse> =>
-    axios.delete(`${apiURL}/receipt/${id}`, getConfig()),
+    api.delete(`/receipt/${id}`),
 };
 
 export default receiptAPI;

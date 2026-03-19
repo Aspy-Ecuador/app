@@ -2,7 +2,7 @@
 import { User } from "@/types/User";
 import { PaymentDataResponse } from "@/typesResponse/PaymentDataResponse";
 import { ReceiptResponse } from "@/typesResponse/ReceiptResponse";
-import { ServiceResponse } from "@/typesResponse/ServiceResponse";
+import { ServiceResponse } from "@typesResponse/Service";
 
 export type Receipt = {
   receipt: ReceiptResponse;

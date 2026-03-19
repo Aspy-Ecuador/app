@@ -1,6 +1,6 @@
 import { useRoleData } from "@/observer/RoleDataContext";
 import { useState } from "react";
-import { ServiceResponse } from "@/typesResponse/ServiceResponse";
+import { ServiceResponse } from "@typesResponse/Service";
 import { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import Grid from "@mui/material/Grid2";
 import Box from "@mui/material/Box";

@@ -1,6 +1,5 @@
-import axios, { AxiosResponse } from "axios";
-import apiURL from "./apiConfig";
-import { getConfig } from "./config";
+import { AxiosResponse } from "axios";
+import api from "@API/api";
 
 interface ProfessionalServiceData {
   service_id: number;
@@ -10,24 +9,22 @@ interface ProfessionalServiceData {
 
 const professionalServiceAPI = {
   getAllProfessionalServices: async (): Promise<AxiosResponse> =>
-    axios.get(`${apiURL}/professional-service`, getConfig()),
+    api.get(`/professional-service`),
 
   getProfessionalServiceById: async (id: string): Promise<AxiosResponse> =>
-    axios.get(`${apiURL}/professional-service/${id}`, getConfig()),
+    api.get(`/professional-service/${id}`),
 
   createProfessionalService: async (
-    data: ProfessionalServiceData
-  ): Promise<AxiosResponse> =>
-    axios.post(`${apiURL}/professional-service`, data, getConfig()),
+    data: ProfessionalServiceData,
+  ): Promise<AxiosResponse> => api.post(`/professional-service`, data),
 
   updateProfessionalService: async (
     id: string,
-    data: ProfessionalServiceData
-  ): Promise<AxiosResponse> =>
-    axios.put(`${apiURL}/professional-service/${id}`, data, getConfig()),
+    data: ProfessionalServiceData,
+  ): Promise<AxiosResponse> => api.put(`/professional-service/${id}`, data),
 
   deleteProfessionalService: async (id: string): Promise<AxiosResponse> =>
-    axios.delete(`${apiURL}/professional-service/${id}`, getConfig()),
+    api.delete(`/professional-service/${id}`),
 };
 
 export default professionalServiceAPI;

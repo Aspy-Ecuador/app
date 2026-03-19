@@ -1,6 +1,5 @@
-import axios, { AxiosResponse } from "axios";
-import apiURL from "./apiConfig";
-import { getConfig } from "./config";
+import { AxiosResponse } from "axios";
+import api from "@API/api";
 
 interface ScheduleData {
   person_id: number;
@@ -10,23 +9,21 @@ interface ScheduleData {
 }
 
 const scheduleAPI = {
-  getAllSchedules: async (): Promise<AxiosResponse> =>
-    axios.get(`${apiURL}/schedule`, getConfig()),
+  getAllSchedules: async (): Promise<AxiosResponse> => api.get(`/schedule`),
 
   getScheduleById: async (id: string): Promise<AxiosResponse> =>
-    axios.get(`${apiURL}/schedule/${id}`, getConfig()),
+    api.get(`/schedule/${id}`),
 
   createSchedule: async (data: ScheduleData): Promise<AxiosResponse> =>
-    axios.post(`${apiURL}/schedule`, data, getConfig()),
+    api.post(`/schedule`, data),
 
   updateSchedule: async (
     id: string,
-    data: ScheduleData
-  ): Promise<AxiosResponse> =>
-    axios.put(`${apiURL}/schedule/${id}`, data, getConfig()),
+    data: ScheduleData,
+  ): Promise<AxiosResponse> => api.put(`/schedule/${id}`, data),
 
   deleteSchedule: async (id: string): Promise<AxiosResponse> =>
-    axios.delete(`${apiURL}/schedule/${id}`, getConfig()),
+    api.delete(`/schedule/${id}`),
 };
 
 export default scheduleAPI;

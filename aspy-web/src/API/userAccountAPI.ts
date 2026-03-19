@@ -1,6 +1,5 @@
-import axios, { AxiosResponse } from "axios";
-import apiURL from "./apiConfig";
-import { getConfig } from "./config";
+import { AxiosResponse } from "axios";
+import api from "@API/api";
 import { UserAccountRequest } from "@/typesRequest/UserAccountRequest";
 
 interface UserAccountData {
@@ -11,36 +10,32 @@ interface UserAccountData {
 const userAccountAPI = {
   // Get all user accounts
   getAllUserAccounts: async (): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/user-account`, getConfig());
+    return api.get(`/user-account`);
   },
 
   // Get user account by ID
   getUserAccountById: async (id: string): Promise<AxiosResponse> => {
-    return axios.get(`${apiURL}/user-account/${id}`, getConfig());
+    return api.get(`/user-account/${id}`);
   },
 
   // Create a new user account
   createUserAccount: async (
-    userAccountData: UserAccountData
+    userAccountData: UserAccountData,
   ): Promise<AxiosResponse> => {
-    return axios.post(`${apiURL}/user-account`, userAccountData, getConfig());
+    return api.post(`/user-account`, userAccountData);
   },
 
   // Update user account by ID
   updateUserAccount: async (
     id: number,
-    userAccountData: UserAccountRequest
+    userAccountData: UserAccountRequest,
   ): Promise<AxiosResponse> => {
-    return axios.put(
-      `${apiURL}/user-account/${id}`,
-      userAccountData,
-      getConfig()
-    );
+    return api.put(`/user-account/${id}`, userAccountData);
   },
 
   // Delete user account by ID
   deleteUserAccount: async (id: string): Promise<AxiosResponse> => {
-    return axios.delete(`${apiURL}/user-account/${id}`, getConfig());
+    return api.delete(`/user-account/${id}`);
   },
 };
 

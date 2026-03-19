@@ -94,25 +94,10 @@ export const RoleDataProvider = ({
     const newData: DataStore = {};
 
     for (const key of keys) {
-      try {
-        let value = JSON.parse(localStorage.getItem(key) ?? "null");
-
-        // 🔹 Si la clave es "services", normalizamos y ordenamos por id_serice
-        if (key === "services" && Array.isArray(value)) {
-          value = value
-            .map((s: any) => ({
-              ...s,
-              id_serice: s.id_serice ?? s.service_id, // compatibilidad con DB
-            }))
-            .sort((a, b) => Number(a.id_serice) - Number(b.id_serice));
-        }
-
-        newData[key] = value;
-      } catch {
-        // Ignorar errores de parseo
-      }
+      const value = localStorage.getItem(key) ?? "null";
+      newData[key] = value;
     }
-
+    console.log("ESTMOS RECARGANDO");
     setData(newData);
     setLoading(false);
   };
@@ -129,20 +114,20 @@ export const RoleDataProvider = ({
 
       console.log(
         "📦 Datos crudos de API:",
-        normalized.map((s: Service) => s.id_serice)
+        normalized.map((s: Service) => s.id_serice),
       );
       console.log(
         "🔍 Tipos de ID:",
-        normalized.map((s: Service) => typeof s.id_serice)
+        normalized.map((s: Service) => typeof s.id_serice),
       );
 
       const orderedServices = [...normalized].sort(
-        (a: Service, b: Service) => Number(a.id_serice) - Number(b.id_serice)
+        (a: Service, b: Service) => Number(a.id_serice) - Number(b.id_serice),
       );
 
       console.log(
         "✅ Datos ordenados:",
-        orderedServices.map((s: Service) => s.id_serice)
+        orderedServices.map((s: Service) => s.id_serice),
       );
 
       localStorage.setItem("services", JSON.stringify(orderedServices));
@@ -158,7 +143,7 @@ export const RoleDataProvider = ({
     try {
       const res = await personAPI.getAllPersons();
       const ordered = [...res.data].sort(
-        (a: PersonResponse, b: PersonResponse) => a.person_id - b.person_id
+        (a: PersonResponse, b: PersonResponse) => a.person_id - b.person_id,
       );
 
       localStorage.setItem("persons", JSON.stringify(ordered));
@@ -174,7 +159,7 @@ export const RoleDataProvider = ({
       const res = await userAccountAPI.getAllUserAccounts();
       const ordered = [...res.data].sort(
         (a: UserAccountResponse, b: UserAccountResponse) =>
-          a.user_id - b.user_id
+          a.user_id - b.user_id,
       );
 
       localStorage.setItem("userAccounts", JSON.stringify(ordered));
@@ -189,7 +174,7 @@ export const RoleDataProvider = ({
     try {
       const res = await roleAPI.getAllRoles();
       const ordered = [...res.data].sort(
-        (a: RoleResponse, b: RoleResponse) => a.role_id - b.role_id
+        (a: RoleResponse, b: RoleResponse) => a.role_id - b.role_id,
       );
 
       localStorage.setItem("roles", JSON.stringify(ordered));
@@ -205,7 +190,7 @@ export const RoleDataProvider = ({
       const res = await professionalAPI.getAllProfessionals();
       const ordered = [...res.data].sort(
         (a: ProfessionalResponse, b: ProfessionalResponse) =>
-          a.person_id - b.person_id
+          a.person_id - b.person_id,
       );
 
       localStorage.setItem("professional", JSON.stringify(ordered));
@@ -221,7 +206,7 @@ export const RoleDataProvider = ({
       const res = await scheduleAPI.getAllSchedules();
       const ordered = [...res.data].sort(
         (a: ScheduleResponse, b: ScheduleResponse) =>
-          a.schedule_id - b.schedule_id
+          a.schedule_id - b.schedule_id,
       );
 
       localStorage.setItem("schedules", JSON.stringify(ordered));
@@ -237,7 +222,7 @@ export const RoleDataProvider = ({
       const res = await appointmentAPI.getAllAppointments();
       const ordered = [...res.data].sort(
         (a: AppointmentResponse, b: AppointmentResponse) =>
-          a.appointment_id - b.appointment_id
+          a.appointment_id - b.appointment_id,
       );
 
       localStorage.setItem("appointments", JSON.stringify(ordered));
@@ -253,7 +238,7 @@ export const RoleDataProvider = ({
       const res = await workerScheduleAPI.getAllWorkerSchedules();
       const ordered = [...res.data].sort(
         (a: WorkerScheduleResponse, b: WorkerScheduleResponse) =>
-          a.worker_schedule_id - b.worker_schedule_id
+          a.worker_schedule_id - b.worker_schedule_id,
       );
 
       localStorage.setItem("workerSchedules", JSON.stringify(ordered));
@@ -269,7 +254,7 @@ export const RoleDataProvider = ({
       const res = await paymentDataAPI.getAllPaymentData();
       const ordered = [...res.data].sort(
         (a: PaymentDataResponse, b: PaymentDataResponse) =>
-          a.payment_data_id - b.payment_data_id
+          a.payment_data_id - b.payment_data_id,
       );
 
       localStorage.setItem("paymentData", JSON.stringify(ordered));
@@ -285,7 +270,7 @@ export const RoleDataProvider = ({
       const res = await professionalServiceAPI.getAllProfessionalServices();
       const ordered = [...res.data].sort(
         (a: ProfessionalServiceResponse, b: ProfessionalServiceResponse) =>
-          a.professional_service_id - b.professional_service_id
+          a.professional_service_id - b.professional_service_id,
       );
 
       localStorage.setItem("professionalServices", JSON.stringify(ordered));
@@ -300,7 +285,7 @@ export const RoleDataProvider = ({
     try {
       const res = await receiptAPI.getAllReceipts();
       const ordered = [...res.data].sort(
-        (a: ReceiptResponse, b: ReceiptResponse) => a.receipt_id - b.receipt_id
+        (a: ReceiptResponse, b: ReceiptResponse) => a.receipt_id - b.receipt_id,
       );
 
       localStorage.setItem("receipts", JSON.stringify(ordered));
@@ -316,7 +301,7 @@ export const RoleDataProvider = ({
       const res = await appointmentReportAPI.getAllReports();
       const ordered = [...res.data].sort(
         (a: AppointmentReportResponse, b: AppointmentReportResponse) =>
-          a.appointment_report_id - b.appointment_report_id
+          a.appointment_report_id - b.appointment_report_id,
       );
 
       localStorage.setItem("appointmentReports", JSON.stringify(ordered));
@@ -331,7 +316,7 @@ export const RoleDataProvider = ({
     try {
       const res = await paymentAPI.getAllPayments();
       const ordered = [...res.data].sort(
-        (a: PaymentResponse, b: PaymentResponse) => a.payment_id - b.payment_id
+        (a: PaymentResponse, b: PaymentResponse) => a.payment_id - b.payment_id,
       );
 
       localStorage.setItem("payments", JSON.stringify(ordered));

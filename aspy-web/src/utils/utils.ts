@@ -1,11 +1,32 @@
 import type { User } from "@/types/User";
-import type { Appointment } from "@/types/Appointment";
+import type { Appointment } from "@/typesResponse/Appointment";
+import type { Person } from "@/typesResponse/Person";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import autoTable from "jspdf-autotable";
 import logoBase64 from "@assets/logo mediano.png";
 import { Receipt } from "@/types/Receipt";
 import { ProfessionalServiceResponse } from "@/typesResponse/ProfessionalServiceResponse";
+import { PersonResponse } from "@/typesResponse/PersonResponse";
+import { WorkerScheduleResponse } from "@/typesResponse/WorkerScheduleResponse";
+import { ServiceResponse } from "@typesResponse/Service";
+import { AppointmentResponse } from "@/typesResponse/AppointmentResponse";
+import { UserAccountResponse } from "@/typesResponse/UserAccountResponse";
+import { RoleResponse } from "@/typesResponse/RoleResponse";
+import { userAdapter } from "@/adapters/userAdapter";
+import { PaymentResponse } from "@/typesResponse/PaymentResponse";
+import { PageViewsBarChartProps } from "@/components/admin/PageViewsBarChart";
+import { StatCardProps } from "@/components/admin/StatCard";
+import { ProfessionalResponse } from "@/typesResponse/ProffesionalResponse";
+import { appointmentAdapter } from "@/adapters/appointmentAdapter";
+import { AppointmentReportResponse } from "@/typesResponse/AppointmentReportResponse";
+import { AppointmentReport } from "@/types/AppointmentReport";
+import { appointmentReportResponseAdapter } from "@/adapters/appointmentReportResponseAdapter";
+import { CloudinaryUploadResponse } from "@/typesResponse/CloudinaryUploadResponse";
+import { FileData } from "@/types/FileData";
+import { dataPayments } from "@/data/Payment";
+import { ReceiptResponse } from "@/typesResponse/ReceiptResponse";
+import { receiptAdapter } from "@/adapters/receiptAdapter";
 
 type TendenciaDiaria = {
   promedioPorcentual: number;
@@ -53,27 +74,6 @@ export function CalcularTendenciaDiaria(data: number[]): TendenciaDiaria {
 export function TotalIngresosMensual(data: number[]): TotalIngresosMensual {
   return { total: data.reduce((total, numero) => total + numero, 0) };
 }
-
-import { PersonResponse } from "@/typesResponse/PersonResponse";
-import { WorkerScheduleResponse } from "@/typesResponse/WorkerScheduleResponse";
-import { ServiceResponse } from "@/typesResponse/ServiceResponse";
-import { AppointmentResponse } from "@/typesResponse/AppointmentResponse";
-import { UserAccountResponse } from "@/typesResponse/UserAccountResponse";
-import { RoleResponse } from "@/typesResponse/RoleResponse";
-import { userAdapter } from "@/adapters/userAdapter";
-import { PaymentResponse } from "@/typesResponse/PaymentResponse";
-import { PageViewsBarChartProps } from "@/components/admin/PageViewsBarChart";
-import { StatCardProps } from "@/components/admin/StatCard";
-import { ProfessionalResponse } from "@/typesResponse/ProffesionalResponse";
-import { appointmentAdapter } from "@/adapters/appointmentAdapter";
-import { AppointmentReportResponse } from "@/typesResponse/AppointmentReportResponse";
-import { AppointmentReport } from "@/types/AppointmentReport";
-import { appointmentReportResponseAdapter } from "@/adapters/appointmentReportResponseAdapter";
-import { CloudinaryUploadResponse } from "@/typesResponse/CloudinaryUploadResponse";
-import { FileData } from "@/types/FileData";
-import { dataPayments } from "@/data/Payment";
-import { ReceiptResponse } from "@/typesResponse/ReceiptResponse";
-import { receiptAdapter } from "@/adapters/receiptAdapter";
 
 export function getPerson(person_id: number, data: any): PersonResponse {
   const persons: PersonResponse[] = data.persons;
@@ -239,81 +239,34 @@ export function getDataAppointment(data: any): PageViewsBarChartProps {
   return { total, scheduled, completed, cancelled };
 }
 
-//SÍ SE USA
+// FINAL
 export function getDataCard(data: any): StatCardProps[] {
-  const users: UserAccountResponse[] = data.userAccounts ?? [];
-  const appointments: AppointmentResponse[] = data.appointments ?? [];
+  const users: Person[] = data.persons ?? [];
+  console.log(typeof localStorage.getItem("persons"));
+  const appointments: Appointment[] = data.appointments ?? [];
 
-  const today = new Date();
-  const lastMonth = today.getMonth() === 0 ? 11 : today.getMonth() - 1;
-  const lastMonthYear =
-    today.getMonth() === 0 ? today.getFullYear() - 1 : today.getFullYear();
-
-  // Días reales del mes pasado (28, 29, 30 o 31 según corresponda)
-  const daysInLastMonth = new Date(lastMonthYear, lastMonth + 1, 0).getDate();
-
-  /**
-   * Cuenta cuántos items caen en cada día del mes pasado.
-   * Retorna un arreglo de exactamente `daysInLastMonth` posiciones,
-   * sin padding — el componente gráfico debe respetar este tamaño real.
-   */
-  function countByDay<T>(items: T[], getDate: (item: T) => string): number[] {
-    const counts = Array(daysInLastMonth).fill(0);
-
-    items.forEach((item) => {
-      const date = new Date(getDate(item));
-      if (
-        date.getMonth() === lastMonth &&
-        date.getFullYear() === lastMonthYear
-      ) {
-        const day = date.getDate();
-        if (day >= 1 && day <= daysInLastMonth) {
-          counts[day - 1] += 1;
-        }
-      }
-    });
-
-    return counts;
-  }
-
-  const clientUsers = users.filter((u) => u.role_id === 3);
-  const inactiveUsers = users.filter((u) => u.status === 2);
-
-  const usuariosData = countByDay(users, (u) => u.creation_date);
-  const citasData = countByDay(appointments, (a) => a.creation_date);
-  const pacientesData = countByDay(clientUsers, (u) => u.creation_date);
-  const inactivosData = countByDay(inactiveUsers, (u) => u.creation_date);
-
-  const sum = (arr: number[]) => arr.reduce((a, b) => a + b, 0);
+  // filtros
+  const pacientes = users.filter((u) => u.user_account.role.name === "Client");
+  const profesionales = users.filter(
+    (u) => u.user_account.role.name === "Professional",
+  );
 
   return [
     {
       title: "Usuarios",
-      value: sum(usuariosData).toString(),
-      interval: "Mes pasado",
-      trend: "usuarios",
-      data: usuariosData,
+      value: users.length.toString(),
     },
     {
       title: "Citas",
-      value: sum(citasData).toString(),
-      interval: "Mes pasado",
-      trend: "citas",
-      data: citasData,
+      value: appointments.length.toString(),
     },
     {
       title: "Pacientes",
-      value: sum(pacientesData).toString(),
-      interval: "Mes pasado",
-      trend: "pacientes",
-      data: pacientesData,
+      value: pacientes.length.toString(),
     },
     {
-      title: "Usuarios inactivos",
-      value: sum(inactivosData).toString(),
-      interval: "Mes pasado",
-      trend: "inactivos",
-      data: inactivosData,
+      title: "Profesionales",
+      value: profesionales.length.toString(),
     },
   ];
 }

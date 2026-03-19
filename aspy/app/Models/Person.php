@@ -1,7 +1,6 @@
 <?php
 
 // FINAL
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -63,19 +62,19 @@ class Person extends Model
         return $this->belongsTo(Education::class, 'education_id', 'education_id');
     }
 
-    public function phones()
+    public function phone()
     {
-        return $this->hasMany(Phone::class, 'person_id', 'person_id');
+        return $this->hasOne(Phone::class, 'person_id', 'person_id');
     }
 
-    public function addresses()
+    public function address()
     {
-        return $this->hasMany(Address::class, 'person_id', 'person_id');
+        return $this->hasOne(Address::class, 'person_id', 'person_id');
     }
 
-    public function identifications()
+    public function identification()
     {
-        return $this->hasMany(Identification::class, 'person_id', 'person_id');
+        return $this->hasOne(Identification::class, 'person_id', 'person_id');
     }
 
     public function client()
@@ -91,10 +90,5 @@ class Person extends Model
     public function staff()
     {
         return $this->hasOne(Staff::class, 'person_id', 'person_id');
-    }
-
-    public function getFullNameAttribute(): string
-    {
-        return "{$this->first_name} {$this->last_name}";
     }
 }
