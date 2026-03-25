@@ -8,7 +8,7 @@ import { register } from "@/API/auth";
 import Box from "@mui/material/Box";
 import UserFormAdmin from "@admin/UserFormAdmin";
 import Steps from "@components/Steps";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Success from "@components/Success";
 import Progress from "@components/Progress";
 import userAccountAPI from "@/API/userAccountAPI";

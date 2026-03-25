@@ -1,7 +1,7 @@
 import { User } from "@/types/User";
 import { getAge, getGender, translateRol } from "@/utils/utils";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";

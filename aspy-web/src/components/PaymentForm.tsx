@@ -11,7 +11,7 @@ import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
 import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
 import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import BancoPacifico from "@assets/BP.jpeg";
 import { FileData } from "@/types/FileData";
 import UploadButton from "@buttons/UploadButton";

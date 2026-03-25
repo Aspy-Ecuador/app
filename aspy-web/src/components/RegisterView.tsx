@@ -5,7 +5,7 @@ import { register } from "@/API/auth";
 import { UserAccountRequest } from "@/typesRequest/UserAccountRequest";
 import Box from "@mui/material/Box";
 import Steps from "@components/Steps";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Success from "@components/Success";
 import FormRegister from "@components/FormRegister";
 

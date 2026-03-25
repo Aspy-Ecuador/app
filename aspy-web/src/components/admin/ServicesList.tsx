@@ -4,7 +4,7 @@ import { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import { columnsServiceAdmin } from "@utils/columns";
 import { ServiceResponse } from "@typesResponse/Service";
 import { useRoleData } from "@/observer/RoleDataContext";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import SimpleHeader from "@components/SimpleHeader";

@@ -3,30 +3,5 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ],
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "esModuleInterop": true,
-    "module": "ESNext",
-    "target": "ESNext",
-    "moduleResolution": "Node",
-    "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "types": ["jest", "node", "vite/client"],
-    "typeRoots": ["./node_modules/@types/", "./types", "./node_modules"],
-    "baseUrl": ".", // Enable baseUrl for path resolution
-    "paths": {
-      "@assets/*": ["src/assets/*"], // Define alias for assets
-      "@API/*": ["src/API/*"],
-      "@types/*": ["src/type/*"],
-      "@typesResponse/*": ["src/typesResponse/*"],
-      "@typesRequest/*": ["src/typesRequest/*"]
-    }
-  },
-  "include": ["src", "jest.setup.ts"]
+  ]
 }

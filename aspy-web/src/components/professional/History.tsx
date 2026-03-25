@@ -3,7 +3,7 @@ import { User } from "@/types/User";
 import { useRoleData } from "@/observer/RoleDataContext";
 import { getUser } from "@/utils/utils";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import OverviewPatient from "@professional/OverviewPatient";
 import TimeLinePatients from "@professional/TimeLinePatient";
 import Header from "@components/Header";

@@ -9,7 +9,7 @@ import {
   getPayments,
 } from "@/utils/utils";
 import StatCard, { StatCardProps } from "@admin/StatCard";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import SessionsChart from "@admin/SessionsChart";
 import { PaymentResponse } from "@typesResponse/PaymentResponse";

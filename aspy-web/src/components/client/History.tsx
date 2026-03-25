@@ -1,5 +1,5 @@
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import TimeLinePatients from "@client/TimeLinePatient";
 import SimpleHeader from "@components/SimpleHeader";
 import { getAuthenticatedUserID } from "@/utils/store";

@@ -5,7 +5,7 @@ import { User } from "@/types/User";
 import Table from "@components/Table";
 import ProfileView from "@components/ProfileView";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Header from "@components/Header";
 import Progress from "../Progress";
 import { getAge, getOccupation, getUsers } from "@/utils/utils";

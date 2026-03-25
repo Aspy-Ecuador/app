@@ -8,7 +8,7 @@ import Button from "@mui/material/Button";
 import InvoiceView from "@components/InvoiceView";
 import Table from "@components/Table";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import SimpleHeader from "@components/SimpleHeader";
 import Progress from "@components/Progress";

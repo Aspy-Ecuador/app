@@ -1,7 +1,7 @@
 import { PaymentResponse } from "@/typesResponse/PaymentResponse";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 
 import FileDownloadIcon from "@mui/icons-material/FileDownload";

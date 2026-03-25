@@ -4,7 +4,7 @@ import { ButtonControl } from "@/types/ButtonControl";
 import { Appointment } from "@/types/Appointment";
 import { getNextAppointments } from "@/utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import ButtonList from "@components/ButtonList";
 import ShowAppointment from "@staff/ShowAppointment";

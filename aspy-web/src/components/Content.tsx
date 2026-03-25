@@ -2,7 +2,7 @@ import ThemedLogo from "@/shared-theme/ThemedLogo";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 
 export default function Content() {
   return (

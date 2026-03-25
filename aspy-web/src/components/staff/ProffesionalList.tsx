@@ -6,7 +6,7 @@ import { columnsProfessional } from "@utils/columns";
 import Table from "@components/Table";
 import ProfileView from "@components/ProfileView";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Header from "@components/Header";
 import { useRoleData } from "@/observer/RoleDataContext";
 import { getUsers } from "@/utils/utils";

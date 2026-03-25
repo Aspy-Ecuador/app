@@ -4,7 +4,7 @@ import { getAppointmentProfessional } from "@utils/utils";
 import { Appointment } from "@/types/Appointment";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Agenda from "@components/Agenda";
 import SelectProfessional from "@components/SelectProfessional";
 import Header from "@components/Header";

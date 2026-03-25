@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FileData } from "@/types/FileData";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import AddReport from "@professional/AddReport";
 import SimpleHeader from "../SimpleHeader";
 

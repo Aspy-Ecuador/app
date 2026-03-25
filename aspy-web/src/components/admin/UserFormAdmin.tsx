@@ -7,7 +7,7 @@ import { getUsers } from "@utils/utils";
 import Button from "@mui/material/Button";
 import UserInput from "@forms/UserInput";
 import Progress from "@components/Progress";
-import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
+import CircularProgress from "@mui/material/CircularProgress";
 
 interface UserFormProps {
   isEditMode: boolean;

@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Header from "@components/Header";
 import FormViewAdmin from "./FormViewAdmin";
 

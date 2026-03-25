@@ -7,7 +7,7 @@ import { useRoleData } from "@/observer/RoleDataContext";
 import Box from "@mui/material/Box";
 import UserForm from "@forms/UserForm";
 import Steps from "@components/Steps";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Success from "@components/Success";
 //import userAccountAPI from "@/API/userAccountAPI";
 //import { register } from "@API/auth";

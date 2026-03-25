@@ -1,7 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { columnsServiceAdmin } from "@utils/columns";
 import { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";

@@ -2,7 +2,7 @@ import { useRoleData } from "@/observer/RoleDataContext";
 import { Appointment } from "@/types/Appointment";
 import { getAppointmentsProfessional } from "@/utils/utils";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Agenda from "@components/Agenda";
 import Progress from "@components/Progress";
 import SimpleHeader from "../SimpleHeader";

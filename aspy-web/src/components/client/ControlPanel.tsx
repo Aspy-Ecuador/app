@@ -4,7 +4,7 @@ import { Appointment } from "@/types/Appointment";
 import { getAppointmentbyClient } from "@/utils/utils";
 import Agenda from "@components/Agenda";
 import WelcomePanel from "@components/WelcomePanel";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Progress from "@components/Progress";
 

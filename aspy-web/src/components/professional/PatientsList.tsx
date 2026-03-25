@@ -4,7 +4,7 @@ import { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import { User } from "@/types/User";
 import Divider from "@mui/material/Divider";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import OverviewPersona from "@professional/OverviewPersona";
 import Table from "@components/Table";

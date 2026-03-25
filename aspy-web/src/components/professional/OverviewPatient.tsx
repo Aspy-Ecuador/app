@@ -1,6 +1,6 @@
 import { User } from "@/types/User";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import { getAge, getOccupation } from "@/utils/utils";

@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { getPayment } from "@/utils/utils";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import InvoiceView from "@components/InvoiceView";
 import ReceiptDetails from "@staff/ReceiptDetails";
 import SimpleHeader from "@components/SimpleHeader";
