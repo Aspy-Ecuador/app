@@ -1,3 +1,4 @@
+// FINAL
 import { useTheme } from "@mui/material/styles";
 import { LineChart } from "@mui/x-charts/LineChart";
 import { CalcularTendenciaDiaria, TotalIngresosMensual } from "@utils/utils";
@@ -104,9 +105,7 @@ export default function SessionsChart({ income }: SessionsChartProps) {
             },
           }}
           slotProps={{
-            legend: {
-              hidden: true,
-            },
+            legend: {},
           }}
         >
           <AreaGradient color={theme.palette.primary.dark} id="ingresos" />

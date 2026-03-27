@@ -2,21 +2,21 @@ import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { inputCreateUserAdminConfig } from "@/config/userFormAdminConfig";
 import { useRoleData } from "@/observer/RoleDataContext";
-import { User } from "@/types/User";
-import { getUsers } from "@utils/utils";
+import type { UserForm } from "@/typesRequest/UserForm";
 import Button from "@mui/material/Button";
 import UserInput from "@forms/UserInput";
 import Progress from "@components/Progress";
 import CircularProgress from "@mui/material/CircularProgress";
+import type { Person } from "@/typesResponse/Person";
 
 interface UserFormProps {
   isEditMode: boolean;
   userId?: number;
   start: number;
   end: number;
-  onNext: (data: User) => void;
+  onNext: (data: UserForm) => void;
   onBack: () => void;
-  onFinish: (data: User) => void;
+  onFinish: (data: UserForm) => void;
   isLast?: boolean;
   onRoleChange?: (roleId: number) => void;
   load?: boolean;
@@ -34,27 +34,43 @@ export default function UserFormAdmin({
   onRoleChange,
   load,
 }: UserFormProps) {
-  const methods = useForm<User>();
+  const methods = useForm<UserForm>();
   const { data, loading } = useRoleData();
-  const users: User[] = getUsers(data);
+  const users: Person[] = data.persons ?? [];
 
   useEffect(() => {
     if (isEditMode) {
-      const user = users.find((u) => u.user_id === userId);
+      const user = users.find((u) => u.person_id === userId);
       if (user) {
         methods.reset({
           first_name: user.first_name,
           last_name: user.last_name,
-          email: user.email,
+          email: user.user_account.email,
           birthdate: user.birthdate,
-          gender: user.gender,
-          occupation: user.occupation,
-          marital_status: user.marital_status,
-          education: user.education,
-          role_id: user.role.role_id,
-          title: user.title,
-          about: user.about,
-          specialty: user.specialty,
+          gender_id: user.gender_id,
+          occupation_id: user.occupation_id,
+          marital_status_id: user.marital_status_id,
+          education_id: user.education_id,
+          role_id: user.user_account.role_id,
+          phone: {
+            number: user.phone?.number ?? "",
+            type: user.phone?.type ?? "",
+          },
+          identification: {
+            type: user.identification?.type ?? "",
+            number: user.identification?.number ?? "",
+          },
+          address: {
+            type: user.address?.type ?? "",
+            country_id: user.address?.country_id ?? 0,
+            state_id: user.address?.state_id ?? 0,
+            city_id: user.address?.city_id ?? 0,
+            primary_address: user.address?.primary_address ?? "",
+            secondary_address: user.address?.secondary_address ?? "",
+          },
+          // Campos de profesional
+          title: user.professional?.title ?? "",
+          specialty: user.professional?.specialty ?? "",
         });
       }
     } else {
@@ -63,8 +79,19 @@ export default function UserFormAdmin({
         last_name: "",
         email: "",
         birthdate: "",
+        password: "",
+        password_confirmation: "",
+        phone: { number: "", type: "" },
+        identification: { type: "", number: "" },
+        address: {
+          type: "",
+          country_id: 0,
+          state_id: 0,
+          city_id: 0,
+          primary_address: "",
+          secondary_address: "",
+        },
         title: "",
-        about: "",
         specialty: "",
       });
     }
@@ -78,9 +105,12 @@ export default function UserFormAdmin({
     }
   }, [roleSelect]);
 
+  // Ocultar campos de profesional si el rol no es 2
   const filteredInputs = inputCreateUserAdminConfig.filter((input) => {
-    const isExtraField = ["title", "about", "specialty"].includes(input.key);
-    return !(isExtraField && roleSelect !== 2);
+    const isProfessionalField = ["title", "about", "specialty"].includes(
+      input.key,
+    );
+    return !(isProfessionalField && roleSelect !== 2);
   });
 
   const list_inputs = filteredInputs.slice(start, end).map((input) => (
@@ -90,7 +120,7 @@ export default function UserFormAdmin({
       type={input.type}
       id={input.key}
       validation={
-        input.key === "confirmPassword"
+        input.key === "password_confirmation"
           ? {
               ...input.validation,
               validate: (value: string) =>
@@ -102,6 +132,7 @@ export default function UserFormAdmin({
       options={input.options}
     />
   ));
+
   const onSubmit = methods.handleSubmit((data) => {
     if (isLast) {
       onFinish(data);
@@ -111,9 +142,7 @@ export default function UserFormAdmin({
   });
 
   const getButtonLabel = () => {
-    if (isLast) {
-      return isEditMode ? "Guardar" : "Crear";
-    }
+    if (isLast) return isEditMode ? "Guardar" : "Crear";
     return "Siguiente";
   };
 
@@ -132,7 +161,7 @@ export default function UserFormAdmin({
           </div>
         </div>
         <div className="gap-10 mt-4 flex flex-row items-center justify-center">
-          {start != 0 && (
+          {start !== 0 && (
             <Button
               variant="outlined"
               onClick={onBack}
@@ -148,7 +177,7 @@ export default function UserFormAdmin({
             className="md:w-[250px]"
           >
             {load ? (
-              <CircularProgress size={24} sx={{ color: "white" }} /> // Mostrar ciclo de carga
+              <CircularProgress size={24} sx={{ color: "white" }} />
             ) : (
               getButtonLabel()
             )}

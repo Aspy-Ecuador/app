@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { getAppointmentProfessional } from "@utils/utils";
-import { Appointment } from "@/types/Appointment";
+import type { Appointment } from "@/typesResponse/Appointment";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -21,7 +21,7 @@ export default function Appointments() {
 
   const appointmentProfessional: Appointment[] = getAppointmentProfessional(
     selectedId,
-    data
+    data,
   );
 
   return (

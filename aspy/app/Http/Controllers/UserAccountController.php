@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Http\JsonResponse;
 
 class UserAccountController extends Controller
 {
@@ -88,82 +89,137 @@ class UserAccountController extends Controller
         return response()->json(['message' => 'No person data found'], 404);
     }
 
-    public function store(StoreUserAccount $request)
+    public function store(Request $request): JsonResponse
     {
-        DB::beginTransaction();
-
-        try {
-            // Validación agrupada
-            $validated = $request->validate([
-            'role_id'       => 'required|integer|exists:role,role_id',
-            'status_id'     => 'required|integer|exists:user_account_status,user_account_status_id',
-            'email'         => 'required|email|max:150|unique:user_account,email',
-            'password_hash' => 'required|string|max:255',
-            ]);
-
-            $validated['created_by'] = 1;
-
-            // Crear usuario
-            $user = UserAccount::create([
-                'role_id' => $validated['role_id'],
-                'email' => $validated['email'],
+        $validated = $request->validate([
+            // ── UserAccount ───────────────────────────────────
+            'email'                     => 'required|email|max:150|unique:user_account,email',
+            'password'                  => 'required|string|min:8|confirmed', // espera password_confirmation
+            'role_id'                   => 'required|integer|exists:role,role_id',           
+ 
+            // ── Datos base de Person ──────────────────────────
+            'gender_id'                 => 'required|integer|exists:gender,gender_id',
+            'occupation_id'             => 'required|integer|exists:occupation,occupation_id',
+            'marital_status_id'         => 'required|integer|exists:marital_status,marital_status_id',
+            'education_id'              => 'required|integer|exists:education,education_id',
+            'first_name'                => 'required|string|max:100',
+            'last_name'                 => 'required|string|max:100',
+            'birthdate'                 => 'required|date',
+ 
+            // ── Phone ─────────────────────────────────────────
+            'phone.number'              => 'required|string|max:30',
+            'phone.type'                => 'required|string|max:50',
+ 
+            // ── Address ───────────────────────────────────────
+            'address.type'              => 'required|string|max:50',
+            'address.country_id'        => 'required|integer|exists:country,country_id',
+            'address.state_id'          => 'required|integer|exists:state,state_id',
+            'address.city_id'           => 'required|integer|exists:city,city_id',
+            'address.primary_address'   => 'required|string|max:255',
+            'address.secondary_address' => 'required|string|max:255',
+ 
+            // ── Identification ────────────────────────────────
+            'identification.type'       => 'required|string|max:50',
+            'identification.number'     => 'required|string|max:50',
+ 
+            // ── Subtipo (opcional) ────────────────────────────
+            'role'                      => 'nullable|string|in:client,professional,staff',
+            'specialty'                 => 'nullable|string|max:150|required_if:role,professional',
+            'title'                     => 'nullable|string|max:150',
+        ]);
+ 
+        $createdBy = auth()->id();
+ 
+        $person = DB::transaction(function () use ($validated, $createdBy) {
+ 
+            // 1. Crear UserAccount (contraseña encriptada)
+            $userAccount = UserAccount::create([
+                'role_id'       => $validated['role_id'],
+                'status_id'     => 1,
+                'email'         => $validated['email'],
                 'password_hash' => Hash::make($validated['password']),
-                'status' => 1,
+                'created_by'    => $createdBy,
             ]);
-
-            // Crear persona
+ 
+            // 2. Crear Person vinculada al UserAccount recién creado
             $person = Person::create([
-                'user_id' => $user->user_id,
-                'first_name' => $validated['first_name'],
-                'last_name' => $validated['last_name'],
-                'birthdate' => $validated['birthdate'],
-                'gender_id' => $validated['gender_id'],
-                'occupation_id' => $validated['occupation_id'],
-                'marital_status_id' => $validated['marital_status_id'],
-                'education_id' => $validated['education_id'],
+                'user_id'           => $userAccount->user_account_id,
+                'gender_id'         => $validated['gender_id'] ?? null,
+                'occupation_id'     => $validated['occupation_id'] ?? null,
+                'marital_status_id' => $validated['marital_status_id'] ?? null,
+                'education_id'      => $validated['education_id'] ?? null,
+                'first_name'        => $validated['first_name'],
+                'last_name'         => $validated['last_name'],
+                'birthdate'         => $validated['birthdate'] ?? null,
+                'created_by'        => $createdBy,
             ]);
-
-            // Crear hijo
-            switch ($validated['role_id']) {
-                case 2:
-                    Professional::create([
-                        'person_id' => $person->person_id,
-                        'specialty' => $validated['specialty'],
-                        'title' => $validated['title'],
-                    ]);
-                    break;
-                case 4:
-                    Staff::create(['person_id' => $person->person_id]);
-                    break;
-                case 3:
-                    Client::create(['person_id' => $person->person_id]);
-                    break;
-            }
-
-            DB::commit();
-
-            return response()->json([
-                'user' => $user,
-                'person' => $person,
-                'person_type' => $validated['person_type'],
-            ], 201);
-
-        } catch (ValidationException $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $e->errors(),
-            ], 422);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'message' => 'Internal server error',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+ 
+            // 3. Crear Phone
+            $person->phone()->create([
+                'number'     => $validated['phone']['number'],
+                'type'       => $validated['phone']['type'] ?? null,
+                'created_by' => $createdBy,
+            ]);
+ 
+            // 4. Crear Address
+            $person->address()->create([
+                'type'              => $validated['address']['type'] ?? null,
+                'country_id'        => $validated['address']['country_id'] ?? null,
+                'state_id'          => $validated['address']['state_id'] ?? null,
+                'city_id'           => $validated['address']['city_id'] ?? null,
+                'primary_address'   => $validated['address']['primary_address'] ?? null,
+                'secondary_address' => $validated['address']['secondary_address'] ?? null,
+                'created_by'        => $createdBy,
+            ]);
+ 
+            // 5. Crear Identification
+            $person->identification()->create([
+                'type'       => $validated['identification']['type'],
+                'number'     => $validated['identification']['number'],
+                'created_by' => $createdBy,
+            ]);
+ 
+            // 6. Crear subtipo si se envía el campo role
+            match ($validated['role'] ?? null) {
+                'client'       => Client::create([
+                                    'person_id'  => $person->person_id,
+                                    'created_by' => $createdBy,
+                                  ]),
+                'professional' => Professional::create([
+                                    'person_id'  => $person->person_id,
+                                    'specialty'  => $validated['specialty'] ?? null,
+                                    'title'      => $validated['title'] ?? null,
+                                    'created_by' => $createdBy,
+                                  ]),
+                'staff'        => Staff::create([
+                                    'person_id'  => $person->person_id,
+                                    'created_by' => $createdBy,
+                                  ]),
+                default        => null,
+            };
+ 
+            return $person;
+        });
+ 
+        return response()->json(
+            $person->load([
+                'userAccount.role',
+                'userAccount.status',
+                'gender',
+                'occupation',
+                'maritalStatus',
+                'education',
+                'phone',
+                'address.country',
+                'address.state',
+                'address.city',
+                'identification',
+                'client',
+                'professional',
+                'staff',
+            ]),
+            201
+        );
     }
 
     public function update(Request $request, $id)

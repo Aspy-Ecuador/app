@@ -1,5 +1,6 @@
 import api from "@API/api";
 import { UserLogin } from "@/types/UserLogin";
+import type { UserForm } from "@/typesRequest/UserForm";
 import { setAuthenticatedUser } from "@store";
 import { UserAccountRequest } from "@/typesRequest/UserAccountRequest";
 
@@ -31,7 +32,7 @@ export const StoreUser = async () => {
   return userLogin;
 };
 
-export const register = async (userRegister: UserAccountRequest) => {
+export const register = async (userRegister: UserForm) => {
   try {
     await api.post("/user-account", userRegister);
   } catch (error) {

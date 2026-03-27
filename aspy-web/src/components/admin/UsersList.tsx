@@ -1,11 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { GridRowSelectionModel } from "@mui/x-data-grid";
-import { User } from "@/types/User";
-import { ButtonAdmin } from "@/types/ButtonAdmin";
+import type { CardAdmin } from "@/types/CardAdmin";
 import { useRoleData } from "@/observer/RoleDataContext";
-import { GridColDef } from "@mui/x-data-grid";
-import { getUsers } from "@/utils/utils";
+import type { GridColDef } from "@mui/x-data-grid";
+import type { GridRowId } from "@mui/x-data-grid";
 import { translateRol } from "@/utils/utils";
 import Progress from "@components/Progress";
 import SimpleHeader from "@components/SimpleHeader";
@@ -21,6 +19,7 @@ import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined
 import AttributionOutlinedIcon from "@mui/icons-material/AttributionOutlined";
 import SupervisedUserCircleOutlinedIcon from "@mui/icons-material/SupervisedUserCircleOutlined";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import type { Person } from "@/typesResponse/Person";
 
 const columns: GridColDef[] = [
   {
@@ -28,7 +27,6 @@ const columns: GridColDef[] = [
     headerName: "Nombres",
     disableColumnMenu: true,
     flex: 2,
-
     resizable: false,
   },
   {
@@ -43,13 +41,11 @@ const columns: GridColDef[] = [
     headerName: "Rol",
     disableColumnMenu: true,
     flex: 2,
-    renderCell: (params) => {
-      return (
-        <Typography variant="body1">
-          {translateRol(params.row.role.name)}
-        </Typography>
-      );
-    },
+    renderCell: (params) => (
+      <Typography variant="body1">
+        {translateRol(params.row.user_account?.role?.name)}
+      </Typography>
+    ),
     resizable: false,
   },
   {
@@ -57,20 +53,37 @@ const columns: GridColDef[] = [
     headerName: "Correo",
     disableColumnMenu: true,
     flex: 4,
+    renderCell: (params) => (
+      <Typography variant="body1">{params.row.user_account?.email}</Typography>
+    ),
+    resizable: false,
+  },
+  {
+    field: "phone",
+    headerName: "Celular",
+    disableColumnMenu: true,
+    flex: 3,
+    renderCell: (params) => (
+      <Typography variant="body1">{params.row.phone?.number}</Typography>
+    ),
     resizable: false,
   },
 ];
 
 export default function UsersList() {
-  const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
-  const [user, setUser] = useState<User | null>(null);
+  const [selectedId, setSelectedId] = useState<GridRowId | null>(null);
   const { data, loading } = useRoleData();
-
   const navigate = useNavigate();
 
-  const users: User[] = getUsers(data ?? []);
+  const users: Person[] = data.persons ?? [];
+  console.log(users);
+  const selectedUser =
+    selectedId !== null
+      ? (users.find((item) => String(item.user_id) === String(selectedId)) ??
+        null)
+      : null;
 
-  const buttonsData: ButtonAdmin[] = [
+  const buttonsData: CardAdmin[] = [
     {
       label: "Usuarios Activos",
       value: users.length,
@@ -78,32 +91,16 @@ export default function UsersList() {
     },
     {
       label: "Profesionales",
-      value: users.filter((user) => user.role.name === "Profesional").length,
+      value: users.filter((u) => u.user_account.role.name === "Professional")
+        .length,
       icon: <SupervisedUserCircleOutlinedIcon fontSize="inherit" />,
     },
     {
       label: "Pacientes",
-      value: users.filter((user) => user.role.name === "Paciente").length,
+      value: users.filter((u) => u.user_account.role.name === "Client").length,
       icon: <AttributionOutlinedIcon fontSize="inherit" />,
     },
   ];
-
-  useEffect(() => {
-    if (rowSelection.length > 0) {
-      const selectedUser = users.find(
-        (item) => item.user_id === rowSelection[0]
-      );
-      if (selectedUser) {
-        setUser(selectedUser);
-      }
-    } else {
-      setUser(null);
-    }
-  }, [rowSelection]);
-
-  const handleCreate = () => {
-    navigate(`/nuevo-usuario`);
-  };
 
   if (loading) return <Progress />;
 
@@ -120,7 +117,7 @@ export default function UsersList() {
             <IconButton
               size="large"
               className="botones-admin"
-              onClick={handleCreate}
+              onClick={() => navigate("/nuevo-usuario")}
             >
               <AddCircleOutlineOutlinedIcon fontSize="inherit" />
               <Typography
@@ -134,27 +131,24 @@ export default function UsersList() {
           </Stack>
         </Grid>
 
-        <Grid size={8}>
-          {loading ? (
-            <Progress />
-          ) : users.length ? (
-            <Table<User>
+        {/* Se expande a 12 si no hay selección, a 8 si hay */}
+        <Grid size={selectedUser ? 8 : 12}>
+          {users.length ? (
+            <Table<Person>
               columns={columns}
               rows={users}
               getRowId={(row) => row.user_id}
-              rowSelectionModel={rowSelection}
-              onRowSelectionChange={(newSelection) =>
-                setRowSelection(newSelection)
-              }
+              selectedId={selectedId}
+              onRowSelect={setSelectedId}
             />
           ) : (
             <Typography>No hay usuarios</Typography>
           )}
         </Grid>
 
-        {user && (
+        {selectedUser && (
           <Grid size={4}>
-            <ProfileView user={user} isRowPosition={false} />
+            <ProfileView user={selectedUser} isRowPosition={false} />
           </Grid>
         )}
       </Grid>

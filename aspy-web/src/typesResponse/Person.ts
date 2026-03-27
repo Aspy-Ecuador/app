@@ -1,13 +1,13 @@
-import { Professional } from "@/typesResponse/Professional";
-import { Staff } from "@/typesResponse/Staff";
-import { Client } from "@/typesResponse/Client";
-import { Gender } from "@/typesResponse/Gender";
-import { Occupation } from "@/typesResponse/Occupation";
-import { MaritalStatus } from "@/typesResponse/MaritalStatus";
-import { Phone } from "@/typesResponse/Phone";
-import { Identification } from "@/typesResponse/Identification";
-import { Address } from "@/typesResponse/Address";
-import { UserAccount } from "@/typesResponse/UserAccount";
+import type { Professional } from "@/typesResponse/Professional";
+import type { Staff } from "@/typesResponse/Staff";
+import type { Client } from "@/typesResponse/Client";
+import type { Gender } from "@/typesResponse/Gender";
+import type { Occupation } from "@/typesResponse/Occupation";
+import type { MaritalStatus } from "@/typesResponse/MaritalStatus";
+import type { Phone } from "@/typesResponse/Phone";
+import type { Identification } from "@/typesResponse/Identification";
+import type { Address } from "@/typesResponse/Address";
+import type { UserAccount } from "@/typesResponse/UserAccount";
 // FINAL
 export interface Person {
   person_id: number;

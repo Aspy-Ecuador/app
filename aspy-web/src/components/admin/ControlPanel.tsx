@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ButtonControl } from "@/types/ButtonControl";
+import type { ButtonControl } from "@/types/ButtonControl";
 import { getAuthenticatedUserName } from "@store";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Grid from "@mui/material/Grid";

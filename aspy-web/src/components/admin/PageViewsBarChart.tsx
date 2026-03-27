@@ -94,9 +94,7 @@ export default function PageViewsBarChart({
           margin={{ left: 50, right: 0, top: 20, bottom: 20 }}
           grid={{ horizontal: true }}
           slotProps={{
-            legend: {
-              hidden: true,
-            },
+            legend: {},
           }}
         />
       </CardContent>

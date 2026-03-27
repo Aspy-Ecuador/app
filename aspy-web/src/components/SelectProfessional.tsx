@@ -1,13 +1,14 @@
+// FINAL
 import { useState } from "react";
-import { User } from "@/types/User";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Progress from "./Progress";
-import { getUsers } from "@/utils/utils";
 import FormControl from "@mui/material/FormControl";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Select from "@mui/material/Select";
+import type { SelectChangeEvent } from "@mui/material/Select";
 import { MenuItem } from "@mui/material";
+import type { Person } from "@/typesResponse/Person";
 
 interface SelectProfessionalProp {
   onSelect: (id: number) => void;
@@ -21,10 +22,10 @@ export default function SelectProfessional({
 
   if (loading) return <Progress />;
 
-  const users: User[] = getUsers(data);
+  const users: Person[] = data.persons;
 
-  const options: User[] =
-    users.filter((user: User) => user.role_id === 2) || [];
+  const options: Person[] =
+    users.filter((user) => user.user_account.role_id === 2) || [];
 
   const handleChange = (event: SelectChangeEvent<number>) => {
     const id = event.target.value as number;
@@ -41,8 +42,8 @@ export default function SelectProfessional({
             Seleccione una opción
           </MenuItem>
           {options?.map((option) => (
-            <MenuItem key={option.person_id} value={option.person_id}>
-              {option.full_name}
+            <MenuItem key={option.user_id} value={option.user_id}>
+              {option.first_name} {option.last_name}
             </MenuItem>
           ))}
         </Select>

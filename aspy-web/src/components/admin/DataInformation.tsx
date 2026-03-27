@@ -1,10 +1,11 @@
-import { ButtonAdmin } from "@/types/ButtonAdmin";
+// FINAL
+import type { CardAdmin } from "@/types/CardAdmin";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 
 interface DataInformationProps {
-  buttonsData: ButtonAdmin[];
+  buttonsData: CardAdmin[];
 }
 
 export default function DataInformation({ buttonsData }: DataInformationProps) {

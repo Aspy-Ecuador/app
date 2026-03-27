@@ -28,7 +28,11 @@ class AppointmentController extends Controller
                 'client' => $appointment->client->person,
                 'professional' => $appointment->professional->person,
                 'service' => $appointment->service,
-                'worker_schedule' => $appointment->workerSchedule
+                'worker_schedule' => $appointment->workerSchedule,
+                'created_by' => $appointment->created_by,
+                'modified_by' => $appointment->modified_by,
+                'creation_date' => $appointment->creation_date,
+                'modification_date' => $appointment->modification_date,
             ];
         });
     }
@@ -43,7 +47,11 @@ class AppointmentController extends Controller
             'client' => $appointment->client->person,
             'professional' => $appointment->professional->person,
             'service' => $appointment->service,
-            'worker_schedule' => $appointment->worker_schedule
+            'worker_schedule' => $appointment->worker_schedule,
+            'created_by' => $appointment->created_by,
+            'modified_by' => $appointment->modified_by,
+            'creation_date' => $appointment->creation_date,
+            'modification_date' => $appointment->modification_date,
         ];
     }
 

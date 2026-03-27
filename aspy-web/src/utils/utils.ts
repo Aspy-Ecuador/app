@@ -27,6 +27,7 @@ import { FileData } from "@/types/FileData";
 import { dataPayments } from "@/data/Payment";
 import { ReceiptResponse } from "@/typesResponse/ReceiptResponse";
 import { receiptAdapter } from "@/adapters/receiptAdapter";
+import type { Payment } from "@/typesResponse/Payment";
 
 type TendenciaDiaria = {
   promedioPorcentual: number;
@@ -147,66 +148,30 @@ export function getProfessionalSchedule(
     });
 }
 
-export function getUsers(data: any): User[] {
-  if (
-    !data ||
-    !data.persons ||
-    !data.userAccounts ||
-    !data.roles ||
-    !data.professional
-  ) {
-    return [];
-  }
-  const persons: PersonResponse[] = data.persons;
-  const userAccounts: UserAccountResponse[] = data.userAccounts;
-  const roles: RoleResponse[] = data.roles;
-  const professionals: ProfessionalResponse[] = data.professional;
-
-  return userAccounts
-    .map((account) => {
-      const person = persons.find((p) => p.user_id === account.user_id);
-      const role = roles.find((r) => r.role_id === account.role_id);
-      if (!person || !role) return null;
-      const user = userAdapter(person, role, account);
-
-      // Si es profesional (role_id === 2), añadimos sus datos extra
-      if (role.role_id === 2) {
-        const prof = professionals.find(
-          (p) => p.person_id === person.person_id,
-        );
-        if (prof) {
-          user.title = prof.title;
-          user.about = prof.about;
-          user.specialty = prof.specialty;
-        }
-      }
-      return user;
-    })
-    .filter((user): user is User => user !== null);
-}
-
-//SÍ SE USA
-export function getIncome(data: PaymentResponse[]): number[] {
+// FINAL
+export function getIncome(data: any): number[] {
+  const payments: Payment[] = data.payments ?? [];
   const currentYear = new Date().getFullYear();
   const monthlyIncome = Array(12).fill(0);
 
-  (data ?? []).forEach((payment) => {
+  payments.forEach((payment) => {
     const date = new Date(payment.creation_date);
 
     if (date.getFullYear() !== currentYear) return;
 
     const month = date.getMonth();
-    monthlyIncome[month] = parseFloat(
-      (monthlyIncome[month] + Number(payment.total_amount)).toFixed(2),
-    );
+    const price = Number(payment?.service?.price) || 0;
+
+    monthlyIncome[month] += price;
   });
 
-  return monthlyIncome;
+  // Redondear solo al final (mejor práctica)
+  return monthlyIncome.map((value) => Number(value.toFixed(2)));
 }
 
-//SÍ SE USA
+// FINAL
 export function getDataAppointment(data: any): PageViewsBarChartProps {
-  const appointments: AppointmentResponse[] = data.appointments ?? [];
+  const appointments: Appointment[] = data.appointments ?? [];
   const currentYear = new Date().getFullYear();
 
   const scheduled = Array(12).fill(0);
@@ -220,7 +185,7 @@ export function getDataAppointment(data: any): PageViewsBarChartProps {
     if (date.getFullYear() !== currentYear) return;
 
     const month = date.getMonth(); // 0–11
-    const statusName = appointment.status?.name?.toLowerCase() ?? "";
+    const statusName = appointment.appointment_status.name.toLowerCase() ?? "";
 
     if (statusName === "scheduled") {
       scheduled[month] += 1;
@@ -242,7 +207,6 @@ export function getDataAppointment(data: any): PageViewsBarChartProps {
 // FINAL
 export function getDataCard(data: any): StatCardProps[] {
   const users: Person[] = data.persons ?? [];
-  console.log(typeof localStorage.getItem("persons"));
   const appointments: Appointment[] = data.appointments ?? [];
 
   // filtros
@@ -250,7 +214,6 @@ export function getDataCard(data: any): StatCardProps[] {
   const profesionales = users.filter(
     (u) => u.user_account.role.name === "Professional",
   );
-
   return [
     {
       title: "Usuarios",
@@ -290,6 +253,7 @@ export function toNumber(str: string): number {
   return Number(str);
 }
 
+// FINAL
 export function getAppointmentProfessional(
   proffesional_id: number,
   data: any,
@@ -298,14 +262,14 @@ export function getAppointmentProfessional(
     return [];
   }
 
-  const appointments: Appointment[] = getAppointments(data);
+  const appointments: Appointment[] = data.appointments ?? [];
 
   if (proffesional_id === 0) {
     return appointments;
   }
 
   return appointments.filter(
-    (appointment) => appointment.proffesional.person_id === proffesional_id,
+    (appointment) => appointment.professional.user_id === proffesional_id,
   );
 }
 
@@ -639,6 +603,44 @@ export function getClients(data: any, person_id: number): User[] {
       index === self.findIndex((c) => c.person_id === client.person_id),
   );
   return uniqueClients;
+}
+
+export function getUsers(data: any): User[] {
+  if (
+    !data ||
+    !data.persons ||
+    !data.userAccounts ||
+    !data.roles ||
+    !data.professional
+  ) {
+    return [];
+  }
+  const persons: PersonResponse[] = data.persons;
+  const userAccounts: UserAccountResponse[] = data.userAccounts;
+  const roles: RoleResponse[] = data.roles;
+  const professionals: ProfessionalResponse[] = data.professional;
+
+  return userAccounts
+    .map((account) => {
+      const person = persons.find((p) => p.user_id === account.user_id);
+      const role = roles.find((r) => r.role_id === account.role_id);
+      if (!person || !role) return null;
+      const user = userAdapter(person, role, account);
+
+      // Si es profesional (role_id === 2), añadimos sus datos extra
+      if (role.role_id === 2) {
+        const prof = professionals.find(
+          (p) => p.person_id === person.person_id,
+        );
+        if (prof) {
+          user.title = prof.title;
+          user.about = prof.about;
+          user.specialty = prof.specialty;
+        }
+      }
+      return user;
+    })
+    .filter((user): user is User => user !== null);
 }
 
 export function getUser(data: any, user_id: number): User {

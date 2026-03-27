@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
-import { columnsServiceAdmin } from "@utils/columns";
-import { ServiceResponse } from "@typesResponse/Service";
+import type { GridColDef } from "@mui/x-data-grid";
+import type { GridRowId } from "@mui/x-data-grid";
+import type { Service } from "@typesResponse/Service";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
@@ -13,41 +13,51 @@ import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import Table from "@components/Table";
 import Progress from "@components/Progress";
-
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import AssignmentTurnedInRoundedIcon from "@mui/icons-material/AssignmentTurnedInRounded";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 
 export default function ServicesList() {
   const { data, loading } = useRoleData();
-  const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
+  const [selectedId, setSelectedId] = useState<GridRowId | null>(null);
 
-  //Ruta para editar y crear
   const navigate = useNavigate();
   const location = useLocation();
 
-  const services: ServiceResponse[] = data?.services ?? [];
+  const services: Service[] = data?.services ?? [];
 
   const handleEdit = (id: number) => {
-    const newPath = `${location.pathname}/${id}`;
-    navigate(newPath);
+    navigate(`${location.pathname}/${id}`);
   };
 
   const handleCreate = () => {
-    const newPath = `/nuevo-servicio`;
-    navigate(newPath);
+    navigate(`/nuevo-servicio`);
   };
 
-  const columnsExtra: GridColDef[] = [
+  const columns: GridColDef[] = [
+    {
+      field: "service_id",
+      headerName: "ID",
+      flex: 1,
+      disableColumnMenu: true,
+      resizable: false,
+    },
+    {
+      field: "name",
+      headerName: "Nombre",
+      flex: 2,
+      disableColumnMenu: true,
+      resizable: false,
+    },
     {
       field: "price",
       headerName: "Costo",
       flex: 2,
       disableColumnMenu: true,
       resizable: false,
-      renderCell: (params) => {
-        return <Typography variant="body1">$ {params.value}</Typography>;
-      },
+      renderCell: (params) => (
+        <Typography variant="body1">$ {params.value}</Typography>
+      ),
     },
     {
       field: "acciones",
@@ -70,8 +80,6 @@ export default function ServicesList() {
       ),
     },
   ];
-
-  const newColumns: GridColDef[] = [...columnsServiceAdmin, ...columnsExtra];
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
@@ -118,14 +126,12 @@ export default function ServicesList() {
           {loading ? (
             <Progress />
           ) : (
-            <Table<ServiceResponse>
-              columns={newColumns}
+            <Table<Service>
+              columns={columns}
               rows={services}
               getRowId={(row) => row.service_id}
-              rowSelectionModel={rowSelection}
-              onRowSelectionChange={(newSelection) =>
-                setRowSelection(newSelection)
-              }
+              selectedId={selectedId}
+              onRowSelect={setSelectedId}
             />
           )}
         </Grid>

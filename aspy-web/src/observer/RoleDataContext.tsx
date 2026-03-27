@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { adminLoaders } from "@API/init";
 import { loadersByRole, UserRole } from "./loadersMap";
 import { getAuthenticatedUser } from "@/utils/store";
 import serviceAPI from "@/API/serviceAPI";
@@ -90,14 +91,20 @@ export const RoleDataProvider = ({
     const runLoader = loadersByRole[role];
     await runLoader();
 
-    const keys = Object.keys(localStorage);
     const newData: DataStore = {};
 
-    for (const key of keys) {
-      const value = localStorage.getItem(key) ?? "null";
-      newData[key] = value;
+    for (const loader of adminLoaders) {
+      const value = localStorage.getItem(loader.name);
+
+      try {
+        const data = value ? JSON.parse(value) : [];
+        newData[loader.name] = data;
+      } catch (error) {
+        console.warn(`Error parsing ${error}`);
+        newData[loader.name] = [];
+      }
     }
-    console.log("ESTMOS RECARGANDO");
+
     setData(newData);
     setLoading(false);
   };
@@ -142,12 +149,8 @@ export const RoleDataProvider = ({
   const refreshPersons = async () => {
     try {
       const res = await personAPI.getAllPersons();
-      const ordered = [...res.data].sort(
-        (a: PersonResponse, b: PersonResponse) => a.person_id - b.person_id,
-      );
-
-      localStorage.setItem("persons", JSON.stringify(ordered));
-      setData((prev: any) => ({ ...prev, persons: ordered }));
+      localStorage.setItem("persons", JSON.stringify(res));
+      setData((prev: any) => ({ ...prev, persons: res }));
       console.log("✔️ Persons actualizados");
     } catch (err) {
       console.error("❌ Error al refrescar persons:", err);

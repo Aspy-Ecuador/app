@@ -26,6 +26,12 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
+            'user'       => [
+                'user_account_id' => $user->user_account_id,
+                'email'           => $user->email,
+                'role'            => $user->role,
+                'person'          => $user->person,
+            ],
         ]);
     }
     
@@ -55,5 +61,25 @@ class AuthController extends Controller
     {
         $request->user()->currentAccessToken()->delete();
         return response()->json(['message' => 'Sesión cerrada']);
+    }
+
+    /**
+     * Retorna el usuario autenticado actualmente.
+     */
+    public function me(Request $request): JsonResponse
+    {
+        $user = $request->user()->load([
+            'role',
+            'status',
+            'person.gender',
+            'person.occupation',
+            'person.phones',
+            'person.addresses.country',
+            'person.addresses.state',
+            'person.addresses.city',
+            'person.identifications',
+        ]);
+ 
+        return response()->json($user);
     }
 }

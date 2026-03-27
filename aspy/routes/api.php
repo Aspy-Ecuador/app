@@ -40,6 +40,11 @@ Route::get('/login', function () {
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->get('/user', [AuthController::class, 'user']);
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
+Route::middleware('auth:sanctum')->group(function () {
+    // Auth
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::get('me',      [AuthController::class, 'me']);
+});
 
 // Role
 Route::middleware('auth:sanctum')->prefix('role')->group(function () {

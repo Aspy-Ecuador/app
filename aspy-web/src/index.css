@@ -2,7 +2,7 @@
 @tailwind utilities;
 @tailwind components;
 @tailwind base;
-
+@import "tailwindcss";
 #root {
   width: 100%;
   height: 100%;
