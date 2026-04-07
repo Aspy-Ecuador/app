@@ -1,3 +1,4 @@
+// FINAL
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { UserForm } from "@/typesRequest/UserForm";
@@ -113,26 +114,25 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
       }
       await refreshAll();
       setOpen(true);
+    } catch (error: any) {
+      console.log(error.response.data);
     } finally {
       setLoad(false);
     }
   };
 
-  // Rangos de campos por paso según el rol seleccionado
-  // Config: [start, end] → índices sobre filteredInputs en UserFormAdmin
-  // professional (role_id=2) tiene 3 campos extra (title, about, specialty) en step 2
   function getStepsFields(role: number) {
     if (role === 2) {
       return [
-        { start: 0, end: 5 }, // Step 1: datos personales
-        { start: 5, end: 14 }, // Step 2: generales + title/about/specialty
-        { start: 14, end: 24 }, // Step 3: seguridad + identificación + dirección
+        { start: 0, end: 10 }, // Step 1: datos personales
+        { start: 10, end: 20 }, // Step 2: generales + title/about/specialty
+        { start: 20, end: 24 }, // Step 3: seguridad + identificación + dirección
       ];
     }
     return [
-      { start: 0, end: 5 }, // Step 1: datos personales
-      { start: 5, end: 11 }, // Step 2: generales (sin campos profesional)
-      { start: 11, end: 21 }, // Step 3: seguridad + identificación + dirección
+      { start: 0, end: 10 }, // Step 1: datos personales
+      { start: 10, end: 18 }, // Step 2: generales (sin campos profesional)
+      { start: 18, end: 24 }, // Step 3: seguridad + identificación + dirección
     ];
   }
 

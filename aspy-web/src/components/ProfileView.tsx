@@ -1,20 +1,24 @@
 // FINAL
 import type { Person } from "@/typesResponse/Person";
+import type { UserLogin } from "@/types/UserLogin";
 import penToSquare from "@assets/pen-to-square.svg";
 import { getAge } from "@/utils/utils";
 import photo from "@assets/user.png";
 import { useNavigate } from "react-router-dom";
 
 type ProfileProps = {
-  user: Person;
+  user: Person | UserLogin;
   isRowPosition: boolean;
 };
 
 export default function ProfileView({ user, isRowPosition }: ProfileProps) {
   const navigate = useNavigate();
-  console.log(user);
+  const person = "person" in user ? user.person : user;
+  const roleName =
+    "person" in user ? user.role.name : user.user_account.role.name;
+
   const handleEdit = () => {
-    navigate(`/editar/${user.user_id}`);
+    navigate(`/editar/${person.user_id}`);
   };
 
   return (
@@ -25,15 +29,13 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
         <img
           className="rounded-full w-[200px] h-auto"
           src={photo}
-          alt={user.first_name}
+          alt={person.first_name}
         />
         <div className="flex flex-col gap-1 justify-center items-center">
           <h1 className="font-kumbh text-primaryAspy font-semibold text-base">
-            {user.first_name} {user.last_name}
+            {person.first_name} {person.last_name}
           </h1>
-          <h2 className="font-kumbh text-secondaryAspy text-sm">
-            {user.user_account.role.name}
-          </h2>
+          <h2 className="font-kumbh text-secondaryAspy text-sm">{roleName}</h2>
         </div>
         <img
           src={penToSquare}
@@ -48,7 +50,7 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
             Sobre mí
           </h1>
           <p className="font-kumbh text-sm text-secondaryAspy">
-            Hola, soy {user.user_account.role.name} en Fundación ASPY :)
+            Hola, soy {roleName} en Fundación ASPY :)
           </p>
         </div>
         <div className="flex flex-row gap-16">
@@ -57,7 +59,7 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
               Edad
             </h2>
             <p className="font-kumbh text-sm text-secondaryAspy">
-              {getAge(user.birthdate)}
+              {getAge(person.birthdate)}
             </p>
           </div>
           <div className="flex flex-col gap-2">
@@ -65,7 +67,7 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
               Género
             </h2>
             <p className="font-kumbh text-sm text-secondaryAspy">
-              {user.gender?.name}
+              {person.gender?.name}
             </p>
           </div>
         </div>

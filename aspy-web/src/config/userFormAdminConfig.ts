@@ -1,6 +1,6 @@
 // FINAL
 export const inputCreateUserAdminConfig = [
-  // ── STEP 1: Datos personales (índices 0–4) ────────────────────────────────
+  // ── STEP 1: Datos personales
   {
     label: "Nombre",
     key: "first_name",
@@ -20,18 +20,6 @@ export const inputCreateUserAdminConfig = [
     validation: { required: { value: true, message: "Campo requerido" } },
   },
   {
-    label: "Email",
-    key: "email",
-    type: "email",
-    validation: {
-      required: { value: true, message: "Campo requerido" },
-      pattern: {
-        value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-        message: "Email no válido",
-      },
-    },
-  },
-  {
     label: "Rol",
     key: "role_id",
     type: "select",
@@ -44,8 +32,6 @@ export const inputCreateUserAdminConfig = [
       required: { value: true, message: "Debe seleccionar un rol" },
     },
   },
-
-  // ── STEP 2: Datos generales (índices 5–10) ────────────────────────────────
   {
     label: "Género",
     key: "gender_id",
@@ -91,71 +77,12 @@ export const inputCreateUserAdminConfig = [
     validation: { required: { value: true, message: "Campo requerido" } },
   },
   {
-    label: "Número de teléfono",
-    key: "phone.number",
-    type: "text",
-    validation: { required: { value: true, message: "Campo requerido" } },
-  },
-  {
-    label: "Tipo de teléfono",
-    key: "phone.type",
-    type: "select",
-    options: [
-      { label: "Móvil", value: "mobile" },
-      { label: "Casa", value: "home" },
-      { label: "Trabajo", value: "work" },
-    ],
-    validation: { required: { value: true, message: "Campo requerido" } },
-  },
-
-  // ── STEP 2 (solo professional): título, descripción, especialidad (11–13) ─
-  {
-    label: "Título",
-    key: "title",
-    type: "text",
-    validation: { required: { value: true, message: "Campo requerido" } },
-  },
-  {
-    label: "Descripción",
-    key: "about",
-    type: "text",
-    validation: { required: { value: true, message: "Campo requerido" } },
-  },
-  {
-    label: "Especialidad",
-    key: "specialty",
-    type: "text",
-    validation: { required: { value: true, message: "Campo requerido" } },
-  },
-
-  // ── STEP 3: Seguridad ─────────────────────────────────────────────────────
-  {
-    label: "Contraseña",
-    key: "password",
-    type: "password",
-    validation: {
-      required: { value: true, message: "Campo requerido" },
-      minLength: { value: 8, message: "Mínimo 8 caracteres" },
-    },
-  },
-  {
-    label: "Confirmar Contraseña",
-    key: "password_confirmation",
-    type: "password",
-    validation: {
-      required: { value: true, message: "Campo requerido" },
-      minLength: { value: 8, message: "Mínimo 8 caracteres" },
-    },
-  },
-
-  // ── STEP 3: Identificación ────────────────────────────────────────────────
-  {
     label: "Tipo de identificación",
     key: "identification.type",
     type: "select",
     options: [
       { label: "Cédula", value: "cedula" },
-      { label: "Pasaporte", value: "passport" },
+      { label: "Pasaporte", value: "pasaporte" },
       { label: "RUC", value: "ruc" },
     ],
     validation: { required: { value: true, message: "Campo requerido" } },
@@ -166,17 +93,22 @@ export const inputCreateUserAdminConfig = [
     type: "text",
     validation: { required: { value: true, message: "Campo requerido" } },
   },
-
-  // ── STEP 3: Dirección (todos los campos requeridos por el store) ──────────
+  // ── STEP 2: Datos generales (índices 5–10) ────────────────────────────────
   {
-    label: "Tipo de dirección",
-    key: "address.type",
+    label: "Tipo de teléfono",
+    key: "phone.type",
     type: "select",
     options: [
-      { label: "Casa", value: "home" },
-      { label: "Trabajo", value: "work" },
-      { label: "Otro", value: "other" },
+      { label: "Móvil", value: "movil" },
+      { label: "Casa", value: "casa" },
+      { label: "Trabajo", value: "trabajo" },
     ],
+    validation: { required: { value: true, message: "Campo requerido" } },
+  },
+  {
+    label: "Número de teléfono",
+    key: "phone.number",
+    type: "text",
     validation: { required: { value: true, message: "Campo requerido" } },
   },
   {
@@ -209,6 +141,17 @@ export const inputCreateUserAdminConfig = [
     validation: { required: { value: true, message: "Campo requerido" } },
   },
   {
+    label: "Tipo de dirección",
+    key: "address.type",
+    type: "select",
+    options: [
+      { label: "Casa", value: "casa" },
+      { label: "Trabajo", value: "trabajo" },
+      { label: "Otro", value: "otro" },
+    ],
+    validation: { required: { value: true, message: "Campo requerido" } },
+  },
+  {
     label: "Dirección principal",
     key: "address.primary_address",
     type: "text",
@@ -219,5 +162,50 @@ export const inputCreateUserAdminConfig = [
     key: "address.secondary_address",
     type: "text",
     validation: { required: { value: true, message: "Campo requerido" } },
+  },
+  // ── STEP 2 (solo professional)
+  {
+    label: "Título",
+    key: "title",
+    type: "text",
+    validation: { required: { value: true, message: "Campo requerido" } },
+  },
+  {
+    label: "Especialidad",
+    key: "specialty",
+    type: "text",
+    validation: { required: { value: true, message: "Campo requerido" } },
+  },
+
+  // ── STEP 3: Seguridad ─────────────────────────────────────────────────────
+  {
+    label: "Email",
+    key: "email",
+    type: "email",
+    validation: {
+      required: { value: true, message: "Campo requerido" },
+      pattern: {
+        value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+        message: "Email no válido",
+      },
+    },
+  },
+  {
+    label: "Contraseña",
+    key: "password",
+    type: "password",
+    validation: {
+      required: { value: true, message: "Campo requerido" },
+      minLength: { value: 8, message: "Mínimo 8 caracteres" },
+    },
+  },
+  {
+    label: "Confirmar Contraseña",
+    key: "password_confirmation",
+    type: "password",
+    validation: {
+      required: { value: true, message: "Campo requerido" },
+      minLength: { value: 8, message: "Mínimo 8 caracteres" },
+    },
   },
 ];

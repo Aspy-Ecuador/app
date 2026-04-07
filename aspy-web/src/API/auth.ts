@@ -1,8 +1,8 @@
+// FINAL
 import api from "@API/api";
-import { UserLogin } from "@/types/UserLogin";
+import type { UserLogin } from "@/types/UserLogin";
 import type { UserForm } from "@/typesRequest/UserForm";
 import { setAuthenticatedUser } from "@store";
-import { UserAccountRequest } from "@/typesRequest/UserAccountRequest";
 
 export const login = async (email: string, password: string) => {
   const response = await api.post("/login", {
@@ -38,5 +38,13 @@ export const register = async (userRegister: UserForm) => {
   } catch (error) {
     console.error("Error al agregar persona:", error);
     throw error;
+  }
+};
+
+export const logoutRequest = async () => {
+  try {
+    await api.post("/logout");
+  } catch (error) {
+    console.error("Error al cerrar sesión:", error);
   }
 };

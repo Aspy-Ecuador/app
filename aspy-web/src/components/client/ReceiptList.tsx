@@ -1,7 +1,5 @@
-import { useState, useEffect } from "react";
-import { GridRowSelectionModel } from "@mui/x-data-grid";
-import { Receipt } from "@/types/Receipt";
-import { GridColDef } from "@mui/x-data-grid";
+import { useState } from "react";
+import type { GridRowId, GridColDef } from "@mui/x-data-grid";
 import { getReceiptByUser, handleDownloadInvoice } from "@utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Button from "@mui/material/Button";
@@ -13,8 +11,9 @@ import Typography from "@mui/material/Typography";
 import SimpleHeader from "@components/SimpleHeader";
 import Progress from "@components/Progress";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
-import { getAuthenticatedUserIdentity } from "@/utils/store";
-import { FlattenedReceipt } from "@/types/FlattenedReceipt";
+import { getAuthenticatedUserID } from "@/utils/store";
+import type { FlattenedReceipt } from "@/types/FlattenedReceipt";
+import type { Payment } from "@/typesResponse/Payment";
 
 const columns: GridColDef[] = [
   {
@@ -80,38 +79,26 @@ const columns: GridColDef[] = [
 export default function ReceiptList() {
   const { data, loading } = useRoleData();
 
-  const receiptList: Receipt[] = getReceiptByUser(
-    data,
-    getAuthenticatedUserIdentity()
-  );
+  const payments: Payment[] = getReceiptByUser(data, getAuthenticatedUserID());
 
-  const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
+  const [selectedId, setSelectedId] = useState<GridRowId | null>(null);
 
-  const [receipt, setReceipt] = useState<Receipt | null>(null);
-
-  //Mostrar el usuario
-  useEffect(() => {
-    if (rowSelection.length > 0) {
-      const selectedInvoice = receiptList.find(
-        (item) => item.receipt.receipt_id === rowSelection[0]
-      );
-      if (selectedInvoice) {
-        setReceipt(selectedInvoice);
-      }
-    } else {
-      setReceipt(null);
-    }
-  }, [rowSelection]);
+  const receipt =
+    selectedId !== null
+      ? (payments.find(
+          (item) => String(item.payment_id) === String(selectedId),
+        ) ?? null)
+      : null;
 
   if (loading) return <Progress />;
 
-  const flattenedRows: FlattenedReceipt[] = receiptList.map((r) => ({
+  const flattenedRows: FlattenedReceipt[] = payments.map((r) => ({
     id: r.receipt.receipt_id,
-    client: r.client.full_name,
+    client: `${r.client.first_name} ${r.client.last_name}`,
     service: r.service.name,
     price: r.service.price,
-    date: r.date,
-    receipt: r,
+    date: r.creation_date.split("T")[0],
+    receipt: r.receipt,
   }));
 
   return (
@@ -124,11 +111,9 @@ export default function ReceiptList() {
           <Table<FlattenedReceipt>
             columns={columns}
             rows={flattenedRows}
-            getRowId={(row) => row.receipt.receipt.receipt_id}
-            rowSelectionModel={rowSelection}
-            onRowSelectionChange={(newSelection) =>
-              setRowSelection(newSelection)
-            }
+            getRowId={(row) => row.id}
+            selectedId={selectedId}
+            onRowSelect={setSelectedId}
           />
         </Grid>
         {receipt && (
@@ -136,15 +121,12 @@ export default function ReceiptList() {
             <InvoiceView
               id={receipt.receipt.receipt_id}
               date={receipt.payment_data.creation_date}
-              client={receipt.client.full_name}
+              client={`${receipt.client.first_name} ${receipt.client.last_name}`}
               service={receipt.service.name}
-              //address={receipt.addres}
               price={receipt.service.price}
-              //discount={receipt.discount_percentage}
               total={receipt.service.price}
               paymentMethod={receipt.payment_data.type}
-              //contactEmail={receipt.contactEmail}
-              //contactPhone={receipt.contactPhone}
+              client_id={receipt.client_id}
             />
           </Grid>
         )}

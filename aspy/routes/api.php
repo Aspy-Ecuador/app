@@ -36,23 +36,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/login', function () {
     return response()->json(['message' => 'Unauthorized, Redirected to Login']);
-})->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::middleware('auth:sanctum')->get('/user', [AuthController::class, 'user']);
-Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
-Route::middleware('auth:sanctum')->group(function () {
-    // Auth
-    Route::post('logout', [AuthController::class, 'logout']);
-    Route::get('me',      [AuthController::class, 'me']);
 });
 
-// Role
-Route::middleware('auth:sanctum')->prefix('role')->group(function () {
-    Route::get('/', [RoleController::class, 'index']);
-    Route::get('/{id}', [RoleController::class, 'show']);
-    Route::post('/', [RoleController::class, 'store']);
-    Route::put('/{id}', [RoleController::class, 'update']);
-    Route::delete('/{id}', [RoleController::class, 'destroy']);
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', [AuthController::class, 'user']);
+    Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/logout', [AuthController::class, 'logout']);
 });
 
 // UserAccount
@@ -114,7 +105,6 @@ Route::middleware('auth:sanctum')->prefix('address')->group(function () {
 });
 
 
-
 // Schedule
 Route::middleware('auth:sanctum')->prefix('schedule')->group(function () {
     Route::get('/', [ScheduleController::class, 'index']);
@@ -132,7 +122,6 @@ Route::middleware('auth:sanctum')->prefix('worker-schedule')->group(function () 
     Route::put('/{id}', [WorkerScheduleController::class, 'update']);
     Route::delete('/{id}', [WorkerScheduleController::class, 'destroy']);
 });
-
 
 // Service
 Route::middleware('auth:sanctum')->prefix('service')->group(function () {
@@ -170,15 +159,6 @@ Route::middleware('auth:sanctum')->prefix('payment')->group(function () {
     Route::delete('/{id}', [PaymentController::class, 'destroy']);
 });
 
-// Receipt
-Route::middleware('auth:sanctum')->prefix('receipt')->group(function () {
-    Route::get('/', [ReceiptController::class, 'index']);
-    Route::get('/{id}', [ReceiptController::class, 'show']);
-    Route::post('/', [ReceiptController::class, 'store']);
-    Route::put('/{id}', [ReceiptController::class, 'update']);
-    Route::delete('/{id}', [ReceiptController::class, 'destroy']);
-});
-
 // Appointment
 Route::middleware('auth:sanctum')->prefix('appointment')->group(function () {
     Route::get('/', [AppointmentController::class, 'index']);
@@ -195,32 +175,4 @@ Route::middleware('auth:sanctum')->prefix('appointment-report')->group(function 
     Route::post('/', [AppointmentReportController::class, 'store']);
     Route::put('/{id}', [AppointmentReportController::class, 'update']);
     Route::delete('/{id}', [AppointmentReportController::class, 'destroy']);
-});
-
-
-// Country
-Route::middleware('auth:sanctum')->prefix('country')->group(function () {
-    Route::get('/', [CountryController::class, 'index']);
-    Route::get('/{id}', [CountryController::class, 'show']);
-    Route::post('/', [CountryController::class, 'store']);
-    Route::put('/{id}', [CountryController::class, 'update']);
-    Route::delete('/{id}', [CountryController::class, 'destroy']);
-});
-
-// State
-Route::middleware('auth:sanctum')->prefix('state')->group(function () {
-    Route::get('/', [StateController::class, 'index']);
-    Route::get('/{id}', [StateController::class, 'show']);
-    Route::post('/', [StateController::class, 'store']);
-    Route::put('/{id}', [StateController::class, 'update']);
-    Route::delete('/{id}', [StateController::class, 'destroy']);
-});
-
-// City
-Route::middleware('auth:sanctum')->prefix('city')->group(function () {
-    Route::get('/', [CityController::class, 'index']);
-    Route::get('/{id}', [CityController::class, 'show']);
-    Route::post('/', [CityController::class, 'store']);
-    Route::put('/{id}', [CityController::class, 'update']);
-    Route::delete('/{id}', [CityController::class, 'destroy']);
 });

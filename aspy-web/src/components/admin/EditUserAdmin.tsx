@@ -1,3 +1,4 @@
+// FINAL
 import { useParams, useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -5,7 +6,6 @@ import Header from "@components/Header";
 import FormViewAdmin from "./FormViewAdmin";
 
 export default function EditUserAdmin() {
-  //Obtener usuario
   const { id } = useParams();
   const numericId = parseInt(id!);
 

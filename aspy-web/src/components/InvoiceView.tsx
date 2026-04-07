@@ -1,3 +1,4 @@
+// FINAL
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
@@ -7,15 +8,19 @@ import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import TableContainer from "@mui/material/TableContainer";
 import Paper from "@mui/material/Paper";
+import Progress from "./Progress";
+import { useRoleData } from "@/observer/RoleDataContext";
+import type { Person } from "@/typesResponse/Person";
 
 interface InvoiceViewProps {
   id: number;
   date: string;
   client: string;
   service: string;
-  price: number;
-  total: number;
+  price: string;
+  total: string;
   paymentMethod: string;
+  client_id: number;
 }
 
 export default function InvoiceView({
@@ -26,7 +31,17 @@ export default function InvoiceView({
   price,
   total,
   paymentMethod,
+  client_id,
 }: InvoiceViewProps) {
+  const { data, loading } = useRoleData();
+  const persons: Person[] = data?.persons || [];
+  const clientData = persons.find((p) => p.person_id === client_id);
+  const contactEmail = clientData?.user_account.email || "";
+  const contactPhone = clientData?.phone.number || "";
+  const address = clientData?.address || { primary_address: "N/A" };
+
+  if (loading) return <Progress />;
+
   return (
     <Box
       maxWidth={500}
@@ -50,8 +65,8 @@ export default function InvoiceView({
       <Typography fontWeight="bold">Nombre de cliente:</Typography>
       <Typography gutterBottom>{client}</Typography>
 
-      {/*<Typography fontWeight="bold">Address:</Typography>*/}
-      {/*<Typography gutterBottom>{address}</Typography>*/}
+      <Typography fontWeight="bold">Address:</Typography>
+      <Typography gutterBottom>{address.primary_address}</Typography>
 
       <Box mt={4}>
         <TableContainer component={Paper} variant="outlined">
@@ -84,10 +99,6 @@ export default function InvoiceView({
                 <TableCell>Subtotal</TableCell>
                 <TableCell align="right">${price}</TableCell>
               </TableRow>
-              {/*<TableRow>
-                <TableCell>Descuento</TableCell>
-                <TableCell align="right">${discount}</TableCell>
-              </TableRow>*/}
               <TableRow>
                 <TableCell sx={{ fontWeight: "bold" }}>Total</TableCell>
                 <TableCell align="right" sx={{ fontWeight: "bold" }}>
@@ -104,11 +115,11 @@ export default function InvoiceView({
           <Typography fontWeight="bold">Método de pago:</Typography>
           <Typography>{paymentMethod}</Typography>
         </Grid>
-        {/*<Grid size={6}>
+        <Grid size={6}>
           <Typography fontWeight="bold">Contact Info:</Typography>
           <Typography>{contactEmail || "N/A"}</Typography>
           <Typography>{contactPhone || "N/A"}</Typography>
-        </Grid>*/}
+        </Grid>
       </Grid>
     </Box>
   );

@@ -1,5 +1,5 @@
 // FINAL
-import { City } from "@/typesResponse/City";
+import type { City } from "@/typesResponse/City";
 
 export interface Address {
   address_id: number;

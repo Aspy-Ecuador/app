@@ -10,15 +10,18 @@ const PrivateRoute: React.FC = () => {
 export default PrivateRoute;
 */
 // src/routes/PrivateRoute.tsx
+
+// FINAL
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { RoleDataProvider } from "@/observer/RoleDataContext";
-import { UserRole } from "@/observer/loadersMap";
+import type { UserRole } from "@/observer/loadersMap";
 import { getAuthenticatedUserRole } from "@/utils/store";
 
 const PrivateRoute: React.FC = () => {
   const token = localStorage.getItem("token");
   if (!token) return <Navigate to="/login" replace />;
+
   const role = getAuthenticatedUserRole() as UserRole | null;
   if (!role) return <Navigate to="/login" replace />;
 

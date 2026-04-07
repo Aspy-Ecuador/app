@@ -222,22 +222,131 @@ class UserAccountController extends Controller
         );
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id): JsonResponse
     {
-        $user = UserAccount::findOrFail($id);
-
         $validated = $request->validate([
-            'role_id' => 'integer',
-            'email' => 'required|email|max:150|unique:user_account,email',
-            'status' => 'integer',
+            // ── UserAccount ───────────────────────────────────
+            'email' => "required|email|max:150|unique:user_account,email,{$id},user_account_id",
+            'password' => 'nullable|string|min:8|confirmed',
+            'role_id' => 'required|integer|exists:role,role_id',
+
+            // ── Person ────────────────────────────────────────
+            'gender_id' => 'required|integer|exists:gender,gender_id',
+            'occupation_id' => 'required|integer|exists:occupation,occupation_id',
+            'marital_status_id' => 'required|integer|exists:marital_status,marital_status_id',
+            'education_id' => 'required|integer|exists:education,education_id',
+            'first_name' => 'required|string|max:100',
+            'last_name' => 'required|string|max:100',
+            'birthdate' => 'required|date',
+
+            // ── Phone ─────────────────────────────────────────
+            'phone.number' => 'required|string|max:30',
+            'phone.type' => 'required|string|max:50',
+
+            // ── Address ───────────────────────────────────────
+            'address.type' => 'required|string|max:50',
+            'address.country_id' => 'required|integer|exists:country,country_id',
+            'address.state_id' => 'required|integer|exists:state,state_id',
+            'address.city_id' => 'required|integer|exists:city,city_id',
+            'address.primary_address' => 'required|string|max:255',
+            'address.secondary_address' => 'required|string|max:255',
+
+            // ── Identification ────────────────────────────────
+            'identification.type' => 'required|string|max:50',
+            'identification.number' => 'required|string|max:50',
+
+            // ── Subtipo ───────────────────────────────────────
+            'role' => 'nullable|string|in:client,professional,staff',
+            'specialty' => 'nullable|string|max:150|required_if:role,professional',
+            'title' => 'nullable|string|max:150',
         ]);
 
-        $validated['password_hash'] = Hash::make($request->password);
-        $validated['modified_by'] = 1;
+        $updatedBy = auth()->id();
 
-        $user->update($validated);
+        $person = DB::transaction(function () use ($validated, $id, $updatedBy) {
 
-        return $user;
+            // 1. Buscar person + user
+            $person = Person::with(['userAccount', 'phone', 'address', 'identification'])->findOrFail($id);
+            $userAccount = $person->userAccount;
+
+            // 2. Update UserAccount
+            $userAccount->update([
+                'role_id' => $validated['role_id'],
+                'email' => $validated['email'],
+            ]);
+
+            if (!empty($validated['password'])) {
+                $userAccount->update([
+                    'password_hash' => Hash::make($validated['password']),
+                ]);
+            }
+
+            // 3. Update Person
+            $person->update([
+                'gender_id' => $validated['gender_id'],
+                'occupation_id' => $validated['occupation_id'],
+                'marital_status_id' => $validated['marital_status_id'],
+                'education_id' => $validated['education_id'],
+                'first_name' => $validated['first_name'],
+                'last_name' => $validated['last_name'],
+                'birthdate' => $validated['birthdate'],
+            ]);
+
+            // 4. Update Phone
+            $person->phone()->update([
+                'number' => $validated['phone']['number'],
+                'type' => $validated['phone']['type'],
+            ]);
+
+            // 5. Update Address
+            $person->address()->update([
+                'type' => $validated['address']['type'],
+                'country_id' => $validated['address']['country_id'],
+                'state_id' => $validated['address']['state_id'],
+                'city_id' => $validated['address']['city_id'],
+                'primary_address' => $validated['address']['primary_address'],
+                'secondary_address' => $validated['address']['secondary_address'],
+            ]);
+
+            // 6. Update Identification
+            $person->identification()->update([
+                'type' => $validated['identification']['type'],
+                'number' => $validated['identification']['number'],
+            ]);
+
+            // 7. Subtipo (simple)
+            if ($validated['role'] === 'professional') {
+                $person->professional()->updateOrCreate(
+                    ['person_id' => $person->person_id],
+                    [
+                        'specialty' => $validated['specialty'] ?? null,
+                        'title' => $validated['title'] ?? null,
+                    ]
+                );
+            }
+
+            return $person;
+        });
+
+        return response()->json(
+            $person->load([
+                'userAccount.role',
+                'userAccount.status',
+                'gender',
+                'occupation',
+                'maritalStatus',
+                'education',
+                'phone',
+                'address.country',
+                'address.state',
+                'address.city',
+                'identification',
+                'client',
+                'professional',
+                'staff',
+            ]),
+            200
+        );
     }
 
     public function destroy($id)

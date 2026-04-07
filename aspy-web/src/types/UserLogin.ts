@@ -1,6 +1,6 @@
-import { Role } from "@/typesResponse/Role";
-import { UserAccountStatus } from "@/typesResponse/UserAccountStatus";
-import { Person } from "@/typesResponse/Person";
+import type { Role } from "@/typesResponse/Role";
+import type { UserAccountStatus } from "@/typesResponse/UserAccountStatus";
+import type { Person } from "@/typesResponse/Person";
 
 // FINAL
 export interface UserLogin {

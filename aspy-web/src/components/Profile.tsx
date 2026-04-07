@@ -1,18 +1,17 @@
-import { UserLogin } from "@/types/UserLogin";
+// FINAL
+import type { UserLogin } from "@/types/UserLogin";
 import ProfileView from "@components/ProfileView";
 
 export default function Profile() {
   const getUserInfoFromLocalStorage = (): UserLogin => {
-    // query para obtener id = numericId
     const UserAccountInfo = localStorage.getItem("authenticatedUser");
     if (UserAccountInfo) {
       const userAccounts = JSON.parse(UserAccountInfo);
+      console.log("User info loaded from localStorage:", userAccounts);
       return userAccounts as UserLogin;
     }
     return {} as UserLogin;
   };
-
-  //const user_from_local_storage = getUserFromLocalStorage();
 
   const user = getUserInfoFromLocalStorage();
 

@@ -1,5 +1,5 @@
 <?php
-
+// NO SE USA
 namespace App\Http\Controllers;
 
 use App\Models\Receipt;
@@ -9,7 +9,7 @@ class ReceiptController extends Controller
 {
     public function index()
     {
-        $receipts = Receipt::all();
+        $receipts = Receipt::with(['payment', 'receiptStatus', 'payment.client', 'payment.paymentData', 'payment.paymentStatus', 'payment.service'])->get();
 
         return response()->json($receipts);
     }

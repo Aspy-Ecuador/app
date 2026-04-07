@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+// FINAL
+import { useEffect, useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { inputCreateUserAdminConfig } from "@/config/userFormAdminConfig";
 import { useRoleData } from "@/observer/RoleDataContext";
@@ -8,7 +9,7 @@ import UserInput from "@forms/UserInput";
 import Progress from "@components/Progress";
 import CircularProgress from "@mui/material/CircularProgress";
 import type { Person } from "@/typesResponse/Person";
-
+import { useWatch } from "react-hook-form";
 interface UserFormProps {
   isEditMode: boolean;
   userId?: number;
@@ -36,7 +37,10 @@ export default function UserFormAdmin({
 }: UserFormProps) {
   const methods = useForm<UserForm>();
   const { data, loading } = useRoleData();
-  const users: Person[] = data.persons ?? [];
+
+  const users: Person[] = useMemo(() => {
+    return data.persons ?? [];
+  }, [data.persons]);
 
   useEffect(() => {
     if (isEditMode) {
@@ -46,7 +50,9 @@ export default function UserFormAdmin({
           first_name: user.first_name,
           last_name: user.last_name,
           email: user.user_account.email,
-          birthdate: user.birthdate,
+          birthdate: user.birthdate.split("T")[0],
+          password: "",
+          password_confirmation: "",
           gender_id: user.gender_id,
           occupation_id: user.occupation_id,
           marital_status_id: user.marital_status_id,
@@ -68,7 +74,6 @@ export default function UserFormAdmin({
             primary_address: user.address?.primary_address ?? "",
             secondary_address: user.address?.secondary_address ?? "",
           },
-          // Campos de profesional
           title: user.professional?.title ?? "",
           specialty: user.professional?.specialty ?? "",
         });
@@ -95,21 +100,23 @@ export default function UserFormAdmin({
         specialty: "",
       });
     }
-  }, [isEditMode, userId]);
+  }, [isEditMode, userId, users, methods]);
 
-  const roleSelect = Number(methods.watch("role_id") ?? 0);
+  const roleSelect = Number(
+    useWatch({
+      control: methods.control,
+      name: "role_id",
+    }) ?? 0,
+  );
 
   useEffect(() => {
     if (onRoleChange) {
       onRoleChange(roleSelect);
     }
-  }, [roleSelect]);
+  }, [roleSelect, onRoleChange]);
 
-  // Ocultar campos de profesional si el rol no es 2
   const filteredInputs = inputCreateUserAdminConfig.filter((input) => {
-    const isProfessionalField = ["title", "about", "specialty"].includes(
-      input.key,
-    );
+    const isProfessionalField = ["title", "specialty"].includes(input.key);
     return !(isProfessionalField && roleSelect !== 2);
   });
 

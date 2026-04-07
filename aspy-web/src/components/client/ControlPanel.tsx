@@ -1,6 +1,7 @@
-import { getAuthenticatedUserIdentity, getAuthenticatedUserName } from "@store";
+// FINAL
+import { getAuthenticatedUserID, getAuthenticatedUserName } from "@store";
 import { useRoleData } from "@/observer/RoleDataContext";
-import { Appointment } from "@/types/Appointment";
+import type { Appointment } from "@/typesResponse/Appointment";
 import { getAppointmentbyClient } from "@/utils/utils";
 import Agenda from "@components/Agenda";
 import WelcomePanel from "@components/WelcomePanel";
@@ -15,7 +16,7 @@ export default function ControlPanel() {
 
   const appointments: Appointment[] = getAppointmentbyClient(
     data,
-    getAuthenticatedUserIdentity()
+    getAuthenticatedUserID(),
   );
 
   return (

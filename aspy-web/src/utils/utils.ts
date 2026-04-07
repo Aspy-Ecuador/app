@@ -14,7 +14,7 @@ import { AppointmentResponse } from "@/typesResponse/AppointmentResponse";
 import { UserAccountResponse } from "@/typesResponse/UserAccountResponse";
 import { RoleResponse } from "@/typesResponse/RoleResponse";
 import { userAdapter } from "@/adapters/userAdapter";
-import { PaymentResponse } from "@/typesResponse/PaymentResponse";
+import { PaymentResponse, type Service } from "@/typesResponse/PaymentResponse";
 import { PageViewsBarChartProps } from "@/components/admin/PageViewsBarChart";
 import { StatCardProps } from "@/components/admin/StatCard";
 import { ProfessionalResponse } from "@/typesResponse/ProffesionalResponse";
@@ -99,11 +99,12 @@ export function getWorkerSchedule(
   return workerschedule;
 }
 
-export function getService(data: any, service_id: number): ServiceResponse {
-  const services: ServiceResponse[] = data.services;
+// FINAL
+export function getService(data: any, service_id: number): Service {
+  const services: Service[] = data.services;
   const service = services.find((service) => service.service_id === service_id);
   if (!service)
-    throw new Error(`No se encontró el worker schedule con ID ${service_id}`);
+    throw new Error(`No se encontró el servicio con ID ${service_id}`);
   return service;
 }
 
@@ -699,12 +700,13 @@ export function getClientsAppointment(data: any): User[] {
   return users.filter((user) => user.role_id === 3);
 }
 
+// FINAL
 export function getAppointmentbyClient(
   data: any,
   client_id: number,
 ): Appointment[] {
-  const appointments: Appointment[] = getAppointments(data);
-  return appointments.filter((app) => app.client.user_id === client_id);
+  const appointments: Appointment[] = data.appointments ?? [];
+  return appointments.filter((apt) => apt.client.user_id === client_id);
 }
 
 export function getReceipt(data: any): Receipt[] {
@@ -746,12 +748,10 @@ export function getReceipt(data: any): Receipt[] {
   return receiptList;
 }
 
-export function getReceiptByUser(data: any, user_id: number): Receipt[] {
-  if (!data || !user_id) {
-    return [];
-  }
-  const receipts: Receipt[] = getReceipt(data);
-  return receipts.filter((recp) => recp.client.user_id == user_id);
+// FINAL
+export function getReceiptByUser(data: any, user_id: number): Payment[] {
+  const payments: Payment[] = data.payments ?? [];
+  return payments.filter((pay) => pay.client.user_id == user_id);
 }
 
 export function getPayments(data: any): PaymentResponse[] {

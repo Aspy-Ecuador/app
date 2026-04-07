@@ -112,37 +112,11 @@ export const RoleDataProvider = ({
   const refreshServices = async () => {
     try {
       const res = await serviceAPI.getAllServices();
-
-      // Normalizamos para que todos tengan id_serice
-      const normalized: Service[] = res.data.map((s: any) => ({
-        ...s,
-        id_serice: s.id_serice ?? s.service_id, // usa el que exista
-      }));
-
-      console.log(
-        "📦 Datos crudos de API:",
-        normalized.map((s: Service) => s.id_serice),
-      );
-      console.log(
-        "🔍 Tipos de ID:",
-        normalized.map((s: Service) => typeof s.id_serice),
-      );
-
-      const orderedServices = [...normalized].sort(
-        (a: Service, b: Service) => Number(a.id_serice) - Number(b.id_serice),
-      );
-
-      console.log(
-        "✅ Datos ordenados:",
-        orderedServices.map((s: Service) => s.id_serice),
-      );
-
-      localStorage.setItem("services", JSON.stringify(orderedServices));
-      setData((prev) => ({ ...prev, services: orderedServices }));
-
-      console.log("✔️ Servicios actualizados y ordenados por ID");
+      localStorage.setItem("services", JSON.stringify(res));
+      setData((prev: any) => ({ ...prev, services: res }));
+      console.log("✔️ Services actualizados");
     } catch (err) {
-      console.error("❌ Error al refrescar servicios:", err);
+      console.error("❌ Error al refrescar services:", err);
     }
   };
 

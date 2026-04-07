@@ -1,7 +1,7 @@
-import { AxiosResponse } from "axios";
+import type { AxiosResponse } from "axios";
 import api from "@API/api";
-import { AppointmentRequest } from "@/typesRequest/AppointmentRequest";
-import { Appointment } from "@/typesResponse/Appointment";
+import type { AppointmentRequest } from "@/typesRequest/AppointmentRequest";
+import type { Appointment } from "@/typesResponse/Appointment";
 
 const appointmentAPI = {
   // Get all appointments

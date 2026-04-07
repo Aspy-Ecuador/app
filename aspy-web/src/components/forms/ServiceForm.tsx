@@ -1,7 +1,8 @@
+// FINAL
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { inputServiceConfig } from "@/config/serviceFormConfig";
-import { Service } from "src/types/Service";
+import type { Service } from "@/typesResponse/Service";
 import { useNavigate } from "react-router-dom";
 import serviceAPI from "@API/serviceAPI";
 import UserInput from "@forms/UserInput";
@@ -11,9 +12,7 @@ import Success from "@components/Success";
 import Progress from "@components/Progress";
 import { getService } from "@/utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext";
-import { ServiceRequest } from "@/typesRequest/ServiceRequest";
-import axios from "axios";
-
+import type { ServiceRequest } from "@/typesRequest/ServiceRequest";
 interface ServiceFormProps {
   isEditMode: boolean;
   serviceId?: number;
@@ -34,7 +33,7 @@ export default function ServiceForm({
   const handleClose = () => {
     setOpen(false);
     if (!isError) {
-      navigate("/servicios"); // solo navegar si no hubo error
+      navigate("/servicios");
     }
   };
 
@@ -52,10 +51,10 @@ export default function ServiceForm({
     } else {
       methods.reset({
         name: "",
-        price: 0,
+        price: "",
       });
     }
-  }, [isEditMode, serviceId]);
+  }, [isEditMode, serviceId, data, methods]);
 
   const list_inputs = inputServiceConfig.map((input) => (
     <UserInput
@@ -73,17 +72,11 @@ export default function ServiceForm({
       setLoadingSave(true);
 
       if (isEditMode && serviceId) {
-        const transformedData: Service = data;
-        console.log(
-          "📤 Enviando a API:",
-          serviceId,
-          data.price,
-          typeof data.price
-        );
-        await serviceAPI.updateService(serviceId, transformedData.price);
-        const resp = await serviceAPI.updateService(serviceId, data.price);
-        console.log("📥 Respuesta de API:", resp.data);
-        // Esperar que se actualice la lista desde API
+        const dataService: ServiceRequest = {
+          ...data,
+          price: Number(data.price),
+        };
+        await serviceAPI.updateService(serviceId, dataService);
         await refreshServices();
 
         setMessage("¡Se ha actualizado con éxito!");
@@ -105,41 +98,24 @@ export default function ServiceForm({
   const onClickCreate = methods.handleSubmit(async (data) => {
     try {
       setLoadingSave(true);
-      const transformedData: ServiceRequest = data;
-
-      console.log(transformedData);
-      console.log("📤 Enviando a API:", transformedData);
-      await serviceAPI.createService(transformedData);
-      console.log("✅ Creado en API");
-
-      console.log("🔄 Refrescando servicios...");
+      const dataService: ServiceRequest = {
+        ...data,
+        price: Number(data.price),
+      };
+      await serviceAPI.createService(dataService);
       await refreshServices();
-      console.log("✅ Servicios actualizados");
       setMessage("¡Se ha creado con éxito!");
       setIsError(false);
       setFail(false);
       setOpen(true);
-    } catch (error: any) {
-      console.error("❌ Error en onClickCreate:", error);
-      if (axios.isAxiosError(error) && error.response) {
-        const errors = error.response.data?.errors;
-
-        if (errors?.name?.length) {
-          // Nombre ya registrado
-          setMessage(`⚠ Este servicio ya ha sido registrado`);
-          setFail(true);
-          setIsError(true);
-        } else {
-          setMessage("Ocurrió un error al guardar el servicio.");
-          setIsError(true);
-        }
-        setOpen(true);
-      } else {
-        setMessage("Error desconocido.");
-        setOpen(true);
-      }
+    } catch (error) {
+      console.error("Error al guardar el servicio:", error);
+      setFail(true);
+      setMessage("Ocurrió un error al guardar el servicio.");
+      setIsError(true);
+      setOpen(true);
     } finally {
-      setLoadingSave(false); // Termina la bolita de cargando
+      setLoadingSave(false);
     }
   });
 

@@ -1,3 +1,4 @@
+// FINAL
 import { useFormContext } from "react-hook-form";
 import { AnimatePresence } from "framer-motion";
 import { findInputError } from "@utils/findInputError";
@@ -8,7 +9,7 @@ import { useEffect, useState } from "react";
 
 type Option = {
   label: string;
-  value: number;
+  value: number | string;
 };
 
 interface UserInputProps {

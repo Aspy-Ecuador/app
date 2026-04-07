@@ -76,7 +76,7 @@ export default function UsersList() {
   const navigate = useNavigate();
 
   const users: Person[] = data.persons ?? [];
-  console.log(users);
+
   const selectedUser =
     selectedId !== null
       ? (users.find((item) => String(item.user_id) === String(selectedId)) ??

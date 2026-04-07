@@ -1,9 +1,9 @@
 // FINAL
-import { Person } from "@/typesResponse/Person";
-import { PaymentData } from "@/typesResponse/PaymentData";
-import { PaymentStatus } from "@/typesResponse/PaymentStatus";
-import { Service } from "@/typesResponse/Service";
-import { Receipt } from "@/typesResponse/Receipt";
+import type { Person } from "@/typesResponse/Person";
+import type { PaymentData } from "@/typesResponse/PaymentData";
+import type { PaymentStatus } from "@/typesResponse/PaymentStatus";
+import type { Service } from "@/typesResponse/Service";
+import type { Receipt } from "@/typesResponse/Receipt";
 
 export interface Payment {
   payment_id: number;

@@ -39,8 +39,8 @@ export interface Person {
   occupation: Occupation | null;
   marital_status: MaritalStatus | null;
 
-  phone: Phone | null;
+  phone: Phone;
   identification: Identification | null;
 
-  address: Address | null;
+  address: Address;
 }

@@ -1,3 +1,4 @@
+// FINAL
 import * as React from "react";
 import { styled } from "@mui/material/styles";
 import { dividerClasses } from "@mui/material/Divider";
@@ -31,6 +32,10 @@ export default function OptionsMenu() {
 
   const handleProfile = () => {
     navigate("/perfil");
+  };
+
+  const handleASPY = () => {
+    navigate("/sobreAspy");
   };
 
   const handleLogout = () => {
@@ -68,6 +73,7 @@ export default function OptionsMenu() {
         }}
       >
         <MenuItem onClick={handleProfile}>Profile</MenuItem>
+        <MenuItem onClick={handleASPY}>ASPY</MenuItem>
         <MenuItem
           onClick={handleLogout}
           sx={{

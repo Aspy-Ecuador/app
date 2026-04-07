@@ -1,7 +1,8 @@
-import { AxiosResponse } from "axios";
+// FINAL
+import type { AxiosResponse } from "axios";
 import api from "@API/api";
-import { ServiceRequest } from "src/typesRequest/ServiceRequest";
-import { Service } from "@/typesResponse/Service";
+import type { ServiceRequest } from "@/typesRequest/ServiceRequest";
+import type { Service } from "@/typesResponse/Service";
 
 const serviceAPI = {
   getAllServices: async (): Promise<Service[]> =>
@@ -13,9 +14,11 @@ const serviceAPI = {
   createService: async (data: ServiceRequest): Promise<AxiosResponse> =>
     api.post(`/service`, data),
 
-  updateService: async (id: number, data: number): Promise<AxiosResponse> => {
-    const data_update = { price: data };
-    return api.put(`/service/${id}`, data_update);
+  updateService: async (
+    id: number,
+    data: ServiceRequest,
+  ): Promise<AxiosResponse> => {
+    return api.put(`/service/${id}`, data);
   },
 
   deleteService: async (id: string): Promise<AxiosResponse> =>

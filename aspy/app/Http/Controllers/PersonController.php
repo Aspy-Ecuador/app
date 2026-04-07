@@ -16,8 +16,9 @@ class PersonController extends Controller
             'education',
             'userAccount.role',
             'phone',
-            'address.city.state.country',            
+            'address.city.state.country',          
             'identification',
+            'professional'
         ])->get();
  
         return response()->json($persons);

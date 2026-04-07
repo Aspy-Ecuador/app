@@ -1,5 +1,6 @@
 import { createStore } from "redux";
-import { UserLogin } from "@/types/UserLogin";
+import type { UserLogin } from "@/types/UserLogin";
+import { logoutRequest } from "@API/auth";
 
 // Definir el estado inicial y el tipo de estado
 interface State {
@@ -111,15 +112,6 @@ export const getAuthenticatedUserEmail = (): string => {
   return user.email; // Devuelve el email del usuario autenticado
 };
 
-// Función para obtener la identidad del usuario autenticado
-export const getAuthenticatedUserIdentity = (): string => {
-  const user = getAuthenticatedUser();
-  if (!user || user === null || typeof user === "string") {
-    throw new Error("No authenticated user found");
-  }
-  return user.person.identification.number; // Devuelve el email del usuario autenticado
-};
-
 export const getAuthenticatedUserID = (): number => {
   const user = getAuthenticatedUser();
   if (!user || user === null || typeof user === "string") {
@@ -140,14 +132,15 @@ export const setThemeMode = (theme: string): void => {
 };
 
 // Logout
-export const logout = (): void => {
-  //localStorage.removeItem("token");
-  //localStorage.removeItem("authenticatedUser");
-  //localStorage.removeItem("role");
-  //localStorage.removeItem("mui-mode"); // Eliminar el tema en el logout
-  //setAuthenticatedUser(null); // borra en Redux
-  localStorage.clear(); // Elimina TODO el localStorage
-  setAuthenticatedUser(null); // borra en Redux
+export const logout = async (): Promise<void> => {
+  try {
+    await logoutRequest();
+  } catch (error) {
+    console.error(error);
+  } finally {
+    localStorage.clear();
+    setAuthenticatedUser(null);
+  }
 };
 
 export default store;

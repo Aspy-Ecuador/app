@@ -1,7 +1,7 @@
 import { useRoleData } from "@/observer/RoleDataContext";
 import { useState } from "react";
-import { ServiceResponse } from "@typesResponse/Service";
-import { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
+import type { Service } from "@typesResponse/Service";
+import type { GridRowId, GridColDef } from "@mui/x-data-grid";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -10,7 +10,7 @@ import SimpleHeader from "@components/SimpleHeader";
 
 export default function ServicesList() {
   const { data } = useRoleData();
-  const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
+  const [rowSelection, setRowSelection] = useState<GridRowId | null>(null);
 
   const columns: GridColDef[] = [
     {
@@ -39,7 +39,7 @@ export default function ServicesList() {
     },
   ];
 
-  const services: ServiceResponse[] = data.services;
+  const services: Service[] = data.services;
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
@@ -49,14 +49,12 @@ export default function ServicesList() {
         </Grid>
 
         <Grid size={12}>
-          <Table<ServiceResponse>
+          <Table<Service>
             columns={columns}
             rows={services}
             getRowId={(row) => row.service_id}
-            rowSelectionModel={rowSelection}
-            onRowSelectionChange={(newSelection) =>
-              setRowSelection(newSelection)
-            }
+            selectedId={rowSelection}
+            onRowSelect={setRowSelection}
           />
         </Grid>
       </Grid>

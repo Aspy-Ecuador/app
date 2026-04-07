@@ -26,22 +26,22 @@ export const adminLoaders: Loader[] = [
 ];
 
 const clientLoaders: Loader[] = [
-  { name: "persons", fn: personAPI.getAllPersons },
-  //{ name: "payments", fn: paymentAPI.getAllPayments },
-  { name: "paymentData", fn: paymentDataAPI.getAllPaymentData },
-  {
-    name: "professionalServices",
-    fn: professionalServiceAPI.getAllProfessionalServices,
-  },
-  { name: "receipts", fn: receiptAPI.getAllReceipts },
-  { name: "schedules", fn: scheduleAPI.getAllSchedules },
   { name: "services", fn: serviceAPI.getAllServices },
-  { name: "userAccounts", fn: userAccountAPI.getAllUserAccounts },
-  { name: "workerSchedules", fn: workerScheduleAPI.getAllWorkerSchedules },
   { name: "appointments", fn: appointmentAPI.getAllAppointments },
-  { name: "appointmentReports", fn: appointmentReportAPI.getAllReports },
-  { name: "roles", fn: roleAPI.getAllRoles },
-  { name: "professional", fn: professionalAPI.getAllProfessionals },
+  { name: "persons", fn: personAPI.getAllPersons },
+  { name: "payments", fn: paymentAPI.getAllPayments },
+  //{ name: "paymentData", fn: paymentDataAPI.getAllPaymentData },
+  //{
+  // name: "professionalServices",
+  //fn: professionalServiceAPI.getAllProfessionalServices,
+  //},
+  //{ name: "schedules", fn: scheduleAPI.getAllSchedules },
+  //{ name: "services", fn: serviceAPI.getAllServices },
+  //{ name: "userAccounts", fn: userAccountAPI.getAllUserAccounts },
+  //{ name: "workerSchedules", fn: workerScheduleAPI.getAllWorkerSchedules },
+  //{ name: "appointmentReports", fn: appointmentReportAPI.getAllReports },
+  //{ name: "roles", fn: roleAPI.getAllRoles },
+  //{ name: "professional", fn: professionalAPI.getAllProfessionals },
 ];
 
 const staffLoaders: Loader[] = [
@@ -107,7 +107,7 @@ export const runClientLoaders = async () => {
   for (const { name, fn } of clientLoaders) {
     try {
       const response = await fn();
-      localStorage.setItem(name, JSON.stringify(response.data));
+      localStorage.setItem(name, JSON.stringify(response));
       console.log(`✔️ Loaded: ${name}`);
     } catch (error) {
       console.error(`❌ Error loading ${name}:`, error);
