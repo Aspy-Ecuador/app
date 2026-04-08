@@ -9,7 +9,7 @@ class ProfessionalServiceController extends Controller
 {
     public function index()
     {
-        $services = ProfessionalService::all();
+        $services = ProfessionalService::with(['service', 'professional'])->get();
 
         return response()->json($services);
     }

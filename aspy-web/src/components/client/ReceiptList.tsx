@@ -1,3 +1,4 @@
+// FINAL
 import { useState } from "react";
 import type { GridRowId, GridColDef } from "@mui/x-data-grid";
 import { getReceiptByUser, handleDownloadInvoice } from "@utils/utils";
@@ -57,6 +58,18 @@ const columns: GridColDef[] = [
     ),
   },
   {
+    field: "name",
+    headerName: "Estado",
+    disableColumnMenu: true,
+    flex: 2,
+    resizable: false,
+    renderCell: (params) => (
+      <Typography variant="body1">
+        {params.row.receipt.receipt_status.name}
+      </Typography>
+    ),
+  },
+  {
     field: "actions",
     headerName: "",
     flex: 2,
@@ -65,7 +78,10 @@ const columns: GridColDef[] = [
     sortable: false,
     renderCell: (params) => (
       <Button
-        onClick={() => handleDownloadInvoice(params.row.receipt)}
+        onClick={() => {
+          handleDownloadInvoice(params.row);
+          console.log(params.row);
+        }}
         variant="text"
         color="primary"
         className="boton-editar"
@@ -94,6 +110,7 @@ export default function ReceiptList() {
 
   const flattenedRows: FlattenedReceipt[] = payments.map((r) => ({
     id: r.receipt.receipt_id,
+    client_id: r.client.person_id,
     client: `${r.client.first_name} ${r.client.last_name}`,
     service: r.service.name,
     price: r.service.price,

@@ -1,15 +1,14 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useRoleData } from "@/observer/RoleDataContext";
-import { PersonResponse } from "@/typesResponse/PersonResponse";
-import { getClientsAppointment, getProfessionalService } from "@/utils/utils";
-import { getProfessionalSchedule } from "@/utils/utils";
-import { WorkerScheduleResponse } from "@/typesResponse/WorkerScheduleResponse";
 import FormControl from "@mui/material/FormControl";
 import Button from "@mui/material/Button";
 import DateCalendarValue from "@components/DateCalendarValue";
 import Progress from "@components/Progress";
-import { User } from "@/types/User";
+import type { ProfessionalService } from "@/typesResponse/ProfessionalService";
+import type { WorkerProfessional } from "@/typesResponse/WorkerProfessional";
+import type { Person } from "@/typesResponse/Person";
+import type { Service } from "@/typesResponse/Service";
 
 interface AppointmentCreationProp {
   isClient: boolean;
@@ -20,93 +19,86 @@ export default function AppointmentCreation({
 }: AppointmentCreationProp) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [serviceId, setServiceId] = useState<number | null>(null);
-  const [scheduleId, setScheduleId] = useState<number | null>(null);
+  const [workerId, setWorkerId] = useState<number | null>(null);
   const [professionalId, setProfessionalId] = useState<number | null>(null);
   const [clientId, setClientId] = useState<number | null>(null);
-  const [professionalsOptions, setProfessionalsOptions] = useState<
-    PersonResponse[]
-  >([]);
-  const [clientsOptions, setClientsOptions] = useState<User[]>([]);
-  const [workerSchedules, setWorkerSchedules] = useState<
-    WorkerScheduleResponse[]
-  >([]);
 
   const navigate = useNavigate();
-
   const { data, loading } = useRoleData();
 
-  useEffect(() => {
-    if (serviceId !== null) {
-      const professionals: PersonResponse[] = getProfessionalService(
-        serviceId,
-        data
-      );
-      setProfessionalsOptions(professionals);
-      const clients: User[] = getClientsAppointment(data);
-      setClientsOptions(clients);
-      if (professionalId !== null) {
-        const workerschedules: WorkerScheduleResponse[] =
-          getProfessionalSchedule(professionalId, data);
-        setWorkerSchedules(workerschedules);
-      } else {
-        setWorkerSchedules([]);
-      }
-    } else {
-      setClientsOptions([]);
-      setWorkerSchedules([]);
-      setProfessionalsOptions([]);
-    }
-  }, [serviceId, data, professionalId]);
+  const servicesOptions: Service[] = data.services;
+  const proServices: ProfessionalService[] = data.proServices;
+  const workerProfessional: WorkerProfessional[] = data.workerProfessional;
+  const persons: Person[] = data.persons;
 
-  const servicesOptions = data.services;
+  // Calculado derivado del serviceId
+  const professionalsOptions = useMemo<Person[]>(() => {
+    if (serviceId === null) return [];
 
-  const handleToPay = () => {
-    if (!serviceId || !scheduleId || !professionalId) {
-      setErrorMessage(
-        "Por favor, complete todos los campos antes de continuar."
-      );
-      return;
-    }
+    return proServices
+      .filter((ps) => ps.service_id === serviceId)
+      .map((ps) =>
+        persons.find((p) => p.person_id === ps.professional.person_id),
+      )
+      .filter((p): p is Person => p !== undefined);
+  }, [serviceId, proServices, persons]);
 
-    if (!isClient) {
-      if (!clientId) {
-        setErrorMessage(
-          "Por favor, complete todos los campos antes de continuar.xd"
-        );
-        return;
-      }
-    }
+  // Calculado derivado de persons (solo para secretario)
+  const clientsOptions = useMemo<Person[]>(() => {
+    if (isClient) return [];
+    return persons.filter((p) => p.client !== null);
+  }, [isClient, persons]);
 
-    setErrorMessage(null);
-    if (!isClient) {
-      const newPath = `/pago/${serviceId}/${scheduleId}/${clientId}`;
-      navigate(newPath);
-    } else {
-      const newPath = `/pago/${serviceId}/${scheduleId}`;
-      navigate(newPath);
-    }
-  };
+  // Calculado derivado del professionalId
+  const workerSchedules = useMemo<WorkerProfessional[]>(() => {
+    if (professionalId === null) return [];
+    return workerProfessional.filter(
+      (wp) => wp.professional.person_id === professionalId,
+    );
+  }, [professionalId, workerProfessional]);
 
-  const handleServiceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = event.target.value;
+  const handleServiceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
     setServiceId(value ? parseInt(value) : null);
-    setProfessionalId(null); // ✅ Resetea el profesional seleccionado
-    setScheduleId(null); // (opcional) resetea también el horario si es necesario
+    setProfessionalId(null);
+    setWorkerId(null);
     setClientId(null);
-    setProfessionalsOptions([]);
-    setWorkerSchedules([]);
   };
 
   const handleProfessionalChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
+    e: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     const value = e.target.value;
     setProfessionalId(value ? parseInt(value) : null);
+    setWorkerId(null);
   };
 
   const handleClientChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setClientId(value ? parseInt(value) : null);
+  };
+
+  const handleToPay = () => {
+    console.log({ serviceId, professionalId, workerId, clientId });
+    if (!serviceId || !workerId || !professionalId) {
+      setErrorMessage(
+        "Por favor, complete todos los campos antes de continuar.",
+      );
+      return;
+    }
+
+    if (!isClient && !clientId) {
+      setErrorMessage("Por favor, seleccione un paciente antes de continuar.");
+      return;
+    }
+
+    setErrorMessage(null);
+
+    const newPath = !isClient
+      ? `/pago/${serviceId}/${workerId}/${clientId}`
+      : `/pago/${serviceId}/${workerId}`;
+
+    navigate(newPath);
   };
 
   if (loading) return <Progress />;
@@ -120,7 +112,7 @@ export default function AppointmentCreation({
         gap: "0px",
       }}
     >
-      {/* Div izquierdo - contenido del formulario */}
+      {/* Formulario */}
       <div
         style={{
           width: "20%",
@@ -130,72 +122,77 @@ export default function AppointmentCreation({
         }}
       >
         <FormControl>
-          <div className="grid grid-cols-1 md:grid-cols-1 gap-8">
+          <div className="grid grid-cols-1 gap-8">
+            {/* Servicio */}
             <div className="flex flex-col gap-2 w-full">
-              <div className="flex flex-row gap-2 w-full">
-                <h6 className="grow">Servicio</h6>
-              </div>
+              <h6>Servicio</h6>
               <select
                 onChange={handleServiceChange}
                 className="border border-gray-300 rounded-md p-2 w-full"
               >
                 <option value="">Escoja el servicio</option>
-                {servicesOptions.map((option: any) => (
-                  <option key={option.service_id} value={option.service_id}>
-                    {option.name}
+                {servicesOptions.map((service) => (
+                  <option key={service.service_id} value={service.service_id}>
+                    {service.name}
                   </option>
                 ))}
               </select>
             </div>
+
+            {/* Profesional */}
             <div className="flex flex-col gap-2 w-full">
-              <div className="flex flex-row gap-2 w-full">
-                <h6 className="grow">Profesional</h6>
-              </div>
+              <h6>Profesional</h6>
               <select
                 onChange={handleProfessionalChange}
-                className="border border-gray-300 rounded-md p-2 w-full"
+                disabled={serviceId === null}
+                className="border border-gray-300 rounded-md p-2 w-full disabled:opacity-50"
               >
                 <option value="">Escoja el profesional</option>
-                {professionalsOptions?.map((option) => (
-                  <option key={option.person_id} value={option.person_id}>
-                    {option.first_name} {option.last_name}
+                {professionalsOptions.map((person) => (
+                  <option key={person.person_id} value={person.person_id}>
+                    {person.first_name} {person.last_name}
                   </option>
                 ))}
               </select>
             </div>
+
+            {/* Paciente - solo secretario */}
             {!isClient && (
               <div className="flex flex-col gap-2 w-full">
-                <div className="flex flex-row gap-2 w-full">
-                  <h6 className="grow">Paciente</h6>
-                </div>
+                <h6>Paciente</h6>
                 <select
                   onChange={handleClientChange}
-                  className="border border-gray-300 rounded-md p-2 w-full"
+                  disabled={serviceId === null}
+                  className="border border-gray-300 rounded-md p-2 w-full disabled:opacity-50"
                 >
                   <option value="">Escoja el paciente</option>
-                  {clientsOptions?.map((option) => (
-                    <option key={option.person_id} value={option.person_id}>
-                      {option.full_name}
+                  {clientsOptions.map((person) => (
+                    <option key={person.person_id} value={person.person_id}>
+                      {person.first_name} {person.last_name}
                     </option>
                   ))}
                 </select>
               </div>
             )}
           </div>
+
+          {/* Botón */}
           <div className="flex flex-col gap-2 w-full mt-8">
             <Button variant="contained" onClick={handleToPay}>
               Proceder a pagar
             </Button>
           </div>
+
+          {/* Error */}
           {errorMessage && (
-            <div className="text-red-600 text-sm mb-2 text-center">
+            <div className="text-red-600 text-sm mt-2 text-center">
               {errorMessage}
             </div>
           )}
         </FormControl>
       </div>
 
-      {/* Div derecho - calendario */}
+      {/* Calendario */}
       <div
         style={{
           width: "50%",
@@ -206,7 +203,7 @@ export default function AppointmentCreation({
       >
         <DateCalendarValue
           availableSchedules={workerSchedules}
-          onScheduleSelect={setScheduleId}
+          onScheduleSelect={setWorkerId}
         />
       </div>
     </div>

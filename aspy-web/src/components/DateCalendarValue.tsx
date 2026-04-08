@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState } from "react";
 import { Dayjs } from "dayjs";
 import { DemoContainer, DemoItem } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -7,34 +7,41 @@ import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
-import { WorkerScheduleResponse } from "@/typesResponse/WorkerScheduleResponse";
+import type { WorkerProfessional } from "@/typesResponse/WorkerProfessional";
 
 interface DateCalendarValueProps {
-  availableSchedules: WorkerScheduleResponse[];
-  onScheduleSelect: (workerScheduleId: number) => void;
+  availableSchedules: WorkerProfessional[];
+  onScheduleSelect: (workerProfessionalId: number) => void;
 }
 
 export default function DateCalendarValue({
   availableSchedules,
   onScheduleSelect,
 }: DateCalendarValueProps) {
-  const [selectedDate, setSelectedDate] = React.useState<Dayjs | null>(null);
-  const [selectedScheduleId, setSelectedScheduleId] = React.useState<
-    number | null
-  >(null);
+  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
+  const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(
+    null,
+  );
 
   const enabledDates = [
-    ...new Set(availableSchedules.map((ws) => ws.schedule.date)),
+    ...new Set(availableSchedules.map((wp) => wp.schedule.date.split("T")[0])),
   ];
 
   const schedulesForSelectedDate =
     selectedDate &&
     availableSchedules
-      .filter((ws) => ws.schedule.date === selectedDate.format("YYYY-MM-DD"))
+      .filter(
+        (wp) =>
+          wp.schedule.date.split("T")[0] === selectedDate.format("YYYY-MM-DD"),
+      )
       .sort((a, b) =>
-        a.schedule.start_time.localeCompare(b.schedule.start_time)
+        a.schedule.start_time.localeCompare(b.schedule.start_time),
       );
 
+  console.log(
+    "Available schedules for selected date:",
+    schedulesForSelectedDate,
+  );
   const shouldDisableDate = (day: Dayjs) => {
     return !enabledDates.includes(day.format("YYYY-MM-DD"));
   };
@@ -46,10 +53,10 @@ export default function DateCalendarValue({
 
   const handleHourChange = (
     _: React.MouseEvent<HTMLElement>,
-    newWorkerScheduleId: string | null
+    newWorkerProfessionalId: string | null,
   ) => {
-    if (newWorkerScheduleId === null) return;
-    const id = parseInt(newWorkerScheduleId);
+    if (newWorkerProfessionalId === null) return;
+    const id = parseInt(newWorkerProfessionalId);
     setSelectedScheduleId(id);
     onScheduleSelect(id);
   };
@@ -70,19 +77,19 @@ export default function DateCalendarValue({
 
       <ToggleButtonGroup
         color="primary"
-        value={selectedScheduleId}
+        value={selectedScheduleId?.toString() ?? null}
         exclusive
         onChange={handleHourChange}
         aria-label="Hora"
         className="flex flex-wrap justify-center w-3/5 mt-4"
       >
         {schedulesForSelectedDate && schedulesForSelectedDate.length > 0 ? (
-          schedulesForSelectedDate.map((ws) => {
-            const label = `${ws.schedule.start_time.slice(0, 5)} - ${ws.schedule.end_time.slice(0, 5)}`;
+          schedulesForSelectedDate.map((wp) => {
+            const label = `${wp.schedule.start_time.slice(0, 5)} - ${wp.schedule.end_time.slice(0, 5)}`;
             return (
               <ToggleButton
-                key={ws.worker_schedule_id}
-                value={ws.worker_schedule_id.toString()} // ✅ ahora usamos el ID del workerSchedule
+                key={wp.worker_schedule_id}
+                value={wp.worker_schedule_id}
                 aria-label={label}
                 className="m-1 rounded-xl"
               >

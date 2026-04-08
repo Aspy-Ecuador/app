@@ -20,7 +20,7 @@ import { StatCardProps } from "@/components/admin/StatCard";
 import { ProfessionalResponse } from "@/typesResponse/ProffesionalResponse";
 import { appointmentAdapter } from "@/adapters/appointmentAdapter";
 import { AppointmentReportResponse } from "@/typesResponse/AppointmentReportResponse";
-import { AppointmentReport } from "@/types/AppointmentReport";
+import type { AppointmentReport } from "@/typesResponse/AppointmentReport";
 import { appointmentReportResponseAdapter } from "@/adapters/appointmentReportResponseAdapter";
 import { CloudinaryUploadResponse } from "@/typesResponse/CloudinaryUploadResponse";
 import { FileData } from "@/types/FileData";
@@ -28,6 +28,8 @@ import { dataPayments } from "@/data/Payment";
 import { ReceiptResponse } from "@/typesResponse/ReceiptResponse";
 import { receiptAdapter } from "@/adapters/receiptAdapter";
 import type { Payment } from "@/typesResponse/Payment";
+import type { FlattenedReceipt } from "@/types/FlattenedReceipt";
+import type { AppointmentWithReports } from "@/types/AppointmentWithReports";
 
 type TendenciaDiaria = {
   promedioPorcentual: number;
@@ -436,13 +438,27 @@ export function getAppointmentsReport(data: any): AppointmentReport[] {
     .filter((item): item is AppointmentReport => item !== null);
 }
 
+// FINAL
 export function getReportsUser(
   appointmentsReport: AppointmentReport[],
-  patient_id: number,
-): AppointmentReport[] {
-  return appointmentsReport.filter(
-    (report) => report.appointment.client.person_id === patient_id,
+  client_id: number,
+  appointments: Appointment[],
+): AppointmentWithReports[] {
+  const filteredAppointments = appointments.filter(
+    (appointment) => appointment.client.person_id === client_id,
   );
+
+  return filteredAppointments.map((appointment) => {
+    const report =
+      appointmentsReport.find(
+        (report) => report.appointment_id === appointment.appointment_id,
+      ) || null;
+
+    return {
+      ...appointment,
+      report,
+    };
+  });
 }
 
 export const uploadToCloudinary = async (file: FileData): Promise<string> => {
@@ -489,7 +505,8 @@ export const getPayment = (id: number, data: any): PaymentResponse => {
   return payment;
 };
 
-export function handleDownloadInvoice(invoice: Receipt) {
+// FINAL
+export function handleDownloadInvoice(invoice: FlattenedReceipt) {
   const doc = new jsPDF("p", "mm", "a4") as jsPDFWithAutoTable; // Vertical, milímetros, tamaño A4
 
   // Insertar logo
@@ -518,12 +535,31 @@ export function handleDownloadInvoice(invoice: Receipt) {
   // Datos de Factura
   doc.setFontSize(12);
   doc.text(`Comprobante de Pago Nº: ${invoice.receipt.receipt_id}`, 10, 52);
-  doc.text(`Fecha de Emisión: ${invoice.date}`, 142, 52);
-  doc.text(`Cliente: ${invoice.client.full_name}`, 10, 59);
-  //doc.text(`Dirección: ${invoice.address}`, 10, 66);
+  doc.text(
+    `Fecha de Emisión: ${invoice.receipt.creation_date.split("T")[0]}`,
+    142,
+    52,
+  );
+  doc.text(`Cliente: ${invoice.client}`, 10, 59);
+
+  const persons = localStorage.getItem("persons");
+  const personData: Person[] = persons ? JSON.parse(persons) : [];
+
+  const clientPerson = personData.find(
+    (p) => p.person_id === invoice.client_id,
+  );
+
+  const payment = localStorage.getItem("payments");
+  const paymentData: Payment[] = payment ? JSON.parse(payment) : [];
+
+  const paymentInfo = paymentData.find(
+    (p) => p.payment_id === invoice.receipt.payment_id,
+  );
+
+  doc.text(`Dirección: ${clientPerson?.user_account.email || "N/A"}`, 10, 66);
 
   // Tabla de servicios
-  const servicios = [[invoice.service.name, `$${invoice.service.price}`]];
+  const servicios = [[invoice.service, `$${invoice.price}`]];
 
   autoTable(doc, {
     startY: 75,
@@ -540,9 +576,9 @@ export function handleDownloadInvoice(invoice: Receipt) {
 
   // Tabla de totales
   const totales = [
-    ["Subtotal:", `$${invoice.service.price}`],
+    ["Subtotal:", `$${invoice.price}`],
     ["IVA 15%:", `$${0}`],
-    ["Total:", `$${invoice.service.price}`],
+    ["Total:", `$${invoice.price}`],
   ];
 
   autoTable(doc, {
@@ -563,11 +599,14 @@ export function handleDownloadInvoice(invoice: Receipt) {
 
   // Método de pago
   doc.setFontSize(11);
-  doc.text(`Método de Pago: ${invoice.payment_data.type}`, 10, finalY);
+  doc.text(
+    `Método de Pago: ${paymentInfo?.payment_data.type || "N/A"}`,
+    10,
+    finalY,
+  );
 
   // Datos de contacto
-  doc.text(`Ctn.: ${invoice.payment_data.number}`, 10, finalY + 7);
-  //doc.text(`Teléfono: ${invoice.payment_data.}`, 10, finalY + 14);
+  doc.text(`Teléfono: ${clientPerson?.phone.number || "N/A"}`, 10, finalY + 10);
 
   // Pie de página
 
@@ -576,9 +615,7 @@ export function handleDownloadInvoice(invoice: Receipt) {
   doc.setFontSize(9);
   doc.text("Gracias por confiar en nosotros.", 105, 290, { align: "center" });
 
-  doc.save(
-    `Factura-${invoice.receipt.receipt_id}-${invoice.client.first_name}.pdf`,
-  );
+  doc.save(`Factura-${invoice.receipt.receipt_id}-${invoice.client}.pdf`);
 }
 
 export function getAppointmentsProfessional(

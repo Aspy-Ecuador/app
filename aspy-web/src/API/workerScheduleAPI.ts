@@ -1,5 +1,6 @@
-import { AxiosResponse } from "axios";
+import type { AxiosResponse } from "axios";
 import api from "@API/api";
+import type { WorkerProfessional } from "@/typesResponse/WorkerProfessional";
 
 interface WorkerScheduleData {
   schedule_id: number;
@@ -7,11 +8,11 @@ interface WorkerScheduleData {
 }
 
 const workerScheduleAPI = {
-  getAllWorkerSchedules: async (): Promise<AxiosResponse> =>
-    await api.get(`/worker-schedule`),
+  getAllWorkerSchedules: async (): Promise<WorkerProfessional[]> =>
+    (await api.get(`/worker-schedule`)).data,
 
-  getWorkerScheduleById: async (id: string): Promise<AxiosResponse> =>
-    api.get(`/worker-schedule/${id}`),
+  getWorkerScheduleById: async (id: string): Promise<WorkerProfessional> =>
+    (await api.get(`/worker-schedule/${id}`)).data,
 
   createWorkerSchedule: async (
     data: WorkerScheduleData,

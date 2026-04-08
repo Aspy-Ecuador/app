@@ -1,3 +1,4 @@
+// FINAL
 import { Scheduler } from "@aldabil/react-scheduler";
 import { es } from "date-fns/locale";
 import type { Appointment } from "@/typesResponse/Appointment";

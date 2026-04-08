@@ -18,7 +18,9 @@ class PersonController extends Controller
             'phone',
             'address.city.state.country',          
             'identification',
-            'professional'
+            'professional',
+            'client',
+            'staff',
         ])->get();
  
         return response()->json($persons);

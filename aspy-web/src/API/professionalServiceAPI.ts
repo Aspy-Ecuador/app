@@ -1,5 +1,6 @@
-import { AxiosResponse } from "axios";
+import type { AxiosResponse } from "axios";
 import api from "@API/api";
+import type { ProfessionalService } from "@/typesResponse/ProfessionalService";
 
 interface ProfessionalServiceData {
   service_id: number;
@@ -8,11 +9,13 @@ interface ProfessionalServiceData {
 }
 
 const professionalServiceAPI = {
-  getAllProfessionalServices: async (): Promise<AxiosResponse> =>
-    api.get(`/professional-service`),
+  getAllProfessionalServices: async (): Promise<ProfessionalService[]> =>
+    (await api.get(`/professional-service`)).data,
 
-  getProfessionalServiceById: async (id: string): Promise<AxiosResponse> =>
-    api.get(`/professional-service/${id}`),
+  getProfessionalServiceById: async (
+    id: string,
+  ): Promise<ProfessionalService> =>
+    (await api.get(`/professional-service/${id}`)).data,
 
   createProfessionalService: async (
     data: ProfessionalServiceData,

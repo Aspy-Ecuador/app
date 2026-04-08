@@ -1,9 +1,11 @@
+// FINAL
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import TimeLinePatients from "@client/TimeLinePatient";
 import SimpleHeader from "@components/SimpleHeader";
-import { getAuthenticatedUserID } from "@/utils/store";
+import { getAuthenticatedPersonID } from "@/utils/store";
 import { useState } from "react";
+import Typography from "@mui/material/Typography";
 
 export default function History() {
   const [selectedComments, setSelectedComments] = useState("");
@@ -15,12 +17,12 @@ export default function History() {
         </Grid>
         <Grid size={6}>
           <TimeLinePatients
-            patient_id={getAuthenticatedUserID()}
+            patient_id={getAuthenticatedPersonID()}
             onSelectComments={setSelectedComments}
           />
         </Grid>
         <Grid size={6} sx={{ height: "90vh" }}>
-          {selectedComments && (
+          {selectedComments ? (
             <div className="border border-gray-300 rounded-md overflow-hidden h-full">
               <iframe
                 src={selectedComments}
@@ -30,6 +32,10 @@ export default function History() {
                 className="rounded-md"
               />
             </div>
+          ) : (
+            <Typography variant="h6" align="center" sx={{ marginTop: "20%" }}>
+              Selecciona un reporte para ver los detalles
+            </Typography>
           )}
         </Grid>
       </Grid>

@@ -9,10 +9,11 @@ interface ScheduleData {
 }
 
 const scheduleAPI = {
-  getAllSchedules: async (): Promise<AxiosResponse> => api.get(`/schedule`),
+  getAllSchedules: async (): Promise<AxiosResponse> =>
+    (await api.get(`/schedule`)).data,
 
   getScheduleById: async (id: string): Promise<AxiosResponse> =>
-    api.get(`/schedule/${id}`),
+    (await api.get(`/schedule/${id}`)).data,
 
   createSchedule: async (data: ScheduleData): Promise<AxiosResponse> =>
     api.post(`/schedule`, data),

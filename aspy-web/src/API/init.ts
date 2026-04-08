@@ -25,26 +25,20 @@ export const adminLoaders: Loader[] = [
   { name: "payments", fn: paymentAPI.getAllPayments },
 ];
 
-const clientLoaders: Loader[] = [
+export const clientLoaders: Loader[] = [
   { name: "services", fn: serviceAPI.getAllServices },
   { name: "appointments", fn: appointmentAPI.getAllAppointments },
   { name: "persons", fn: personAPI.getAllPersons },
   { name: "payments", fn: paymentAPI.getAllPayments },
-  //{ name: "paymentData", fn: paymentDataAPI.getAllPaymentData },
-  //{
-  // name: "professionalServices",
-  //fn: professionalServiceAPI.getAllProfessionalServices,
-  //},
-  //{ name: "schedules", fn: scheduleAPI.getAllSchedules },
-  //{ name: "services", fn: serviceAPI.getAllServices },
-  //{ name: "userAccounts", fn: userAccountAPI.getAllUserAccounts },
-  //{ name: "workerSchedules", fn: workerScheduleAPI.getAllWorkerSchedules },
-  //{ name: "appointmentReports", fn: appointmentReportAPI.getAllReports },
-  //{ name: "roles", fn: roleAPI.getAllRoles },
-  //{ name: "professional", fn: professionalAPI.getAllProfessionals },
+  { name: "appointmentReports", fn: appointmentReportAPI.getAllReports },
+  {
+    name: "proServices",
+    fn: professionalServiceAPI.getAllProfessionalServices,
+  },
+  { name: "workerProfessional", fn: workerScheduleAPI.getAllWorkerSchedules },
 ];
 
-const staffLoaders: Loader[] = [
+export const staffLoaders: Loader[] = [
   { name: "payments", fn: paymentAPI.getAllPayments },
   { name: "paymentData", fn: paymentDataAPI.getAllPaymentData },
   {
@@ -63,7 +57,7 @@ const staffLoaders: Loader[] = [
   { name: "professional", fn: professionalAPI.getAllProfessionals },
 ];
 
-const professionalLoaders: Loader[] = [
+export const professionalLoaders: Loader[] = [
   //{ name: "payments", fn: paymentAPI.getAllPayments },
   { name: "paymentData", fn: paymentDataAPI.getAllPaymentData },
   {

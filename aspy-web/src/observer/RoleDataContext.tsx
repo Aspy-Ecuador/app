@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { adminLoaders } from "@API/init";
-import { loadersByRole, UserRole } from "./loadersMap";
+import { loadersByRole, loadersArraysByRole, UserRole } from "./loadersMap";
 import { getAuthenticatedUser } from "@/utils/store";
 import serviceAPI from "@/API/serviceAPI";
 import { Service } from "@/types/Service";
@@ -93,7 +93,7 @@ export const RoleDataProvider = ({
 
     const newData: DataStore = {};
 
-    for (const loader of adminLoaders) {
+    for (const loader of loadersArraysByRole[role]) {
       const value = localStorage.getItem(loader.name);
 
       try {

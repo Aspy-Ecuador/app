@@ -1,11 +1,6 @@
 import type { AxiosResponse } from "axios";
 import api from "@API/api";
 
-interface ReceiptData {
-  appointment_id: number;
-  file_url: string;
-}
-
 const receiptAPI = {
   getAllReceipts: async (): Promise<AxiosResponse> => api.get(`/receipt`),
 
@@ -15,10 +10,8 @@ const receiptAPI = {
   createReceipt: async (data: any): Promise<AxiosResponse> =>
     api.post(`/receipt`, data),
 
-  updateReceipt: async (
-    id: string,
-    data: ReceiptData,
-  ): Promise<AxiosResponse> => api.put(`/receipt/${id}`, data),
+  updateReceipt: async (id: string, data: any): Promise<AxiosResponse> =>
+    api.put(`/receipt/${id}`, data),
 
   deleteReceipt: async (id: string): Promise<AxiosResponse> =>
     api.delete(`/receipt/${id}`),

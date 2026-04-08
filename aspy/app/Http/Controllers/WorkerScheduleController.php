@@ -12,12 +12,12 @@ class WorkerScheduleController extends Controller
 {
     public function index()
     {
-        return WorkerSchedule::with(['schedule', 'person'])->get();
+        return WorkerSchedule::with(['schedule', 'professional'])->get();
     }
 
     public function show($id)
     {
-        return WorkerSchedule::with(['schedule', 'person'])->findOrFail($id);
+        return WorkerSchedule::with(['schedule', 'professional'])->findOrFail($id);
     }
 
     public function store(Request $request)
