@@ -1,9 +1,9 @@
-import { useState, Fragment } from "react";
 import { useNavigate } from "react-router-dom";
+import { useState, Fragment } from "react";
 import { useParams } from "react-router-dom";
 import { AppointmentRequest } from "@/typesRequest/AppointmentRequest";
 import { FileData } from "@/types/FileData";
-import { ServiceResponse } from "@typesResponse/Service";
+import type { Service } from "@typesResponse/Service";
 import { useRoleData } from "@/observer/RoleDataContext";
 import { getAuthenticatedUserID } from "@/utils/store";
 import Box from "@mui/material/Box";
@@ -43,26 +43,22 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
     refreshWorkerSchedules,
   } = useRoleData();
 
-  if (loading) return <Progress />;
-
-  const services: ServiceResponse[] = data.services;
-
   const navigate = useNavigate();
-  const [activeStep, setActiveStep] = useState(0);
-  const [isPaymentValid, setIsPaymentValid] = useState(false);
-
-  const [open, setOpen] = useState(false);
-
-  const [file, setFile] = useState<FileData | null>(null);
   const { serviceId, scheduleId, clientId } = useParams();
 
-  // Opcional: convertirlos a número si los necesitas como enteros
   const parsedServiceId = parseInt(serviceId || "", 10);
   const parsedScheduleId = parseInt(scheduleId || "", 10);
   const parsedClientId = parseInt(clientId || "", 10);
 
+  const [activeStep, setActiveStep] = useState(0);
+  const [isPaymentValid, setIsPaymentValid] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [file, setFile] = useState<FileData | null>(null);
   const [load, setLoad] = useState(false);
 
+  if (loading) return <Progress />;
+
+  const services: Service[] = data.services;
   const handleOpen = async () => {
     if (file != null) {
       setLoad(true);

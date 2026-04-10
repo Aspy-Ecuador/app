@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import MuiCard from "@mui/material/Card";
@@ -13,11 +13,11 @@ import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded
 import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
 import Grid from "@mui/material/Grid";
 import BancoPacifico from "@assets/BP.jpeg";
-import { FileData } from "@/types/FileData";
+import type { FileData } from "@/types/FileData";
 import UploadButton from "@buttons/UploadButton";
 import { Edit, UploadFile } from "@mui/icons-material";
 import { useRoleData } from "@/observer/RoleDataContext";
-import { ServiceResponse } from "@typesResponse/Service";
+import type { Service } from "@typesResponse/Service";
 
 interface PaymentFormProps {
   setFile: (valid: FileData) => void;
@@ -65,22 +65,22 @@ export default function PaymentForm({
 }: PaymentFormProps) {
   const { data, loading } = useRoleData();
   const [signature, setSignature] = useState<FileData | null>(null);
-  const [service, setService] = useState<ServiceResponse>();
 
-  // Validación en tiempo real
+  // Derivado directamente, sin useState ni useEffect
+  const service = useMemo(() => {
+    if (!loading && data.services) {
+      return data.services.find((s: Service) => s.service_id === service_id);
+    }
+    return undefined;
+  }, [loading, data.services, service_id]);
+
   useEffect(() => {
     const allFilled = !!signature;
     if (allFilled) {
       setFile(signature);
     }
     setIsValid(allFilled);
-    if (!loading && data.services) {
-      const found = data.services.find(
-        (s: ServiceResponse) => s.service_id === service_id,
-      );
-      setService(found);
-    }
-  }, [signature]);
+  }, [signature, setFile, setIsValid]);
 
   return (
     <Stack spacing={{ xs: 1, sm: 3 }} useFlexGap>

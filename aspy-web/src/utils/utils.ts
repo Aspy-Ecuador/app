@@ -461,6 +461,7 @@ export function getReportsUser(
   });
 }
 
+// FINAL
 export const uploadToCloudinary = async (file: FileData): Promise<string> => {
   const realFile = file!.file as File;
   const formData = new FormData();
