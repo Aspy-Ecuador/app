@@ -10,12 +10,19 @@ class PaymentController extends Controller
 {
     public function index()
     {
-        $payments = Payment::with(['client.person', 'service', 'paymentData', 'paymentStatus', 'receipt', 'receipt.receiptStatus'])->get();
+        $payments = Payment::with([
+            'client.person',
+            'service',
+            'paymentData',
+            'paymentStatus',
+            'receipt',
+            'receipt.receiptStatus'
+        ])->get();
+
         return $payments->map(function ($payment) {
-            return [            
-                ...$payment->toArray(),        
-                'client' => $payment->client->person,
-            ];
+            $data = $payment->toArray();
+            $data['client'] = $payment->client?->person;
+            return $data;
         });
     }
 
