@@ -95,8 +95,8 @@ export default function AppointmentCreation({
     setErrorMessage(null);
 
     const newPath = !isClient
-      ? `/pago/${serviceId}/${workerId}/${clientId}`
-      : `/pago/${serviceId}/${workerId}`;
+      ? `/pago/${serviceId}/${workerId}/${clientId}/${professionalId}`
+      : `/pago/${serviceId}/${workerId}/${professionalId}`;
 
     navigate(newPath);
   };

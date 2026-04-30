@@ -1,4 +1,4 @@
-import { FieldErrors, FieldError } from "react-hook-form";
+import type { FieldErrors, FieldError } from "react-hook-form";
 
 export function findInputError(errors: FieldErrors, name: string) {
   const error = errors[name] as FieldError | undefined;

@@ -55,4 +55,8 @@ class ProfessionalController extends Controller
 
         return response()->noContent();
     }
+
+    public function createHorario(){
+        
+    }
 }

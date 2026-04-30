@@ -4,23 +4,19 @@ import type { AppointmentRequest } from "@/typesRequest/AppointmentRequest";
 import type { Appointment } from "@/typesResponse/Appointment";
 
 const appointmentAPI = {
-  // Get all appointments
   getAllAppointments: async (): Promise<Appointment[]> =>
     (await api.get(`/appointment`)).data,
 
-  // Get appointment by ID
   getAppointmentById: async (id: string): Promise<AxiosResponse> => {
     return api.get(`/appointment/${id}`);
   },
 
-  // Create a new appointment
   createAppointment: async (
-    appointmentData: AppointmentRequest,
+    data: AppointmentRequest,
   ): Promise<AxiosResponse> => {
-    return api.post(`/appointment`, appointmentData);
+    return api.post(`/appointment/appointment-create`, data);
   },
 
-  // Update appointment by ID
   updateAppointment: async (
     id: number,
     appointmentData: { status: number },
@@ -28,7 +24,6 @@ const appointmentAPI = {
     return api.put(`/appointment/${id}`, appointmentData);
   },
 
-  // Delete appointment by ID
   deleteAppointment: async (id: string): Promise<AxiosResponse> => {
     return api.delete(`/appointment/${id}`);
   },

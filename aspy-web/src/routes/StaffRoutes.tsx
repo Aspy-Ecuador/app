@@ -34,7 +34,7 @@ export const StaffRoutes = [
   { path: "/profesionales/:id", element: <EditUser /> },
   { path: "/servicios/:id", element: <EditService /> },
   {
-    path: "/pago/:serviceId/:scheduleId/:clientId",
+    path: "/pago/:serviceId/:workerId/:clientId/:professionalId",
     element: <CheckoutView isClient={false} />,
   },
   ...SharedRoutes,

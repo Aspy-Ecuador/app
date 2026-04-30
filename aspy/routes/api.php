@@ -93,6 +93,7 @@ Route::middleware('auth:sanctum')->prefix('professional')->group(function () {
     Route::post('/', [ProfessionalController::class, 'store']);
     Route::put('/{id}', [ProfessionalController::class, 'update']);
     Route::delete('/{id}', [ProfessionalController::class, 'destroy']);
+    Route::post("/create-horario", [ProfessionalController::class, 'createHorario']);
 });
 
 // Address
@@ -162,10 +163,11 @@ Route::middleware('auth:sanctum')->prefix('payment')->group(function () {
 // Appointment
 Route::middleware('auth:sanctum')->prefix('appointment')->group(function () {
     Route::get('/', [AppointmentController::class, 'index']);
-    Route::get('/{id}', [AppointmentController::class, 'show']);
-    Route::post('/', [AppointmentController::class, 'store']);
-    Route::put('/{id}', [AppointmentController::class, 'update']);
-    Route::delete('/{id}', [AppointmentController::class, 'destroy']);
+    Route::post('/appointment-create', [AppointmentController::class, 'createAppointment']);
+    Route::put('/reject', [AppointmentController::class, 'rejectAppointment']);
+    Route::put('/approve', [AppointmentController::class, 'approveAppointment']);
+    Route::put('/complete', [AppointmentController::class, 'completeAppointment']);
+    Route::put('/missed', [AppointmentController::class, 'missedAppointment']);
 });
 
 // AppointmentReport

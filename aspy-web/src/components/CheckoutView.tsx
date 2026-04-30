@@ -5,7 +5,7 @@ import { AppointmentRequest } from "@/typesRequest/AppointmentRequest";
 import { FileData } from "@/types/FileData";
 import type { Service } from "@typesResponse/Service";
 import { useRoleData } from "@/observer/RoleDataContext";
-import { getAuthenticatedUserID } from "@/utils/store";
+import { getAuthenticatedPersonID } from "@/utils/store";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
@@ -31,7 +31,6 @@ interface CheckoutViewProp {
 
 export default function CheckoutView({ isClient }: CheckoutViewProp) {
   const {
-    data,
     loading,
     refreshServices,
     refreshPersons,
@@ -44,11 +43,12 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
   } = useRoleData();
 
   const navigate = useNavigate();
-  const { serviceId, scheduleId, clientId } = useParams();
+  const { serviceId, workerId, clientId, professionalId } = useParams();
 
   const parsedServiceId = parseInt(serviceId || "", 10);
-  const parsedScheduleId = parseInt(scheduleId || "", 10);
+  const parsedWorkerId = parseInt(workerId || "", 10);
   const parsedClientId = parseInt(clientId || "", 10);
+  const parsedProfessionalId = parseInt(professionalId || "", 10);
 
   const [activeStep, setActiveStep] = useState(0);
   const [isPaymentValid, setIsPaymentValid] = useState(false);
@@ -58,51 +58,33 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
 
   if (loading) return <Progress />;
 
-  const services: Service[] = data.services;
   const handleOpen = async () => {
     if (file != null) {
       setLoad(true);
-      const selectedService = services.find(
-        (service) => service.service_id === parsedServiceId,
-      );
 
-      // 2. Subir a Cloudinary
-      const uploadedFileUrl = await uploadToCloudinary(file);
+      //const uploadedFileUrl = await uploadToCloudinary(file);
 
-      const hardcodedPersonId = isClient
-        ? getAuthenticatedUserID()
-        : parsedClientId; // Cliente
-
-      const hardcodedScheduledBy = 5;
-      const hardcodedServicePrice = selectedService!.price;
-      const hardcodedTotalAmount = selectedService!.price;
-      const hardcodedPaymentType = "Transferencia";
-      const hardcodedAccountNumber = 987654321;
+      const clientId = isClient ? getAuthenticatedPersonID() : parsedClientId; // Cliente
 
       const dataSend: AppointmentRequest = {
-        payment_data: {
-          type: hardcodedPaymentType,
-          number: hardcodedAccountNumber,
-          file: uploadedFileUrl,
-        },
-        payment: {
-          person_id: Number(hardcodedPersonId),
-          service_id: Number(parsedServiceId),
-          service_price: Number(hardcodedServicePrice),
-          total_amount: Number(hardcodedTotalAmount),
-        },
-        scheduled_by: hardcodedScheduledBy,
-        worker_schedule_id: parsedScheduleId,
+        payment_type: "Transferencia",
+        payment_file:
+          "https://res.cloudinary.com/dyqznwbdb/raw/upload/v1777582266/pdfs/tlmcvftgfpjxiiymcupb.pdf",
+        client_id: clientId,
+        professional_id: parsedProfessionalId,
+        service_id: parsedServiceId,
+        worker_schedule_id: parsedWorkerId,
       };
+
       await appointmentAPI.createAppointment(dataSend);
-      await refreshServices();
-      await refreshPersons();
-      await refreshUserAccounts();
-      await refreshRoles();
-      await refreshProfessionals();
-      await refreshSchedules();
-      await refreshAppointments();
-      await refreshWorkerSchedules();
+      //await refreshServices();
+      //await refreshPersons();
+      //await refreshUserAccounts();
+      //await refreshRoles();
+      //await refreshProfessionals();
+      //await refreshSchedules();
+      //await refreshAppointments();
+      //await refreshWorkerSchedules();
       setActiveStep(activeStep + 1);
       setLoad(false);
       setOpen(true);

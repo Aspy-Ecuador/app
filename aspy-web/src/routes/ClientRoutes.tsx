@@ -17,7 +17,7 @@ export const ClientRoutes = [
   { path: "/consultarServicios", element: <ServicesList /> },
   { path: "/reportes", element: <History /> },
   {
-    path: "/pago/:serviceId/:scheduleId",
+    path: "/pago/:serviceId/:workerId/:professionalId",
     element: <CheckoutView isClient={true} />,
   },
 
