@@ -53,7 +53,7 @@ export default function AppointmentCreation({
   const workerSchedules = useMemo<WorkerProfessional[]>(() => {
     if (professionalId === null) return [];
     return workerProfessional.filter(
-      (wp) => wp.professional.person_id === professionalId,
+      (wp) => wp.professional.person_id === professionalId && wp.is_available,
     );
   }, [professionalId, workerProfessional]);
 

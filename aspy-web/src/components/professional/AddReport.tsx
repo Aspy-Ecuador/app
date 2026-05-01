@@ -1,16 +1,24 @@
+// FINAL
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Edit, UploadFile } from "@mui/icons-material";
-import { FileData } from "@/types/FileData";
-import { AppointmentReportRequest } from "@/typesRequest/AppointmentReportRequest";
-import { getAppointment, toNumber, uploadToCloudinary } from "@/utils/utils";
+import type { FileData } from "@/types/FileData";
+import { getAppointment, uploadToCloudinary } from "@/utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext";
-import CancelButton from "@buttons/CancelButton";
-import CreationButton from "@buttons/CreationButton";
-import UploadButton from "@buttons/UploadButton";
 import Progress from "@components/Progress";
 import appointmentReportAPI from "@/API/appointmentReportAPI";
 import Success from "../Success";
+import type { ReportRequest } from "@/typesRequest/ReportRequest";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
+import CircularProgress from "@mui/material/CircularProgress";
+import UploadFileRoundedIcon from "@mui/icons-material/UploadFileRounded";
+import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
+import SendRoundedIcon from "@mui/icons-material/SendRounded";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 
 interface AddReportProps {
   setReport: (file: FileData | null) => void;
@@ -18,149 +26,242 @@ interface AddReportProps {
 
 export default function AddReport({ setReport }: AddReportProps) {
   const { appointment } = useParams();
-  //const [signature, setSignature] = useState<FileData | null>(null);
   const [reporte, setReporte] = useState<FileData | null>(null);
-  const navigate = useNavigate();
+  const [sending, setSending] = useState(false);
   const [open, setOpen] = useState(false);
-
-  const handleBack = () => {
-    navigate(-1);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    navigate("/");
-  };
-
-  const handleOpen = () => {
-    setOpen(true);
-  };
+  const navigate = useNavigate();
 
   const {
     data,
     loading,
-    refreshPaymentData,
-    refreshProfessionals,
     refreshAppointments,
     refreshServices,
     refreshPersons,
-    refreshUserAccounts,
-    refreshRoles,
-    refreshSchedules,
     refreshAppointmentReports,
   } = useRoleData();
+
   if (loading) return <Progress />;
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const fileData: FileData = { file, name: file.name };
+    setReport(fileData);
+    setReporte(fileData);
+    e.target.value = "";
+  };
+
+  const handleRemove = () => {
+    setReport(null);
+    setReporte(null);
+  };
+
   const handleSend = async () => {
-    if (reporte != null && appointment != null) {
+    if (!reporte || !appointment) return;
+    setSending(true);
+    try {
       const reportUrl = await uploadToCloudinary(reporte);
-      //const signUrl = await uploadToCloudinary(signature);
-      const dataAppointment = getAppointment(data, toNumber(appointment));
+      const dataAppointment = getAppointment(
+        data.appointments,
+        Number(appointment),
+      );
+      if (!dataAppointment) return;
 
-      if (!dataAppointment) {
-        return null;
-      }
-
-      const dataRequest = {
-        appointment_id: Number(appointment!),
-        comments: reportUrl,
-        sign:
-          dataAppointment.proffesional.title +
-          " " +
-          dataAppointment.proffesional.first_name,
-        "created-by": "system",
+      const dataRequest: ReportRequest = {
+        appointmentId: Number(appointment),
+        file: reportUrl,
+        sign: `${dataAppointment.professional.first_name} ${dataAppointment.professional.last_name}`,
       };
 
-      console.log(dataRequest);
       await appointmentReportAPI.createReport(dataRequest);
-      await refreshPaymentData();
-      await refreshProfessionals();
       await refreshAppointments();
       await refreshServices();
       await refreshPersons();
-      await refreshUserAccounts();
-      await refreshRoles();
-      await refreshSchedules();
       await refreshAppointmentReports();
-      handleOpen();
+      setOpen(true);
+    } finally {
+      setSending(false);
     }
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-md w-full  space-y-6 flex flex-col relative">
-      {/*
-      <div>
-        <div className="flex items-center mb-2">
-          <Edit className="mr-2 text-gray-600" />
-          <h2 className="text-lg font-semibold">Firma del profesional</h2>
-        </div>
-        <UploadButton
-          accept="image/*"
-          label="Subir firma"
-          icon={<UploadFile className="mr-2 text-blue-600" />}
-          buttonClassName="bg-white text-black font-bold border border-blue-600 hover:bg-blue-50"
-          onFileSelected={(fileData) => setSignature(fileData)}
-        />
-        {signature && (
-          <>
-            <p className="text-sm text-gray-500 mt-1">
-              Firma cargada: <strong>{signature.name}</strong>
-            </p>
-            <div className="mt-2">
-              <img
-                src={
-                  signature.file instanceof File
-                    ? URL.createObjectURL(signature.file)
-                    : signature.file
-                }
-                alt="Firma seleccionada"
-                className="max-h-48 object-contain border rounded-md"
-              />
-            </div>
-          </>
-        )}
-      </div>
-*/}
-      <div>
-        <div className="flex items-center mb-2">
-          <Edit className="mr-2 text-gray-600" />
-          <h2 className="text-lg font-semibold">Reporte del profesional</h2>
-        </div>
-        <UploadButton
-          accept="application/pdf"
-          label="Subir Reporte"
-          icon={<UploadFile className="mr-2 text-blue-600" />}
-          buttonClassName="bg-white text-black font-bold border border-blue-600 hover:bg-blue-50"
-          onFileSelected={(fileData) => {
-            setReport(fileData);
-            setReporte(fileData);
-          }}
-        />
-        {reporte && (
-          <p className="text-sm text-gray-500 mt-1">
-            Reporte cargado: <strong>{reporte.name}</strong>
-          </p>
-        )}
-      </div>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+      {/* ── Sección: subir archivo ── */}
+      <Box>
+        <Typography
+          variant="overline"
+          color="text.secondary"
+          sx={{ letterSpacing: 2, display: "block", mb: 1.5 }}
+        >
+          Archivo del reporte
+        </Typography>
 
-      <div className="flex justify-end gap-3 mt-auto">
-        <CancelButton
-          onClick={() => {
-            //setSignature(null);
-            //setReport(null);
-            //setReporte(null);
-            handleBack();
+        {reporte ? (
+          /* Archivo cargado */
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={1.5}
+            sx={{
+              p: 1.5,
+              borderRadius: 2,
+              border: "0.5px solid",
+              borderColor: "success.light",
+              bgcolor: "#EAF3DE",
+            }}
+          >
+            <CheckCircleOutlineRoundedIcon
+              sx={{ fontSize: 18, color: "success.main", flexShrink: 0 }}
+            />
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                display="block"
+              >
+                Archivo cargado
+              </Typography>
+              <Typography
+                variant="body2"
+                fontWeight={500}
+                noWrap
+                title={reporte.name}
+                sx={{ color: "#3B6D11" }}
+              >
+                {reporte.name}
+              </Typography>
+            </Box>
+            <Button
+              size="small"
+              color="inherit"
+              onClick={handleRemove}
+              sx={{
+                minWidth: 0,
+                p: 0.5,
+                borderRadius: 1,
+                color: "text.disabled",
+                "&:hover": { color: "error.main" },
+              }}
+            >
+              <CloseRoundedIcon sx={{ fontSize: 16 }} />
+            </Button>
+          </Stack>
+        ) : (
+          /* Zona de carga */
+          <Box
+            component="label"
+            htmlFor="report-upload"
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 1,
+              p: 3,
+              borderRadius: 2.5,
+              border: "1.5px dashed",
+              borderColor: "divider",
+              cursor: "pointer",
+              transition: "all 0.15s",
+              "&:hover": {
+                borderColor: "primary.main",
+                bgcolor: "action.hover",
+              },
+            }}
+          >
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                bgcolor: "#E6F1FB",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <UploadFileRoundedIcon sx={{ fontSize: 18, color: "#185FA5" }} />
+            </Box>
+            <Box textAlign="center">
+              <Typography variant="body2" fontWeight={500}>
+                Subir reporte
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Solo PDF · hasta 10 MB
+              </Typography>
+            </Box>
+            <input
+              id="report-upload"
+              type="file"
+              accept="application/pdf"
+              hidden
+              onChange={handleFileChange}
+            />
+          </Box>
+        )}
+      </Box>
+
+      {/* ── Info del archivo si ya cargó ── */}
+      {reporte && (
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <InsertDriveFileOutlinedIcon
+            sx={{ fontSize: 14, color: "text.disabled" }}
+          />
+          <Typography variant="caption" color="text.secondary" noWrap>
+            PDF listo para enviar
+          </Typography>
+        </Stack>
+      )}
+
+      <Divider />
+
+      {/* ── Acciones ── */}
+      <Stack direction="row" spacing={1}>
+        <Button
+          fullWidth
+          variant="outlined"
+          size="small"
+          color="inherit"
+          onClick={() => navigate(-1)}
+          sx={{
+            borderRadius: 2,
+            textTransform: "none",
+            borderColor: "divider",
+            color: "text.secondary",
           }}
-          text="Cancelar"
-        />
-        <CreationButton text="Enviar reporte" onClick={handleSend} />
-      </div>
+        >
+          Cancelar
+        </Button>
+
+        <Button
+          fullWidth
+          variant="contained"
+          size="small"
+          disabled={!reporte || sending}
+          onClick={handleSend}
+          color="info"
+          startIcon={
+            sending ? (
+              <CircularProgress size={14} color="inherit" />
+            ) : (
+              <SendRoundedIcon sx={{ fontSize: 15 }} />
+            )
+          }
+          sx={{ borderRadius: 2, textTransform: "none" }}
+        >
+          {sending ? "Enviando..." : "Enviar"}
+        </Button>
+      </Stack>
+
       <Success
         open={open}
-        handleClose={handleClose}
+        handleClose={() => {
+          setOpen(false);
+          navigate("/");
+        }}
         isRegister={true}
-        message={"Se ha registrado con éxito!!"}
+        message="Se ha registrado con éxito!!"
       />
-    </div>
+    </Box>
   );
 }

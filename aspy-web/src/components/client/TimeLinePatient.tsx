@@ -10,7 +10,7 @@ import TimelineDot from "@mui/lab/TimelineDot";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import { getReportsUser, translateStatus } from "@/utils/utils";
+import { getReportsUser } from "@/utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Progress from "@components/Progress";
 import type { AppointmentReport } from "@/typesResponse/AppointmentReport";
@@ -73,9 +73,7 @@ export default function TimeLinePatients({
                   {report.professional.last_name}
                 </Typography>
                 <Typography variant="body1">
-                  <strong>
-                    {translateStatus(report.appointment_status.name)}
-                  </strong>
+                  <strong>{report.appointment_status.name}</strong>
                 </Typography>
               </Grid>
               <Grid
@@ -84,13 +82,19 @@ export default function TimeLinePatients({
                 justifyContent="center"
                 alignItems="center"
               >
-                <Button
-                  variant="outlined"
-                  onClick={() => handleMoreInfo(report)}
-                  className="button-ver-detalles"
-                >
-                  Ver Reporte
-                </Button>
+                {report.report ? (
+                  <Button
+                    variant="outlined"
+                    onClick={() => handleMoreInfo(report)}
+                    className="button-ver-detalles"
+                  >
+                    Ver Reporte
+                  </Button>
+                ) : (
+                  <Typography variant="body1" color="textSecondary">
+                    No hay reporte disponible
+                  </Typography>
+                )}
               </Grid>
             </Grid>
           </TimelineContent>

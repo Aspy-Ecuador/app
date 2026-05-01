@@ -1,5 +1,5 @@
 // FINAL
-import { Role } from "@/typesResponse/Role";
+import type { Role } from "@/typesResponse/Role";
 
 export interface UserAccount {
   user_account_id: number;

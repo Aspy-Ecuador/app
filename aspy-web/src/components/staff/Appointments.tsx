@@ -1,7 +1,8 @@
+// FINAL
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAppointmentProfessional } from "@utils/utils";
-import { Appointment } from "@/types/Appointment";
+import type { Appointment } from "@/typesResponse/Appointment";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -12,26 +13,24 @@ import Progress from "@components/Progress";
 
 export default function Appointments() {
   const navigate = useNavigate();
-
   const { data, loading } = useRoleData();
-
-  if (loading) return <Progress />;
-
   const [selectedId, setSelected] = useState<number>(0);
 
   const handleSelectProfessional = (id: number) => {
     setSelected(id);
   };
 
+  if (loading) return <Progress />;
+
+  const appointmentProfessional: Appointment[] = getAppointmentProfessional(
+    selectedId,
+    data,
+  );
+
   const handleCreateAppointment = () => {
     const newPath = `/agendar-cita`;
     navigate(newPath);
   };
-
-  const appointmentProfessional: Appointment[] = getAppointmentProfessional(
-    selectedId,
-    data
-  );
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>

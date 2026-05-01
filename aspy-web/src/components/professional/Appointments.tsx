@@ -1,5 +1,6 @@
+// FINAL
 import { useRoleData } from "@/observer/RoleDataContext";
-import { Appointment } from "@/types/Appointment";
+import type { Appointment } from "@/typesResponse/Appointment";
 import { getAppointmentsProfessional } from "@/utils/utils";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -14,8 +15,8 @@ export default function Appointments() {
   if (loading) return <Progress />;
 
   const appointments: Appointment[] = getAppointmentsProfessional(
-    data,
-    getAuthenticatedUserID()
+    data.appointments,
+    getAuthenticatedUserID(),
   );
 
   return (

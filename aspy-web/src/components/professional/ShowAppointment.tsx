@@ -1,5 +1,6 @@
+// FINAL
 import { useNavigate } from "react-router-dom";
-import { Appointment } from "@/types/Appointment";
+import type { Appointment } from "@/typesResponse/Appointment";
 import { useState } from "react";
 import Card from "@mui/material/Card";
 import Divider from "@mui/material/Divider";
@@ -7,215 +8,183 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
-import Radio from "@mui/material/Radio";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import FormControl from "@mui/material/FormControl";
-import FormLabel from "@mui/material/FormLabel";
 import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
 import ConfirmDialog from "@professional/ConfirmDialog";
 import appointmentAPI from "@/API/appointmentAPI";
 import { useRoleData } from "@/observer/RoleDataContext";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
 interface ShowAppointmentProps {
   unmarkedAppointmentsProp: Appointment[];
   unreportedAppointments: Appointment[];
 }
 
+type ActionType = "complete" | "missed" | null;
+
 export default function ShowAppointment({
   unmarkedAppointmentsProp,
   unreportedAppointments,
 }: ShowAppointmentProps) {
   const [unmarkedAppointments, setUnmarkedAppointments] = useState(
-    unmarkedAppointmentsProp
+    unmarkedAppointmentsProp,
   );
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
+  const [pendingAction, setPendingAction] = useState<ActionType>(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const [assistMap, setAssistMap] = useState<Record<number, string>>({});
   const navigate = useNavigate();
   const {
-    refreshPaymentData,
-    refreshProfessionals,
     refreshAppointments,
     refreshServices,
     refreshPersons,
-    refreshUserAccounts,
-    refreshRoles,
-    refreshSchedules,
+    refreshAppointmentReports,
   } = useRoleData();
 
-  const handleConfirmAssist = async () => {
+  const handleSelectAction = (cita: Appointment, action: ActionType) => {
     (document.activeElement as HTMLElement)?.blur();
-    if (selectedAppointment) {
-      setUnmarkedAppointments((prev) =>
-        prev.filter(
-          (cita) => cita.id_appointment !== selectedAppointment.id_appointment
-        )
-      );
-
-      setAssistMap((prev) => {
-        const updated = { ...prev };
-        delete updated[selectedAppointment.id_appointment];
-        return updated;
-      });
-    }
-    setOpenDialog(false);
-    await send();
-    await refreshPaymentData();
-    await refreshProfessionals();
-    await refreshAppointments();
-    await refreshServices();
-    await refreshPersons();
-    await refreshUserAccounts();
-    await refreshRoles();
-    await refreshSchedules();
-    setSelectedAppointment(null);
+    setSelectedAppointment(cita);
+    setPendingAction(action);
+    setOpenDialog(true);
   };
 
-  const send = async () => {
-    const option: string = selectedAppointment
-      ? assistMap[selectedAppointment.id_appointment]
-      : "";
-    if (option !== "" && selectedAppointment !== null) {
-      await appointmentAPI.updateAppointment(
-        selectedAppointment.id_appointment,
-        {
-          status: Number(option),
-        }
+  const handleConfirm = async () => {
+    (document.activeElement as HTMLElement)?.blur();
+
+    if (!selectedAppointment || !pendingAction) return;
+
+    const { appointment_id } = selectedAppointment;
+
+    try {
+      if (pendingAction === "complete") {
+        await appointmentAPI.completeAppointment(appointment_id);
+      } else if (pendingAction === "missed") {
+        await appointmentAPI.missedAppointment(appointment_id);
+      }
+
+      setUnmarkedAppointments((prev) =>
+        prev.filter((cita) => cita.appointment_id !== appointment_id),
       );
+
+      await refreshAppointments();
+      await refreshServices();
+      await refreshPersons();
+      await refreshAppointmentReports();
+    } finally {
+      setOpenDialog(false);
+      setSelectedAppointment(null);
+      setPendingAction(null);
     }
   };
 
   const handleCancel = () => {
     (document.activeElement as HTMLElement)?.blur();
-    if (selectedAppointment) {
-      setAssistMap((prev) => {
-        const updated = { ...prev };
-        delete updated[selectedAppointment.id_appointment];
-        return updated;
-      });
-    }
     setOpenDialog(false);
     setSelectedAppointment(null);
+    setPendingAction(null);
+  };
+
+  const sxCard = {
+    borderRadius: 3,
+    border: "1px solid",
+    borderColor: "divider",
+    transition: "border-color 0.2s",
+    "&:hover": { borderColor: "primary.light" },
+  };
+
+  const sxRow = {
+    justifyContent: "space-between",
+    alignItems: "center",
+    py: 0.5,
   };
 
   return (
-    <Grid container spacing={2}>
+    <Grid container spacing={3}>
+      {/* ── Sección: Citas sin marcar ── */}
       <Grid size={12}>
-        <Typography variant="h3">Citas sin marcar:</Typography>
+        <Typography
+          variant="overline"
+          sx={{ color: "text.secondary", letterSpacing: 2 }}
+        >
+          Citas sin marcar
+        </Typography>
       </Grid>
 
-      <Grid size={12} container alignItems="center" justifyContent="center">
+      <Grid size={12} container spacing={2} justifyContent="center">
         {unmarkedAppointments.length > 0 ? (
-          unmarkedAppointments.map((cita, index) => (
-            <Grid key={index} size={12} sx={{ maxWidth: 310 }}>
-              <Card variant="outlined">
-                <Box sx={{ p: 2 }}>
-                  <Stack
-                    direction="row"
-                    sx={{
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Typography gutterBottom variant="body1">
-                      Paciente:
+          unmarkedAppointments.map((cita) => (
+            <Grid key={cita.appointment_id} size={{ xs: 12, sm: 6, md: 4 }}>
+              <Card variant="outlined" sx={sxCard}>
+                <Box sx={{ p: 2.5 }}>
+                  <Stack direction="row" sx={sxRow}>
+                    <Typography variant="caption" color="text.secondary">
+                      Paciente
                     </Typography>
-                    <Typography gutterBottom variant="body1">
-                      {cita.client.full_name}
+                    <Typography variant="body2" fontWeight={600}>
+                      {cita.client.first_name} {cita.client.last_name}
                     </Typography>
                   </Stack>
-                  <Stack
-                    direction="row"
-                    sx={{
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Typography gutterBottom variant="body1">
-                      Servicio:
+                  <Stack direction="row" sx={sxRow}>
+                    <Typography variant="caption" color="text.secondary">
+                      Servicio
                     </Typography>
-                    <Typography gutterBottom variant="body1">
-                      {cita.service.name}
+                    <Typography variant="body2">{cita.service.name}</Typography>
+                  </Stack>
+                  <Stack direction="row" sx={sxRow}>
+                    <Typography variant="caption" color="text.secondary">
+                      Fecha
+                    </Typography>
+                    <Typography variant="body2">
+                      {cita.worker_schedule.schedule.date}
                     </Typography>
                   </Stack>
-                  <Stack
-                    direction="row"
-                    sx={{
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Typography gutterBottom variant="body1">
-                      Fecha:
+                  <Stack direction="row" sx={sxRow}>
+                    <Typography variant="caption" color="text.secondary">
+                      Hora
                     </Typography>
-                    <Typography gutterBottom variant="body1">
-                      {cita.date}
-                    </Typography>
-                  </Stack>
-                  <Stack
-                    direction="row"
-                    sx={{
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Typography gutterBottom variant="body1">
-                      Hora:
-                    </Typography>
-                    <Typography gutterBottom variant="body1">
-                      {cita.startTime}
-                    </Typography>
+                    <Chip
+                      label={`${cita.worker_schedule.schedule.start_time} – ${cita.worker_schedule.schedule.end_time}`}
+                      size="small"
+                      variant="outlined"
+                      sx={{ fontFamily: "monospace", fontSize: 11 }}
+                    />
                   </Stack>
                 </Box>
-                <Divider />
-                <Box sx={{ p: 2 }}>
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    className="xd"
-                    sx={{ display: "flex", justifyContent: "center", mt: 1 }}
-                  >
-                    <FormControl>
-                      <FormLabel id={`opciones-${index}`}>
-                        Seleccione una opción
-                      </FormLabel>
-                      <RadioGroup
-                        row
-                        name={`opcion-cita-${index}`}
-                        value={assistMap[cita.id_appointment] || ""}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          setAssistMap((prev) => ({
-                            ...prev,
-                            [cita.id_appointment]: value,
-                          }));
 
-                          setSelectedAppointment(cita);
-                          setOpenDialog(true);
-                        }}
-                      >
-                        <FormControlLabel
-                          value="2"
-                          control={<Radio />}
-                          label="Asistió"
-                        />
-                        <FormControlLabel
-                          value="3"
-                          control={<Radio />}
-                          label="No asistió"
-                        />
-                      </RadioGroup>
-                    </FormControl>
-                  </Stack>
+                <Divider />
+
+                <Box sx={{ p: 2, display: "flex", gap: 1 }}>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="success"
+                    size="small"
+                    startIcon={<CheckCircleOutlineIcon />}
+                    onClick={() => handleSelectAction(cita, "complete")}
+                    sx={{ borderRadius: 2, textTransform: "none" }}
+                  >
+                    Asistió
+                  </Button>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="error"
+                    size="small"
+                    startIcon={<CancelOutlinedIcon />}
+                    onClick={() => handleSelectAction(cita, "missed")}
+                    sx={{ borderRadius: 2, textTransform: "none" }}
+                  >
+                    No asistió
+                  </Button>
                 </Box>
               </Card>
             </Grid>
           ))
         ) : (
           <Grid size={12}>
-            <Typography variant="h4" align="center">
+            <Typography variant="body2" align="center" color="text.disabled">
               No hay citas que marcar
             </Typography>
           </Grid>
@@ -223,101 +192,83 @@ export default function ShowAppointment({
       </Grid>
 
       <Grid size={12}>
-        <Divider className="divider-paciente-historial" />
+        <Divider />
       </Grid>
 
+      {/* ── Sección: Citas sin reportar ── */}
       <Grid size={12}>
-        <Typography variant="h3">Citas sin reportar:</Typography>
+        <Typography
+          variant="overline"
+          sx={{ color: "text.secondary", letterSpacing: 2 }}
+        >
+          Citas sin reportar
+        </Typography>
       </Grid>
 
-      <Grid size={12} container alignItems="center" justifyContent="center">
+      <Grid size={12} container spacing={2} justifyContent="center">
         {unreportedAppointments.length > 0 ? (
-          unreportedAppointments.map((cita, index) => (
-            <Grid key={index} size={12} sx={{ maxWidth: 310 }}>
-              <Card variant="outlined">
-                <Box sx={{ p: 2 }}>
-                  <Stack
-                    direction="row"
-                    sx={{
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Typography gutterBottom variant="body1">
-                      Paciente:
+          unreportedAppointments.map((cita) => (
+            <Grid key={cita.appointment_id} size={{ xs: 12, sm: 6, md: 4 }}>
+              <Card variant="outlined" sx={sxCard}>
+                <Box sx={{ p: 2.5 }}>
+                  <Stack direction="row" sx={sxRow}>
+                    <Typography variant="caption" color="text.secondary">
+                      Paciente
                     </Typography>
-                    <Typography gutterBottom variant="body1">
-                      {cita.client.full_name}
+                    <Typography variant="body2" fontWeight={600}>
+                      {cita.client.first_name} {cita.client.last_name}
                     </Typography>
                   </Stack>
-                  <Stack
-                    direction="row"
-                    sx={{
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Typography gutterBottom variant="body1">
-                      Servicio:
+                  <Stack direction="row" sx={sxRow}>
+                    <Typography variant="caption" color="text.secondary">
+                      Servicio
                     </Typography>
-                    <Typography gutterBottom variant="body1">
-                      {cita.service.name}
+                    <Typography variant="body2">{cita.service.name}</Typography>
+                  </Stack>
+                  <Stack direction="row" sx={sxRow}>
+                    <Typography variant="caption" color="text.secondary">
+                      Fecha
+                    </Typography>
+                    <Typography variant="body2">
+                      {cita.worker_schedule.schedule.date}
                     </Typography>
                   </Stack>
-                  <Stack
-                    direction="row"
-                    sx={{
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Typography gutterBottom variant="body1">
-                      Fecha:
+                  <Stack direction="row" sx={sxRow}>
+                    <Typography variant="caption" color="text.secondary">
+                      Hora
                     </Typography>
-                    <Typography gutterBottom variant="body1">
-                      {cita.date}
-                    </Typography>
-                  </Stack>
-                  <Stack
-                    direction="row"
-                    sx={{
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Typography gutterBottom variant="body1">
-                      Hora:
-                    </Typography>
-                    <Typography gutterBottom variant="body1">
-                      {cita.startTime}
-                    </Typography>
+                    <Chip
+                      label={cita.worker_schedule.schedule.start_time}
+                      size="small"
+                      variant="outlined"
+                      sx={{ fontFamily: "monospace", fontSize: 11 }}
+                    />
                   </Stack>
                 </Box>
+
                 <Divider />
+
                 <Box sx={{ p: 2 }}>
-                  <Stack
-                    direction="row"
-                    alignItems={"center"}
-                    justifyContent={"center"}
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="info"
+                    size="small"
+                    startIcon={<AddCircleOutlineIcon />}
+                    onClick={() =>
+                      navigate(`pacientes/${cita.appointment_id}/nuevoReporte`)
+                    }
+                    sx={{ borderRadius: 2, textTransform: "none" }}
                   >
-                    <Button
-                      onClick={() => {
-                        const newPath = `pacientes/${cita.id_appointment}/nuevoReporte`;
-                        navigate(newPath);
-                      }}
-                      variant="outlined"
-                      className="button-new-report"
-                    >
-                      Nuevo Reporte
-                    </Button>
-                  </Stack>
+                    Nuevo Reporte
+                  </Button>
                 </Box>
               </Card>
             </Grid>
           ))
         ) : (
           <Grid size={12}>
-            <Typography variant="h4" align="center">
+            <Typography variant="body2" align="center" color="text.disabled">
               No hay citas que reportar
             </Typography>
           </Grid>
@@ -327,12 +278,8 @@ export default function ShowAppointment({
       <ConfirmDialog
         open={openDialog}
         onClose={handleCancel}
-        onConfirm={handleConfirmAssist}
-        value={
-          selectedAppointment
-            ? assistMap[selectedAppointment.id_appointment]
-            : ""
-        }
+        onConfirm={handleConfirm}
+        value={pendingAction ?? ""}
       />
     </Grid>
   );

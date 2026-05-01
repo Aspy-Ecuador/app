@@ -1,5 +1,6 @@
+// FINAL
 import { getAuthenticatedUserID, getAuthenticatedUserName } from "@store";
-import { Appointment } from "@/types/Appointment";
+import type { Appointment } from "@/typesResponse/Appointment";
 import { useRoleData } from "@/observer/RoleDataContext";
 import {
   getUnmarkedAppointments,
@@ -17,13 +18,14 @@ export default function ControlPanel() {
   if (loading) return <Progress />;
 
   const unmarkedAppointments: Appointment[] = getUnmarkedAppointments(
-    data,
-    getAuthenticatedUserID()
+    data.appointments,
+    getAuthenticatedUserID(),
   );
 
   const unreportedAppointments: Appointment[] = getUnreportedAppointments(
-    data,
-    getAuthenticatedUserID()
+    data.appointments,
+    data.appointmentReports,
+    getAuthenticatedUserID(),
   );
 
   return (

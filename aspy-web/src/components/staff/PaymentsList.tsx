@@ -1,8 +1,7 @@
+// FINAL
 import { useNavigate, useLocation } from "react-router-dom";
-import { GridRowSelectionModel } from "@mui/x-data-grid";
-import { PaymentResponse } from "@/typesResponse/PaymentResponse";
-import { GridColDef } from "@mui/x-data-grid";
-import { dataPayments } from "@data/Payment";
+import type { GridRowId } from "@mui/x-data-grid";
+import type { GridColDef } from "@mui/x-data-grid";
 import Button from "@mui/material/Button";
 import Table from "@components/Table";
 import Box from "@mui/material/Box";
@@ -15,14 +14,17 @@ import AccessTimeFilledRoundedIcon from "@mui/icons-material/AccessTimeFilledRou
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import CancelRoundedIcon from "@mui/icons-material/CancelRounded";
 import { useRoleData } from "@/observer/RoleDataContext";
-import { getPayments } from "@/utils/utils";
 import Progress from "../Progress";
+import type { Payment } from "@/typesResponse/Payment";
+import { useState } from "react";
 
 export default function PaymentsList() {
-  const rowSelection: GridRowSelectionModel = [];
-  //const { data, loading } = useRoleData();
-  //const payments: PaymentResponse[] = getPayments(data);
-  //Ruta para aprobar
+  const { data, loading } = useRoleData();
+
+  const payments: Payment[] = data.payments ?? [];
+
+  const [selectedId, setSelectedId] = useState<GridRowId | null>(null);
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -47,7 +49,7 @@ export default function PaymentsList() {
       renderCell: (params) => {
         return (
           <Typography variant="body1">
-            {params.row.person.first_name} {params.row.person.last_name}
+            {params.row.client.first_name} {params.row.client.last_name}
           </Typography>
         );
       },
@@ -76,7 +78,9 @@ export default function PaymentsList() {
       align: "left",
       headerAlign: "left",
       renderCell: (params) => {
-        return <Typography variant="body1">$ {params.value}</Typography>;
+        return (
+          <Typography variant="body1">$ {params.row.service.price}</Typography>
+        );
       },
     },
     {
@@ -111,13 +115,15 @@ export default function PaymentsList() {
       renderCell: (params) => {
         return (
           <Typography variant="body1">
-            {getStatusIcon(params.row.status.status_id)}
+            {getStatusIcon(params.row.payment_status.payment_status_id)}
           </Typography>
         );
       },
     },
   ];
-  //if (loading) return <Progress />;
+
+  if (loading) return <Progress />;
+
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1}>
@@ -125,12 +131,12 @@ export default function PaymentsList() {
           <SimpleHeader text={"Pagos"} />
         </Grid>
         <Grid size={12}>
-          <Table<PaymentResponse>
+          <Table<Payment>
             columns={columns}
+            rows={payments}
             getRowId={(row) => row.payment_id}
-            rows={dataPayments}
-            rowSelectionModel={rowSelection}
-            onRowSelectionChange={() => {}}
+            selectedId={selectedId}
+            onRowSelect={setSelectedId}
           />
         </Grid>
       </Grid>
@@ -141,9 +147,9 @@ export default function PaymentsList() {
 const getStatusIcon = (status: number) => {
   switch (status) {
     case 1:
-      return <AccessTimeFilledRoundedIcon color="warning" />;
-    case 2:
       return <CheckCircleRoundedIcon color="success" />;
+    case 2:
+      return <AccessTimeFilledRoundedIcon color="warning" />;
     case 3:
       return <CancelRoundedIcon color="error" />;
     default:

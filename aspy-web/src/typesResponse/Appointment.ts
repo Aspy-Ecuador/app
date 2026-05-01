@@ -7,6 +7,8 @@ import type { WorkerSchedule } from "@/typesResponse/WorkerSchedule";
 export interface Appointment {
   appointment_id: number;
 
+  payment_id: number;
+
   appointment_status: AppointmentStatus;
 
   client: Person;

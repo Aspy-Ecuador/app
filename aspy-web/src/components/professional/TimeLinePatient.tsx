@@ -1,7 +1,5 @@
 // Hay que instalar npm install @mui/lab@6.0.0-beta.32
-import { User } from "@/types/User";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Appointment } from "@/types/Appointment";
 import TimelineItem, { timelineItemClasses } from "@mui/lab/TimelineItem";
 import Timeline from "@mui/lab/Timeline";
 import TimelineSeparator from "@mui/lab/TimelineSeparator";
@@ -11,37 +9,32 @@ import TimelineDot from "@mui/lab/TimelineDot";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import {
-  getAppointmentsReport,
-  getReportsUser,
-  translateStatus,
-} from "@/utils/utils";
+import { getReportsUser } from "@/utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Progress from "@components/Progress";
-import { AppointmentReport } from "@/types/AppointmentReport";
+import type { Person } from "@/typesResponse/Person";
+import type { AppointmentWithReports } from "@/types/AppointmentWithReports";
 
 interface TimeLinePatientsProps {
-  patient: User;
+  patient: Person;
 }
 
 export default function TimeLinePatients({ patient }: TimeLinePatientsProps) {
   const { data, loading } = useRoleData();
-
-  if (loading) return <Progress />;
-
   const navigate = useNavigate();
   const location = useLocation();
 
-  const appointmentsReport: AppointmentReport[] = getAppointmentsReport(data);
+  if (loading) return <Progress />;
 
-  const appointmentsReportUser: AppointmentReport[] = getReportsUser(
-    appointmentsReport,
-    patient.person_id
+  const appointmentsReportUser: AppointmentWithReports[] = getReportsUser(
+    data.appointmentReports,
+    patient.user_id,
+    data.appointments,
   );
+  console.log("Appointments with reports for user:", appointmentsReportUser);
 
-  //const appointmentsUser: Appointment[] =
-  const handleMoreInfo = (appointment: Appointment) => {
-    navigate(`${location.pathname}/${appointment.id_appointment}`);
+  const handleMoreInfo = (appointmentId: number) => {
+    navigate(`${location.pathname}/${appointmentId}`);
   };
 
   return (
@@ -63,20 +56,19 @@ export default function TimeLinePatients({ patient }: TimeLinePatientsProps) {
             <Grid container spacing={10} sx={{ marginBottom: "3%" }}>
               <Grid size={8}>
                 <Typography variant="body1">
-                  <strong>Fecha:</strong> {report.appointment.date}
+                  <strong>Fecha:</strong> {report.worker_schedule.schedule.date}
                 </Typography>
                 <Typography variant="body1">
-                  <strong>Hora:</strong> {report.appointment.startTime} -{" "}
-                  {report.appointment.endTime}
+                  <strong>Hora:</strong>{" "}
+                  {report.worker_schedule.schedule.start_time} -
+                  {report.worker_schedule.schedule.end_time}
                 </Typography>
                 <Typography variant="body1">
-                  <strong>Profesional:</strong>{" "}
-                  {report.appointment.proffesional.full_name}
+                  <strong>Profesional:</strong> {report.professional.first_name}{" "}
+                  {report.professional.last_name}
                 </Typography>
                 <Typography variant="body1">
-                  <strong>
-                    {translateStatus(report.appointment.status.name)}
-                  </strong>
+                  <strong>{report.appointment_status.name}</strong>
                 </Typography>
               </Grid>
               <Grid
@@ -87,7 +79,7 @@ export default function TimeLinePatients({ patient }: TimeLinePatientsProps) {
               >
                 <Button
                   variant="outlined"
-                  onClick={() => handleMoreInfo(report.appointment)}
+                  onClick={() => handleMoreInfo(report.appointment_id)}
                   className="button-ver-detalles"
                 >
                   Ver detalles

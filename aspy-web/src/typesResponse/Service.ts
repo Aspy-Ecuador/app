@@ -3,7 +3,7 @@ export interface Service {
   service_id: number;
 
   name: string;
-  price: string;
+  price: number;
 
   created_by: number | null;
   modified_by: number | null;

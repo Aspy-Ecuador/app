@@ -1,9 +1,9 @@
+// FINAL
 import { useNavigate } from "react-router-dom";
 import { useState, Fragment } from "react";
 import { useParams } from "react-router-dom";
-import { AppointmentRequest } from "@/typesRequest/AppointmentRequest";
-import { FileData } from "@/types/FileData";
-import type { Service } from "@typesResponse/Service";
+import type { AppointmentRequest } from "@/typesRequest/AppointmentRequest";
+import type { FileData } from "@/types/FileData";
 import { useRoleData } from "@/observer/RoleDataContext";
 import { getAuthenticatedPersonID } from "@/utils/store";
 import Box from "@mui/material/Box";
@@ -20,7 +20,6 @@ import ReplyRoundedIcon from "@mui/icons-material/ReplyRounded";
 import Success from "@components/Success";
 import appointmentAPI from "@API/appointmentAPI";
 import Progress from "@components/Progress";
-import { getAppointments, uploadToCloudinary } from "@/utils/utils";
 import CircularProgress from "@mui/material/CircularProgress";
 
 const steps = ["Detalles de Pago", "Revisar cita"];
@@ -34,12 +33,11 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
     loading,
     refreshServices,
     refreshPersons,
-    refreshUserAccounts,
-    refreshRoles,
-    refreshProfessionals,
-    refreshSchedules,
+    refreshAppointmentReports,
+    refreshPayments,
     refreshAppointments,
-    refreshWorkerSchedules,
+    refreshProServices,
+    refreshWorkerProfessional,
   } = useRoleData();
 
   const navigate = useNavigate();
@@ -77,14 +75,13 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
       };
 
       await appointmentAPI.createAppointment(dataSend);
-      //await refreshServices();
-      //await refreshPersons();
-      //await refreshUserAccounts();
-      //await refreshRoles();
-      //await refreshProfessionals();
-      //await refreshSchedules();
-      //await refreshAppointments();
-      //await refreshWorkerSchedules();
+      await refreshPersons();
+      await refreshAppointments();
+      await refreshAppointmentReports();
+      await refreshPayments();
+      await refreshProServices();
+      await refreshServices();
+      await refreshWorkerProfessional();
       setActiveStep(activeStep + 1);
       setLoad(false);
       setOpen(true);

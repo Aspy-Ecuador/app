@@ -7,6 +7,7 @@ use App\Models\Payment;
 use App\Models\PaymentData;
 use App\Models\Receipt;
 use App\Models\WorkerSchedule;
+use App\Models\AppointmentReport;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,6 +28,7 @@ class AppointmentController extends Controller
             return [
                 'appointment_id' => $appointment->appointment_id,
                 'appointment_status' => $appointment->appointmentStatus,
+                'payment_id' => $appointment->payment_id,
                 'client' => $appointment->client->person,
                 'professional' => $appointment->professional->person,
                 'service' => $appointment->service,
@@ -138,6 +140,7 @@ class AppointmentController extends Controller
             $payment = $appointment->payment;
             $payment->payment_status_id = 3;
             $payment->modified_by = auth()->id();
+            $payment->modification_date = now();
             $payment->save();
 
             if ($appointment->receipt) {
@@ -145,8 +148,9 @@ class AppointmentController extends Controller
             }
 
             $workerSchedule = WorkerSchedule::findOrFail($appointment->worker_schedule_id);
-            $workerSchedule->available = true;
+            $workerSchedule->is_available = true;
             $workerSchedule->modified_by = auth()->id();
+            $workerSchedule->modification_date = now();
             $workerSchedule->save();
 
             $appointment->delete();
@@ -264,6 +268,43 @@ class AppointmentController extends Controller
             DB::rollBack();
             return response()->json([
                 'message' => 'Failed to mark appointment as missed.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function createReport(Request $request)
+    {
+        $request->validate([
+            'appointmentId' => 'required|integer',
+            'file'          => 'required|string',
+            'sign'          => 'required|string',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $appointment = Appointment::findOrFail($request->appointmentId);
+
+            $report = AppointmentReport::create([
+                'appointment_id' => $request->appointmentId,
+                'file'       => $request->file,
+                'sign'           => $request->sign,
+                'created_by'     => auth()->id(),
+                'creation_date'  => now(),
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Report created successfully.',
+                'report'  => $report,
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to create report.',
                 'error'   => $e->getMessage(),
             ], 500);
         }

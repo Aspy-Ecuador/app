@@ -1,76 +1,101 @@
+// FINAL
 import { useNavigate } from "react-router-dom";
 import { getAuthenticatedUserName } from "@store";
-import { ButtonControl } from "@/types/ButtonControl";
-import { Appointment } from "@/types/Appointment";
+import type { ButtonControl } from "@/types/ButtonControl";
+import type { Appointment } from "@/typesResponse/Appointment";
 import { getNextAppointments } from "@/utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext";
-import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
-import ButtonList from "@components/ButtonList";
-import ShowAppointment from "@staff/ShowAppointment";
-import WelcomePanel from "@components/WelcomePanel";
+import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
 import PersonAddAltRoundedIcon from "@mui/icons-material/PersonAddAltRounded";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
 import PermContactCalendarRoundedIcon from "@mui/icons-material/PermContactCalendarRounded";
 import Progress from "@components/Progress";
+import ButtonList from "@components/ButtonList";
+import ShowAppointment from "@staff/ShowAppointment";
+import WelcomePanel from "@components/WelcomePanel";
 
 export default function ControlPanel() {
   const { data, loading } = useRoleData();
-
   const navigate = useNavigate();
-
-  const handleCreateUser = () => {
-    const newPath = `/registrarUsuario`;
-    navigate(newPath);
-  };
-
-  const handleCreateService = () => {
-    const newPath = `/crear-servicio`;
-    navigate(newPath);
-  };
-
-  const handleCreateAppointment = () => {
-    const newPath = `/agendar-cita`;
-    navigate(newPath);
-  };
 
   const botones: ButtonControl[] = [
     {
-      text: "Registrar nuevo usuario",
-      icon: <PermContactCalendarRoundedIcon className="boton-panelcontrol" />,
-      accion: handleCreateUser,
+      text: "Agendar cita",
+      icon: <EditCalendarRoundedIcon />,
+      accion: () => navigate("/agendar-cita"),
     },
     {
-      text: "Agregar Servicio",
-      icon: <PersonAddAltRoundedIcon className="boton-panelcontrol" />,
-      accion: handleCreateService,
+      text: "Registrar usuario",
+      icon: <PermContactCalendarRoundedIcon />,
+      accion: () => navigate("/registrarUsuario"),
     },
     {
-      text: "Agendar Nueva Cita",
-      icon: <EditCalendarRoundedIcon className="boton-panelcontrol" />,
-      accion: handleCreateAppointment,
+      text: "Agregar servicio",
+      icon: <PersonAddAltRoundedIcon />,
+      accion: () => navigate("/crear-servicio"),
     },
   ];
 
-  const appointments: Appointment[] = getNextAppointments(data);
-
   if (loading) return <Progress />;
 
-  return (
-    <Box className="box-panel-control" sx={{ padding: 2 }}>
-      <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 1, md: 1 }}>
-        <Grid size={12}>
-          <WelcomePanel user={"Secr. " + getAuthenticatedUserName()} />
-        </Grid>
+  const appointments: Appointment[] = getNextAppointments(data.appointments);
 
+  return (
+    <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2 }}>
+      <WelcomePanel user={"Secr. " + getAuthenticatedUserName()} />
+
+      <Grid container spacing={2} alignItems="flex-start">
+        {/* Columna de citas */}
         <Grid size={8}>
-          <Typography variant="h3">Citas de hoy:</Typography>
+          <Typography
+            sx={{
+              textTransform: "uppercase",
+              mb: 1.25,
+            }}
+          >
+            Citas de hoy
+          </Typography>
           <ShowAppointment appointments={appointments} />
         </Grid>
 
-        <Grid size={4} className="gird-botones-citas">
-          <ButtonList botones={botones} />
+        {/* Sidebar de acciones */}
+        <Grid size={4}>
+          <Paper
+            elevation={0}
+            sx={{
+              border: "0.5px solid",
+              borderColor: "divider",
+              borderRadius: 3,
+              overflow: "hidden",
+            }}
+          >
+            <Box
+              sx={{
+                px: 1.75,
+                py: 1.25,
+                borderBottom: "0.5px solid",
+                borderColor: "divider",
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: 10,
+                  fontWeight: 500,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  color: "text.disabled",
+                }}
+              >
+                Acciones rápidas
+              </Typography>
+            </Box>
+            <Box sx={{ p: 0.75 }}>
+              <ButtonList botones={botones} />
+            </Box>
+          </Paper>
         </Grid>
       </Grid>
     </Box>

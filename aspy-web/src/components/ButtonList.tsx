@@ -1,10 +1,8 @@
 import { useTheme } from "@mui/material";
-import { ButtonControl } from "@/types/ButtonControl";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
+import Typography from "@mui/material/Typography";
+import type { ButtonControl } from "@/types/ButtonControl";
 
 interface ButtonListProps {
   botones: ButtonControl[];
@@ -12,19 +10,57 @@ interface ButtonListProps {
 
 export default function ButtonList({ botones }: ButtonListProps) {
   const theme = useTheme();
-  const themeClass =
-    theme.palette.mode === "dark" ? "dark-theme" : "light-theme";
+  const isDark = theme.palette.mode === "dark";
 
   return (
-    <List className={themeClass}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, p: 0.5 }}>
       {botones.map((boton, index) => (
-        <ListItem key={index} disablePadding className="li-botones-citas">
-          <ListItemButton onClick={boton.accion} className="ul-botones-citas">
-            <ListItemIcon className="li-icono-citas">{boton.icon}</ListItemIcon>
-            <ListItemText className="li-item-texto" primary={boton.text} />
-          </ListItemButton>
-        </ListItem>
+        <ButtonBase
+          key={index}
+          onClick={boton.accion}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            px: 1.75,
+            py: 1.25,
+            borderRadius: 2,
+            border: "0.5px solid transparent",
+            width: "100%",
+            textAlign: "left",
+            justifyContent: "flex-start",
+            transition: "background 0.15s, border-color 0.15s",
+            "&:hover": {
+              bgcolor: isDark ? "rgba(255,255,255,0.05)" : "action.hover",
+              borderColor: "divider",
+            },
+            "&:active": { transform: "scale(0.99)" },
+          }}
+        >
+          {/* Icono con fondo de color */}
+          <Box
+            sx={{
+              width: 32,
+              height: 32,
+              borderRadius: "8px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              bgcolor: isDark ? "rgba(255,255,255,0.08)" : "action.selected",
+              color: "text.secondary",
+              "& svg": { fontSize: 16 },
+            }}
+          >
+            {boton.icon}
+          </Box>
+
+          {/* Texto */}
+          <Typography sx={{ fontSize: 13, fontWeight: 500, flex: 1 }}>
+            {boton.text}
+          </Typography>
+        </ButtonBase>
       ))}
-    </List>
+    </Box>
   );
 }

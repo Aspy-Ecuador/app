@@ -6,7 +6,7 @@ export type FlattenedReceipt = {
   client_id: number;
   client: string;
   service: string;
-  price: string;
+  price: number;
   date: string;
   receipt: Receipt;
 };

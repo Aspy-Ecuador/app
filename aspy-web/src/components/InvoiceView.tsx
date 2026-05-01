@@ -1,13 +1,8 @@
 // FINAL
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Grid from "@mui/material/Grid";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableRow from "@mui/material/TableRow";
-import TableContainer from "@mui/material/TableContainer";
 import Paper from "@mui/material/Paper";
+import CreditCardRoundedIcon from "@mui/icons-material/CreditCardRounded";
 import Progress from "./Progress";
 import { useRoleData } from "@/observer/RoleDataContext";
 import type { Person } from "@/typesResponse/Person";
@@ -17,11 +12,31 @@ interface InvoiceViewProps {
   date: string;
   client: string;
   service: string;
-  price: string;
-  total: string;
+  price: number;
+  total: number;
   paymentMethod: string;
   client_id: number;
 }
+
+const Field = ({ label, value }: { label: string; value: string }) => (
+  <Box sx={{ mb: 1.25 }}>
+    <Typography
+      sx={{
+        fontSize: 10,
+        fontWeight: 500,
+        letterSpacing: "0.04em",
+        textTransform: "uppercase",
+        color: "text.disabled",
+        mb: 0.25,
+      }}
+    >
+      {label}
+    </Typography>
+    <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
+      {value}
+    </Typography>
+  </Box>
+);
 
 export default function InvoiceView({
   id,
@@ -34,93 +49,154 @@ export default function InvoiceView({
   client_id,
 }: InvoiceViewProps) {
   const { data, loading } = useRoleData();
-  const persons: Person[] = data?.persons || [];
-  const clientData = persons.find((p) => p.person_id === client_id);
-  const contactEmail = clientData?.user_account.email || "";
-  const contactPhone = clientData?.phone.number || "";
-  const address = clientData?.address || { primary_address: "N/A" };
-
   if (loading) return <Progress />;
 
+  const clientData = (data?.persons as Person[])?.find(
+    (p) => p.person_id === client_id,
+  );
+  const email = clientData?.user_account.email ?? "N/A";
+  const address = clientData?.address?.primary_address ?? "N/A";
+
   return (
-    <Box
-      maxWidth={500}
-      mx="auto"
-      p={3}
-      bgcolor="#fff"
-      borderRadius={1}
-      border={1}
-      borderColor="#000000"
+    <Paper
+      elevation={0}
+      sx={{
+        border: "0.5px solid",
+        borderColor: "divider",
+        borderRadius: 3,
+        overflow: "hidden",
+      }}
     >
-      <Typography variant="h6" fontWeight="bold">
-        Recibo de pago
-      </Typography>
-      <Typography variant="h4" fontWeight="bold" gutterBottom>
-        #{id}
-      </Typography>
-
-      <Typography fontWeight="bold">Fecha:</Typography>
-      <Typography gutterBottom>{date}</Typography>
-
-      <Typography fontWeight="bold">Nombre de cliente:</Typography>
-      <Typography gutterBottom>{client}</Typography>
-
-      <Typography fontWeight="bold">Address:</Typography>
-      <Typography gutterBottom>{address.primary_address}</Typography>
-
-      <Box mt={4}>
-        <TableContainer component={Paper} variant="outlined">
-          <Table>
-            <TableBody>
-              <TableRow>
-                <TableCell
-                  colSpan={2}
-                  sx={{ fontWeight: "bold", backgroundColor: "#f5f5f5" }}
-                >
-                  Servicio
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>{service}</TableCell>
-                <TableCell align="right">${price}</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </TableContainer>
-
-        <TableContainer
-          component={Paper}
-          variant="outlined"
-          sx={{ marginTop: "2%" }}
+      <Box
+        sx={{
+          px: 1.75,
+          py: 1.25,
+          borderBottom: "0.5px solid",
+          borderColor: "divider",
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: 10,
+            fontWeight: 500,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            color: "text.disabled",
+          }}
         >
-          <Table>
-            <TableBody>
-              <TableRow>
-                <TableCell>Subtotal</TableCell>
-                <TableCell align="right">${price}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell sx={{ fontWeight: "bold" }}>Total</TableCell>
-                <TableCell align="right" sx={{ fontWeight: "bold" }}>
-                  ${total}
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </TableContainer>
+          Recibo
+        </Typography>
       </Box>
 
-      <Grid container mt={4} spacing={2}>
-        <Grid size={6}>
-          <Typography fontWeight="bold">Método de pago:</Typography>
-          <Typography>{paymentMethod}</Typography>
-        </Grid>
-        <Grid size={6}>
-          <Typography fontWeight="bold">Contact Info:</Typography>
-          <Typography>{contactEmail || "N/A"}</Typography>
-          <Typography>{contactPhone || "N/A"}</Typography>
-        </Grid>
-      </Grid>
-    </Box>
+      <Box sx={{ p: 1.75 }}>
+        <Box sx={{ mb: 1.5 }}>
+          <Typography sx={{ fontSize: 11, color: "text.disabled" }}>
+            Recibo de pago
+          </Typography>
+          <Typography sx={{ fontSize: 22, fontWeight: 500 }}>#{id}</Typography>
+        </Box>
+
+        <Field label="Cliente" value={client} />
+        <Field label="Dirección" value={address} />
+        <Field label="Contacto" value={email} />
+        <Field label="Fecha" value={date} />
+
+        <Box
+          sx={{
+            borderTop: "0.5px solid",
+            borderColor: "divider",
+            pt: 1.25,
+            mt: 0.5,
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              pb: 1,
+              borderBottom: "0.5px solid",
+              borderColor: "divider",
+            }}
+          >
+            <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
+              {service}
+            </Typography>
+            <Typography
+              sx={{ fontSize: 12, fontWeight: 500, fontFamily: "monospace" }}
+            >
+              ${price.toFixed(2)}
+            </Typography>
+          </Box>
+          <Box sx={{ display: "flex", justifyContent: "space-between", pt: 1 }}>
+            <Typography sx={{ fontSize: 12, fontWeight: 500 }}>
+              Total
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: 15,
+                fontWeight: 500,
+                color: "#0F6E56",
+                fontFamily: "monospace",
+              }}
+            >
+              ${total.toFixed(2)}
+            </Typography>
+          </Box>
+        </Box>
+
+        <Box
+          sx={{
+            mt: 1.5,
+            pt: 1.25,
+            borderTop: "0.5px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+              color: "text.disabled",
+              mb: 0.75,
+            }}
+          >
+            Método de pago
+          </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              px: 1.25,
+              py: 0.875,
+              bgcolor: "action.hover",
+              borderRadius: 2,
+              border: "0.5px solid",
+              borderColor: "divider",
+            }}
+          >
+            <Box
+              sx={{
+                width: 24,
+                height: 24,
+                borderRadius: "6px",
+                bgcolor: "#E1F5EE",
+                color: "#0F6E56",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <CreditCardRoundedIcon sx={{ fontSize: 13 }} />
+            </Box>
+            <Typography sx={{ fontSize: 12, fontWeight: 500 }}>
+              {paymentMethod}
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+    </Paper>
   );
 }

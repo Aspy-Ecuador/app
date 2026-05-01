@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { User } from "@/types/User";
+import type { Person } from "@/typesResponse/Person";
 import { useRoleData } from "@/observer/RoleDataContext";
 import { getUser } from "@/utils/utils";
 import Box from "@mui/material/Box";
@@ -11,6 +11,8 @@ import Progress from "@components/Progress";
 
 export default function History() {
   const { data, loading } = useRoleData();
+  const { id } = useParams();
+  const navigate = useNavigate();
 
   if (loading) return <Progress />;
 
@@ -22,17 +24,14 @@ export default function History() {
     navigate("/");
   };
 
-  const { id } = useParams();
-  const navigate = useNavigate();
-
   const numericId = id ? parseInt(id) : 0;
 
   if (numericId == 0) {
     backToHome();
   }
 
-  const user: User = getUser(data, numericId);
-  console.log(user);
+  const user: Person = getUser(data.persons, numericId);
+
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1}>

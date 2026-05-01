@@ -1,3 +1,4 @@
+// FINAL
 import type { AxiosResponse } from "axios";
 import api from "@API/api";
 import type { AppointmentRequest } from "@/typesRequest/AppointmentRequest";
@@ -7,25 +8,36 @@ const appointmentAPI = {
   getAllAppointments: async (): Promise<Appointment[]> =>
     (await api.get(`/appointment`)).data,
 
-  getAppointmentById: async (id: string): Promise<AxiosResponse> => {
-    return api.get(`/appointment/${id}`);
-  },
-
   createAppointment: async (
     data: AppointmentRequest,
   ): Promise<AxiosResponse> => {
     return api.post(`/appointment/appointment-create`, data);
   },
 
-  updateAppointment: async (
-    id: number,
-    appointmentData: { status: number },
-  ): Promise<AxiosResponse> => {
-    return api.put(`/appointment/${id}`, appointmentData);
+  rejectAppointment: async (appointmentId: number): Promise<AxiosResponse> => {
+    return api.put(`/appointment/appointment-reject`, {
+      appointmentId: appointmentId,
+    });
   },
 
-  deleteAppointment: async (id: string): Promise<AxiosResponse> => {
-    return api.delete(`/appointment/${id}`);
+  approveAppointment: async (appointmentId: number): Promise<AxiosResponse> => {
+    return api.put(`/appointment/appointment-approve`, {
+      appointmentId: appointmentId,
+    });
+  },
+
+  completeAppointment: async (
+    appointmentId: number,
+  ): Promise<AxiosResponse> => {
+    return api.put(`/appointment/appointment-complete`, {
+      appointmentId: appointmentId,
+    });
+  },
+
+  missedAppointment: async (appointmentId: number): Promise<AxiosResponse> => {
+    return api.put(`/appointment/appointment-missed`, {
+      appointmentId: appointmentId,
+    });
   },
 };
 

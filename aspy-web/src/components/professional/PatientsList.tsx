@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+// FINAL
+import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
-import { User } from "@/types/User";
+import type { GridColDef, GridRowId } from "@mui/x-data-grid";
 import Divider from "@mui/material/Divider";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -10,10 +10,11 @@ import OverviewPersona from "@professional/OverviewPersona";
 import Table from "@components/Table";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Progress from "@components/Progress";
-import { getAge, getClients } from "@/utils/utils";
+import { getAge, getClients, translateRol } from "@/utils/utils";
 import { getAuthenticatedUserID } from "@/utils/store";
+import type { Person } from "@/typesResponse/Person";
 
-export const columns: GridColDef[] = [
+const columns: GridColDef[] = [
   {
     field: "first_name",
     headerName: "Nombres",
@@ -29,10 +30,29 @@ export const columns: GridColDef[] = [
     resizable: false,
   },
   {
+    field: "role",
+    headerName: "Rol",
+    disableColumnMenu: true,
+    flex: 2,
+    renderCell: (params) => (
+      <Typography variant="body1">
+        {translateRol(params.row.user_account?.role?.name)}
+      </Typography>
+    ),
+    resizable: false,
+  },
+  {
     field: "email",
     headerName: "Correo",
     disableColumnMenu: true,
     flex: 2,
+    renderCell: (params) => {
+      return (
+        <Typography variant="body1">
+          {params.row.user_account?.email}
+        </Typography>
+      );
+    },
     resizable: false,
   },
   {
@@ -52,41 +72,41 @@ export const columns: GridColDef[] = [
     headerName: "Ocupación",
     disableColumnMenu: true,
     flex: 2,
+    renderCell: (params) => {
+      return (
+        <Typography variant="body1">{params.row.occupation.name}</Typography>
+      );
+    },
     resizable: false,
   },
 ];
 
 export default function PatientsList() {
+  const [selectedId, setSelectedId] = useState<GridRowId | null>(null);
   const { data, loading } = useRoleData();
-  const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
-  const [user, setUser] = useState<User | null>(null);
-
-  const clients: User[] = getClients(data, getAuthenticatedUserID()) ?? [];
-
-  useEffect(() => {
-    if (rowSelection.length > 0) {
-      const selectedUser = clients.find(
-        (item) => item.user_id === rowSelection[0]
-      );
-      if (selectedUser) {
-        setUser(selectedUser);
-      }
-    } else {
-      setUser(null);
-    }
-  }, [rowSelection]);
-
   const navigate = useNavigate();
   const location = useLocation();
 
+  if (loading) return <Progress />;
+
+  const users: Person[] = getClients(
+    data.appointments,
+    data.persons,
+    getAuthenticatedUserID(),
+  );
+
+  const selectedUser =
+    selectedId !== null
+      ? (users.find((item) => String(item.user_id) === String(selectedId)) ??
+        null)
+      : null;
+
   const handleMoreInfo = () => {
-    if (user) {
-      const newPath = `${location.pathname}/${user.user_id}`;
+    if (selectedUser) {
+      const newPath = `${location.pathname}/${selectedUser.user_id}`;
       navigate(newPath);
     }
   };
-
-  if (loading) return <Progress />;
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
@@ -102,25 +122,23 @@ export default function PatientsList() {
         <Grid size={8}>
           {loading ? (
             <Progress />
-          ) : clients.length ? (
-            <Table<User>
+          ) : users.length ? (
+            <Table<Person>
               columns={columns}
-              rows={clients}
+              rows={users}
               getRowId={(row) => row.user_id}
-              rowSelectionModel={rowSelection}
-              onRowSelectionChange={(newSelection) =>
-                setRowSelection(newSelection)
-              }
+              selectedId={selectedId}
+              onRowSelect={setSelectedId}
             />
           ) : (
             <Typography>No hay Clientes</Typography>
           )}
         </Grid>
-        {user && (
+        {selectedUser && (
           <Grid size={4}>
             <OverviewPersona
-              key={user.user_id}
-              selectedData={user}
+              key={selectedUser.user_id}
+              selectedData={selectedUser}
               moreInfo={handleMoreInfo}
             />
           </Grid>

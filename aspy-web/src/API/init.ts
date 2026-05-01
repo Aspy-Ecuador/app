@@ -40,40 +40,29 @@ export const clientLoaders: Loader[] = [
 
 export const staffLoaders: Loader[] = [
   { name: "payments", fn: paymentAPI.getAllPayments },
-  { name: "paymentData", fn: paymentDataAPI.getAllPaymentData },
   {
-    name: "professionalServices",
+    name: "proServices",
     fn: professionalServiceAPI.getAllProfessionalServices,
   },
-  { name: "roles", fn: roleAPI.getAllRoles },
-  { name: "receipts", fn: receiptAPI.getAllReceipts },
-  { name: "schedules", fn: scheduleAPI.getAllSchedules },
   { name: "services", fn: serviceAPI.getAllServices },
-  { name: "userAccounts", fn: userAccountAPI.getAllUserAccounts },
-  { name: "workerSchedules", fn: workerScheduleAPI.getAllWorkerSchedules },
+  { name: "workerProfessional", fn: workerScheduleAPI.getAllWorkerSchedules },
   { name: "appointments", fn: appointmentAPI.getAllAppointments },
-  { name: "appointmentReports", fn: appointmentReportAPI.getAllReports },
   { name: "persons", fn: personAPI.getAllPersons },
-  { name: "professional", fn: professionalAPI.getAllProfessionals },
 ];
 
 export const professionalLoaders: Loader[] = [
-  //{ name: "payments", fn: paymentAPI.getAllPayments },
-  { name: "paymentData", fn: paymentDataAPI.getAllPaymentData },
+  { name: "payments", fn: paymentAPI.getAllPayments },
   {
-    name: "professionalServices",
+    name: "proServices",
     fn: professionalServiceAPI.getAllProfessionalServices,
   },
-  { name: "receipts", fn: receiptAPI.getAllReceipts },
-  { name: "schedules", fn: scheduleAPI.getAllSchedules },
+
   { name: "services", fn: serviceAPI.getAllServices },
-  { name: "userAccounts", fn: userAccountAPI.getAllUserAccounts },
-  { name: "workerSchedules", fn: workerScheduleAPI.getAllWorkerSchedules },
+
+  { name: "workerProfessional", fn: workerScheduleAPI.getAllWorkerSchedules },
   { name: "appointments", fn: appointmentAPI.getAllAppointments },
   { name: "appointmentReports", fn: appointmentReportAPI.getAllReports },
   { name: "persons", fn: personAPI.getAllPersons },
-  { name: "roles", fn: roleAPI.getAllRoles },
-  { name: "professional", fn: professionalAPI.getAllProfessionals },
 ];
 
 // Recorrers para cada tipo
@@ -117,7 +106,7 @@ export const runStaffLoaders = async () => {
   for (const { name, fn } of staffLoaders) {
     try {
       const response = await fn();
-      localStorage.setItem(name, JSON.stringify(response.data));
+      localStorage.setItem(name, JSON.stringify(response));
       console.log(`✔️ Loaded: ${name}`);
     } catch (error) {
       console.error(`❌ Error loading ${name}:`, error);
@@ -133,7 +122,7 @@ export const runProfessionalLoaders = async () => {
   for (const { name, fn } of professionalLoaders) {
     try {
       const response = await fn();
-      localStorage.setItem(name, JSON.stringify(response.data));
+      localStorage.setItem(name, JSON.stringify(response));
       console.log(`✔️ Loaded: ${name}`);
     } catch (error) {
       console.error(`❌ Error loading ${name}:`, error);

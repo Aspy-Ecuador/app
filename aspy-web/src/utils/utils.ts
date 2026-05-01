@@ -13,7 +13,6 @@ import { ServiceResponse } from "@typesResponse/Service";
 import { AppointmentResponse } from "@/typesResponse/AppointmentResponse";
 import { UserAccountResponse } from "@/typesResponse/UserAccountResponse";
 import { RoleResponse } from "@/typesResponse/RoleResponse";
-import { userAdapter } from "@/adapters/userAdapter";
 import { PaymentResponse, type Service } from "@/typesResponse/PaymentResponse";
 import { PageViewsBarChartProps } from "@/components/admin/PageViewsBarChart";
 import { StatCardProps } from "@/components/admin/StatCard";
@@ -252,10 +251,6 @@ export function translateRol(rol: string): string {
   }
 }
 
-export function toNumber(str: string): number {
-  return Number(str);
-}
-
 // FINAL
 export function getAppointmentProfessional(
   proffesional_id: number,
@@ -276,108 +271,13 @@ export function getAppointmentProfessional(
   );
 }
 
-export function getAppointments(data: any): Appointment[] {
-  const professionals: ProfessionalResponse[] = data.professional;
-
-  const appointments: Appointment[] = (data.appointments || [])
-    .map((appointment: any) => {
-      const service = data.services?.find(
-        (s: any) => s.service_id === appointment.payment.service_id,
-      );
-
-      const clientPerson = data.persons?.find(
-        (p: any) => p.person_id === appointment.payment.person_id,
-      );
-
-      const clientAccount = data.userAccounts?.find(
-        (a: any) => a.user_id === clientPerson?.user_id,
-      );
-
-      const clientRole = data.roles?.find(
-        (r: any) => r.role_id === clientAccount?.role_id,
-      );
-
-      const professionalPerson = data.persons?.find(
-        (p: any) => p.person_id === appointment.worker_schedule.person_id,
-      );
-      const professionalAccount = data.userAccounts?.find(
-        (a: any) => a.user_id === professionalPerson?.user_id,
-      );
-
-      const professionalRole = data.roles?.find(
-        (r: any) => r.role_id === professionalAccount?.role_id,
-      );
-
-      const schedule = data.schedules?.find(
-        (s: any) => s.schedule_id === appointment.worker_schedule.schedule_id,
-      );
-
-      // Validación
-      if (
-        !service ||
-        !clientPerson ||
-        !clientAccount ||
-        !clientRole ||
-        !professionalPerson ||
-        !professionalAccount ||
-        !professionalRole ||
-        !schedule
-      )
-        return null;
-
-      const client = userAdapter(clientPerson, clientRole, clientAccount);
-      const professional = userAdapter(
-        professionalPerson,
-        professionalRole,
-        professionalAccount,
-      );
-      // Si es profesional (role_id === 2), añadimos sus datos extra
-      if (professional.role_id === 2) {
-        const prof = professionals.find(
-          (p) => p.person_id === professional.person_id,
-        );
-        if (prof) {
-          professional.title = prof.title;
-          professional.about = prof.about;
-          professional.specialty = prof.specialty;
-        }
-      }
-      return appointmentAdapter(
-        appointment,
-        schedule,
-        client,
-        professional,
-        service,
-      );
-    })
-    .filter(Boolean);
-
-  return appointments;
-}
-
-export function getNextAppointments(data: any): Appointment[] {
-  const appointments: Appointment[] = getAppointments(data);
-  if (!appointments) return [];
+export function getNextAppointments(data: Appointment[]): Appointment[] {
+  if (!data) return [];
 
   const today = new Date();
   const todayStr = today.toISOString().split("T")[0];
-
-  return appointments.filter((app) => app.date > todayStr);
-}
-
-export function translateStatus(status: string): string {
-  switch (status.trim().toLowerCase()) {
-    case "scheduled":
-      return "Agendado";
-    case "completed":
-      return "Completado";
-    case "cancelled":
-      return "Cancelado";
-    case "pending":
-      return "Pendiente";
-    default:
-      return "Desconocido";
-  }
+  // CAMBIAR
+  return data.filter((app) => app.worker_schedule.schedule.date < todayStr);
 }
 
 export function getOccupation(occupation: number): string {
@@ -395,6 +295,7 @@ export function getOccupation(occupation: number): string {
   }
 }
 
+// FINAL
 export function getAge(birthdate: string): number {
   const today = new Date();
   const [year, month, day] = birthdate.split("-").map(Number);
@@ -497,9 +398,13 @@ export const uploadToCloudinary = async (file: FileData): Promise<string> => {
   }
 };
 
-export const getPayment = (id: number, data: any): PaymentResponse => {
+// FINAL
+export const getPayment = (id: number, data: Payment[]): Payment => {
   //const payments: PaymentResponse[] = getPayments(data);
-  const payment = dataPayments.find((p) => p.payment_id === id);
+  if (!data) {
+    throw new Error("No se encontraron pagos en los datos proporcionados.");
+  }
+  const payment = data.find((p) => p.payment_id === id);
   if (!payment) {
     throw new Error(`No se encontró el pago con ID ${id}`);
   }
@@ -619,29 +524,33 @@ export function handleDownloadInvoice(invoice: FlattenedReceipt) {
   doc.save(`Factura-${invoice.receipt.receipt_id}-${invoice.client}.pdf`);
 }
 
+// FINAL
 export function getAppointmentsProfessional(
-  data: any,
-  person_id: number,
+  data: Appointment[],
+  user_id: number,
 ): Appointment[] {
-  const appointments: Appointment[] = getAppointments(data);
-  return appointments.filter(
-    (appointment) => appointment.proffesional.person_id === person_id,
+  return data.filter(
+    (appointment) => appointment.professional.user_id === user_id,
   );
 }
 
-export function getClients(data: any, person_id: number): User[] {
-  const appointments: Appointment[] = getAppointmentsProfessional(
-    data,
-    person_id,
+export function getClients(
+  appointments: Appointment[],
+  persons: Person[],
+  user_id: number,
+): Person[] {
+  const filteredAppointments = getAppointmentsProfessional(
+    appointments,
+    user_id,
   );
 
-  const clients = appointments.map((app) => app.client);
-
-  const uniqueClients = clients.filter(
-    (client, index, self) =>
-      index === self.findIndex((c) => c.person_id === client.person_id),
+  // Obtener IDs únicos de clientes
+  const clientIds = new Set(
+    filteredAppointments.map((app) => app.client.person_id),
   );
-  return uniqueClients;
+
+  // Filtrar persons con esos IDs
+  return persons.filter((person) => clientIds.has(person.person_id));
 }
 
 export function getUsers(data: any): User[] {
@@ -682,54 +591,52 @@ export function getUsers(data: any): User[] {
     .filter((user): user is User => user !== null);
 }
 
-export function getUser(data: any, user_id: number): User {
-  const users: User[] = getUsers(data);
-  console.log(users);
-  return users.find((user) => user.user_id === user_id)!;
+export function getUser(data: Person[], user_id: number): Person {
+  return data.find((user) => user.user_id === user_id)!;
 }
 
+// FINAL
 export function getUnmarkedAppointments(
-  data: any,
-  person_id: number,
+  data: Appointment[],
+  user_id: number,
 ): Appointment[] {
   const appointments: Appointment[] = getAppointmentsProfessional(
     data,
-    person_id,
+    user_id,
   );
-  //const appointmentReport: AppointmentReport[] = getAppointmentsReport(data);
   return appointments.filter(
-    (appointment) => appointment.status.id_status === 1,
+    (appointment) => appointment.appointment_status.appointment_status_id === 2,
   );
 }
 
+// FINAL
 export function getUnreportedAppointments(
-  data: any,
-  person_id: number,
+  data: Appointment[],
+  reports: AppointmentReport[],
+  user_id: number,
 ): Appointment[] {
   const appointments: Appointment[] = getAppointmentsProfessional(
     data,
-    person_id,
+    user_id,
   );
-
-  const appointmentReports: AppointmentReportResponse[] =
-    data.appointmentReports;
-
-  if (!appointments || !appointmentReports) {
+  console.log("Appointments for user:", appointments);
+  if (!appointments || !reports) {
     return [];
   }
 
+  const reportedIds = new Set(reports.map((r) => r.appointment_id));
+
   const unreported = appointments.filter(
     (app) =>
-      !appointmentReports.some(
-        (report) => report.appointment_id === app.id_appointment,
-      ) && app.status.id_status === 2, // 🔹 solo citas con status_id = 1
+      !reportedIds.has(app.appointment_id) &&
+      app.appointment_status.appointment_status_id === 3,
   );
+  console.log("Unreported Appointments:", unreported);
   return unreported.length > 0 ? unreported : [];
 }
 
-export function getAppointment(data: any, id: number): Appointment | undefined {
-  const appointments: Appointment[] = getAppointments(data);
-  return appointments.find((app) => app.id_appointment === id);
+export function getAppointment(data: Appointment[], id: number): Appointment {
+  return data.find((app) => app.appointment_id === id)!;
 }
 
 export function getClientsAppointment(data: any): User[] {
@@ -790,6 +697,20 @@ export function getReceipt(data: any): Receipt[] {
 export function getReceiptByUser(data: any, user_id: number): Payment[] {
   const payments: Payment[] = data.payments ?? [];
   return payments.filter((pay) => pay.client.user_id == user_id);
+}
+
+// FINAL
+export function getProfessional(data: Person[]) {
+  if (!data) return [];
+  return data.filter(
+    (person) => person.user_account.role.name === "Professional",
+  );
+}
+
+// FINAL
+export function getClient(data: Person[]) {
+  if (!data) return [];
+  return data.filter((person) => person.user_account.role.name === "Client");
 }
 
 export function getPayments(data: any): PaymentResponse[] {

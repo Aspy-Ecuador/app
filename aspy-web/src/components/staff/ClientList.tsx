@@ -1,18 +1,20 @@
-import { useState, useEffect } from "react";
-import { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
-import { useNavigate, useLocation } from "react-router-dom";
-import { User } from "@/types/User";
+// FINAL
+import { useState } from "react";
+import type { GridColDef, GridRowId } from "@mui/x-data-grid";
+import { useNavigate } from "react-router-dom";
 import Table from "@components/Table";
 import ProfileView from "@components/ProfileView";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Header from "@components/Header";
 import Progress from "../Progress";
-import { getAge, getOccupation, getUsers } from "@/utils/utils";
+import { getAge, translateRol } from "@/utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Typography from "@mui/material/Typography";
+import { getClient } from "@/utils/utils";
+import type { Person } from "@/typesResponse/Person";
 
-export const columns: GridColDef[] = [
+const columns: GridColDef[] = [
   {
     field: "first_name",
     headerName: "Nombres",
@@ -28,10 +30,29 @@ export const columns: GridColDef[] = [
     resizable: false,
   },
   {
+    field: "role",
+    headerName: "Rol",
+    disableColumnMenu: true,
+    flex: 2,
+    renderCell: (params) => (
+      <Typography variant="body1">
+        {translateRol(params.row.user_account?.role?.name)}
+      </Typography>
+    ),
+    resizable: false,
+  },
+  {
     field: "email",
     headerName: "Correo",
     disableColumnMenu: true,
     flex: 2,
+    renderCell: (params) => {
+      return (
+        <Typography variant="body1">
+          {params.row.user_account?.email}
+        </Typography>
+      );
+    },
     resizable: false,
   },
   {
@@ -53,9 +74,7 @@ export const columns: GridColDef[] = [
     flex: 2,
     renderCell: (params) => {
       return (
-        <Typography variant="body1">
-          {getOccupation(params.row.occupation)}
-        </Typography>
+        <Typography variant="body1">{params.row.occupation.name}</Typography>
       );
     },
     resizable: false,
@@ -63,41 +82,21 @@ export const columns: GridColDef[] = [
 ];
 
 export default function ClientsList() {
-  const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
-  const [user, setUser] = useState<User | null>(null);
+  const [selectedId, setSelectedId] = useState<GridRowId | null>(null);
   const { data, loading } = useRoleData();
-
-  const users: User[] = getUsers(data);
-  const clients: User[] =
-    users.filter((user: User) => user.role_id === 3) || [];
-
-  //Mostrar el usuario
-  useEffect(() => {
-    if (rowSelection.length > 0) {
-      const selectedUser = users.find(
-        (item) => item.user_id === rowSelection[0]
-      );
-      if (selectedUser) {
-        setUser(selectedUser);
-      }
-    } else {
-      setUser(null);
-    }
-  }, [rowSelection]);
-
-  //Ruta para editar y crear
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const handleEdit = () => {
-    if (user) {
-      const newPath = `${location.pathname}/${user.user_id}`;
-      navigate(newPath);
-    }
-  };
+  //Usuario seleccionado
+  const users: Person[] = getClient(data.persons ?? []);
+
+  const selectedUser =
+    selectedId !== null
+      ? (users.find((item) => String(item.user_id) === String(selectedId)) ??
+        null)
+      : null;
 
   const handleCreatePatient = () => {
-    const newPath = `/crear-paciente`;
+    const newPath = `/registrarUsuario`;
     navigate(newPath);
   };
 
@@ -115,23 +114,17 @@ export default function ClientsList() {
           />
         </Grid>
         <Grid size={8}>
-          <Table<User>
+          <Table<Person>
             columns={columns}
-            rows={clients}
+            rows={users}
             getRowId={(row) => row.user_id}
-            rowSelectionModel={rowSelection}
-            onRowSelectionChange={(newSelection) =>
-              setRowSelection(newSelection)
-            }
+            selectedId={selectedId}
+            onRowSelect={setSelectedId}
           />
         </Grid>
-        {user && (
+        {selectedUser && (
           <Grid size={4}>
-            <ProfileView
-              user={user}
-              onEdit={handleEdit}
-              isRowPosition={false}
-            />
+            <ProfileView user={selectedUser} isRowPosition={false} />
           </Grid>
         )}
       </Grid>

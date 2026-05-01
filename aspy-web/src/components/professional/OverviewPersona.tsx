@@ -1,5 +1,5 @@
-import { User } from "@/types/User";
-import { getAge, getGender, translateRol } from "@/utils/utils";
+// FINAL
+import { getAge } from "@/utils/utils";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Avatar from "@mui/material/Avatar";
@@ -8,9 +8,10 @@ import Typography from "@mui/material/Typography";
 import photo from "@assets/user.png";
 
 import InfoIcon from "@mui/icons-material/Info";
+import type { Person } from "@/typesResponse/Person";
 
 interface OverviewPersonaProps {
-  selectedData: User;
+  selectedData: Person;
   moreInfo: () => void;
 }
 
@@ -42,12 +43,12 @@ export default function Overview_persona({
         </Grid>
         <Grid size={12}>
           <Typography variant="body1" className="class_nombres">
-            {selectedData.full_name}
+            {selectedData.first_name} {selectedData.last_name}
           </Typography>
         </Grid>
         <Grid size={12}>
           <Typography variant="body1" className="class_titulo">
-            {translateRol(selectedData.role.name)}
+            {selectedData.user_account.role.name}
           </Typography>
         </Grid>
         <Grid
@@ -67,24 +68,6 @@ export default function Overview_persona({
             Información
           </Button>
         </Grid>
-        {/*
-        <Grid size={12}>
-          <Box sx={{ width: "100%" }}>
-            <Grid container spacing={0}>
-              <Grid size={12}>
-                <Typography variant="body1" className="class_sobremi">
-                  Sobre mi
-                </Typography>
-              </Grid>
-              <Grid size={12} sx={{ width: "100%" }}>
-                <Typography variant="body1" className="class_descripcion">
-                  {selectedData.aboutme}
-                </Typography>
-              </Grid>
-            </Grid>
-          </Box>
-        </Grid>
-        */}
         <Grid size={12}>
           <Box sx={{ width: "100%" }}>
             <Grid container spacing={0}>
@@ -117,7 +100,7 @@ export default function Overview_persona({
                     </Grid>
                     <Grid size={12}>
                       <Typography variant="body1" className="class_genero">
-                        {getGender(selectedData.gender)}
+                        {selectedData.gender?.name}
                       </Typography>
                     </Grid>
                   </Grid>

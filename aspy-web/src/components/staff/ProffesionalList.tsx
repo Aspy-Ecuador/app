@@ -1,54 +1,106 @@
-import { useState, useEffect } from "react";
-import { GridRowSelectionModel } from "@mui/x-data-grid";
-import { useNavigate, useLocation } from "react-router-dom";
-import { User } from "@/types/User";
-import { columnsProfessional } from "@utils/columns";
+// FINAL
+import { useState } from "react";
+import type { GridColDef, GridRowId } from "@mui/x-data-grid";
+import { useNavigate } from "react-router-dom";
 import Table from "@components/Table";
 import ProfileView from "@components/ProfileView";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Header from "@components/Header";
 import { useRoleData } from "@/observer/RoleDataContext";
-import { getUsers } from "@/utils/utils";
+import { getProfessional } from "@/utils/utils";
 import Progress from "@components/Progress";
+import type { Person } from "@/typesResponse/Person";
+import Typography from "@mui/material/Typography";
+import { translateRol } from "@/utils/utils";
+
+const columns: GridColDef[] = [
+  {
+    field: "first_name",
+    headerName: "Nombres",
+    disableColumnMenu: true,
+    flex: 2,
+    resizable: false,
+  },
+  {
+    field: "last_name",
+    headerName: "Apellidos",
+    disableColumnMenu: true,
+    flex: 2,
+    resizable: false,
+  },
+  {
+    field: "role",
+    headerName: "Rol",
+    disableColumnMenu: true,
+    flex: 2,
+    renderCell: (params) => (
+      <Typography variant="body1">
+        {translateRol(params.row.user_account?.role?.name)}
+      </Typography>
+    ),
+    resizable: false,
+  },
+  {
+    field: "email",
+    headerName: "Correo",
+    disableColumnMenu: true,
+    flex: 4,
+    renderCell: (params) => (
+      <Typography variant="body1">{params.row.user_account?.email}</Typography>
+    ),
+    resizable: false,
+  },
+  {
+    field: "phone",
+    headerName: "Celular",
+    disableColumnMenu: true,
+    flex: 3,
+    renderCell: (params) => (
+      <Typography variant="body1">{params.row.phone?.number}</Typography>
+    ),
+    resizable: false,
+  },
+  {
+    field: "titulo",
+    headerName: "Título",
+    disableColumnMenu: true,
+    flex: 3,
+    renderCell: (params) => (
+      <Typography variant="body1">{params.row.professional.title}</Typography>
+    ),
+    resizable: false,
+  },
+  {
+    field: "specialty",
+    headerName: "Especialidad",
+    disableColumnMenu: true,
+    flex: 3,
+    renderCell: (params) => (
+      <Typography variant="body1">
+        {params.row.professional.specialty}
+      </Typography>
+    ),
+    resizable: false,
+  },
+];
 
 export default function ProffesionalList() {
-  const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
+  const [selectedId, setSelectedId] = useState<GridRowId | null>(null);
+  const { data, loading } = useRoleData();
+  const navigate = useNavigate();
 
   //Usuario seleccionado
-  const [user, setUser] = useState<User | null>(null);
+  const users: Person[] = getProfessional(data.persons ?? []);
 
-  const { data, loading } = useRoleData();
-  const users: User[] = getUsers(data);
-  const professionals: User[] = users.filter((user) => user.role_id === 2);
-  console.log(professionals);
-  //Mostrar el usuario
-  useEffect(() => {
-    if (rowSelection.length > 0) {
-      const selectedUser = professionals.find(
-        (item) => item.user_id === rowSelection[0]
-      );
-      if (selectedUser) {
-        setUser(selectedUser);
-      }
-    } else {
-      setUser(null);
-    }
-  }, [rowSelection]);
-
-  //Ruta para editar y crear
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const handleEdit = () => {
-    if (user) {
-      const newPath = `${location.pathname}/${user.user_id}`;
-      navigate(newPath);
-    }
-  };
+  const selectedUser =
+    selectedId !== null
+      ? (users.find((item) => String(item.user_id) === String(selectedId)) ??
+        null)
+      : null;
 
   const handleCreateProfessional = () => {
-    const newPath = `/crear-profesional`;
+    const newPath = `/registrarUsuario`;
     navigate(newPath);
   };
 
@@ -66,23 +118,17 @@ export default function ProffesionalList() {
           />
         </Grid>
         <Grid size={8}>
-          <Table<User>
-            columns={columnsProfessional}
-            rows={professionals}
+          <Table<Person>
+            columns={columns}
+            rows={users}
             getRowId={(row) => row.user_id}
-            rowSelectionModel={rowSelection}
-            onRowSelectionChange={(newSelection) =>
-              setRowSelection(newSelection)
-            }
+            selectedId={selectedId}
+            onRowSelect={setSelectedId}
           />
         </Grid>
-        {user && (
+        {selectedUser && (
           <Grid size={4}>
-            <ProfileView
-              user={user}
-              onEdit={handleEdit}
-              isRowPosition={false}
-            />
+            <ProfileView user={selectedUser} isRowPosition={false} />
           </Grid>
         )}
       </Grid>

@@ -1,25 +1,25 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { columnsServiceAdmin } from "@utils/columns";
-import { GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
+import type { GridColDef, GridRowId } from "@mui/x-data-grid";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Table from "@components/Table";
 import Header from "@components/Header";
-
+import Progress from "@components/Progress";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { useRoleData } from "@/observer/RoleDataContext";
 import { useState } from "react";
-import { ServiceResponse } from "@typesResponse/Service";
+import type { Service } from "@typesResponse/Service";
 
 export default function Services() {
-  const { data } = useRoleData();
-  const [rowSelection, setRowSelection] = useState<GridRowSelectionModel>([]);
+  const { data, loading } = useRoleData();
+  const [selectedId, setSelectedId] = useState<GridRowId | null>(null);
 
-  //Ruta para editar y crear
   const navigate = useNavigate();
   const location = useLocation();
+
+  const services: Service[] = data?.services ?? [];
 
   const handleEdit = (id: number) => {
     const newPath = `${location.pathname}/${id}`;
@@ -31,16 +31,30 @@ export default function Services() {
     navigate(newPath);
   };
 
-  const columnsExtra: GridColDef[] = [
+  const columns: GridColDef[] = [
+    {
+      field: "service_id",
+      headerName: "ID",
+      flex: 1,
+      disableColumnMenu: true,
+      resizable: false,
+    },
+    {
+      field: "name",
+      headerName: "Nombre",
+      flex: 2,
+      disableColumnMenu: true,
+      resizable: false,
+    },
     {
       field: "price",
       headerName: "Costo",
       flex: 2,
       disableColumnMenu: true,
       resizable: false,
-      renderCell: (params) => {
-        return <Typography variant="body1">$ {params.value}</Typography>;
-      },
+      renderCell: (params) => (
+        <Typography variant="body1">$ {params.value}</Typography>
+      ),
     },
     {
       field: "acciones",
@@ -64,10 +78,6 @@ export default function Services() {
     },
   ];
 
-  const newColumns: GridColDef[] = [...columnsServiceAdmin, ...columnsExtra];
-
-  const services: ServiceResponse[] = data.services;
-
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1}>
@@ -81,15 +91,17 @@ export default function Services() {
         </Grid>
 
         <Grid size={12}>
-          <Table<ServiceResponse>
-            columns={newColumns}
-            rows={services}
-            getRowId={(row) => row.service_id}
-            rowSelectionModel={rowSelection}
-            onRowSelectionChange={(newSelection) =>
-              setRowSelection(newSelection)
-            }
-          />
+          {loading ? (
+            <Progress />
+          ) : (
+            <Table<Service>
+              columns={columns}
+              rows={services}
+              getRowId={(row) => row.service_id}
+              selectedId={selectedId}
+              onRowSelect={setSelectedId}
+            />
+          )}
         </Grid>
       </Grid>
     </Box>
