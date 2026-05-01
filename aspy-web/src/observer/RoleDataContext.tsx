@@ -1,4 +1,10 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import {
   loadersByRole,
   loadersArraysByRole,
@@ -6,7 +12,7 @@ import {
 } from "./loadersMap";
 import { getAuthenticatedUser } from "@/utils/store";
 import serviceAPI from "@/API/serviceAPI";
-import professionalAPI from "@/API/professionalAPI";
+import workerScheduleAPI from "@/API/workerScheduleAPI";
 import personAPI from "@/API/personAPI";
 import appointmentAPI from "@/API/appointmentAPI";
 import professionalServiceAPI from "@/API/professionalServiceAPI";
@@ -51,7 +57,7 @@ export const RoleDataProvider = ({
   const [data, setData] = useState<DataStore>({});
   const [loading, setLoading] = useState(true);
 
-  const refreshData = async () => {
+  const refreshData = useCallback(async () => {
     setLoading(true);
 
     const authUser = getAuthenticatedUser();
@@ -79,7 +85,7 @@ export const RoleDataProvider = ({
 
     setData(newData);
     setLoading(false);
-  };
+  }, [role]);
 
   const refreshServices = async () => {
     try {
@@ -127,7 +133,7 @@ export const RoleDataProvider = ({
 
   const refreshWorkerProfessional = async () => {
     try {
-      const res = await professionalAPI.getAllProfessionals();
+      const res = await workerScheduleAPI.getAllWorkerSchedules();
       localStorage.setItem("workerProfessional", JSON.stringify(res));
       setData((prev: any) => ({ ...prev, professional: res }));
       console.log("✔️ Professionals Worker actualizados");
@@ -159,8 +165,12 @@ export const RoleDataProvider = ({
   };
 
   useEffect(() => {
-    refreshData();
-  }, [role]);
+    const load = async () => {
+      await refreshData();
+    };
+
+    load();
+  }, [refreshData]);
 
   return (
     <RoleDataContext.Provider

@@ -1,12 +1,13 @@
-import { User } from "@/types/User";
+// FINAL
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
-import { getAge, getOccupation } from "@/utils/utils";
+import { getAge } from "@/utils/utils";
+import type { Person } from "@/typesResponse/Person";
 
 interface OverviewPacienteProps {
-  patient: User;
+  patient: Person;
 }
 
 export default function OverviewPatient({ patient }: OverviewPacienteProps) {
@@ -20,7 +21,9 @@ export default function OverviewPatient({ patient }: OverviewPacienteProps) {
               <Typography>Nombre</Typography>
             </Grid>
             <Grid size={6}>
-              <Typography>{patient.full_name}</Typography>
+              <Typography>
+                {patient.first_name} {patient.last_name}
+              </Typography>
             </Grid>
           </Grid>
           <Grid container spacing={1} size={12}>
@@ -31,22 +34,20 @@ export default function OverviewPatient({ patient }: OverviewPacienteProps) {
               <Typography>{getAge(patient.birthdate)}</Typography>
             </Grid>
           </Grid>
-          {/*
           <Grid container spacing={1} size={12}>
             <Grid size={6}>
               <Typography>Número celular</Typography>
             </Grid>
             <Grid size={6}>
-              <Typography>{paciente.phone}</Typography>
+              <Typography>{patient.phone.number}</Typography>
             </Grid>
           </Grid>
-          */}
           <Grid container spacing={1} size={12}>
             <Grid size={6}>
               <Typography>Correo</Typography>
             </Grid>
             <Grid size={6}>
-              <Typography>{patient.email}</Typography>
+              <Typography>{patient.user_account.email}</Typography>
             </Grid>
           </Grid>
           <Grid container spacing={1} size={12}>
@@ -54,50 +55,11 @@ export default function OverviewPatient({ patient }: OverviewPacienteProps) {
               <Typography>Ocupacion</Typography>
             </Grid>
             <Grid size={6}>
-              <Typography>{getOccupation(patient.occupation)}</Typography>
+              <Typography>{patient.occupation?.name}</Typography>
             </Grid>
           </Grid>
         </Grid>
         <Divider className="divider-overview-paciente" />
-        {/*
-        <Grid container size={12} rowSpacing={1}>
-          <Typography variant="h6">Representante</Typography>
-          <Grid container spacing={1} size={12}>
-            <Grid size={6}>
-              <Typography>Nombre</Typography>
-            </Grid>
-            <Grid size={6}>
-              <Typography>
-                {representante.first_name} {representante.last_name}
-              </Typography>
-            </Grid>
-          </Grid>
-          <Grid container spacing={1} size={12}>
-            <Grid size={6}>
-              <Typography>Parentesco</Typography>
-            </Grid>
-            <Grid size={6}>
-              <Typography>{representante.age}</Typography>
-            </Grid>
-          </Grid>
-          <Grid container spacing={1} size={12}>
-            <Grid size={6}>
-              <Typography>Número celular</Typography>
-            </Grid>
-            <Grid size={6}>
-              <Typography>{representante.phone}</Typography>
-            </Grid>
-          </Grid>
-          <Grid container spacing={1} size={12}>
-            <Grid size={6}>
-              <Typography>Correo</Typography>
-            </Grid>
-            <Grid size={6}>
-              <Typography>{representante.email}</Typography>
-            </Grid>
-          </Grid>
-        </Grid>
-        */}
       </Grid>
     </Box>
   );

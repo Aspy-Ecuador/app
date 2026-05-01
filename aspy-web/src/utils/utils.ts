@@ -1,31 +1,15 @@
-import type { User } from "@/types/User";
 import type { Appointment } from "@/typesResponse/Appointment";
 import type { Person } from "@/typesResponse/Person";
+import type { Service } from "@/typesResponse/Service";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import autoTable from "jspdf-autotable";
 import logoBase64 from "@assets/logo mediano.png";
-import { Receipt } from "@/types/Receipt";
-import { ProfessionalServiceResponse } from "@/typesResponse/ProfessionalServiceResponse";
-import { PersonResponse } from "@/typesResponse/PersonResponse";
-import { WorkerScheduleResponse } from "@/typesResponse/WorkerScheduleResponse";
-import { ServiceResponse } from "@typesResponse/Service";
-import { AppointmentResponse } from "@/typesResponse/AppointmentResponse";
-import { UserAccountResponse } from "@/typesResponse/UserAccountResponse";
-import { RoleResponse } from "@/typesResponse/RoleResponse";
-import { PaymentResponse, type Service } from "@/typesResponse/PaymentResponse";
-import { PageViewsBarChartProps } from "@/components/admin/PageViewsBarChart";
-import { StatCardProps } from "@/components/admin/StatCard";
-import { ProfessionalResponse } from "@/typesResponse/ProffesionalResponse";
-import { appointmentAdapter } from "@/adapters/appointmentAdapter";
-import { AppointmentReportResponse } from "@/typesResponse/AppointmentReportResponse";
+import type { PageViewsBarChartProps } from "@/components/admin/PageViewsBarChart";
+import type { StatCardProps } from "@/components/admin/StatCard";
 import type { AppointmentReport } from "@/typesResponse/AppointmentReport";
-import { appointmentReportResponseAdapter } from "@/adapters/appointmentReportResponseAdapter";
-import { CloudinaryUploadResponse } from "@/typesResponse/CloudinaryUploadResponse";
-import { FileData } from "@/types/FileData";
-import { dataPayments } from "@/data/Payment";
-import { ReceiptResponse } from "@/typesResponse/ReceiptResponse";
-import { receiptAdapter } from "@/adapters/receiptAdapter";
+import type { CloudinaryUploadResponse } from "@/typesResponse/CloudinaryUploadResponse";
+import type { FileData } from "@/types/FileData";
 import type { Payment } from "@/typesResponse/Payment";
 import type { FlattenedReceipt } from "@/types/FlattenedReceipt";
 import type { AppointmentWithReports } from "@/types/AppointmentWithReports";
@@ -77,29 +61,6 @@ export function TotalIngresosMensual(data: number[]): TotalIngresosMensual {
   return { total: data.reduce((total, numero) => total + numero, 0) };
 }
 
-export function getPerson(person_id: number, data: any): PersonResponse {
-  const persons: PersonResponse[] = data.persons;
-  const person = persons.find((person) => person.person_id === person_id);
-  if (!person) throw new Error(`No se encontró la persona con ID ${person_id}`);
-  return person;
-}
-
-export function getWorkerSchedule(
-  worker_schedule_id: number,
-  data: any,
-): WorkerScheduleResponse {
-  const workerschedules: WorkerScheduleResponse[] = data.workerSchedules;
-  const workerschedule = workerschedules.find(
-    (workerschedule) =>
-      workerschedule.worker_schedule_id === worker_schedule_id,
-  );
-  if (!workerschedule)
-    throw new Error(
-      `No se encontró el worker schedule con ID ${worker_schedule_id}`,
-    );
-  return workerschedule;
-}
-
 // FINAL
 export function getService(data: any, service_id: number): Service {
   const services: Service[] = data.services;
@@ -107,47 +68,6 @@ export function getService(data: any, service_id: number): Service {
   if (!service)
     throw new Error(`No se encontró el servicio con ID ${service_id}`);
   return service;
-}
-
-export function getProfessionalService(
-  service_id: number,
-  data: any,
-): PersonResponse[] {
-  const professionals: ProfessionalServiceResponse[] =
-    data.professionalServices;
-
-  const professionalsFilter = professionals.filter(
-    (service) => service.service_id === service_id,
-  );
-
-  const persons: PersonResponse[] = data.persons;
-
-  const professionalIds = new Set(
-    professionalsFilter.map((prof) => prof.person_id),
-  );
-
-  return persons.filter((person) => professionalIds.has(person.person_id));
-}
-
-export function getProfessionalSchedule(
-  person_id: number,
-  data: any,
-): WorkerScheduleResponse[] {
-  const workerSchedules: WorkerScheduleResponse[] = data.workerSchedules;
-  const appointments: Appointment[] = getAppointments(data);
-
-  return workerSchedules
-    .filter((worker) => worker.person_id === person_id)
-    .filter((worker) => {
-      // Verificar si existe alguna cita con la misma fecha y hora de inicio
-      const hasAppointment = appointments.some(
-        (appt) =>
-          appt.date === worker.schedule.date &&
-          appt.startTime === worker.schedule.start_time,
-      );
-      // Solo queremos los que NO tengan cita
-      return !hasAppointment;
-    });
 }
 
 // FINAL
@@ -236,6 +156,7 @@ export function getDataCard(data: any): StatCardProps[] {
   ];
 }
 
+//FINAL
 export function translateRol(rol: string): string {
   switch (rol.trim().toLowerCase()) {
     case "admin":
@@ -271,28 +192,13 @@ export function getAppointmentProfessional(
   );
 }
 
+// FINAL
 export function getNextAppointments(data: Appointment[]): Appointment[] {
   if (!data) return [];
 
   const today = new Date();
   const todayStr = today.toISOString().split("T")[0];
-  // CAMBIAR
-  return data.filter((app) => app.worker_schedule.schedule.date < todayStr);
-}
-
-export function getOccupation(occupation: number): string {
-  switch (occupation) {
-    case 1:
-      return "Doctor";
-    case 2:
-      return "Enfermero";
-    case 3:
-      return "Ingeniero";
-    case 4:
-      return "Estudiante";
-    default:
-      return "Desconocido";
-  }
+  return data.filter((app) => app.worker_schedule.schedule.date >= todayStr);
 }
 
 // FINAL
@@ -311,32 +217,25 @@ export function getAge(birthdate: string): number {
   return age;
 }
 
-export function getGender(gender: number): string {
-  switch (gender) {
-    case 1:
-      return "Masculino";
-    case 2:
-      return "Femenino";
-    default:
-      return "Desconocido";
-  }
-}
+// FINAL
+export function getAppointmentsReport(
+  appointmentsReport: AppointmentReport[],
+  appointments: Appointment[],
+  user_id: number,
+  cita_id: number,
+): AppointmentWithReports {
+  const appointment = appointments.find(
+    (a) => a.appointment_id === cita_id && a.client.user_id === user_id,
+  )!;
 
-export function getAppointmentsReport(data: any): AppointmentReport[] {
-  const appointments: Appointment[] = getAppointments(data);
-  const appointmentReport: AppointmentReportResponse[] =
-    data.appointmentReports;
-  return appointmentReport
-    .map((report) => {
-      const appointment = appointments.find(
-        (a) => a.id_appointment === report.appointment_id,
-      );
+  const report = appointmentsReport.find(
+    (r) => r.appointment_id === appointment.appointment_id,
+  )!;
 
-      if (!appointment) return null;
-
-      return appointmentReportResponseAdapter(appointment, report);
-    })
-    .filter((item): item is AppointmentReport => item !== null);
+  return {
+    ...appointment,
+    report,
+  };
 }
 
 // FINAL
@@ -534,6 +433,7 @@ export function getAppointmentsProfessional(
   );
 }
 
+// FINAL
 export function getClients(
   appointments: Appointment[],
   persons: Person[],
@@ -553,44 +453,7 @@ export function getClients(
   return persons.filter((person) => clientIds.has(person.person_id));
 }
 
-export function getUsers(data: any): User[] {
-  if (
-    !data ||
-    !data.persons ||
-    !data.userAccounts ||
-    !data.roles ||
-    !data.professional
-  ) {
-    return [];
-  }
-  const persons: PersonResponse[] = data.persons;
-  const userAccounts: UserAccountResponse[] = data.userAccounts;
-  const roles: RoleResponse[] = data.roles;
-  const professionals: ProfessionalResponse[] = data.professional;
-
-  return userAccounts
-    .map((account) => {
-      const person = persons.find((p) => p.user_id === account.user_id);
-      const role = roles.find((r) => r.role_id === account.role_id);
-      if (!person || !role) return null;
-      const user = userAdapter(person, role, account);
-
-      // Si es profesional (role_id === 2), añadimos sus datos extra
-      if (role.role_id === 2) {
-        const prof = professionals.find(
-          (p) => p.person_id === person.person_id,
-        );
-        if (prof) {
-          user.title = prof.title;
-          user.about = prof.about;
-          user.specialty = prof.specialty;
-        }
-      }
-      return user;
-    })
-    .filter((user): user is User => user !== null);
-}
-
+// FINAL
 export function getUser(data: Person[], user_id: number): Person {
   return data.find((user) => user.user_id === user_id)!;
 }
@@ -635,14 +498,9 @@ export function getUnreportedAppointments(
   return unreported.length > 0 ? unreported : [];
 }
 
+// FINAL
 export function getAppointment(data: Appointment[], id: number): Appointment {
   return data.find((app) => app.appointment_id === id)!;
-}
-
-export function getClientsAppointment(data: any): User[] {
-  const users: User[] = getUsers(data);
-
-  return users.filter((user) => user.role_id === 3);
 }
 
 // FINAL
@@ -652,45 +510,6 @@ export function getAppointmentbyClient(
 ): Appointment[] {
   const appointments: Appointment[] = data.appointments ?? [];
   return appointments.filter((apt) => apt.client.user_id === client_id);
-}
-
-export function getReceipt(data: any): Receipt[] {
-  if (!data) {
-    return [];
-  }
-  const receiptsResponse: ReceiptResponse[] = data.receipts;
-  const receiptList: Receipt[] = receiptsResponse
-    .map((receipt) => {
-      const payment = dataPayments?.find(
-        (p: any) => p.payment_id === receipt.payment_id,
-      );
-      if (!payment) return null;
-
-      const paymentData = data.paymentData?.find(
-        (pd: any) => pd.payment_data_id === payment.payment_data_id,
-      );
-      const service = data.services?.find(
-        (s: any) => s.service_id === payment.service.service_id,
-      );
-      const person = data.persons?.find(
-        (p: any) => p.person_id === payment.person.person_id,
-      );
-      const userAccount = data.userAccounts?.find(
-        (ua: any) => ua.user_id === person?.user_id,
-      );
-      const role = data.roles?.find(
-        (r: any) => r.role_id === userAccount?.role_id,
-      );
-
-      if (!paymentData || !service || !person || !userAccount || !role)
-        return null;
-
-      const client = userAdapter(person, role, userAccount);
-
-      return receiptAdapter(receipt, paymentData, service, client);
-    })
-    .filter(Boolean) as Receipt[];
-  return receiptList;
 }
 
 // FINAL
@@ -711,8 +530,4 @@ export function getProfessional(data: Person[]) {
 export function getClient(data: Person[]) {
   if (!data) return [];
   return data.filter((person) => person.user_account.role.name === "Client");
-}
-
-export function getPayments(data: any): PaymentResponse[] {
-  return data.payments;
 }

@@ -1,5 +1,5 @@
 // FINAL
-import { State } from "@/typesResponse/State";
+import type { State } from "@/typesResponse/State";
 
 export interface City {
   city_id: number;

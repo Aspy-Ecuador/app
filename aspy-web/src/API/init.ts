@@ -1,16 +1,10 @@
-//import paymentAPI from "./paymentAPI";
-import paymentDataAPI from "./paymentDataAPI";
+// FINAL
 import professionalServiceAPI from "./professionalServiceAPI";
-import receiptAPI from "./receiptAPI";
-import scheduleAPI from "./scheduleAPI";
 import serviceAPI from "./serviceAPI";
 import workerScheduleAPI from "./workerScheduleAPI";
 import appointmentAPI from "./appointmentAPI";
 import appointmentReportAPI from "./appointmentReportAPI";
-import userAccountAPI from "./userAccountAPI";
 import personAPI from "./personAPI";
-import roleAPI from "./roleAPI";
-import professionalAPI from "./professionalAPI";
 import paymentAPI from "./paymentAPI";
 
 type Loader<T = unknown> = {
@@ -129,20 +123,3 @@ export const runProfessionalLoaders = async () => {
     }
   }
 };
-/*
-export const initData = async (): Promise<void> => {
-  console.log("Initializing data...");
-  const token = localStorage.getItem("token");
-  if (!token) return;
-
-  for (const { name, fn } of loaders) {
-    try {
-      const response = await fn();
-      localStorage.setItem(name, JSON.stringify(response.data));
-      console.log(`✔️ Loaded: ${name}`);
-    } catch (error) {
-      console.error(`❌ Error loading ${name}:`, error);
-    }
-  }
-};
-*/

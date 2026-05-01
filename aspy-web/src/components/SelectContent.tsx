@@ -1,17 +1,19 @@
+// FINAL
 import * as React from "react";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemIcon from "@mui/material/ListItemIcon";
-import Select, { SelectChangeEvent, selectClasses } from "@mui/material/Select";
+import Select, {
+  type SelectChangeEvent,
+  selectClasses,
+} from "@mui/material/Select";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import GroupsIcon from "@mui/icons-material/Groups";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import PersonIcon from "@mui/icons-material/Person";
 import { styled } from "@mui/material/styles";
-import {
-  getAuthenticatedUserRole /*setAuthenticatedUserByRole*/,
-} from "@store";
-import { Role } from "@/types/Role";
+import { getAuthenticatedUserRole } from "@store";
+import type { Role } from "@/types/Role";
 
 const roleOptions = [
   {
@@ -50,7 +52,6 @@ export default function RoleSwitcher() {
   const handleChange = (event: SelectChangeEvent<unknown>) => {
     const selectedRole = event.target.value as Role;
     setRole(selectedRole);
-    //setAuthenticatedUserByRole(selectedRole);
     window.location.reload();
   };
 

@@ -1,3 +1,4 @@
+// FINAL
 // Hay que instalar npm install @mui/lab@6.0.0-beta.32
 import { useNavigate, useLocation } from "react-router-dom";
 import TimelineItem, { timelineItemClasses } from "@mui/lab/TimelineItem";
@@ -31,7 +32,6 @@ export default function TimeLinePatients({ patient }: TimeLinePatientsProps) {
     patient.user_id,
     data.appointments,
   );
-  console.log("Appointments with reports for user:", appointmentsReportUser);
 
   const handleMoreInfo = (appointmentId: number) => {
     navigate(`${location.pathname}/${appointmentId}`);

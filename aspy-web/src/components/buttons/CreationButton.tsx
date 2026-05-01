@@ -1,4 +1,11 @@
-function CreationButton({ onClick, text }: { onClick: () => void; text: string }) {
+// FINAL
+function CreationButton({
+  onClick,
+  text,
+}: {
+  onClick: () => void;
+  text: string;
+}) {
   return (
     <button
       onClick={onClick}

@@ -1,3 +1,4 @@
+// FINAL
 import ThemedLogo from "@/shared-theme/ThemedLogo";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";

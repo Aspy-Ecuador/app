@@ -1,5 +1,4 @@
-// components/NotFound.tsx
-
+// FINAL
 const NotFound = () => {
   return (
     <div style={{ padding: "2rem", textAlign: "center" }}>

@@ -1,17 +1,19 @@
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { inputRegisterUserConfig } from "@/config/userFormRegister";
-import { User } from "@/types/User";
+import type { UserForm } from "@/typesRequest/UserForm";
 import Button from "@mui/material/Button";
-import Input from "@components/Input";
+import CircularProgress from "@mui/material/CircularProgress";
+import UserInput from "@forms/UserInput";
 
 interface FormRegisterProps {
   start: number;
   end: number;
-  onNext: (data: User) => void;
+  onNext: (data: UserForm) => void;
   onBack: () => void;
-  onFinish: (data: User) => void;
+  onFinish: (data: UserForm) => void;
   isLast?: boolean;
+  load?: boolean;
 }
 
 export default function FormRegister({
@@ -21,8 +23,9 @@ export default function FormRegister({
   onBack,
   onFinish,
   isLast,
+  load,
 }: FormRegisterProps) {
-  const methods = useForm<User>();
+  const methods = useForm<UserForm>();
 
   useEffect(() => {
     methods.reset({
@@ -30,21 +33,30 @@ export default function FormRegister({
       last_name: "",
       email: "",
       birthdate: "",
-      title: "",
-      about: "",
-      specialty: "",
+      password: "",
+      password_confirmation: "",
       role_id: 3,
+      phone: { number: "", type: "" },
+      identification: { type: "", number: "" },
+      address: {
+        type: "",
+        country_id: 0,
+        state_id: 0,
+        city_id: 0,
+        primary_address: "",
+        secondary_address: "",
+      },
     });
   }, [methods]);
 
   const list_inputs = inputRegisterUserConfig.slice(start, end).map((input) => (
-    <Input
+    <UserInput
       key={input.key}
       label={input.label}
       type={input.type}
       id={input.key}
       validation={
-        input.key === "confirmPassword"
+        input.key === "password_confirmation"
           ? {
               ...input.validation,
               validate: (value: string) =>
@@ -66,9 +78,7 @@ export default function FormRegister({
   });
 
   const getButtonLabel = () => {
-    if (isLast) {
-      return "Registrar";
-    }
+    if (isLast) return "Registrar";
     return "Siguiente";
   };
 
@@ -85,7 +95,7 @@ export default function FormRegister({
           </div>
         </div>
         <div className="gap-10 mt-4 flex flex-row items-center justify-center">
-          {start != 0 && (
+          {start !== 0 && (
             <Button
               variant="outlined"
               onClick={onBack}
@@ -100,7 +110,11 @@ export default function FormRegister({
             onClick={onSubmit}
             className="md:w-[250px]"
           >
-            {getButtonLabel()}
+            {load ? (
+              <CircularProgress size={24} sx={{ color: "white" }} />
+            ) : (
+              getButtonLabel()
+            )}
           </Button>
         </div>
       </form>

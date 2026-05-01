@@ -2,7 +2,7 @@ import React from "react";
 import { Routes as RRDRoutes, Route } from "react-router-dom";
 import { getAuthenticatedUserRole } from "@store";
 import { Routes } from "@routes/Routes";
-import { Role } from "@/types/Role";
+import type { Role } from "@/types/Role";
 import AppTheme from "@shared-theme/AppTheme";
 import CssBaseline from "@mui/material/CssBaseline";
 

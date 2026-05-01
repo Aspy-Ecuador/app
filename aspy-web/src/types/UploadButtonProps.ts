@@ -1,9 +1,10 @@
-import { FileData } from "./FileData";
+// FINAL
+import type { FileData } from "./FileData";
 
 export interface UploadButtonProps {
   onFileSelected?: (fileData: FileData) => void;
   accept?: string;
-  label?: string;  
+  label?: string;
   buttonClassName?: string;
   icon?: React.ReactNode;
 }

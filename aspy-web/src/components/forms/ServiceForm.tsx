@@ -45,13 +45,13 @@ export default function ServiceForm({
       if (service) {
         methods.reset({
           name: service.name,
-          price: service.price,
+          price: Number(service.price),
         });
       }
     } else {
       methods.reset({
         name: "",
-        price: "",
+        price: 0,
       });
     }
   }, [isEditMode, serviceId, data, methods]);

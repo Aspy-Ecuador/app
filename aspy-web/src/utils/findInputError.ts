@@ -1,3 +1,4 @@
+// FINAL
 import type { FieldErrors, FieldError } from "react-hook-form";
 
 export function findInputError(errors: FieldErrors, name: string) {

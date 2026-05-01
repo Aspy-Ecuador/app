@@ -10,6 +10,11 @@ const serviceAPI = {
 
   createService: async (data: ServiceRequest): Promise<AxiosResponse> =>
     api.post(`/service`, data),
+
+  updateService: async (
+    id: number,
+    data: ServiceRequest,
+  ): Promise<AxiosResponse> => api.put(`/service/${id}`, data),
 };
 
 export default serviceAPI;

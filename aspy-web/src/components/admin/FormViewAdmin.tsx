@@ -114,8 +114,8 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
       }
       await refreshAll();
       setOpen(true);
-    } catch (error: any) {
-      console.log(error.response.data);
+    } catch (error: unknown) {
+      console.log(error);
     } finally {
       setLoad(false);
     }

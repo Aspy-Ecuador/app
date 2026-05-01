@@ -96,15 +96,6 @@ Route::middleware('auth:sanctum')->prefix('professional')->group(function () {
     Route::post("/create-horario", [ProfessionalController::class, 'createHorario']);
 });
 
-// Address
-Route::middleware('auth:sanctum')->prefix('address')->group(function () {
-    Route::get('/', [AddressController::class, 'index']);
-    Route::get('/{id}', [AddressController::class, 'show']);
-    Route::post('/', [AddressController::class, 'store']);
-    Route::put('/{id}', [AddressController::class, 'update']);
-    Route::delete('/{id}', [AddressController::class, 'destroy']);
-});
-
 
 // Schedule
 Route::middleware('auth:sanctum')->prefix('schedule')->group(function () {

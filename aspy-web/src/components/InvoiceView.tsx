@@ -124,7 +124,7 @@ export default function InvoiceView({
             <Typography
               sx={{ fontSize: 12, fontWeight: 500, fontFamily: "monospace" }}
             >
-              ${price.toFixed(2)}
+              ${price}
             </Typography>
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between", pt: 1 }}>
@@ -139,7 +139,7 @@ export default function InvoiceView({
                 fontFamily: "monospace",
               }}
             >
-              ${total.toFixed(2)}
+              ${total}
             </Typography>
           </Box>
         </Box>

@@ -1,5 +1,6 @@
+// FINAL
 import { CloudUpload } from "@mui/icons-material";
-import { UploadButtonProps } from "@/types/UploadButtonProps";
+import type { UploadButtonProps } from "@/types/UploadButtonProps";
 import { useRef } from "react";
 
 function UploadButton({
