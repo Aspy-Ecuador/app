@@ -1,12 +1,15 @@
+// FINAL
 import { useRoleData } from "@/observer/RoleDataContext";
 import type { Service } from "@typesResponse/Service";
 import Divider from "@mui/material/Divider";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
+import Chip from "@mui/material/Chip";
 import Progress from "@components/Progress";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
+import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
+import MedicalServicesRoundedIcon from "@mui/icons-material/MedicalServicesRounded";
 
 interface ReviewProps {
   service_id: number;
@@ -22,36 +25,156 @@ export default function Review({ service_id }: ReviewProps) {
   );
 
   return (
-    <Stack spacing={2}>
-      <List disablePadding>
-        <ListItem sx={{ py: 1, px: 0 }}>
-          <ListItemText primary={service?.name} />
-          <Typography variant="subtitle1">${service?.price}</Typography>
-        </ListItem>
-        <ListItem sx={{ py: 1, px: 0 }}>
-          <ListItemText primary="Total" />
-          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-            ${service?.price}
-          </Typography>
-        </ListItem>
-      </List>
-      <Divider />
-      <Stack
-        direction="column"
-        divider={<Divider flexItem />}
-        spacing={2}
-        sx={{ my: 2 }}
+    <Stack spacing={3}>
+      {/* Resumen del servicio */}
+      <Box
+        sx={{
+          borderRadius: 3,
+          border: "1px solid",
+          borderColor: "divider",
+          overflow: "hidden",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+        }}
       >
-        <div>
-          <Typography variant="subtitle2" gutterBottom>
-            Detalles de Pago
+        {/* Header de la tarjeta */}
+        <Box
+          sx={{
+            px: 3,
+            py: 2,
+            background: "linear-gradient(135deg, #1565C0 0%, #1976D2 100%)",
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+          }}
+        >
+          <MedicalServicesRoundedIcon sx={{ color: "white", fontSize: 20 }} />
+          <Typography
+            variant="subtitle2"
+            sx={{ color: "white", fontWeight: 600, letterSpacing: 0.5 }}
+          >
+            Resumen de la Cita
           </Typography>
+        </Box>
 
-          <Typography variant="body1" sx={{ color: "text.secondary" }}>
+        {/* Contenido */}
+        <Box sx={{ px: 3, py: 2 }}>
+          {/* Servicio */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              py: 1.5,
+            }}
+          >
+            <Box>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  textTransform: "uppercase",
+                  letterSpacing: 0.8,
+                }}
+              >
+                Servicio
+              </Typography>
+              <Typography variant="body1" sx={{ fontWeight: 500, mt: 0.25 }}>
+                {service?.name}
+              </Typography>
+            </Box>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 700, color: "primary.main" }}
+            >
+              ${service?.price}
+            </Typography>
+          </Box>
+
+          <Divider />
+
+          {/* Total */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              pt: 2,
+              pb: 1,
+            }}
+          >
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              Total
+            </Typography>
+            <Box sx={{ textAlign: "right" }}>
+              <Typography
+                variant="h5"
+                sx={{ fontWeight: 800, color: "primary.main" }}
+              >
+                ${service?.price}
+              </Typography>
+              <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                IVA incluido
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+
+      {/* Método de pago */}
+      <Box
+        sx={{
+          borderRadius: 3,
+          border: "1px solid",
+          borderColor: "divider",
+          px: 3,
+          py: 2.5,
+          display: "flex",
+          alignItems: "center",
+          gap: 2,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+        }}
+      >
+        <Box
+          sx={{
+            width: 44,
+            height: 44,
+            borderRadius: 2,
+            backgroundColor: "primary.50",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <AccountBalanceRoundedIcon sx={{ color: "primary.main" }} />
+        </Box>
+        <Box sx={{ flex: 1 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              textTransform: "uppercase",
+              letterSpacing: 0.8,
+            }}
+          >
+            Método de pago
+          </Typography>
+          <Typography variant="body1" sx={{ fontWeight: 500 }}>
             Transferencia bancaria
           </Typography>
-        </div>
-      </Stack>
+        </Box>
+        <Chip
+          icon={<CheckCircleOutlineRoundedIcon fontSize="small" />}
+          label="Verificando"
+          size="small"
+          sx={{
+            backgroundColor: "warning.50",
+            color: "warning.dark",
+            fontWeight: 600,
+            "& .MuiChip-icon": { color: "warning.main" },
+          }}
+        />
+      </Box>
     </Stack>
   );
 }

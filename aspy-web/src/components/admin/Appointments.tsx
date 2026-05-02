@@ -29,7 +29,7 @@ export default function Appointments() {
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1}>
         <Grid size={12} className="grid-p-patients-tittle">
-          <SimpleHeader text={"Citas"} />
+          <SimpleHeader text={"Citas"} chip="Citas agendadas" />
         </Grid>
         <Grid size={9}>
           {loading ? (

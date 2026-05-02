@@ -1,9 +1,8 @@
 // FINAL
+/* Ver documentacion en https://github.com/aldabil21/react-scheduler  */
 import { Scheduler } from "@aldabil/react-scheduler";
 import { es } from "date-fns/locale";
 import type { Appointment } from "@/typesResponse/Appointment";
-
-/* Ver documentacion en https://github.com/aldabil21/react-scheduler  */
 
 export default function Agenda({
   appointments,

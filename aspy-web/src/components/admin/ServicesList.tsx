@@ -1,39 +1,28 @@
 // FINAL
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import type { GridColDef } from "@mui/x-data-grid";
-import type { GridRowId } from "@mui/x-data-grid";
+import type { GridColDef, GridRowId } from "@mui/x-data-grid";
 import type { Service } from "@typesResponse/Service";
 import { useRoleData } from "@/observer/RoleDataContext";
-import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import SimpleHeader from "@components/SimpleHeader";
-import Stack from "@mui/material/Stack";
-import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import SimpleHeader from "@components/SimpleHeader";
 import Table from "@components/Table";
 import Progress from "@components/Progress";
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import AssignmentTurnedInRoundedIcon from "@mui/icons-material/AssignmentTurnedInRounded";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 
 export default function ServicesList() {
   const { data, loading } = useRoleData();
   const [selectedId, setSelectedId] = useState<GridRowId | null>(null);
-
   const navigate = useNavigate();
   const location = useLocation();
 
   const services: Service[] = data?.services ?? [];
-
-  const handleEdit = (id: number) => {
-    navigate(`${location.pathname}/${id}`);
-  };
-
-  const handleCreate = () => {
-    navigate(`/nuevo-servicio`);
-  };
 
   const columns: GridColDef[] = [
     {
@@ -46,7 +35,7 @@ export default function ServicesList() {
     {
       field: "name",
       headerName: "Nombre",
-      flex: 2,
+      flex: 3,
       disableColumnMenu: true,
       resizable: false,
     },
@@ -57,7 +46,16 @@ export default function ServicesList() {
       disableColumnMenu: true,
       resizable: false,
       renderCell: (params) => (
-        <Typography variant="body1">$ {params.value}</Typography>
+        <Typography
+          sx={{
+            fontSize: 12,
+            fontWeight: 500,
+            color: "#0F6E56",
+            fontFamily: "monospace",
+          }}
+        >
+          ${Number(params.value).toFixed(2)}
+        </Typography>
       ),
     },
     {
@@ -71,71 +69,133 @@ export default function ServicesList() {
       align: "center",
       headerAlign: "center",
       renderCell: (params) => (
-        <Button
-          onClick={() => handleEdit(params.row.service_id)}
-          variant="text"
-          className="boton-editar"
+        <IconButton
+          size="small"
+          onClick={() =>
+            navigate(`${location.pathname}/${params.row.service_id}`)
+          }
+          sx={{
+            width: 26,
+            height: 26,
+            border: "0.5px solid",
+            borderColor: "divider",
+            bgcolor: "action.hover",
+            borderRadius: 1.5,
+            "&:hover": {
+              borderColor: "#9FE1CB",
+              color: "#0F6E56",
+              bgcolor: "#E1F5EE",
+            },
+          }}
         >
-          <EditOutlinedIcon />
-        </Button>
+          <EditOutlinedIcon sx={{ fontSize: 13 }} />
+        </IconButton>
       ),
     },
   ];
 
   return (
-    <Box className="box-panel-control" sx={{ padding: 2 }}>
-      <Grid container spacing={1}>
-        <Grid size={12} className="grid-p-patients-tittle">
-          <SimpleHeader text={"Lista de Servicios"} />
-        </Grid>
+    <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.75 }}>
+      <SimpleHeader text="Lista de servicios" chip="Servicios" />
 
-        <Grid size={12}>
-          <Stack direction="row" spacing={2}>
-            <IconButton size="large" className="botones-admin">
-              <AssignmentTurnedInRoundedIcon fontSize="inherit" />
-              <Grid container sx={{ marginLeft: 2 }}>
-                <Grid size={12}>
-                  <Typography variant="body1" className="typo-tittle-boton">
-                    Total Servicios
-                  </Typography>
-                </Grid>
-                <Grid size={12}>
-                  <Typography variant="body1" className="typo-number-boton">
-                    {services.length}
-                  </Typography>
-                </Grid>
-              </Grid>
-            </IconButton>
-            <IconButton
-              size="large"
-              className="botones-admin"
-              onClick={handleCreate}
+      {/* Stats + botón */}
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        {/* Tarjeta total */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.25,
+            px: 1.75,
+            py: 1.25,
+            border: "0.5px solid",
+            borderColor: "divider",
+            borderRadius: 3,
+          }}
+        >
+          <Box
+            sx={{
+              width: 32,
+              height: 32,
+              borderRadius: "8px",
+              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              bgcolor: "#EEEDFE",
+              color: "#534AB7",
+              "& svg": { fontSize: 16 },
+            }}
+          >
+            <AssignmentTurnedInRoundedIcon fontSize="inherit" />
+          </Box>
+          <Box>
+            <Typography
+              sx={{
+                fontSize: 10,
+                fontWeight: 500,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                color: "text.disabled",
+                lineHeight: 1,
+              }}
             >
-              <AddCircleOutlineOutlinedIcon fontSize="inherit" />
-              <Typography
-                variant="body1"
-                className="typo-tittle-boton"
-                sx={{ marginLeft: 2 }}
-              >
-                Agregar Servicio
-              </Typography>
-            </IconButton>
-          </Stack>
-        </Grid>
+              Total servicios
+            </Typography>
+            <Typography sx={{ fontSize: 18, fontWeight: 500, lineHeight: 1.3 }}>
+              {services.length}
+            </Typography>
+          </Box>
+        </Box>
 
-        <Grid size={12}>
-          {loading ? (
-            <Progress />
-          ) : (
-            <Table<Service>
-              columns={columns}
-              rows={services}
-              getRowId={(row) => row.service_id}
-              selectedId={selectedId}
-              onRowSelect={setSelectedId}
-            />
-          )}
-        </Grid>
+        <Box sx={{ width: "0.5px", height: 36, bgcolor: "divider", mx: 0.5 }} />
+
+        {/* Botón agregar */}
+        <Button
+          onClick={() => navigate("/nuevo-servicio")}
+          startIcon={<AddRoundedIcon sx={{ fontSize: "14px !important" }} />}
+          sx={{
+            fontSize: 12,
+            fontWeight: 500,
+            bgcolor: "#E1F5EE",
+            color: "#0F6E56",
+            border: "0.5px solid #9FE1CB",
+            borderRadius: 3,
+            px: 1.75,
+            py: 1.25,
+            height: "auto",
+            textTransform: "none",
+            "&:hover": { bgcolor: "#9FE1CB" },
+          }}
+        >
+          Agregar servicio
+        </Button>
+      </Box>
+
+      {/* Tabla */}
+      <Grid size={12}>
+        {loading ? (
+          <Progress />
+        ) : services.length ? (
+          <Table<Service>
+            columns={columns}
+            rows={services}
+            getRowId={(row) => row.service_id}
+            selectedId={selectedId}
+            onRowSelect={setSelectedId}
+          />
+        ) : (
+          <Typography
+            sx={{
+              fontSize: 13,
+              color: "text.disabled",
+              textAlign: "center",
+              py: 4,
+            }}
+          >
+            No hay servicios registrados
+          </Typography>
+        )}
       </Grid>
     </Box>
   );

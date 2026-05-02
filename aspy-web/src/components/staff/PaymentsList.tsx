@@ -128,7 +128,7 @@ export default function PaymentsList() {
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1}>
         <Grid size={12} className="grid-p-patients-tittle">
-          <SimpleHeader text={"Pagos"} />
+          <SimpleHeader text={"Lista de pagos"} chip="Pagos" />
         </Grid>
         <Grid size={12}>
           <Table<Payment>

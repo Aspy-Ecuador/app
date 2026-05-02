@@ -1,12 +1,11 @@
 // FINAL
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import Divider from "@mui/material/Divider";
 import Button from "@mui/material/Button";
-
-import ReplyRoundedIcon from "@mui/icons-material/ReplyRounded";
+import IconButton from "@mui/material/IconButton";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   textHeader: string;
@@ -21,36 +20,71 @@ export default function Header({
   textIcon,
   handle,
 }: HeaderProps) {
-  return (
-    <Box>
-      <Grid container spacing={0}>
-        <Grid size={9}>
-          <Typography variant="h3">{textHeader}</Typography>
-        </Grid>
+  const navigate = useNavigate();
 
-        <Grid size={3} display="flex" justifyContent="flex-end">
-          {isCreate ? (
-            <Button
-              onClick={handle}
-              variant="outlined"
-              startIcon={<AddRoundedIcon fontSize="large" />}
-              className="guardar"
-            >
-              {textIcon}
-            </Button>
-          ) : (
-            <Button
-              onClick={handle}
-              variant="outlined"
-              startIcon={<ReplyRoundedIcon fontSize="large" />}
-              className="guardar"
-            >
-              Volver
-            </Button>
-          )}
-        </Grid>
-      </Grid>
-      <Divider className="divider-paciente-historial"></Divider>
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
+        pb: 1.5,
+        borderBottom: "0.5px solid",
+        borderColor: "divider",
+      }}
+    >
+      <IconButton
+        size="small"
+        onClick={() => navigate(-1)}
+        sx={{
+          border: "0.5px solid",
+          borderColor: "divider",
+          borderRadius: 1.5,
+        }}
+      >
+        <ArrowBackRoundedIcon sx={{ fontSize: 16 }} />
+      </IconButton>
+
+      <Typography variant="h3">{textHeader}</Typography>
+
+      <Box sx={{ ml: "auto" }}>
+        {isCreate ? (
+          <Button
+            onClick={handle}
+            size="large"
+            startIcon={<AddRoundedIcon />}
+            sx={{
+              bgcolor: "#E1F5EE",
+              color: "#0F6E56",
+              border: "0.5px solid #9FE1CB",
+              borderRadius: 1.5,
+              px: 1.5,
+              height: 26,
+              "&:hover": { bgcolor: "#9FE1CB" },
+            }}
+          >
+            {textIcon}
+          </Button>
+        ) : (
+          <Button
+            onClick={handle}
+            size="large"
+            startIcon={<ArrowBackRoundedIcon />}
+            sx={{
+              bgcolor: "action.hover",
+              color: "text.secondary",
+              border: "0.5px solid",
+              borderColor: "divider",
+              borderRadius: 1.5,
+              px: 1.5,
+              height: 26,
+              "&:hover": { bgcolor: "action.selected" },
+            }}
+          >
+            Volver
+          </Button>
+        )}
+      </Box>
     </Box>
   );
 }

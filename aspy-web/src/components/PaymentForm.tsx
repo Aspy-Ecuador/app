@@ -1,4 +1,5 @@
 // FINAL
+// FINAL
 import { useState, useEffect, useMemo } from "react";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
@@ -9,14 +10,19 @@ import FormControl from "@mui/material/FormControl";
 import RadioGroup from "@mui/material/RadioGroup";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import Chip from "@mui/material/Chip";
+import Divider from "@mui/material/Divider";
 import { styled } from "@mui/material/styles";
 import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
-import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
-import Grid from "@mui/material/Grid";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import BancoPacifico from "@assets/BP.jpeg";
 import type { FileData } from "@/types/FileData";
 import UploadButton from "@buttons/UploadButton";
-import { Edit, UploadFile } from "@mui/icons-material";
+import {
+  UploadFile,
+  CheckCircleOutline,
+  ContentCopyRounded,
+} from "@mui/icons-material";
 import { useRoleData } from "@/observer/RoleDataContext";
 import type { Service } from "@typesResponse/Service";
 
@@ -26,38 +32,54 @@ interface PaymentFormProps {
   service_id: number;
 }
 
-const Card = styled(MuiCard)<{ selected?: boolean }>(({ theme }) => ({
-  border: "1px solid",
-  borderColor: theme.palette.divider,
+const PaymentCard = styled(MuiCard)<{ selected?: boolean }>(({ theme }) => ({
+  border: "2px solid",
+  borderColor: theme.palette.primary.main,
+  borderRadius: 16,
   width: "100%",
-  "&:hover": {
-    background:
-      "linear-gradient(to bottom right, hsla(210, 100%, 97%, 0.5) 25%, hsla(210, 100%, 90%, 0.3) 100%)",
-    borderColor: "primary.light",
-    boxShadow: "0px 2px 8px hsla(0, 0%, 0%, 0.1)",
-    ...theme.applyStyles("dark", {
-      background:
-        "linear-gradient(to right bottom, hsla(210, 100%, 12%, 0.2) 25%, hsla(210, 100%, 16%, 0.2) 100%)",
-      borderColor: "primary.dark",
-      boxShadow: "0px 1px 8px hsla(210, 100%, 25%, 0.5) ",
-    }),
-  },
-  [theme.breakpoints.up("md")]: {
-    flexGrow: 1,
-    maxWidth: `calc(50% - ${theme.spacing(1)})`,
-  },
-  variants: [
-    {
-      props: ({ selected }) => selected,
-      style: {
-        borderColor: theme.palette.primary.light,
-        ...theme.applyStyles("dark", {
-          borderColor: theme.palette.primary.dark,
-        }),
-      },
-    },
-  ],
+  background: `linear-gradient(135deg, ${theme.palette.primary.light}18 0%, ${theme.palette.primary.main}08 100%)`,
+  boxShadow: "none",
 }));
+
+const InfoRow = ({
+  label,
+  value,
+  copyable,
+}: {
+  label: string;
+  value: string;
+  copyable?: boolean;
+}) => (
+  <Box
+    sx={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      py: 0.75,
+    }}
+  >
+    <Typography variant="body2" sx={{ color: "text.secondary" }}>
+      {label}
+    </Typography>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+        {value}
+      </Typography>
+      {copyable && (
+        <ContentCopyRounded
+          sx={{
+            fontSize: 14,
+            color: "primary.main",
+            cursor: "pointer",
+            opacity: 0.7,
+            "&:hover": { opacity: 1 },
+          }}
+          onClick={() => navigator.clipboard?.writeText(value)}
+        />
+      )}
+    </Box>
+  </Box>
+);
 
 export default function PaymentForm({
   service_id,
@@ -67,7 +89,6 @@ export default function PaymentForm({
   const { data, loading } = useRoleData();
   const [signature, setSignature] = useState<FileData | null>(null);
 
-  // Derivado directamente, sin useState ni useEffect
   const service = useMemo(() => {
     if (!loading && data.services) {
       return data.services.find((s: Service) => s.service_id === service_id);
@@ -77,145 +98,211 @@ export default function PaymentForm({
 
   useEffect(() => {
     const allFilled = !!signature;
-    if (allFilled) {
-      setFile(signature);
-    }
+    if (allFilled) setFile(signature);
     setIsValid(allFilled);
   }, [signature, setFile, setIsValid]);
 
   return (
-    <Stack spacing={{ xs: 1, sm: 3 }} useFlexGap>
-      <FormControl component="fieldset" fullWidth>
-        <RadioGroup
-          aria-label="Payment options"
-          name="paymentType"
+    <Stack spacing={3} useFlexGap>
+      {/* Selección de método de pago */}
+      <Box>
+        <Typography
+          variant="overline"
           sx={{
-            display: "flex",
-            flexDirection: { xs: "column", sm: "row" },
-            gap: 2,
+            color: "text.secondary",
+            letterSpacing: 1.2,
+            mb: 1.5,
+            display: "block",
           }}
         >
-          <Card sx={{ cursor: "pointer" }}>
-            <CardActionArea
-              sx={{
-                ".MuiCardActionArea-focusHighlight": {
-                  backgroundColor: "transparent",
-                },
-                "&:focus-visible": {
-                  backgroundColor: "action.hover",
-                },
-              }}
-              className="boton-change"
-            >
-              <CardContent
-                sx={{ display: "flex", alignItems: "center", gap: 1 }}
+          Método de pago
+        </Typography>
+        <FormControl component="fieldset" fullWidth>
+          <RadioGroup name="paymentType">
+            <PaymentCard>
+              <CardActionArea
+                sx={{
+                  borderRadius: 3,
+                  ".MuiCardActionArea-focusHighlight": {
+                    backgroundColor: "transparent",
+                  },
+                }}
               >
-                <AccountBalanceRoundedIcon
-                  fontSize="small"
-                  sx={[
-                    (theme) => ({
-                      color: "grey.400",
-                      ...theme.applyStyles("dark", {
-                        color: "grey.600",
-                      }),
-                    }),
-                    {
-                      color: "primary.main",
-                    },
-                  ]}
-                />
-                <Typography sx={{ fontWeight: "medium" }}>
-                  Transferencia Bancaria
-                </Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-        </RadioGroup>
-      </FormControl>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <Alert severity="warning" icon={<WarningRoundedIcon />}>
-          Recuerde: una vez que suba su comprobante de pago, el personal
-          administrativo revisará y aprobará el comprobante. Cuando esto ocurra,
-          su cita quedará confirmada.
-        </Alert>
-        <Typography variant="subtitle1" sx={{ fontWeight: "medium" }}>
-          Total a Pagar
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          {service?.price}
-        </Typography>
-        <Typography variant="subtitle1" sx={{ fontWeight: "medium" }}>
-          Cuenta Bancaria
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Transfiera el pago a la cuenta bancaria que se indica a continuación.
-        </Typography>
-        <Grid container>
-          <Grid size={9}>
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <Typography variant="body1" sx={{ color: "text.secondary" }}>
-                Banco:
-              </Typography>
-              <Typography variant="body1" sx={{ fontWeight: "medium" }}>
-                Pacífico
-              </Typography>
-            </Box>
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <Typography variant="body1" sx={{ color: "text.secondary" }}>
-                Tipo
-              </Typography>
-              <Typography variant="body1" sx={{ fontWeight: "medium" }}>
-                Cuenta Corriente
-              </Typography>
-            </Box>
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <Typography variant="body1" sx={{ color: "text.secondary" }}>
-                Número de cuenta
-              </Typography>
-              <Typography variant="body1" sx={{ fontWeight: "medium" }}>
-                123456789
-              </Typography>
-            </Box>
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <Typography variant="body1" sx={{ color: "text.secondary" }}>
-                C.I.
-              </Typography>
-              <Typography variant="body1" sx={{ fontWeight: "medium" }}>
-                987654321
-              </Typography>
-            </Box>
-          </Grid>
+                <CardContent
+                  sx={{ display: "flex", alignItems: "center", gap: 2, py: 2 }}
+                >
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 2,
+                      backgroundColor: "primary.main",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <AccountBalanceRoundedIcon
+                      sx={{ color: "white", fontSize: 20 }}
+                    />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography sx={{ fontWeight: 600, lineHeight: 1.2 }}>
+                      Transferencia Bancaria
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{ color: "text.secondary" }}
+                    >
+                      Pago directo a cuenta
+                    </Typography>
+                  </Box>
+                  <Chip
+                    label="Seleccionado"
+                    size="small"
+                    sx={{
+                      backgroundColor: "primary.main",
+                      color: "white",
+                      fontWeight: 600,
+                      fontSize: "0.7rem",
+                    }}
+                  />
+                </CardContent>
+              </CardActionArea>
+            </PaymentCard>
+          </RadioGroup>
+        </FormControl>
+      </Box>
 
-          <Grid size={3} className="contenedor-principal">
-            <img
-              src={BancoPacifico}
-              alt="bancoPacifico"
-              style={{ width: "50%", height: "auto" }}
+      {/* Monto a pagar */}
+      <Box
+        sx={{
+          borderRadius: 3,
+          background: "linear-gradient(135deg, #1565C0 0%, #1976D2 100%)",
+          p: 2.5,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Box>
+          <Typography
+            variant="caption"
+            sx={{ color: "rgba(255,255,255,0.75)", letterSpacing: 1 }}
+          >
+            TOTAL A PAGAR
+          </Typography>
+          <Typography
+            variant="h4"
+            sx={{ color: "white", fontWeight: 800, lineHeight: 1.1, mt: 0.25 }}
+          >
+            ${service?.price}
+          </Typography>
+        </Box>
+        <Box
+          component="img"
+          src={BancoPacifico}
+          alt="Banco Pacífico"
+          sx={{
+            height: 40,
+            borderRadius: 2,
+            backgroundColor: "white",
+            px: 1,
+          }}
+        />
+      </Box>
+
+      {/* Datos de la cuenta */}
+      <Box
+        sx={{
+          borderRadius: 3,
+          border: "1px solid",
+          borderColor: "divider",
+          overflow: "hidden",
+        }}
+      >
+        <Box
+          sx={{
+            px: 2.5,
+            py: 1.5,
+            backgroundColor: "grey.50",
+            borderBottom: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+            Datos de transferencia
+          </Typography>
+        </Box>
+        <Box sx={{ px: 2.5, py: 1.5 }}>
+          <InfoRow label="Banco" value="Pacífico" />
+          <Divider />
+          <InfoRow label="Tipo" value="Cuenta Corriente" />
+          <Divider />
+          <InfoRow label="Número de cuenta" value="123456789" copyable />
+          <Divider />
+          <InfoRow label="C.I. / RUC" value="987654321" copyable />
+        </Box>
+      </Box>
+
+      {/* Alerta */}
+      <Alert
+        severity="info"
+        icon={<InfoOutlinedIcon fontSize="small" />}
+        sx={{
+          borderRadius: 2,
+          "& .MuiAlert-message": { fontSize: "0.82rem" },
+        }}
+      >
+        El personal administrativo revisará y aprobará su comprobante. Su cita
+        quedará confirmada una vez verificado el pago.
+      </Alert>
+
+      {/* Upload */}
+      <Box
+        sx={{
+          borderRadius: 3,
+          border: "2px dashed",
+          borderColor: signature ? "success.main" : "divider",
+          p: 2.5,
+          transition: "border-color 0.2s ease",
+          backgroundColor: signature ? "success.50" : "transparent",
+        }}
+      >
+        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5 }}>
+          Comprobante de pago
+        </Typography>
+
+        {signature ? (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <CheckCircleOutline sx={{ color: "success.main", fontSize: 22 }} />
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                {signature.name}
+              </Typography>
+              <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                Archivo cargado correctamente
+              </Typography>
+            </Box>
+          </Box>
+        ) : (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <Typography
+              variant="body2"
+              sx={{ color: "text.secondary", mb: 0.5 }}
+            >
+              Suba el comprobante de pago en formato PDF.
+            </Typography>
+            <UploadButton
+              accept="application/pdf"
+              label="Subir comprobante"
+              icon={<UploadFile fontSize="small" />}
+              buttonClassName="bg-white text-blue-700 font-semibold border-2 border-blue-500 hover:bg-blue-50 rounded-xl px-4 py-2 transition-all"
+              onFileSelected={(fileData) => setSignature(fileData)}
             />
-          </Grid>
-          <Grid size={12}>
-            <div className="mt-4">
-              <div className="flex items-center mb-2">
-                <Edit className="mr-2 text-gray-600" />
-                <h2 className="text-lg font-semibold">Comprobante de pago</h2>
-              </div>
-              <UploadButton
-                accept="pdf/*"
-                label="Subir comprobante"
-                icon={<UploadFile className="mr-2 text-blue-600" />}
-                buttonClassName="bg-white text-black font-bold border border-blue-600 hover:bg-blue-50"
-                onFileSelected={(fileData) => setSignature(fileData)}
-              />
-              {signature && (
-                <>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Comprobante cargado: <strong>{signature.name}</strong>
-                  </p>
-                </>
-              )}
-            </div>
-          </Grid>
-        </Grid>
+          </Box>
+        )}
       </Box>
     </Stack>
   );

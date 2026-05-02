@@ -33,6 +33,7 @@ class ServiceController extends Controller
         ]);
  
         $validated['created_by'] = 1;
+        $validated['creation_date'] = now();
 
         $service = Service::create($validated);
  
@@ -53,6 +54,7 @@ class ServiceController extends Controller
         ]);
  
         $validated['modified_by'] = 1;
+        $validated['modification_date'] = now();
 
         $service->update($validated);
  

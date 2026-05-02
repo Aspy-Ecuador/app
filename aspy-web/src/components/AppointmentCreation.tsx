@@ -2,8 +2,15 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useMemo } from "react";
 import { useRoleData } from "@/observer/RoleDataContext";
-import FormControl from "@mui/material/FormControl";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import InputLabel from "@mui/material/InputLabel";
+import FormControl from "@mui/material/FormControl";
+import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 import DateCalendarValue from "@components/DateCalendarValue";
 import Progress from "@components/Progress";
 import type { ProfessionalService } from "@/typesResponse/ProfessionalService";
@@ -14,6 +21,82 @@ import type { Service } from "@/typesResponse/Service";
 interface AppointmentCreationProp {
   isClient: boolean;
 }
+
+const SectionPanel = ({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) => (
+  <Paper
+    elevation={0}
+    sx={{
+      border: "0.5px solid",
+      borderColor: "divider",
+      borderRadius: 3,
+      overflow: "hidden",
+    }}
+  >
+    <Box
+      sx={{
+        px: 1.75,
+        py: 1.25,
+        borderBottom: "0.5px solid",
+        borderColor: "divider",
+      }}
+    >
+      <Typography
+        sx={{
+          fontSize: 10,
+          fontWeight: 500,
+          letterSpacing: "0.06em",
+          textTransform: "uppercase",
+          color: "text.disabled",
+        }}
+      >
+        {label}
+      </Typography>
+    </Box>
+    <Box sx={{ p: 2 }}>{children}</Box>
+  </Paper>
+);
+
+const StyledSelect = ({
+  label,
+  value,
+  onChange,
+  disabled,
+  children,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+  children: React.ReactNode;
+}) => (
+  <FormControl fullWidth size="small" disabled={disabled}>
+    <InputLabel sx={{ fontSize: 12 }}>{label}</InputLabel>
+    <Select
+      value={value}
+      label={label}
+      onChange={(e) => onChange(e.target.value)}
+      sx={{
+        fontSize: 12,
+        borderRadius: 2,
+        bgcolor: "action.hover",
+        "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
+      }}
+    >
+      <MenuItem value="" sx={{ fontSize: 12 }}>
+        <Typography sx={{ fontSize: 12, color: "text.disabled" }}>
+          Selecciona una opción
+        </Typography>
+      </MenuItem>
+      {children}
+    </Select>
+  </FormControl>
+);
 
 export default function AppointmentCreation({
   isClient,
@@ -32,10 +115,8 @@ export default function AppointmentCreation({
   const workerProfessional: WorkerProfessional[] = data.workerProfessional;
   const persons: Person[] = data.persons;
 
-  // Calculado derivado del serviceId
   const professionalsOptions = useMemo<Person[]>(() => {
     if (serviceId === null) return [];
-
     return proServices
       .filter((ps) => ps.service_id === serviceId)
       .map((ps) =>
@@ -44,13 +125,11 @@ export default function AppointmentCreation({
       .filter((p): p is Person => p !== undefined);
   }, [serviceId, proServices, persons]);
 
-  // Calculado derivado de persons (solo para secretario)
   const clientsOptions = useMemo<Person[]>(() => {
     if (isClient) return [];
-    return persons.filter((p) => p.client !== null);
+    return persons.filter((p) => p.user_account.role.role_id === 3);
   }, [isClient, persons]);
 
-  // Calculado derivado del professionalId
   const workerSchedules = useMemo<WorkerProfessional[]>(() => {
     if (professionalId === null) return [];
     return workerProfessional.filter(
@@ -58,155 +137,144 @@ export default function AppointmentCreation({
     );
   }, [professionalId, workerProfessional]);
 
-  const handleServiceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    setServiceId(value ? parseInt(value) : null);
-    setProfessionalId(null);
-    setWorkerId(null);
-    setClientId(null);
-  };
-
-  const handleProfessionalChange = (
-    e: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    const value = e.target.value;
-    setProfessionalId(value ? parseInt(value) : null);
-    setWorkerId(null);
-  };
-
-  const handleClientChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    setClientId(value ? parseInt(value) : null);
-  };
-
   const handleToPay = () => {
-    console.log({ serviceId, professionalId, workerId, clientId });
     if (!serviceId || !workerId || !professionalId) {
-      setErrorMessage(
-        "Por favor, complete todos los campos antes de continuar.",
-      );
+      setErrorMessage("Completa todos los campos antes de continuar.");
       return;
     }
-
     if (!isClient && !clientId) {
-      setErrorMessage("Por favor, seleccione un paciente antes de continuar.");
+      setErrorMessage("Selecciona un paciente antes de continuar.");
       return;
     }
-
     setErrorMessage(null);
-
-    const newPath = !isClient
-      ? `/pago/${serviceId}/${workerId}/${clientId}/${professionalId}`
-      : `/pago/${serviceId}/${workerId}/${professionalId}`;
-
-    navigate(newPath);
+    navigate(
+      !isClient
+        ? `/pago/${serviceId}/${workerId}/${clientId}/${professionalId}`
+        : `/pago/${serviceId}/${workerId}/${professionalId}`,
+    );
   };
 
   if (loading) return <Progress />;
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: "0px",
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: "260px minmax(0,1fr)",
+        gap: 1.5,
+        alignItems: "start",
       }}
     >
       {/* Formulario */}
-      <div
-        style={{
-          width: "20%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <FormControl>
-          <div className="grid grid-cols-1 gap-8">
-            {/* Servicio */}
-            <div className="flex flex-col gap-2 w-full">
-              <h6>Servicio</h6>
-              <select
-                onChange={handleServiceChange}
-                className="border border-gray-300 rounded-md p-2 w-full"
+      <SectionPanel label="Datos de la cita">
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.75 }}>
+          <StyledSelect
+            label="Servicio"
+            value={serviceId?.toString() ?? ""}
+            onChange={(v) => {
+              setServiceId(v ? parseInt(v) : null);
+              setProfessionalId(null);
+              setWorkerId(null);
+              setClientId(null);
+            }}
+          >
+            {servicesOptions.map((s) => (
+              <MenuItem
+                key={s.service_id}
+                value={s.service_id.toString()}
+                sx={{ fontSize: 12 }}
               >
-                <option value="">Escoja el servicio</option>
-                {servicesOptions.map((service) => (
-                  <option key={service.service_id} value={service.service_id}>
-                    {service.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+                {s.name}
+              </MenuItem>
+            ))}
+          </StyledSelect>
 
-            {/* Profesional */}
-            <div className="flex flex-col gap-2 w-full">
-              <h6>Profesional</h6>
-              <select
-                onChange={handleProfessionalChange}
-                disabled={serviceId === null}
-                className="border border-gray-300 rounded-md p-2 w-full disabled:opacity-50"
+          <StyledSelect
+            label="Profesional"
+            value={professionalId?.toString() ?? ""}
+            disabled={serviceId === null}
+            onChange={(v) => {
+              setProfessionalId(v ? parseInt(v) : null);
+              setWorkerId(null);
+            }}
+          >
+            {professionalsOptions.map((p) => (
+              <MenuItem
+                key={p.person_id}
+                value={p.person_id.toString()}
+                sx={{ fontSize: 12 }}
               >
-                <option value="">Escoja el profesional</option>
-                {professionalsOptions.map((person) => (
-                  <option key={person.person_id} value={person.person_id}>
-                    {person.first_name} {person.last_name}
-                  </option>
-                ))}
-              </select>
-            </div>
+                {p.first_name} {p.last_name}
+              </MenuItem>
+            ))}
+          </StyledSelect>
 
-            {/* Paciente - solo secretario */}
-            {!isClient && (
-              <div className="flex flex-col gap-2 w-full">
-                <h6>Paciente</h6>
-                <select
-                  onChange={handleClientChange}
-                  disabled={serviceId === null}
-                  className="border border-gray-300 rounded-md p-2 w-full disabled:opacity-50"
+          {!isClient && (
+            <StyledSelect
+              label="Paciente"
+              value={clientId?.toString() ?? ""}
+              disabled={serviceId === null}
+              onChange={(v) => setClientId(v ? parseInt(v) : null)}
+            >
+              {clientsOptions.map((p) => (
+                <MenuItem
+                  key={p.person_id}
+                  value={p.person_id.toString()}
+                  sx={{ fontSize: 12 }}
                 >
-                  <option value="">Escoja el paciente</option>
-                  {clientsOptions.map((person) => (
-                    <option key={person.person_id} value={person.person_id}>
-                      {person.first_name} {person.last_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-          </div>
-
-          {/* Botón */}
-          <div className="flex flex-col gap-2 w-full mt-8">
-            <Button variant="contained" onClick={handleToPay}>
-              Proceder a pagar
-            </Button>
-          </div>
-
-          {/* Error */}
-          {errorMessage && (
-            <div className="text-red-600 text-sm mt-2 text-center">
-              {errorMessage}
-            </div>
+                  {p.first_name} {p.last_name}
+                </MenuItem>
+              ))}
+            </StyledSelect>
           )}
-        </FormControl>
-      </div>
+
+          {errorMessage && (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 0.75,
+                p: 1.25,
+                bgcolor: "#FCEBEB",
+                border: "0.5px solid #F7C1C1",
+                borderRadius: 2,
+              }}
+            >
+              <ErrorOutlineRoundedIcon
+                sx={{ fontSize: 14, color: "#A32D2D", flexShrink: 0 }}
+              />
+              <Typography sx={{ fontSize: 11, color: "#A32D2D" }}>
+                {errorMessage}
+              </Typography>
+            </Box>
+          )}
+
+          <Button
+            onClick={handleToPay}
+            fullWidth
+            sx={{
+              bgcolor: "#1D9E75",
+              color: "#fff",
+              fontSize: 12,
+              fontWeight: 500,
+              borderRadius: 2,
+              py: 1,
+              mt: 0.5,
+              "&:hover": { bgcolor: "#0F6E56" },
+            }}
+          >
+            Proceder a pagar
+          </Button>
+        </Box>
+      </SectionPanel>
 
       {/* Calendario */}
-      <div
-        style={{
-          width: "50%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
+      <SectionPanel label="Selecciona fecha y hora">
         <DateCalendarValue
           availableSchedules={workerSchedules}
           onScheduleSelect={setWorkerId}
         />
-      </div>
-    </div>
+      </SectionPanel>
+    </Box>
   );
 }

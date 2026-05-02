@@ -39,8 +39,7 @@ class PaymentController extends Controller
     {
         $validated = $request->validate([
             'person_id' => 'required|integer',
-            'service_id' => 'required|integer',
-            'discount_id' => 'nullable|integer',
+            'service_id' => 'required|integer',            
             'payment_data_id' => 'required|integer',
             'service_price' => 'required|numeric|min:0',
             'discount_percentage' => 'nullable|integer|min:0|max:100',

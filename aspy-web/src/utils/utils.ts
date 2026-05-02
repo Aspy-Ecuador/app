@@ -14,10 +14,6 @@ import type { Payment } from "@/typesResponse/Payment";
 import type { FlattenedReceipt } from "@/types/FlattenedReceipt";
 import type { AppointmentWithReports } from "@/types/AppointmentWithReports";
 
-type TendenciaDiaria = {
-  promedioPorcentual: number;
-};
-
 type TotalIngresosMensual = {
   total: number;
 };
@@ -26,34 +22,6 @@ interface jsPDFWithAutoTable extends jsPDF {
   lastAutoTable?: {
     finalY: number;
     [key: string]: number;
-  };
-}
-
-export function CalcularTendenciaDiaria(data: number[]): TendenciaDiaria {
-  if (data.length < 2) {
-    return {
-      promedioPorcentual: 0,
-    };
-  }
-
-  let sumaPorcentajes = 0;
-
-  for (let i = 1; i < data.length; i++) {
-    const actual = data[i];
-    const anterior = data[i - 1];
-
-    const cambio = actual - anterior;
-
-    if (anterior !== 0) {
-      const porcentaje = (cambio / anterior) * 100;
-      sumaPorcentajes += porcentaje;
-    }
-  }
-
-  const totalCambios = data.length - 1;
-
-  return {
-    promedioPorcentual: +(sumaPorcentajes / totalCambios).toFixed(2),
   };
 }
 
@@ -77,14 +45,16 @@ export function getIncome(data: any): number[] {
   const monthlyIncome = Array(12).fill(0);
 
   payments.forEach((payment) => {
-    const date = new Date(payment.creation_date);
+    if (payment.payment_status.payment_status_id !== 3) {
+      const date = new Date(payment.creation_date);
 
-    if (date.getFullYear() !== currentYear) return;
+      if (date.getFullYear() !== currentYear) return;
 
-    const month = date.getMonth();
-    const price = Number(payment?.service?.price) || 0;
+      const month = date.getMonth();
+      const price = Number(payment?.service?.price) || 0;
 
-    monthlyIncome[month] += price;
+      monthlyIncome[month] += price;
+    }
   });
 
   // Redondear solo al final (mejor práctica)
@@ -99,6 +69,7 @@ export function getDataAppointment(data: any): PageViewsBarChartProps {
   const scheduled = Array(12).fill(0);
   const completed = Array(12).fill(0);
   const cancelled = Array(12).fill(0);
+  const saved = Array(12).fill(0);
 
   appointments.forEach((appointment) => {
     const date = new Date(appointment.creation_date);
@@ -108,13 +79,14 @@ export function getDataAppointment(data: any): PageViewsBarChartProps {
 
     const month = date.getMonth(); // 0–11
     const statusName = appointment.appointment_status.name.toLowerCase() ?? "";
-
-    if (statusName === "scheduled") {
+    if (statusName === "agendada") {
       scheduled[month] += 1;
-    } else if (statusName === "completed") {
+    } else if (statusName === "completada") {
       completed[month] += 1;
-    } else if (statusName === "cancelled") {
+    } else if (statusName === "perdida") {
       cancelled[month] += 1;
+    } else if (statusName === "guardada") {
+      saved[month] += 1;
     }
   });
 
@@ -122,8 +94,7 @@ export function getDataAppointment(data: any): PageViewsBarChartProps {
     scheduled.reduce((a, b) => a + b, 0) +
     completed.reduce((a, b) => a + b, 0) +
     cancelled.reduce((a, b) => a + b, 0);
-
-  return { total, scheduled, completed, cancelled };
+  return { total, scheduled, completed, cancelled, saved };
 }
 
 // FINAL

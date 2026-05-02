@@ -11,39 +11,14 @@ interface StepsProps {
 
 export default function Steps({ activeStep, steps }: StepsProps) {
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: { sm: "space-between", md: "flex-end" },
-        alignItems: "center",
-        width: "100%",
-        maxWidth: { sm: "100%", md: 600 },
-      }}
-    >
-      <Box
-        sx={{
-          display: { xs: "none", md: "flex" },
-          flexDirection: "column",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          flexGrow: 1,
-        }}
-      >
-        <Stepper
-          id="desktop-stepper"
-          activeStep={activeStep}
-          sx={{ width: "100%", height: 40 }}
-        >
-          {steps.map((label) => (
-            <Step
-              sx={{ ":first-of-type": { pl: 0 }, ":last-child": { pr: 0 } }}
-              key={label}
-            >
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-      </Box>
+    <Box sx={{ width: "100%", py: 1 }}>
+      <Stepper activeStep={activeStep} alternativeLabel>
+        {steps.map((label) => (
+          <Step key={label}>
+            <StepLabel>{label}</StepLabel>
+          </Step>
+        ))}
+      </Stepper>
     </Box>
   );
 }

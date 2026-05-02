@@ -46,7 +46,7 @@ export default function ServicesList() {
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1}>
         <Grid size={12} className="grid-p-patients-tittle">
-          <SimpleHeader text="Consultar servicios" />
+          <SimpleHeader text="Consultar servicios" chip="Servicios" />
         </Grid>
 
         <Grid size={12}>

@@ -1,15 +1,78 @@
 // FINAL
 import type { Person } from "@/typesResponse/Person";
 import type { UserLogin } from "@/types/UserLogin";
-import penToSquare from "@assets/pen-to-square.svg";
 import { getAge } from "@/utils/utils";
-import photo from "@assets/user.png";
 import { useNavigate } from "react-router-dom";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
 
 type ProfileProps = {
   user: Person | UserLogin;
   isRowPosition: boolean;
 };
+
+const Field = ({ label, value }: { label: string; value: string }) => (
+  <Box>
+    <Typography
+      sx={{
+        fontSize: 10,
+        fontWeight: 500,
+        letterSpacing: "0.04em",
+        textTransform: "uppercase",
+        color: "text.disabled",
+        mb: 0.25,
+      }}
+    >
+      {label}
+    </Typography>
+    <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.primary" }}>
+      {value || "—"}
+    </Typography>
+  </Box>
+);
+
+const SectionPanel = ({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) => (
+  <Paper
+    elevation={0}
+    sx={{
+      border: "0.5px solid",
+      borderColor: "divider",
+      borderRadius: 3,
+      overflow: "hidden",
+    }}
+  >
+    <Box
+      sx={{
+        px: 1.75,
+        py: 1.25,
+        borderBottom: "0.5px solid",
+        borderColor: "divider",
+      }}
+    >
+      <Typography
+        sx={{
+          fontSize: 10,
+          fontWeight: 500,
+          letterSpacing: "0.06em",
+          textTransform: "uppercase",
+          color: "text.disabled",
+        }}
+      >
+        {label}
+      </Typography>
+    </Box>
+    <Box sx={{ p: 2.5 }}>{children}</Box>
+  </Paper>
+);
 
 export default function ProfileView({ user, isRowPosition }: ProfileProps) {
   const navigate = useNavigate();
@@ -17,61 +80,116 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
   const roleName =
     "person" in user ? user.role.name : user.user_account.role.name;
 
-  const handleEdit = () => {
-    navigate(`/editar/${person.user_id}`);
-  };
+  const initials =
+    `${person.first_name?.[0] ?? ""}${person.last_name?.[0] ?? ""}`.toUpperCase();
 
   return (
-    <div
-      className={`flex ${isRowPosition ? "flex-col md:flex-row" : "flex-col"} justify-center gap-16 p-8 m-8`}
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: isRowPosition ? "220px minmax(0,1fr)" : "1fr",
+        gap: 1.5,
+        alignItems: "start",
+      }}
     >
-      <div className="flex flex-col gap-16 items-center">
-        <img
-          className="rounded-full w-[200px] h-auto"
-          src={photo}
-          alt={person.first_name}
-        />
-        <div className="flex flex-col gap-1 justify-center items-center">
-          <h1 className="font-kumbh text-primaryAspy font-semibold text-base">
+      {/* Panel avatar */}
+      <SectionPanel label="Perfil">
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 1.5,
+            textAlign: "center",
+          }}
+        >
+          {/* Avatar con iniciales + botón editar */}
+          <Box sx={{ position: "relative", display: "inline-block" }}>
+            <Box
+              sx={{
+                width: 80,
+                height: 80,
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #E1F5EE, #B5D4F4)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 28,
+                fontWeight: 500,
+                color: "#0F6E56",
+                border: "2px solid",
+                borderColor: "divider",
+              }}
+            >
+              {initials}
+            </Box>
+            <IconButton
+              size="small"
+              onClick={() => navigate(`/editar/${person.user_id}`)}
+              sx={{
+                position: "absolute",
+                bottom: 0,
+                right: 0,
+                width: 24,
+                height: 24,
+                bgcolor: "background.paper",
+                border: "0.5px solid",
+                borderColor: "divider",
+                "&:hover": { bgcolor: "action.hover" },
+              }}
+            >
+              <EditRoundedIcon sx={{ fontSize: 11 }} />
+            </IconButton>
+          </Box>
+
+          <Typography sx={{ fontSize: 15, fontWeight: 500 }}>
             {person.first_name} {person.last_name}
-          </h1>
-          <h2 className="font-kumbh text-secondaryAspy text-sm">{roleName}</h2>
-        </div>
-        <img
-          src={penToSquare}
-          onClick={handleEdit}
-          className="fill-gray-200 size-8 cursor-pointer"
-          alt="Editar perfil"
-        />
-      </div>
-      <div className="flex flex-col gap-16 items-center">
-        <div className="flex flex-col gap-2">
-          <h1 className="font-kumbh text-primaryAspy font-semibold text-base">
-            Sobre mí
-          </h1>
-          <p className="font-kumbh text-sm text-secondaryAspy">
+          </Typography>
+
+          <Box
+            sx={{
+              fontSize: 10,
+              fontWeight: 500,
+              px: 1.25,
+              py: 0.25,
+              borderRadius: "20px",
+              bgcolor: "#E6F1FB",
+              color: "#185FA5",
+            }}
+          >
+            {roleName}
+          </Box>
+        </Box>
+      </SectionPanel>
+
+      {/* Panel info */}
+      <SectionPanel label="Información personal">
+        {/* Sobre mí */}
+        <Box
+          sx={{
+            p: 1.25,
+            mb: 2,
+            bgcolor: "action.hover",
+            borderRadius: 2,
+            border: "0.5px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Typography
+            sx={{ fontSize: 12, color: "text.secondary", lineHeight: 1.6 }}
+          >
             Hola, soy {roleName} en Fundación ASPY :)
-          </p>
-        </div>
-        <div className="flex flex-row gap-16">
-          <div className="flex flex-col gap-2">
-            <h2 className="font-kumbh text-primaryAspy font-semibold text-base">
-              Edad
-            </h2>
-            <p className="font-kumbh text-sm text-secondaryAspy">
-              {getAge(person.birthdate)}
-            </p>
-          </div>
-          <div className="flex flex-col gap-2">
-            <h2 className="font-kumbh text-primaryAspy font-semibold text-base">
-              Género
-            </h2>
-            <p className="font-kumbh text-sm text-secondaryAspy">
-              {person.gender?.name}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+          </Typography>
+        </Box>
+
+        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+          <Field label="Nombre" value={person.first_name} />
+          <Field label="Apellido" value={person.last_name} />
+          <Field label="Edad" value={`${getAge(person.birthdate)} años`} />
+          <Field label="Género" value={person.gender?.name ?? "—"} />
+          <Field label="Rol" value={roleName} />
+        </Box>
+      </SectionPanel>
+    </Box>
   );
 }

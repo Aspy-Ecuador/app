@@ -9,18 +9,17 @@ import { getAuthenticatedPersonID } from "@/utils/store";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import PaymentForm from "@/components/PaymentForm";
 import Review from "@components/Review";
 import Steps from "@components/Steps";
-import Divider from "@mui/material/Divider";
-import ReplyRoundedIcon from "@mui/icons-material/ReplyRounded";
 import Success from "@components/Success";
 import appointmentAPI from "@API/appointmentAPI";
 import Progress from "@components/Progress";
 import CircularProgress from "@mui/material/CircularProgress";
+import Paper from "@mui/material/Paper";
+import Header from "@components/Header";
 
 const steps = ["Detalles de Pago", "Revisar cita"];
 
@@ -60,15 +59,16 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
     if (file != null) {
       setLoad(true);
 
-      //const uploadedFileUrl = await uploadToCloudinary(file);
-
-      const clientId = isClient ? getAuthenticatedPersonID() : parsedClientId; // Cliente
+      // const uploadedFileUrl = await uploadToCloudinary(file);
+      const resolvedClientId = isClient
+        ? getAuthenticatedPersonID()
+        : parsedClientId;
 
       const dataSend: AppointmentRequest = {
         payment_type: "Transferencia",
         payment_file:
           "https://res.cloudinary.com/dyqznwbdb/raw/upload/v1777582266/pdfs/tlmcvftgfpjxiiymcupb.pdf",
-        client_id: clientId,
+        client_id: resolvedClientId,
         professional_id: parsedProfessionalId,
         service_id: parsedServiceId,
         worker_schedule_id: parsedWorkerId,
@@ -110,89 +110,85 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
     }
   };
 
-  const handleNext = () => {
-    setActiveStep(activeStep + 1);
-  };
+  const handleNext = () => setActiveStep(activeStep + 1);
+  const handleBack = () => setActiveStep(activeStep - 1);
 
-  const handleBack = () => {
-    setActiveStep(activeStep - 1);
-  };
-
-  const handleBackPage = () => {
-    navigate(-1);
-  };
-  if (loading) return <Progress />;
   return (
-    <Box className="box-panel-control" sx={{ padding: 2 }}>
-      <Grid container spacing={1} className="contenedor-principal">
-        <Grid size={12} className="grid-p-patients-tittle">
-          <Grid container spacing={0}>
-            <Grid size={9}>
-              <Typography variant="h3">Pagar</Typography>
-            </Grid>
-            <Grid size={3} display="flex" justifyContent="flex-end">
-              <Button
-                onClick={handleBackPage}
-                variant="outlined"
-                startIcon={<ReplyRoundedIcon />}
-                className="guardar"
-              >
-                Volver
-              </Button>
-            </Grid>
-          </Grid>
-          <Divider className="divider-paciente-historial"></Divider>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        backgroundColor: "grey.50",
+        py: { xs: 2, md: 4 },
+        px: { xs: 2, md: 3 },
+      }}
+    >
+      <Grid container spacing={2} justifyContent="center">
+        {/* Encabezado */}
+        <Grid size={12}>
+          <Header
+            textHeader="Pagar"
+            isCreate={false}
+            handle={() => navigate(-1)}
+          />
         </Grid>
-        <Grid size={12} className="contenedor-principal">
+
+        {/* Steps */}
+        <Grid size={12}>
           <Steps activeStep={activeStep} steps={steps} />
         </Grid>
-        {/* Bloque */}
-        <Grid size={12} className="contenedor-principal">
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              flexGrow: 1,
-              width: "100%",
-              maxWidth: { sm: "100%", md: 600 },
-              maxHeight: "720px",
-              gap: { xs: 1, md: "none" },
-            }}
-          >
-            {activeStep === steps.length ? (
-              <Success
-                open={open}
-                handleClose={handleClose}
-                isRegister={false}
-                message={"Cita registrada con éxito"}
-              />
-            ) : (
-              <Fragment>
+
+        {/* Contenido principal */}
+        <Grid size={12}>
+          {activeStep === steps.length ? (
+            <Success
+              open={open}
+              handleClose={handleClose}
+              isRegister={false}
+              message={"Cita registrada con éxito"}
+            />
+          ) : (
+            <Fragment>
+              <Paper
+                elevation={0}
+                sx={{
+                  borderRadius: 4,
+                  border: "1px solid",
+                  borderColor: "divider",
+                  p: { xs: 2.5, sm: 4 },
+                  backgroundColor: "white",
+                  boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
+                }}
+              >
                 {getStepContent(activeStep)}
+
+                {/* Botones de navegación */}
                 <Box
-                  sx={[
-                    {
-                      display: "flex",
-                      flexDirection: { xs: "column-reverse", sm: "row" },
-                      alignItems: "end",
-                      flexGrow: 1,
-                      gap: 1,
-                      pb: { xs: 12, sm: 0 },
-                      mt: { xs: 2, sm: 0 },
-                    },
-                    activeStep !== 0
-                      ? { justifyContent: "space-between" }
-                      : { justifyContent: "flex-end" },
-                  ]}
+                  sx={{
+                    display: "flex",
+                    justifyContent:
+                      activeStep !== 0 ? "space-between" : "flex-end",
+                    alignItems: "center",
+                    mt: 4,
+                    pt: 3,
+                    borderTop: "1px solid",
+                    borderColor: "divider",
+                    gap: 1,
+                  }}
                 >
                   {activeStep !== 0 && (
                     <Button
                       startIcon={<ChevronLeftRoundedIcon />}
                       onClick={handleBack}
                       variant="text"
-                      sx={{ display: { xs: "none", sm: "flex" } }}
+                      sx={{
+                        textTransform: "none",
+                        fontWeight: 600,
+                        color: "text.secondary",
+                        display: { xs: "none", sm: "flex" },
+                        "&:hover": { color: "primary.main" },
+                      }}
                     >
-                      Previous
+                      Anterior
                     </Button>
                   )}
 
@@ -202,29 +198,57 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
                       endIcon={<ChevronRightRoundedIcon />}
                       onClick={handleNext}
                       disabled={!isPaymentValid}
-                      sx={{ width: { xs: "100%", sm: "fit-content" } }}
+                      sx={{
+                        borderRadius: 2.5,
+                        textTransform: "none",
+                        fontWeight: 700,
+                        px: 4,
+                        py: 1.25,
+                        fontSize: "0.95rem",
+                        boxShadow: "0 4px 14px rgba(25,118,210,0.35)",
+                        "&:hover": {
+                          boxShadow: "0 6px 20px rgba(25,118,210,0.45)",
+                        },
+                        width: { xs: "100%", sm: "auto" },
+                      }}
                     >
-                      Next
+                      Continuar
                     </Button>
                   )}
 
                   {activeStep === 1 && (
                     <Button
                       variant="contained"
-                      onClick={handleOpen} // o handleFinish si necesitas hacer otra cosa
-                      sx={{ width: { xs: "100%", sm: "fit-content" } }}
+                      onClick={handleOpen}
+                      disabled={load}
+                      sx={{
+                        borderRadius: 2.5,
+                        textTransform: "none",
+                        fontWeight: 700,
+                        px: 4,
+                        py: 1.25,
+                        fontSize: "0.95rem",
+                        minWidth: 140,
+                        background:
+                          "linear-gradient(135deg, #1565C0 0%, #1976D2 100%)",
+                        boxShadow: "0 4px 14px rgba(25,118,210,0.35)",
+                        "&:hover": {
+                          boxShadow: "0 6px 20px rgba(25,118,210,0.45)",
+                        },
+                        width: { xs: "100%", sm: "auto" },
+                      }}
                     >
                       {load ? (
-                        <CircularProgress size={24} sx={{ color: "white" }} /> // Mostrar ciclo de carga
+                        <CircularProgress size={22} sx={{ color: "white" }} />
                       ) : (
-                        <h1>Finalizar</h1>
+                        "Finalizar reserva"
                       )}
                     </Button>
                   )}
                 </Box>
-              </Fragment>
-            )}
-          </Box>
+              </Paper>
+            </Fragment>
+          )}
         </Grid>
       </Grid>
     </Box>

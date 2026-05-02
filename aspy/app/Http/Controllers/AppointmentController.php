@@ -77,7 +77,8 @@ class AppointmentController extends Controller
                 'client_id'  => $request->client_id,
                 'type'       => $request->payment_type,
                 'file'       => $request->payment_file,
-                'created_by' => auth()->id(),                
+                'created_by' => auth()->id(),
+                'creation_date' => now(),         
             ]);
 
             $payment = Payment::create([
@@ -85,7 +86,8 @@ class AppointmentController extends Controller
                 'service_id'        => $request->service_id,
                 'payment_data_id'   => $paymentData->payment_data_id,
                 'payment_status_id' => 2,
-                'created_by'        => auth()->id(),                
+                'created_by'        => auth()->id(),
+                'creation_date' => now(),               
             ]);
 
             $appointment = Appointment::create([
@@ -95,13 +97,15 @@ class AppointmentController extends Controller
                 'worker_schedule_id'    => $request->worker_schedule_id,
                 'appointment_status_id' => 1,
                 'service_id'            => $request->service_id,
-                'created_by'            => auth()->id(),                
+                'created_by'            => auth()->id(),       
+                'creation_date' => now(),         
             ]);
 
             $receipt = Receipt::create([
                 'payment_id'        => $payment->payment_id,
                 'receipt_status_id' => 2,
-                'created_by'        => auth()->id(),                
+                'created_by'        => auth()->id(), 
+                'creation_date' => now(),               
             ]);
 
             $workerSchedule = WorkerSchedule::findOrFail($request->worker_schedule_id);
@@ -184,15 +188,18 @@ class AppointmentController extends Controller
             $payment = $appointment->payment;
             $payment->payment_status_id = 1;
             $payment->modified_by = auth()->id();
+            $payment->modification_date = now();
             $payment->save();
 
             $appointment->appointment_status_id = 2;
             $appointment->modified_by = auth()->id();
+            $appointment->modification_date = now();
             $appointment->save();
 
             $receipt = $appointment->payment->receipt;
             $receipt->receipt_status_id = 1;
             $receipt->modified_by = auth()->id();
+            $receipt->modification_date = now();
             $receipt->save();
 
             DB::commit();
@@ -224,6 +231,7 @@ class AppointmentController extends Controller
 
             $appointment->appointment_status_id = 3;
             $appointment->modified_by = auth()->id();
+            $appointment->modification_date = now();
             $appointment->save();
 
             DB::commit();
@@ -255,6 +263,7 @@ class AppointmentController extends Controller
 
             $appointment->appointment_status_id = 4;
             $appointment->modified_by = auth()->id();
+            $appointment->modification_date = now();
             $appointment->save();
 
             DB::commit();

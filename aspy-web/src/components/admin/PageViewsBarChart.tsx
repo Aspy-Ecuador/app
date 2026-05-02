@@ -1,104 +1,130 @@
 // FINAL
 import { BarChart } from "@mui/x-charts/BarChart";
-import { useTheme } from "@mui/material/styles";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
+import Paper from "@mui/material/Paper";
+import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Stack from "@mui/material/Stack";
 
 export type PageViewsBarChartProps = {
   total: number;
   scheduled: number[];
   completed: number[];
   cancelled: number[];
+  saved: number[];
 };
+
+const MONTHS = [
+  "Ene",
+  "Feb",
+  "Mar",
+  "Abr",
+  "May",
+  "Jun",
+  "Jul",
+  "Ago",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dic",
+];
 
 export default function PageViewsBarChart({
   total,
   scheduled,
   completed,
   cancelled,
+  saved,
 }: PageViewsBarChartProps) {
-  const theme = useTheme();
-  const colorPalette = [
-    theme.palette.primary.light,
-    theme.palette.primary.main,
-    theme.palette.primary.dark,
-  ];
-
   return (
-    <Card variant="outlined" sx={{ width: "100%" }}>
-      <CardContent>
-        <Typography component="h2" variant="subtitle2" gutterBottom>
-          Número de Citas
+    <Paper
+      elevation={0}
+      sx={{
+        width: "100%",
+        border: "0.5px solid",
+        borderColor: "divider",
+        borderRadius: 3,
+        overflow: "hidden",
+      }}
+    >
+      {/* Header */}
+      <Box
+        sx={{
+          px: 2,
+          py: 1.5,
+          borderBottom: "0.5px solid",
+          borderColor: "divider",
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: 10,
+            fontWeight: 500,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            color: "text.disabled",
+            mb: 0.5,
+          }}
+        >
+          Número de citas
         </Typography>
-        <Stack sx={{ justifyContent: "space-between" }}>
-          <Stack
-            direction="row"
-            sx={{
-              alignContent: { xs: "center", sm: "flex-start" },
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
-            <Typography variant="h4" component="p">
-              {total}
-            </Typography>
-          </Stack>
-          <Typography variant="caption" sx={{ color: "text.secondary" }}>
-            Cantidad de citas durante el año
-          </Typography>
-        </Stack>
+        <Typography sx={{ fontSize: 22, fontWeight: 500 }}>{total}</Typography>
+        <Typography sx={{ fontSize: 11, color: "text.disabled" }}>
+          Cantidad de citas durante el año
+        </Typography>
+      </Box>
+
+      {/* Chart */}
+      <Box sx={{ px: 1, pb: 1 }}>
         <BarChart
-          borderRadius={8}
-          colors={colorPalette}
-          xAxis={[
-            {
-              scaleType: "band",
-              data: [
-                "Ene",
-                "Feb",
-                "Mar",
-                "Abr",
-                "May",
-                "Jun",
-                "Jul",
-                "Ago",
-                "Sep",
-                "Oct",
-                "Nov",
-                "Dic",
-              ],
-            },
-          ]}
+          borderRadius={4}
+          colors={["#1D9E75", "#378ADD", "#E24B4A", "#d5c916"]}
+          xAxis={[{ scaleType: "band", data: MONTHS }]}
           series={[
             {
-              id: "citas-agendadas",
-              label: "Citas Agendadas",
+              id: "agendadas",
+              label: "Agendadas",
               data: scheduled,
               stack: "A",
             },
             {
-              id: "citas-asistidas",
-              label: "Citas Asistidas",
+              id: "asistidas",
+              label: "Asistidas",
               data: completed,
               stack: "A",
             },
             {
-              id: "citas-canceladas",
-              label: "Citas Canceladas",
+              id: "canceladas",
+              label: "Canceladas",
               data: cancelled,
               stack: "A",
             },
+            {
+              id: "guardadas",
+              label: "Guardadas",
+              data: saved,
+              stack: "A",
+            },
           ]}
-          height={250}
-          margin={{ left: 50, right: 0, top: 20, bottom: 20 }}
+          height={200}
+          margin={{ left: 48, right: 12, top: 16, bottom: 24 }}
           grid={{ horizontal: true }}
+          sx={{
+            "& .MuiChartsAxis-tickLabel": {
+              fontSize: "10px !important",
+              fill: "var(--mui-palette-text-disabled)",
+            },
+            "& .MuiChartsGrid-line": {
+              stroke: "var(--mui-palette-divider)",
+              strokeWidth: 0.5,
+            },
+            "& .MuiChartsLegend-root text": { fontSize: "10px !important" },
+          }}
           slotProps={{
-            legend: {},
+            legend: {
+              position: { vertical: "bottom" },
+            },
           }}
         />
-      </CardContent>
-    </Card>
+      </Box>
+    </Paper>
   );
 }
