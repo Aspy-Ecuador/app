@@ -1,36 +1,13 @@
 <?php
 
-use App\Http\Controllers\AddressController;
-use App\Http\Controllers\AgaController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AppointmentReportController;
-use App\Http\Controllers\AppointmentStatusController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CityController;
-use App\Http\Controllers\ClientController;
-use App\Http\Controllers\CountryController;
-use App\Http\Controllers\DiscountController;
-use App\Http\Controllers\EducationController;
-use App\Http\Controllers\GenderController;
-use App\Http\Controllers\IdentificationController;
-use App\Http\Controllers\MaritalStatusController;
-use App\Http\Controllers\MedicalProfileController;
-use App\Http\Controllers\OccupationController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\PaymentDataController;
-use App\Http\Controllers\PaymentStatusController;
 use App\Http\Controllers\PersonController;
-use App\Http\Controllers\PhoneController;
-use App\Http\Controllers\ProfessionalController;
 use App\Http\Controllers\ProfessionalServiceController;
-use App\Http\Controllers\ReceiptController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\StaffController;
-use App\Http\Controllers\StateController;
 use App\Http\Controllers\UserAccountController;
-use App\Http\Controllers\UserAccountStatusController;
 use App\Http\Controllers\WorkerScheduleController;
 use Illuminate\Support\Facades\Route;
 
@@ -46,7 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 
-// UserAccount
+// Register
 Route::prefix('user-account')->group(function () {
     Route::post('/', [UserAccountController::class, 'store']);
 });
@@ -68,42 +45,9 @@ Route::middleware('auth:sanctum')->prefix('person')->group(function () {
     Route::delete('/{id}', [PersonController::class, 'destroy']);
 });
 
-// Client
-Route::middleware('auth:sanctum')->prefix('client')->group(function () {
-    Route::get('/', [ClientController::class, 'index']);
-    Route::get('/{id}', [ClientController::class, 'show']);
-    Route::post('/', [ClientController::class, 'store']);
-    Route::put('/{id}', [ClientController::class, 'update']);
-    Route::delete('/{id}', [ClientController::class, 'destroy']);
-});
-
-// Staff
-Route::middleware('auth:sanctum')->prefix('staff')->group(function () {
-    Route::get('/', [StaffController::class, 'index']);
-    Route::get('/{id}', [StaffController::class, 'show']);
-    Route::post('/', [StaffController::class, 'store']);
-    Route::put('/{id}', [StaffController::class, 'update']);
-    Route::delete('/{id}', [StaffController::class, 'destroy']);
-});
-
 // Professional
 Route::middleware('auth:sanctum')->prefix('professional')->group(function () {
-    Route::get('/', [ProfessionalController::class, 'index']);
-    Route::get('/{id}', [ProfessionalController::class, 'show']);
-    Route::post('/', [ProfessionalController::class, 'store']);
-    Route::put('/{id}', [ProfessionalController::class, 'update']);
-    Route::delete('/{id}', [ProfessionalController::class, 'destroy']);
     Route::post("/create-horario", [ProfessionalController::class, 'createHorario']);
-});
-
-
-// Schedule
-Route::middleware('auth:sanctum')->prefix('schedule')->group(function () {
-    Route::get('/', [ScheduleController::class, 'index']);
-    Route::get('/{id}', [ScheduleController::class, 'show']);
-    Route::post('/', [ScheduleController::class, 'store']);
-    Route::put('/{id}', [ScheduleController::class, 'update']);
-    Route::delete('/{id}', [ScheduleController::class, 'destroy']);
 });
 
 // WorkerSchedule
@@ -133,14 +77,6 @@ Route::middleware('auth:sanctum')->prefix('professional-service')->group(functio
     Route::delete('/{id}', [ProfessionalServiceController::class, 'destroy']);
 });
 
-// PaymentData
-Route::middleware('auth:sanctum')->prefix('payment-data')->group(function () {
-    Route::get('/', [PaymentDataController::class, 'index']);
-    Route::get('/{id}', [PaymentDataController::class, 'show']);
-    Route::post('/', [PaymentDataController::class, 'store']);
-    Route::put('/{id}', [PaymentDataController::class, 'update']);
-    Route::delete('/{id}', [PaymentDataController::class, 'destroy']);
-});
 
 // Payment
 Route::middleware('auth:sanctum')->prefix('payment')->group(function () {

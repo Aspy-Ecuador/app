@@ -128,7 +128,7 @@ class UserAccountController extends Controller
             'title'                     => 'nullable|string|max:150',
         ]);
  
-        $createdBy = auth()->id();
+        $createdBy = auth()->id() ?? 0;
  
         $person = DB::transaction(function () use ($validated, $createdBy) {
  
@@ -139,6 +139,8 @@ class UserAccountController extends Controller
                 'email'         => $validated['email'],
                 'password_hash' => Hash::make($validated['password']),
                 'created_by'    => $createdBy,
+                'creation_date' => now()
+
             ]);
  
             // 2. Crear Person vinculada al UserAccount recién creado
@@ -152,6 +154,7 @@ class UserAccountController extends Controller
                 'last_name'         => $validated['last_name'],
                 'birthdate'         => $validated['birthdate'] ?? null,
                 'created_by'        => $createdBy,
+                'creation_date'     => now()
             ]);
  
             // 3. Crear Phone
@@ -159,6 +162,7 @@ class UserAccountController extends Controller
                 'number'     => $validated['phone']['number'],
                 'type'       => $validated['phone']['type'] ?? null,
                 'created_by' => $createdBy,
+                'creation_date' => now()
             ]);
  
             // 4. Crear Address
@@ -170,6 +174,7 @@ class UserAccountController extends Controller
                 'primary_address'   => $validated['address']['primary_address'] ?? null,
                 'secondary_address' => $validated['address']['secondary_address'] ?? null,
                 'created_by'        => $createdBy,
+                'creation_date'     => now()
             ]);
  
             // 5. Crear Identification
@@ -177,6 +182,7 @@ class UserAccountController extends Controller
                 'type'       => $validated['identification']['type'],
                 'number'     => $validated['identification']['number'],
                 'created_by' => $createdBy,
+                'creation_date' => now()
             ]);
  
             // 6. Crear subtipo si se envía el campo role
@@ -184,16 +190,19 @@ class UserAccountController extends Controller
                 'client'       => Client::create([
                                     'person_id'  => $person->person_id,
                                     'created_by' => $createdBy,
+                                    'creation_date' => now()
                                   ]),
                 'professional' => Professional::create([
                                     'person_id'  => $person->person_id,
                                     'specialty'  => $validated['specialty'] ?? null,
                                     'title'      => $validated['title'] ?? null,
                                     'created_by' => $createdBy,
+                                    'creation_date' => now()
                                   ]),
                 'staff'        => Staff::create([
                                     'person_id'  => $person->person_id,
                                     'created_by' => $createdBy,
+                                    'creation_date' => now()
                                   ]),
                 default        => null,
             };
@@ -261,7 +270,7 @@ class UserAccountController extends Controller
             'title' => 'nullable|string|max:150',
         ]);
 
-        $updatedBy = auth()->id();
+        $updatedBy = auth()->id() ?? 0;
 
         $person = DB::transaction(function () use ($validated, $id, $updatedBy) {
 
@@ -273,6 +282,7 @@ class UserAccountController extends Controller
             $userAccount->update([
                 'role_id' => $validated['role_id'],
                 'email' => $validated['email'],
+                'modified_by' => $updatedBy,
             ]);
 
             if (!empty($validated['password'])) {
@@ -290,12 +300,16 @@ class UserAccountController extends Controller
                 'first_name' => $validated['first_name'],
                 'last_name' => $validated['last_name'],
                 'birthdate' => $validated['birthdate'],
+                'modified_by' => $updatedBy,
+                'modification_date' => now()
             ]);
 
             // 4. Update Phone
             $person->phone()->update([
                 'number' => $validated['phone']['number'],
                 'type' => $validated['phone']['type'],
+                'modified_by' => $updatedBy,
+                'modification_date' => now()
             ]);
 
             // 5. Update Address
@@ -306,25 +320,50 @@ class UserAccountController extends Controller
                 'city_id' => $validated['address']['city_id'],
                 'primary_address' => $validated['address']['primary_address'],
                 'secondary_address' => $validated['address']['secondary_address'],
+                'modified_by' => $updatedBy,
+                'modification_date' => now()
             ]);
 
             // 6. Update Identification
             $person->identification()->update([
                 'type' => $validated['identification']['type'],
                 'number' => $validated['identification']['number'],
+                'modified_by' => $updatedBy,
+                'modification_date' => now()
             ]);
 
-            // 7. Subtipo (simple)
+            // 7. Subtipo
             if ($validated['role'] === 'professional') {
                 $person->professional()->updateOrCreate(
                     ['person_id' => $person->person_id],
                     [
-                        'specialty' => $validated['specialty'] ?? null,
-                        'title' => $validated['title'] ?? null,
+                        'specialty'         => $validated['specialty'] ?? null,
+                        'title'             => $validated['title'] ?? null,
+                        'modified_by'       => $updatedBy,
+                        'modification_date' => now(),
                     ]
                 );
             }
 
+            if ($validated['role'] === 'client') {
+                $person->client()->updateOrCreate(
+                    ['person_id' => $person->person_id],
+                    [
+                        'modified_by'       => $updatedBy,
+                        'modification_date' => now(),
+                    ]
+                );
+            }
+
+            if ($validated['role'] === 'staff') {
+                $person->staff()->updateOrCreate(
+                    ['person_id' => $person->person_id],
+                    [
+                        'modified_by'       => $updatedBy,
+                        'modification_date' => now(),
+                    ]
+                );
+            }        
             return $person;
         });
 
