@@ -1,9 +1,9 @@
+// FINAL
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { register } from "@/API/auth";
 import Box from "@mui/material/Box";
 import Steps from "@components/Steps";
-import Grid from "@mui/material/Grid";
 import Success from "@components/Success";
 import FormRegister from "@components/FormRegister";
 import type { UserForm } from "@/typesRequest/UserForm";
@@ -15,7 +15,7 @@ function buildPayload(data: UserForm) {
     email: data.email,
     password: data.password,
     password_confirmation: data.password_confirmation,
-    role_id: 3, // siempre cliente
+    role_id: 3,
     first_name: data.first_name,
     last_name: data.last_name,
     birthdate: data.birthdate,
@@ -66,7 +66,6 @@ export default function RegisterView() {
   const handleFinalSubmit = async (stepData: UserForm) => {
     const fullData = { ...formData, ...stepData } as UserForm;
     const payload = buildPayload(fullData);
-
     setLoad(true);
     try {
       await register(payload);
@@ -79,23 +78,19 @@ export default function RegisterView() {
   };
 
   return (
-    <Box>
-      <Grid container rowSpacing={1}>
-        <Grid size={12} className="contenedor-principal">
-          <Steps activeStep={step} steps={stepsName} />
-        </Grid>
-        <Grid size={12}>
-          <FormRegister
-            start={stepsFields[step].start}
-            end={stepsFields[step].end}
-            onNext={handleNext}
-            onBack={handleBack}
-            onFinish={handleFinalSubmit}
-            isLast={step === totalSteps - 1}
-            load={load}
-          />
-        </Grid>
-      </Grid>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Steps activeStep={step} steps={stepsName} />
+
+      <FormRegister
+        start={stepsFields[step].start}
+        end={stepsFields[step].end}
+        onNext={handleNext}
+        onBack={handleBack}
+        onFinish={handleFinalSubmit}
+        isLast={step === totalSteps - 1}
+        load={load}
+      />
+
       <Success
         open={open}
         handleClose={handleClose}

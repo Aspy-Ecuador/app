@@ -1,9 +1,15 @@
+// FINAL
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { inputRegisterUserConfig } from "@/config/userFormRegister";
 import type { UserForm } from "@/typesRequest/UserForm";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
+import Divider from "@mui/material/Divider";
+import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
+import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
+import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import UserInput from "@forms/UserInput";
 
 interface FormRegisterProps {
@@ -50,23 +56,24 @@ export default function FormRegister({
   }, [methods]);
 
   const list_inputs = inputRegisterUserConfig.slice(start, end).map((input) => (
-    <UserInput
-      key={input.key}
-      label={input.label}
-      type={input.type}
-      id={input.key}
-      validation={
-        input.key === "password_confirmation"
-          ? {
-              ...input.validation,
-              validate: (value: string) =>
-                value === methods.getValues("password") ||
-                "Las contraseñas no coinciden",
-            }
-          : input.validation
-      }
-      options={input.options}
-    />
+    <Box key={input.key} sx={{ minWidth: 0, width: "100%" }}>
+      <UserInput
+        label={input.label}
+        type={input.type}
+        id={input.key}
+        validation={
+          input.key === "password_confirmation"
+            ? {
+                ...input.validation,
+                validate: (value: string) =>
+                  value === methods.getValues("password") ||
+                  "Las contraseñas no coinciden",
+              }
+            : input.validation
+        }
+        options={input.options}
+      />
+    </Box>
   ));
 
   const onSubmit = methods.handleSubmit((data) => {
@@ -77,46 +84,100 @@ export default function FormRegister({
     }
   });
 
-  const getButtonLabel = () => {
-    if (isLast) return "Registrar";
-    return "Siguiente";
-  };
-
   return (
     <FormProvider {...methods}>
-      <form
-        onSubmit={(e) => e.preventDefault()}
-        noValidate
-        className="flex flex-col w-full h-full p-6"
-      >
-        <div className="flex justify-center items-center">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            {list_inputs}
-          </div>
-        </div>
-        <div className="gap-10 mt-4 flex flex-row items-center justify-center">
+      <form onSubmit={(e) => e.preventDefault()} noValidate>
+        {/* Grid de inputs */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+            gap: 3,
+            mb: 3,
+            width: "100%",
+            boxSizing: "border-box",
+            "& > *": { minWidth: 0 },
+          }}
+        >
+          {list_inputs}
+        </Box>
+
+        <Divider sx={{ mb: 2.5 }} />
+
+        {/* Botones de navegación */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: start !== 0 ? "space-between" : "flex-end",
+            alignItems: "center",
+            gap: 1.5,
+          }}
+        >
           {start !== 0 && (
             <Button
-              variant="outlined"
+              variant="text"
               onClick={onBack}
-              className="md:w-[250px]"
+              startIcon={<ChevronLeftRoundedIcon />}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                color: "text.secondary",
+                "&:hover": { color: "primary.main" },
+              }}
             >
               Anterior
             </Button>
           )}
+
           <Button
             type="submit"
             variant="contained"
             onClick={onSubmit}
-            className="md:w-[250px]"
+            disabled={!!load}
+            startIcon={
+              !load && isLast ? (
+                <CheckRoundedIcon fontSize="small" />
+              ) : undefined
+            }
+            endIcon={
+              !load && !isLast ? (
+                <ChevronRightRoundedIcon fontSize="small" />
+              ) : undefined
+            }
+            sx={{
+              textTransform: "none",
+              fontWeight: 700,
+              px: 4,
+              py: 1.1,
+              borderRadius: 2.5,
+              fontSize: "0.92rem",
+              minWidth: 140,
+              background: isLast
+                ? "linear-gradient(135deg, #0F6E56 0%, #1B8C6E 100%)"
+                : "linear-gradient(135deg, #1565C0 0%, #1976D2 100%)",
+              boxShadow: isLast
+                ? "0 4px 14px rgba(15,110,86,0.35)"
+                : "0 4px 14px rgba(25,118,210,0.35)",
+              "&:hover": {
+                boxShadow: isLast
+                  ? "0 6px 20px rgba(15,110,86,0.45)"
+                  : "0 6px 20px rgba(25,118,210,0.45)",
+              },
+              "&:disabled": {
+                background: "rgba(0,0,0,0.12)",
+                boxShadow: "none",
+              },
+            }}
           >
             {load ? (
-              <CircularProgress size={24} sx={{ color: "white" }} />
+              <CircularProgress size={22} sx={{ color: "white" }} />
+            ) : isLast ? (
+              "Registrarse"
             ) : (
-              getButtonLabel()
+              "Siguiente"
             )}
           </Button>
-        </div>
+        </Box>
       </form>
     </FormProvider>
   );

@@ -3,13 +3,12 @@ import { styled } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
-import Divider from "@mui/material/Divider";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
+import Divider from "@mui/material/Divider";
 import AppTheme from "@shared-theme/AppTheme";
-import ColorModeSelect from "@shared-theme/ColorModeSelect";
 import RegisterView from "@components/RegisterView";
 
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -17,24 +16,28 @@ const Card = styled(MuiCard)(({ theme }) => ({
   flexDirection: "column",
   alignSelf: "center",
   width: "100%",
-  padding: theme.spacing(4),
-  gap: theme.spacing(2),
+  padding: theme.spacing(4, 5),
+  gap: theme.spacing(2.5),
   margin: "auto",
-  boxShadow:
-    "hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px",
+  borderRadius: 20,
+  border: "1px solid",
+  borderColor: theme.palette.divider,
+  boxShadow: "0 8px 40px rgba(0,0,0,0.08)",
   [theme.breakpoints.up("sm")]: {
-    width: "450px",
+    width: "680px",
+  },
+  [theme.breakpoints.up("md")]: {
+    width: "760px",
   },
   ...theme.applyStyles("dark", {
-    boxShadow:
-      "hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px",
+    boxShadow: "0 8px 40px rgba(0,0,0,0.4)",
   }),
 }));
 
 const SignUpContainer = styled(Stack)(({ theme }) => ({
-  height: "calc((1 - var(--template-frame-height, 0)) * 100dvh)",
-  minHeight: "100%",
+  minHeight: "100dvh",
   padding: theme.spacing(2),
+  overflowY: "auto",
   [theme.breakpoints.up("sm")]: {
     padding: theme.spacing(4),
   },
@@ -56,96 +59,50 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
 
 export default function SignUp(props: { disableCustomTheme?: boolean }) {
   const navigate = useNavigate();
-  /*
-  const [emailError, setEmailError] = useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = useState("");
-  const [passwordError, setPasswordError] = useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
-  const [nameError, setNameError] = useState(false);
-  const [nameErrorMessage, setNameErrorMessage] = useState("");
 
-*/
-  /*
-  const validateInputs = () => {
-    const email = document.getElementById("email") as HTMLInputElement;
-    const password = document.getElementById("password") as HTMLInputElement;
-    const name = document.getElementById("name") as HTMLInputElement;
-
-    let isValid = true;
-
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
-      setEmailError(true);
-      setEmailErrorMessage("Please enter a valid email address.");
-      isValid = false;
-    } else {
-      setEmailError(false);
-      setEmailErrorMessage("");
-    }
-
-    if (!password.value || password.value.length < 6) {
-      setPasswordError(true);
-      setPasswordErrorMessage("Password must be at least 6 characters long.");
-      isValid = false;
-    } else {
-      setPasswordError(false);
-      setPasswordErrorMessage("");
-    }
-
-    if (!name.value || name.value.length < 1) {
-      setNameError(true);
-      setNameErrorMessage("Name is required.");
-      isValid = false;
-    } else {
-      setNameError(false);
-      setNameErrorMessage("");
-    }
-
-    return isValid;
-  };
-*/
-  /*
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    if (nameError || emailError || passwordError) {
-      event.preventDefault();
-      return;
-    }
-    const data = new FormData(event.currentTarget);
-    console.log({
-      name: data.get("name"),
-      lastName: data.get("lastName"),
-      email: data.get("email"),
-      password: data.get("password"),
-    });
-  };
-*/
   return (
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
-      <ColorModeSelect sx={{ position: "fixed", top: "1rem", right: "1rem" }} />
-      <SignUpContainer direction="column" justifyContent="space-between">
-        <Card variant="outlined" className="card-register">
-          <Typography
-            component="h1"
-            variant="h4"
-            sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
-            textAlign={"center"}
-          >
-            Bienvenidos a ASPY
-          </Typography>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <RegisterView />
-          </Box>
-          <Divider>
-            <Typography sx={{ color: "text.secondary" }}>o</Typography>
-          </Divider>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Typography sx={{ textAlign: "center" }}>
-              ¿Ya tienes una cuenta?{" "}
-              <Link onClick={() => navigate("/login")} component="button">
-                Iniciar sesión
-              </Link>
+      <SignUpContainer direction="column" justifyContent="center">
+        <Card variant="outlined">
+          {/* Encabezado */}
+          <Box sx={{ textAlign: "center", mb: 0.5 }}>
+            <Typography
+              component="h1"
+              variant="h5"
+              sx={{ fontWeight: 800, mb: 0.5 }}
+            >
+              Crear cuenta en ASPY
+            </Typography>
+            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              Completa los pasos para registrarte como cliente
             </Typography>
           </Box>
+
+          {/* Formulario multi-paso */}
+          <RegisterView />
+
+          <Divider sx={{ fontSize: "0.78rem", color: "text.secondary" }}>
+            o
+          </Divider>
+
+          <Typography
+            variant="body2"
+            sx={{ textAlign: "center", color: "text.secondary" }}
+          >
+            ¿Ya tienes una cuenta?{" "}
+            <Link
+              onClick={() => navigate("/login")}
+              component="button"
+              sx={{
+                fontWeight: 600,
+                textDecoration: "none",
+                "&:hover": { textDecoration: "underline" },
+              }}
+            >
+              Iniciar sesión
+            </Link>
+          </Typography>
         </Card>
       </SignUpContainer>
     </AppTheme>
