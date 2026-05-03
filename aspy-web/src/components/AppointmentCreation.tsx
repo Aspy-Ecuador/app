@@ -167,7 +167,7 @@ export default function AppointmentCreation({
     >
       {/* Formulario */}
       <SectionPanel label="Datos de la cita">
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.75 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
           <StyledSelect
             label="Servicio"
             value={serviceId?.toString() ?? ""}
@@ -179,11 +179,7 @@ export default function AppointmentCreation({
             }}
           >
             {servicesOptions.map((s) => (
-              <MenuItem
-                key={s.service_id}
-                value={s.service_id.toString()}
-                sx={{ fontSize: 12 }}
-              >
+              <MenuItem key={s.service_id} value={s.service_id.toString()}>
                 {s.name}
               </MenuItem>
             ))}
@@ -199,11 +195,7 @@ export default function AppointmentCreation({
             }}
           >
             {professionalsOptions.map((p) => (
-              <MenuItem
-                key={p.person_id}
-                value={p.person_id.toString()}
-                sx={{ fontSize: 12 }}
-              >
+              <MenuItem key={p.person_id} value={p.person_id.toString()}>
                 {p.first_name} {p.last_name}
               </MenuItem>
             ))}
@@ -217,11 +209,7 @@ export default function AppointmentCreation({
               onChange={(v) => setClientId(v ? parseInt(v) : null)}
             >
               {clientsOptions.map((p) => (
-                <MenuItem
-                  key={p.person_id}
-                  value={p.person_id.toString()}
-                  sx={{ fontSize: 12 }}
-                >
+                <MenuItem key={p.person_id} value={p.person_id.toString()}>
                   {p.first_name} {p.last_name}
                 </MenuItem>
               ))}

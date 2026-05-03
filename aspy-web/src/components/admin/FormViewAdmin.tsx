@@ -167,8 +167,8 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
         isRegister={true}
         message={
           isEdit
-            ? "Se ha actualizado con éxito!!"
-            : "Se ha registrado con éxito!!"
+            ? "Se ha actualizado el usuario con éxito!!"
+            : "Se ha registrado el usuario con éxito!!"
         }
       />
     </Box>

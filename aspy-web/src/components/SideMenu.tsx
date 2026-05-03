@@ -81,7 +81,6 @@ export default function SideMenu() {
         <Avatar
           sizes="small"
           alt="Riley Carter"
-          src="https://mui.com/static/images/avatar/1.jpg"
           sx={{ width: 36, height: 36 }}
         />
         <Box sx={{ mr: "auto" }}>

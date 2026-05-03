@@ -282,119 +282,6 @@ export const getPayment = (id: number, data: Payment[]): Payment => {
 };
 
 // FINAL
-export function handleDownloadInvoice(invoice: FlattenedReceipt) {
-  const doc = new jsPDF("p", "mm", "a4") as jsPDFWithAutoTable; // Vertical, milímetros, tamaño A4
-
-  // Insertar logo
-  doc.addImage(logoBase64, "PNG", 10, 10, 50, 30);
-
-  // Nombre empresa
-  doc.setFontSize(18);
-  doc.text("Fundación ASPY Ecuador", 105, 20, { align: "center" });
-
-  // Info Empresa
-  doc.setFontSize(10);
-  doc.text("Av.Miguel H Alcivar, y Av.Alberto Borges, Guayaquil", 105, 28, {
-    align: "center",
-  });
-  doc.text(
-    "Teléfono: 0999616051 | Email: fundacionaspyecuador@gmail.com",
-    105,
-    34,
-    { align: "center" },
-  );
-
-  // Línea divisoria
-  doc.setLineWidth(0.5);
-  doc.line(10, 45, 200, 45);
-
-  // Datos de Factura
-  doc.setFontSize(12);
-  doc.text(`Comprobante de Pago Nº: ${invoice.receipt.receipt_id}`, 10, 52);
-  doc.text(
-    `Fecha de Emisión: ${invoice.receipt.creation_date.split("T")[0]}`,
-    142,
-    52,
-  );
-  doc.text(`Cliente: ${invoice.client}`, 10, 59);
-
-  const persons = localStorage.getItem("persons");
-  const personData: Person[] = persons ? JSON.parse(persons) : [];
-
-  const clientPerson = personData.find(
-    (p) => p.person_id === invoice.client_id,
-  );
-
-  const payment = localStorage.getItem("payments");
-  const paymentData: Payment[] = payment ? JSON.parse(payment) : [];
-
-  const paymentInfo = paymentData.find(
-    (p) => p.payment_id === invoice.receipt.payment_id,
-  );
-
-  doc.text(`Dirección: ${clientPerson?.user_account.email || "N/A"}`, 10, 66);
-
-  // Tabla de servicios
-  const servicios = [[invoice.service, `$${invoice.price}`]];
-
-  autoTable(doc, {
-    startY: 75,
-    head: [["Descripción del Servicio", "Precio"]],
-    body: servicios,
-    theme: "grid",
-    headStyles: { fillColor: [0, 102, 204], textColor: 255 },
-    styles: { fontSize: 11 },
-    columnStyles: {
-      0: { halign: "left" },
-      1: { halign: "right" },
-    },
-  });
-
-  // Tabla de totales
-  const totales = [
-    ["Subtotal:", `$${invoice.price}`],
-    ["IVA 15%:", `$${0}`],
-    ["Total:", `$${invoice.price}`],
-  ];
-
-  autoTable(doc, {
-    startY: 100,
-    body: totales,
-    theme: "plain",
-    styles: { fontSize: 11 },
-    tableWidth: 60, // ancho pequeño para que no sea gigante
-    margin: { left: 145 }, // mueve la tabla a la derecha en el eje X
-    columnStyles: {
-      0: { halign: "right", fontStyle: "bold" },
-      1: { halign: "left" },
-    },
-  });
-
-  // Totales
-  const finalY = (doc.lastAutoTable?.finalY ?? 0) + 15;
-
-  // Método de pago
-  doc.setFontSize(11);
-  doc.text(
-    `Método de Pago: ${paymentInfo?.payment_data.type || "N/A"}`,
-    10,
-    finalY,
-  );
-
-  // Datos de contacto
-  doc.text(`Teléfono: ${clientPerson?.phone.number || "N/A"}`, 10, finalY + 10);
-
-  // Pie de página
-
-  doc.setLineWidth(0.5);
-  doc.line(10, 285, 200, 285);
-  doc.setFontSize(9);
-  doc.text("Gracias por confiar en nosotros.", 105, 290, { align: "center" });
-
-  doc.save(`Factura-${invoice.receipt.receipt_id}-${invoice.client}.pdf`);
-}
-
-// FINAL
 export function getAppointmentsProfessional(
   data: Appointment[],
   user_id: number,
@@ -501,4 +388,314 @@ export function getProfessional(data: Person[]) {
 export function getClient(data: Person[]) {
   if (!data) return [];
   return data.filter((person) => person.user_account.role.name === "Client");
+}
+
+// -------------------------------------------------------------------------
+// ─── Paleta de colores (logo ASPY) ────────────────────────────────
+const COLOR = {
+  blue: [91, 184, 212] as [number, number, number], // #5BB8D4
+  blueDark: [58, 154, 184] as [number, number, number], // #3A9AB8
+  blueLight: [214, 240, 248] as [number, number, number], // #D6F0F8
+  pink: [232, 160, 176] as [number, number, number], // #E8A0B0
+  yellow: [240, 200, 74] as [number, number, number], // #F0C84A
+  black: [26, 26, 46] as [number, number, number], // #1A1A2E
+  gray: [94, 110, 122] as [number, number, number], // #5E6E7A
+  lightGray: [245, 247, 249] as [number, number, number], // #F5F7F9
+  white: [255, 255, 255] as [number, number, number],
+  border: [226, 235, 240] as [number, number, number], // #E2EBF0
+};
+
+// ─── Helpers ──────────────────────────────────────────────────────
+function setColor(
+  doc: jsPDFWithAutoTable,
+  rgb: [number, number, number],
+  type: "fill" | "draw" | "text",
+) {
+  if (type === "fill") doc.setFillColor(...rgb);
+  else if (type === "draw") doc.setDrawColor(...rgb);
+  else doc.setTextColor(...rgb);
+}
+
+// ─── Función principal ────────────────────────────────────────────
+export function handleDownloadInvoice(invoice: FlattenedReceipt) {
+  const doc = new jsPDF("p", "mm", "a4") as jsPDFWithAutoTable;
+  const W = 210; // ancho A4
+  const M = 14; // margen lateral
+
+  // ── Datos externos ──────────────────────────────────────────────
+  const persons = localStorage.getItem("persons");
+  const personData: Person[] = persons ? JSON.parse(persons) : [];
+  const clientPerson = personData.find(
+    (p) => p.person_id === invoice.client_id,
+  );
+
+  const payment = localStorage.getItem("payments");
+  const paymentData: Payment[] = payment ? JSON.parse(payment) : [];
+  const paymentInfo = paymentData.find(
+    (p) => p.payment_id === invoice.receipt.payment_id,
+  );
+
+  // ══════════════════════════════════════════════════════════════
+  // HEADER — banda azul superior
+  // ══════════════════════════════════════════════════════════════
+  setColor(doc, COLOR.black, "fill");
+  doc.rect(0, 0, W, 40, "F");
+
+  // Barra decorativa de colores (azul | rosa | amarillo)
+  setColor(doc, COLOR.blue, "fill");
+  doc.rect(0, 40, W * 0.5, 3, "F");
+  setColor(doc, COLOR.pink, "fill");
+  doc.rect(W * 0.5, 40, W * 0.25, 3, "F");
+  setColor(doc, COLOR.yellow, "fill");
+  doc.rect(W * 0.75, 40, W * 0.25, 3, "F");
+
+  // Logo
+  doc.addImage(logoBase64, "PNG", M, 5, 36, 30);
+
+  // Nombre fundación
+  setColor(doc, COLOR.white, "text");
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  doc.text("Fundación ASPY Ecuador", W - M, 17, { align: "right" });
+
+  // Info contacto
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  setColor(doc, [200, 220, 235], "text");
+  doc.text("Av. Miguel H. Alcivar y Av. Alberto Borges, Guayaquil", W - M, 24, {
+    align: "right",
+  });
+  doc.text("Tel: 0999616051  |  fundacionaspyecuador@gmail.com", W - M, 30, {
+    align: "right",
+  });
+
+  // ══════════════════════════════════════════════════════════════
+  // TÍTULO DOCUMENTO
+  // ══════════════════════════════════════════════════════════════
+  setColor(doc, COLOR.lightGray, "fill");
+  doc.rect(0, 43, W, 18, "F");
+
+  setColor(doc, COLOR.black, "text");
+  doc.setFontSize(13);
+  doc.setFont("helvetica", "bold");
+  doc.text("COMPROBANTE DE PAGO", W / 2, 54, { align: "center" });
+
+  // Número de comprobante — badge azul
+  setColor(doc, COLOR.blue, "fill");
+  doc.roundedRect(W - M - 44, 45, 44, 12, 2, 2, "F");
+  setColor(doc, COLOR.white, "text");
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "bold");
+  doc.text(`N° ${invoice.receipt.receipt_id}`, W - M - 22, 52.5, {
+    align: "center",
+  });
+
+  // ══════════════════════════════════════════════════════════════
+  // BLOQUE INFO — cliente y fecha
+  // ══════════════════════════════════════════════════════════════
+  let y = 72;
+
+  // Dos columnas: cliente (izq) | fecha (der)
+  // — Card izquierda
+  setColor(doc, COLOR.border, "draw");
+  setColor(doc, COLOR.white, "fill");
+  doc.setLineWidth(0.3);
+  doc.roundedRect(M, y, 88, 34, 2, 2, "FD");
+
+  // — Card derecha
+  doc.roundedRect(W / 2 + 4, y, 88, 34, 2, 2, "FD");
+
+  // Etiqueta "DATOS DEL CLIENTE"
+  setColor(doc, COLOR.blue, "fill");
+  doc.roundedRect(M, y, 44, 6, 1, 1, "F");
+  setColor(doc, COLOR.white, "text");
+  doc.setFontSize(6.5);
+  doc.setFont("helvetica", "bold");
+  doc.text("DATOS DEL CLIENTE", M + 22, y + 4.3, { align: "center" });
+
+  // Valores cliente
+  setColor(doc, COLOR.gray, "text");
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  doc.text("Nombre:", M + 4, y + 13);
+  doc.text("Email:", M + 4, y + 20);
+  doc.text("Teléfono:", M + 4, y + 27);
+
+  setColor(doc, COLOR.black, "text");
+  doc.setFont("helvetica", "bold");
+  doc.text(invoice.client || "N/A", M + 24, y + 13);
+  doc.setFont("helvetica", "normal");
+  doc.text(clientPerson?.user_account.email || "N/A", M + 24, y + 20);
+  doc.text(clientPerson?.phone.number || "N/A", M + 24, y + 27);
+
+  // Etiqueta "DETALLES DE EMISIÓN"
+  const rx = W / 2 + 4;
+  setColor(doc, COLOR.pink, "fill");
+  doc.roundedRect(rx, y, 50, 6, 1, 1, "F");
+  setColor(doc, COLOR.white, "text");
+  doc.setFontSize(6.5);
+  doc.setFont("helvetica", "bold");
+  doc.text("DETALLES DE EMISIÓN", rx + 25, y + 4.3, { align: "center" });
+
+  setColor(doc, COLOR.gray, "text");
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  doc.text("Fecha de emisión:", rx + 4, y + 13);
+  doc.text("Estado:", rx + 4, y + 20);
+  doc.text("Método de pago:", rx + 4, y + 27);
+
+  setColor(doc, COLOR.black, "text");
+  doc.setFont("helvetica", "bold");
+  doc.text(invoice.receipt.creation_date.split("T")[0], rx + 36, y + 13);
+  doc.setFont("helvetica", "normal");
+  doc.text(invoice.receipt.receipt_status?.name || "N/A", rx + 36, y + 20);
+  doc.text(paymentInfo?.payment_data?.type || "Transferencia", rx + 36, y + 27);
+
+  // ══════════════════════════════════════════════════════════════
+  // TABLA DE SERVICIOS
+  // ══════════════════════════════════════════════════════════════
+  y += 44;
+
+  // Etiqueta sección
+  setColor(doc, COLOR.black, "text");
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  doc.text("DETALLE DEL SERVICIO", M, y);
+
+  // Línea decorativa
+  setColor(doc, COLOR.blue, "draw");
+  doc.setLineWidth(0.8);
+  doc.line(M, y + 1.5, M + 50, y + 1.5);
+  setColor(doc, COLOR.border, "draw");
+  doc.setLineWidth(0.3);
+  doc.line(M + 50, y + 1.5, W - M, y + 1.5);
+
+  autoTable(doc, {
+    startY: y + 5,
+    head: [["#", "Descripción del Servicio", "Precio Unitario", "Total"]],
+    body: [["1", invoice.service, `$${invoice.price}`, `$${invoice.price}`]],
+    theme: "plain",
+    headStyles: {
+      fillColor: COLOR.black,
+      textColor: COLOR.white,
+      fontSize: 8.5,
+      fontStyle: "bold",
+      cellPadding: { top: 4, bottom: 4, left: 5, right: 5 },
+    },
+    bodyStyles: {
+      fontSize: 9,
+      textColor: COLOR.black,
+      cellPadding: { top: 5, bottom: 5, left: 5, right: 5 },
+    },
+    alternateRowStyles: {
+      fillColor: COLOR.lightGray,
+    },
+    columnStyles: {
+      0: { halign: "center", cellWidth: 12 },
+      1: { halign: "left" },
+      2: { halign: "right", cellWidth: 38 },
+      3: { halign: "right", cellWidth: 38, fontStyle: "bold" },
+    },
+    margin: { left: M, right: M },
+    tableLineWidth: 0,
+  });
+
+  // ══════════════════════════════════════════════════════════════
+  // BLOQUE TOTALES
+  // ══════════════════════════════════════════════════════════════
+  const afterTable = (doc.lastAutoTable?.finalY ?? 130) + 8;
+
+  // Card de totales alineada a la derecha
+  const tw = 80; // ancho
+  const tx = W - M - tw;
+
+  setColor(doc, COLOR.lightGray, "fill");
+  setColor(doc, COLOR.border, "draw");
+  doc.setLineWidth(0.3);
+  doc.roundedRect(tx, afterTable, tw, 36, 2, 2, "FD");
+
+  // Filas de totales
+  const rows: [string, string, boolean][] = [
+    ["Subtotal:", `$${invoice.price}`, false],
+    ["IVA (15%):", "$0.00", false],
+    ["TOTAL:", `$${invoice.price}`, true],
+  ];
+
+  rows.forEach(([label, value, isBold], i) => {
+    const ry = afterTable + 8 + i * 10;
+
+    if (isBold) {
+      // Fila total — fondo azul
+      setColor(doc, COLOR.blue, "fill");
+      doc.rect(tx + 1, ry - 5, tw - 2, 11, "F");
+      setColor(doc, COLOR.white, "text");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9.5);
+    } else {
+      setColor(doc, COLOR.gray, "text");
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8.5);
+    }
+
+    doc.text(label, tx + 8, ry);
+    doc.text(value, tx + tw - 6, ry, { align: "right" });
+  });
+
+  // ══════════════════════════════════════════════════════════════
+  // NOTA / AGRADECIMIENTO
+  // ══════════════════════════════════════════════════════════════
+  const noteY = afterTable + 48;
+
+  setColor(doc, COLOR.blueLight, "fill");
+  setColor(doc, COLOR.blue, "draw");
+  doc.setLineWidth(0.4);
+  doc.roundedRect(M, noteY, W - M * 2, 18, 2, 2, "FD");
+
+  // Acento lateral izquierdo
+  setColor(doc, COLOR.blue, "fill");
+  doc.roundedRect(M, noteY, 3, 18, 1, 1, "F");
+
+  setColor(doc, COLOR.blueDark, "text");
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "bold");
+  doc.text("Nota:", M + 7, noteY + 7);
+  doc.setFont("helvetica", "normal");
+  setColor(doc, COLOR.black, "text");
+  doc.text(
+    "Este comprobante es válido como constancia de pago. Para consultas, contáctenos a nuestro correo o teléfono.",
+    M + 7,
+    noteY + 13,
+  );
+
+  // ══════════════════════════════════════════════════════════════
+  // FOOTER
+  // ══════════════════════════════════════════════════════════════
+  // Barra de colores inferior
+  setColor(doc, COLOR.blue, "fill");
+  doc.rect(0, 280, W * 0.5, 2, "F");
+  setColor(doc, COLOR.pink, "fill");
+  doc.rect(W * 0.5, 280, W * 0.25, 2, "F");
+  setColor(doc, COLOR.yellow, "fill");
+  doc.rect(W * 0.75, 280, W * 0.25, 2, "F");
+
+  // Fondo footer
+  setColor(doc, COLOR.black, "fill");
+  doc.rect(0, 282, W, 15, "F");
+
+  setColor(doc, [180, 200, 215], "text");
+  doc.setFontSize(7.5);
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    "Fundación ASPY Ecuador  |  fundacionaspyecuador@gmail.com  |  Tel: 0999616051",
+    W / 2,
+    289,
+    { align: "center" },
+  );
+  setColor(doc, COLOR.blue, "text");
+  doc.text("Gracias por confiar en nosotros.", W / 2, 294, { align: "center" });
+
+  // ── Guardar ─────────────────────────────────────────────────
+  doc.save(
+    `Comprobante-ASPY-${invoice.receipt.receipt_id}-${invoice.client}.pdf`,
+  );
 }

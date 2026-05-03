@@ -112,9 +112,6 @@ export default function Review({ service_id }: ReviewProps) {
               >
                 ${service?.price}
               </Typography>
-              <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                IVA incluido
-              </Typography>
             </Box>
           </Box>
         </Box>
