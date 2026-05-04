@@ -169,7 +169,11 @@ export function getNextAppointments(data: Appointment[]): Appointment[] {
 
   const today = new Date();
   const todayStr = today.toISOString().split("T")[0];
-  return data.filter((app) => app.worker_schedule.schedule.date >= todayStr);
+  return data.filter(
+    (app) =>
+      app.worker_schedule.schedule.date >= todayStr &&
+      app.appointment_status.appointment_status_id !== 3,
+  );
 }
 
 // FINAL

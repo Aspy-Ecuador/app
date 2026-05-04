@@ -30,6 +30,7 @@ export default function WelcomePanel({ user }: WelcomePanelProps) {
           letterSpacing: "0.05em",
           textTransform: "uppercase",
           color: "text.disabled",
+          textAlign: "center",
         }}
       >
         Bienvenid@ al Panel de Control, ASPY
