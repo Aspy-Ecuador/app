@@ -454,7 +454,7 @@ export function handleDownloadInvoice(invoice: FlattenedReceipt) {
   doc.rect(W * 0.75, 40, W * 0.25, 3, "F");
 
   // Logo
-  doc.addImage(logoBase64, "PNG", M, 5, 36, 30);
+  doc.addImage(logoBase64, "PNG", M, 5, 45, 30);
 
   // Nombre fundación
   setColor(doc, COLOR.white, "text");

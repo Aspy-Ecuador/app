@@ -1,13 +1,27 @@
 import SideMenu from "@components/SideMenu";
 import { Outlet } from "react-router-dom";
+import Box from "@mui/material/Box";
 
 const AdminLayout = () => (
-  <div style={{ display: "flex", minHeight: "100dvh" }}>
+  <Box
+    sx={{ display: "flex", minHeight: "100dvh", bgcolor: "background.default" }}
+  >
     <SideMenu />
-    <div style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
+
+    <Box
+      component="main"
+      sx={{
+        flex: 1,
+        minWidth: 0,
+        overflow: "auto",
+        bgcolor: "#F4F6F8",
+        // En móvil, deja espacio para el botón hamburguesa
+        pt: { xs: "56px", md: 0 },
+      }}
+    >
       <Outlet />
-    </div>
-  </div>
+    </Box>
+  </Box>
 );
 
 export default AdminLayout;

@@ -17,36 +17,32 @@ export default function History() {
 
   if (loading) return <Progress />;
 
-  const handleBack = () => {
-    navigate(-1);
-  };
-
-  const backToHome = () => {
-    navigate("/");
-  };
+  const handleBack = () => navigate(-1);
+  const backToHome = () => navigate("/");
 
   const numericId = id ? parseInt(id) : 0;
-
-  if (numericId == 0) {
-    backToHome();
-  }
+  if (numericId === 0) backToHome();
 
   const user: Person = getUser(data.persons, numericId);
 
   return (
-    <Box className="box-panel-control" sx={{ padding: 2 }}>
-      <Grid container spacing={1}>
-        <Grid size={12} className="grid-p-patients-tittle">
+    <Box sx={{ padding: 2 }}>
+      <Grid container spacing={2}>
+        <Grid size={12}>
           <Header
-            textHeader={"Histórico de Paciente"}
+            textHeader="Histórico de Paciente"
             isCreate={false}
             handle={handleBack}
           />
         </Grid>
-        <Grid size={8}>
+
+        {/* Timeline — columna principal */}
+        <Grid size={{ xs: 12, md: 8 }}>
           <TimeLinePatients patient={user!} />
         </Grid>
-        <Grid size={4}>
+
+        {/* Overview — columna lateral */}
+        <Grid size={{ xs: 12, md: 4 }}>
           <OverviewPatient patient={user!} />
         </Grid>
       </Grid>

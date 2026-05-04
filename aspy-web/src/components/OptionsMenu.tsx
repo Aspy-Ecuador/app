@@ -1,93 +1,116 @@
-// FINAL
 import * as React from "react";
-import { styled } from "@mui/material/styles";
-import { dividerClasses } from "@mui/material/Divider";
 import Menu from "@mui/material/Menu";
-import MuiMenuItem from "@mui/material/MenuItem";
-import { paperClasses } from "@mui/material/Paper";
-import { listClasses } from "@mui/material/List";
+import MenuItem from "@mui/material/MenuItem";
 import ListItemText from "@mui/material/ListItemText";
-import ListItemIcon, { listItemIconClasses } from "@mui/material/ListItemIcon";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
-import MenuButton from "./MenuButton";
-import { useNavigate } from "react-router-dom"; // Importa useNavigate
+import { useNavigate } from "react-router-dom";
 import { logout } from "@store";
 
-const MenuItem = styled(MuiMenuItem)({
-  margin: "2px 0",
-});
+const menuItemSx = {
+  borderRadius: 1.5,
+  mx: 0.5,
+  px: 1.25,
+  py: 0.75,
+  mb: 0.25,
+  fontSize: 12,
+  "& .MuiListItemText-primary": { fontSize: 12 },
+  "& .MuiListItemIcon-root": { minWidth: 28, color: "text.secondary" },
+  "&:hover": { bgcolor: "action.hover" },
+};
 
 export default function OptionsMenu() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
   const navigate = useNavigate();
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  const handleClose = () => setAnchorEl(null);
 
-  const handleProfile = () => {
-    navigate("/perfil");
-  };
-
-  const handleASPY = () => {
-    navigate("/sobreAspy");
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
+  const actions = [
+    {
+      label: "Perfil",
+      icon: <PersonOutlineRoundedIcon sx={{ fontSize: 15 }} />,
+      action: () => navigate("/perfil"),
+    },
+    {
+      label: "Sobre ASPY",
+      icon: <InfoOutlinedIcon sx={{ fontSize: 15 }} />,
+      action: () => navigate("/sobreAspy"),
+    },
+  ];
 
   return (
-    <React.Fragment>
-      <MenuButton
-        aria-label="Open menu"
-        onClick={handleClick}
-        sx={{ borderColor: "transparent" }}
+    <>
+      <IconButton
+        size="small"
+        onClick={(e) => setAnchorEl(e.currentTarget)}
+        sx={{
+          width: 26,
+          height: 26,
+          borderRadius: "6px",
+          border: "0.5px solid rgba(255,255,255,0.1)",
+          bgcolor: "rgba(255,255,255,0.05)",
+          color: "rgba(255,255,255,0.4)",
+          "&:hover": { bgcolor: "rgba(255,255,255,0.1)" },
+        }}
       >
-        <MoreVertRoundedIcon />
-      </MenuButton>
+        <MoreVertRoundedIcon sx={{ fontSize: 14 }} />
+      </IconButton>
+
       <Menu
         anchorEl={anchorEl}
-        id="menu"
-        open={open}
+        open={Boolean(anchorEl)}
         onClose={handleClose}
         onClick={handleClose}
-        transformOrigin={{ horizontal: "right", vertical: "bottom" }} // Cambiar origen de transformación
-        anchorOrigin={{ horizontal: "right", vertical: "top" }} // Cambiar origen de anclaje
-        sx={{
-          [`& .${listClasses.root}`]: {
-            padding: "4px",
-          },
-          [`& .${paperClasses.root}`]: {
-            padding: 0,
-          },
-          [`& .${dividerClasses.root}`]: {
-            margin: "4px -4px",
+        transformOrigin={{ horizontal: "right", vertical: "bottom" }}
+        anchorOrigin={{ horizontal: "right", vertical: "top" }}
+        slotProps={{
+          paper: {
+            elevation: 0,
+            sx: {
+              border: "0.5px solid",
+              borderColor: "divider",
+              borderRadius: 2.5,
+              minWidth: 160,
+              p: 0.5,
+              mt: -0.5,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+            },
           },
         }}
       >
-        <MenuItem onClick={handleProfile}>Profile</MenuItem>
-        <MenuItem onClick={handleASPY}>ASPY</MenuItem>
+        {actions.map(({ label, icon, action }) => (
+          <MenuItem key={label} onClick={action} sx={menuItemSx}>
+            <ListItemIcon>{icon}</ListItemIcon>
+            <ListItemText>{label}</ListItemText>
+          </MenuItem>
+        ))}
+
         <MenuItem
-          onClick={handleLogout}
+          onClick={() => {
+            logout();
+            navigate("/login");
+          }}
           sx={{
-            [`& .${listItemIconClasses.root}`]: {
-              minWidth: 0,
-            },
+            ...menuItemSx,
+            color: "#A32D2D",
+            "& .MuiListItemIcon-root": { minWidth: 28, color: "#A32D2D" },
           }}
         >
-          <ListItemText>Logout</ListItemText>
-          <ListItemIcon sx={{ marginLeft: "4px" }}>
-            <LogoutRoundedIcon fontSize="small" />
+          <ListItemIcon>
+            <LogoutRoundedIcon sx={{ fontSize: 15 }} />
           </ListItemIcon>
+          <ListItemText>
+            <Typography sx={{ fontSize: 12, color: "#A32D2D" }}>
+              Cerrar sesión
+            </Typography>
+          </ListItemText>
         </MenuItem>
       </Menu>
-    </React.Fragment>
+    </>
   );
 }

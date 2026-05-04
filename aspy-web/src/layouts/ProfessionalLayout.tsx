@@ -1,13 +1,27 @@
 import SideMenu from "@components/SideMenu";
 import { Outlet } from "react-router-dom";
+import Box from "@mui/material/Box";
 
 const ProfessionalLayout = () => (
-  <div style={{ display: "flex", minHeight: "100dvh" }}>
+  <Box
+    sx={{ display: "flex", minHeight: "100dvh", bgcolor: "background.default" }}
+  >
     <SideMenu />
-    <div style={{ flex: 1 }}>
+
+    {/* Área de contenido */}
+    <Box
+      component="main"
+      sx={{
+        flex: 1,
+        minWidth: 0, // evita overflow en flex
+        overflow: "auto",
+        bgcolor: (theme) =>
+          theme.palette.mode === "dark" ? "background.default" : "#F4F6F8", // gris muy suave, distinto al blanco del sidebar
+      }}
+    >
       <Outlet />
-    </div>
-  </div>
+    </Box>
+  </Box>
 );
 
 export default ProfessionalLayout;

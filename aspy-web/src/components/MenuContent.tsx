@@ -1,13 +1,9 @@
-// FINAL
 import type { ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { getAuthenticatedUserRole } from "@store";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import Stack from "@mui/material/Stack";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import ButtonBase from "@mui/material/ButtonBase";
 
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
@@ -19,20 +15,20 @@ import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
 import ReceiptLongRoundedIcon from "@mui/icons-material/ReceiptLongRounded";
 import ArticleRoundedIcon from "@mui/icons-material/ArticleRounded";
 
-type ListItem = {
-  text: string;
-  route: string;
-  icon: ReactNode;
-};
+interface MenuContentProps {
+  onNavigate?: () => void;
+}
 
-const adminListItems = [
+type NavItem = { text: string; route: string; icon: ReactNode };
+
+const adminListItems: NavItem[] = [
   { text: "Vista General", route: "/", icon: <HomeRoundedIcon /> },
   { text: "Usuarios", route: "/usuarios", icon: <GroupRoundedIcon /> },
-  { text: "Servicios ", route: "/servicios", icon: <AssignmentRoundedIcon /> },
-  { text: "Citas ", route: "/citas", icon: <CalendarMonthRoundedIcon /> },
+  { text: "Servicios", route: "/servicios", icon: <AssignmentRoundedIcon /> },
+  { text: "Citas", route: "/citas", icon: <CalendarMonthRoundedIcon /> },
 ];
 
-const staffListItems = [
+const staffListItems: NavItem[] = [
   { text: "Vista General", route: "/", icon: <HomeRoundedIcon /> },
   {
     text: "Profesionales",
@@ -46,11 +42,11 @@ const staffListItems = [
   },
   { text: "Citas", route: "/citas", icon: <CalendarMonthRoundedIcon /> },
   { text: "Recibos", route: "/recibos", icon: <ReceiptLongRoundedIcon /> },
-  { text: "Pagos", route: "/pagos ", icon: <PaymentRoundedIcon /> },
-  { text: "Servicios ", route: "/servicios", icon: <AssignmentRoundedIcon /> },
+  { text: "Pagos", route: "/pagos", icon: <PaymentRoundedIcon /> },
+  { text: "Servicios", route: "/servicios", icon: <AssignmentRoundedIcon /> },
 ];
 
-const professionalListItems = [
+const professionalListItems: NavItem[] = [
   { text: "Vista General", route: "/", icon: <HomeRoundedIcon /> },
   {
     text: "Pacientes",
@@ -60,7 +56,7 @@ const professionalListItems = [
   { text: "Citas", route: "/citas", icon: <CalendarMonthRoundedIcon /> },
 ];
 
-const clientListItems = [
+const clientListItems: NavItem[] = [
   { text: "Vista General", route: "/", icon: <HomeRoundedIcon /> },
   {
     text: "Nueva cita",
@@ -76,59 +72,115 @@ const clientListItems = [
   { text: "Reportes", route: "/reportes", icon: <ArticleRoundedIcon /> },
 ];
 
-export default function MenuContent() {
-  const navigate = useNavigate();
-  const userRole = getAuthenticatedUserRole();
-  let mainListItems: ListItem[];
+const ROLE_MAP: Record<string, NavItem[]> = {
+  Admin: adminListItems,
+  Staff: staffListItems,
+  Professional: professionalListItems,
+  Client: clientListItems,
+};
 
-  if (userRole === "Admin") {
-    mainListItems = adminListItems;
-  } else if (userRole === "Staff") {
-    mainListItems = staffListItems;
-  } else if (userRole === "Professional") {
-    mainListItems = professionalListItems;
-  } else if (userRole === "Client") {
-    mainListItems = clientListItems;
-  } else {
-    mainListItems = [];
-  }
+export default function MenuContent({ onNavigate }: MenuContentProps) {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const role = getAuthenticatedUserRole();
+  const items = ROLE_MAP[role] ?? [];
+
+  const handleNav = (route: string) => {
+    navigate(route.trim());
+    onNavigate?.(); // cierra el drawer móvil si se pasa el callback
+  };
 
   return (
-    <Stack sx={{ flexGrow: 1, p: 1, justifyContent: "space-between" }}>
-      <List dense>
-        {mainListItems.map((item, index) => (
-          <ListItem key={index} disablePadding sx={{ display: "block" }}>
-            <ListItemButton
-              onClick={() => navigate(item.route)}
-              selected={
-                item.route === "/"
-                  ? window.location.pathname === item.route
-                  : window.location.pathname.startsWith(item.route)
-              }
+    <Box sx={{ p: 1, display: "flex", flexDirection: "column", gap: 0.25 }}>
+      <Typography
+        sx={{
+          fontSize: 9,
+          fontWeight: 600,
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          color: "rgba(255,255,255,0.3)",
+          px: 1,
+          pt: 1,
+          pb: 0.5,
+        }}
+      >
+        Menú principal
+      </Typography>
+
+      {items.map((item, index) => {
+        const isActive =
+          item.route === "/"
+            ? pathname === "/"
+            : pathname.startsWith(item.route.trim());
+
+        return (
+          <ButtonBase
+            key={index}
+            onClick={() => handleNav(item.route)}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.25,
+              px: 1.25,
+              py: 0.875,
+              borderRadius: 2,
+              width: "100%",
+              textAlign: "left",
+              justifyContent: "flex-start",
+              bgcolor: isActive ? "rgba(75,163,211,0.18)" : "transparent",
+              transition: "background 0.15s",
+              "&:hover": {
+                bgcolor: isActive
+                  ? "rgba(75,163,211,0.22)"
+                  : "rgba(255,255,255,0.06)",
+              },
+            }}
+          >
+            {/* Icono */}
+            <Box
+              sx={{
+                width: 28,
+                height: 28,
+                borderRadius: "7px",
+                flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                bgcolor: isActive ? "rgba(75,163,211,0.25)" : "transparent",
+                color: isActive ? "#4BA3D3" : "rgba(255,255,255,0.4)",
+                "& svg": { fontSize: 16 },
+              }}
             >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-      {/*  <List dense>
-        {secondaryListItems.map((item, index) => (
-          <ListItem key={index} disablePadding sx={{ display: "block" }}>
-            <ListItemButton
-              onClick={() => navigate(item.route)}
-              selected={
-                item.route === "/"
-                  ? window.location.pathname === item.route
-                  : window.location.pathname.startsWith(item.route)
-              }
+              {item.icon}
+            </Box>
+
+            {/* Label */}
+            <Typography
+              sx={{
+                fontSize: 12,
+                fontWeight: 500,
+                flex: 1,
+                color: isActive ? "#fff" : "rgba(255,255,255,0.55)",
+              }}
             >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List> */}
-    </Stack>
+              {item.text}
+            </Typography>
+
+            {/* Barra activa */}
+            {isActive && (
+              <Box
+                sx={{
+                  width: 3,
+                  height: 16,
+                  borderRadius: "2px",
+                  bgcolor: "#4BA3D3",
+                  flexShrink: 0,
+                }}
+              />
+            )}
+          </ButtonBase>
+        );
+      })}
+    </Box>
   );
 }
