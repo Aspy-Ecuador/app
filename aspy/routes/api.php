@@ -10,6 +10,7 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\UserAccountController;
 use App\Http\Controllers\WorkerScheduleController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfessionalController;
 
 Route::get('/login', function () {
     return response()->json(['message' => 'Unauthorized, Redirected to Login']);

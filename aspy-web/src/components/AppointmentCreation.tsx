@@ -1,6 +1,6 @@
 // FINAL
 import { useNavigate } from "react-router-dom";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
@@ -108,7 +108,7 @@ export default function AppointmentCreation({
   const [clientId, setClientId] = useState<number | null>(null);
 
   const navigate = useNavigate();
-  const { data, loading } = useRoleData();
+  const { data, loading, refreshWorkerProfessional } = useRoleData();
 
   const servicesOptions: Service[] = data.services;
   const proServices: ProfessionalService[] = data.proServices;
@@ -153,6 +153,10 @@ export default function AppointmentCreation({
         : `/pago/${serviceId}/${workerId}/${professionalId}`,
     );
   };
+
+  useEffect(() => {
+  refreshWorkerProfessional();
+}, []);
 
   if (loading) return <Progress />;
 

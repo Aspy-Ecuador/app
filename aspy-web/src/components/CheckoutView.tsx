@@ -30,12 +30,8 @@ interface CheckoutViewProp {
 export default function CheckoutView({ isClient }: CheckoutViewProp) {
   const {
     loading,
-    refreshServices,
-    refreshPersons,
-    refreshAppointmentReports,
     refreshPayments,
     refreshAppointments,
-    refreshProServices,
     refreshWorkerProfessional,
   } = useRoleData();
 
@@ -75,13 +71,11 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
       };
 
       await appointmentAPI.createAppointment(dataSend);
-      await refreshPersons();
-      await refreshAppointments();
-      await refreshAppointmentReports();
-      await refreshPayments();
-      await refreshProServices();
-      await refreshServices();
-      await refreshWorkerProfessional();
+      await Promise.all([
+        refreshAppointments(),
+        refreshWorkerProfessional(),
+        refreshPayments(),
+      ]);
       setActiveStep(activeStep + 1);
       setLoad(false);
       setOpen(true);

@@ -124,7 +124,7 @@ export const RoleDataProvider = ({
     try {
       const res = await professionalServiceAPI.getAllProfessionalServices();
       localStorage.setItem("proServices", JSON.stringify(res));
-      setData((prev: any) => ({ ...prev, professionalServices: res }));
+      setData((prev: any) => ({ ...prev, proServices: res }));
       console.log("✔️ ProfessionalServices actualizados");
     } catch (err) {
       console.error("❌ Error al refrescar professionalServices:", err);
@@ -135,10 +135,10 @@ export const RoleDataProvider = ({
     try {
       const res = await workerScheduleAPI.getAllWorkerSchedules();
       localStorage.setItem("workerProfessional", JSON.stringify(res));
-      setData((prev: any) => ({ ...prev, professional: res }));
+      setData((prev: any) => ({ ...prev, workerProfessional: res }));
       console.log("✔️ Professionals Worker actualizados");
     } catch (err) {
-      console.error("❌ Error al refrescar professionals:", err);
+      console.error("❌ Error al refrescar workerProfessional:", err);
     }
   };
 

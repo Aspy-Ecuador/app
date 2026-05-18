@@ -24,14 +24,26 @@ export default function Agenda({
         end: new Date(`${baseDate}T${schedule.end_time}`),
       };
     });
+
   return (
     <Scheduler
       locale={es}
       view="week"
       editable={false}
-      //editable={false}
       deletable={false}
       agenda={false}
+      week={{
+        weekDays: [0, 1, 2, 3, 4, 5, 6],
+        weekStartOn: 1,
+        startHour: 0,
+        endHour: 23,
+        step: 60,
+      }}
+      day={{
+        startHour: 0,
+        endHour: 23,
+        step: 60,
+      }}
       translations={{
         navigation: {
           month: "Mes",
@@ -55,8 +67,8 @@ export default function Agenda({
           allDay: "Todo el día",
         },
         moreEvents: "Más eventos...",
-        noDataToDisplay: "No hay eventos para mostrar", // 🔹 Texto cuando no hay eventos
-        loading: "Cargando...", // 🔹 Texto mientras se cargan los eventos
+        noDataToDisplay: "No hay eventos para mostrar",
+        loading: "Cargando...",
       }}
       events={events}
     />

@@ -11,6 +11,7 @@ import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import AssignmentIndRoundedIcon from "@mui/icons-material/AssignmentIndRounded";
 import SwitchAccountRoundedIcon from "@mui/icons-material/SwitchAccountRounded";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
+import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
 import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
 import ReceiptLongRoundedIcon from "@mui/icons-material/ReceiptLongRounded";
 import ArticleRoundedIcon from "@mui/icons-material/ArticleRounded";
@@ -54,6 +55,7 @@ const professionalListItems: NavItem[] = [
     icon: <AssignmentIndRoundedIcon />,
   },
   { text: "Citas", route: "/citas", icon: <CalendarMonthRoundedIcon /> },
+  {text: "Crear Horarios", route: "/seleccionar-horario", icon: <EditCalendarRoundedIcon />},
 ];
 
 const clientListItems: NavItem[] = [
