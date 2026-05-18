@@ -46,16 +46,16 @@ export default function ServicesList() {
       disableColumnMenu: true,
       resizable: false,
       renderCell: (params) => (
-        <Typography
-          sx={{
-            fontSize: 12,
-            fontWeight: 500,
-            color: "#0F6E56",
-            fontFamily: "monospace",
-          }}
-        >
-          ${Number(params.value).toFixed(2)}
-        </Typography>
+        <Box display="flex" alignItems="center" height="100%">
+          <Typography
+            variant="body1"
+            sx={{
+              color: "#0F6E56",
+            }}
+          >
+            ${Number(params.value).toFixed(2)}
+          </Typography>
+        </Box>
       ),
     },
     {
@@ -69,27 +69,27 @@ export default function ServicesList() {
       align: "center",
       headerAlign: "center",
       renderCell: (params) => (
-        <IconButton
-          size="small"
-          onClick={() =>
-            navigate(`${location.pathname}/${params.row.service_id}`)
-          }
-          sx={{
-            width: 26,
-            height: 26,
-            border: "0.5px solid",
-            borderColor: "divider",
-            bgcolor: "action.hover",
-            borderRadius: 1.5,
-            "&:hover": {
-              borderColor: "#9FE1CB",
-              color: "#0F6E56",
-              bgcolor: "#E1F5EE",
-            },
-          }}
-        >
-          <EditOutlinedIcon sx={{ fontSize: 13 }} />
-        </IconButton>
+        <Box display="flex" alignItems="center" height="100%">
+          <IconButton
+            size="small"
+            onClick={() =>
+              navigate(`${location.pathname}/${params.row.service_id}`)
+            }
+            sx={{
+              border: "0.5px solid",
+              borderColor: "divider",
+              bgcolor: "action.hover",
+              borderRadius: 1.5,
+              "&:hover": {
+                borderColor: "#9FE1CB",
+                color: "#0F6E56",
+                bgcolor: "#E1F5EE",
+              },
+            }}
+          >
+            <EditOutlinedIcon sx={{ fontSize: 13 }} />
+          </IconButton>
+        </Box>
       ),
     },
   ];

@@ -22,6 +22,7 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import type { Person } from "@/typesResponse/Person";
 
 const roleChipSx = (role: string) => {
+  if (role === "Admin") return { bgcolor: "#fafbe6", color: "#b9b716" };
   if (role === "Professional") return { bgcolor: "#E1F5EE", color: "#0F6E56" };
   if (role === "Client") return { bgcolor: "#E6F1FB", color: "#185FA5" };
   return { bgcolor: "#EEEDFE", color: "#534AB7" };
@@ -72,9 +73,11 @@ const columns: GridColDef[] = [
     flex: 4,
     resizable: false,
     renderCell: (params) => (
-      <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
-        {params.row.user_account?.email}
-      </Typography>
+      <Box display="flex" alignItems="center" height="100%">
+        <Typography variant="body1">
+          {params.row.user_account?.email}
+        </Typography>
+      </Box>
     ),
   },
   {
@@ -84,9 +87,9 @@ const columns: GridColDef[] = [
     flex: 3,
     resizable: false,
     renderCell: (params) => (
-      <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
-        {params.row.phone?.number}
-      </Typography>
+      <Box display="flex" alignItems="center" height="100%">
+        <Typography variant="body1">{params.row.phone?.number}</Typography>
+      </Box>
     ),
   },
 ];

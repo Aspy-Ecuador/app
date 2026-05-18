@@ -23,6 +23,7 @@ import { getAuthenticatedPersonID } from "@store";
 import workerScheduleAPI from "@/API/workerScheduleAPI";
 import professionalAPI from "@/API/professionalAPI";
 import type { WorkerProfessional } from "@/typesResponse/WorkerProfessional";
+import type { Schedule } from "@/typesResponse/Schedule";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -104,8 +105,6 @@ const fieldSx = {
   "& .MuiInputLabel-root": { fontSize: { xs: 12, md: 14 } },
   "& .MuiInputLabel-root.Mui-focused": { color: "#1D9E75" },
 };
-
-// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function HorarioProfessional() {
   const professionalId = getAuthenticatedPersonID();
@@ -201,32 +200,34 @@ export default function HorarioProfessional() {
     } catch (error: any) {
       setSnackbar({
         open: true,
-        message:
-          error?.response?.data?.message || "Error al crear el horario.",
+        message: error?.response?.data?.message || "Error al crear el horario.",
         severity: "error",
       });
     } finally {
       setSubmitting(false);
     }
   };
-
-  // ─── Render ────────────────────────────────────────────────────────────────
   return (
     <>
       <Box
         sx={{
           display: "grid",
-          // Mobile: stacked | Desktop: form takes ~38%, list takes the rest
-          gridTemplateColumns: { xs: "1fr", md: "minmax(340px, 38%) minmax(0, 1fr)" },
+          gridTemplateColumns: {
+            xs: "1fr",
+            md: "minmax(340px, 38%) minmax(0, 1fr)",
+          },
           gap: { xs: 1.5, md: 2.5 },
           alignItems: "start",
         }}
       >
-        {/* ── LEFT: Form ── */}
         <SectionPanel label="Nuevo horario">
-          <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 1.5, md: 2.25 } }}>
-
-            {/* Intro label — visible on desktop only for visual weight */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: { xs: 1.5, md: 2.25 },
+            }}
+          >
             <Typography
               sx={{
                 display: { xs: "none", md: "block" },
@@ -235,12 +236,14 @@ export default function HorarioProfessional() {
                 lineHeight: 1.5,
               }}
             >
-              Configura un nuevo turno seleccionando el tipo, la fecha y el rango horario.
+              Configura un nuevo turno seleccionando el tipo, la fecha y el
+              rango horario.
             </Typography>
 
-            {/* Tipo de turno */}
             <FormControl fullWidth size="medium">
-              <InputLabel sx={{ fontSize: { xs: 12, md: 14 } }}>Tipo de turno</InputLabel>
+              <InputLabel sx={{ fontSize: { xs: 12, md: 14 } }}>
+                Tipo de turno
+              </InputLabel>
               <Select
                 value={name}
                 label="Tipo de turno"
@@ -249,24 +252,38 @@ export default function HorarioProfessional() {
                   fontSize: { xs: 12, md: 14 },
                   borderRadius: 2.5,
                   bgcolor: "action.hover",
-                  "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
-                  "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#1D9E75" },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#1D9E75" },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "divider",
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#1D9E75",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#1D9E75",
+                  },
                 }}
               >
-                <MenuItem value="Turno Mañana" sx={{ fontSize: { xs: 12, md: 14 } }}>
-                  🌅 Turno Mañana
+                <MenuItem
+                  value="Turno Mañana"
+                  sx={{ fontSize: { xs: 12, md: 14 } }}
+                >
+                  Turno Mañana
                 </MenuItem>
-                <MenuItem value="Turno Tarde" sx={{ fontSize: { xs: 12, md: 14 } }}>
-                  🌤️ Turno Tarde
+                <MenuItem
+                  value="Turno Tarde"
+                  sx={{ fontSize: { xs: 12, md: 14 } }}
+                >
+                  Turno Tarde
                 </MenuItem>
-                <MenuItem value="Turno Noche" sx={{ fontSize: { xs: 12, md: 14 } }}>
-                  🌙 Turno Noche
+                <MenuItem
+                  value="Turno Noche"
+                  sx={{ fontSize: { xs: 12, md: 14 } }}
+                >
+                  Turno Noche
                 </MenuItem>
               </Select>
             </FormControl>
 
-            {/* Date */}
             <TextField
               fullWidth
               size="medium"
@@ -279,8 +296,13 @@ export default function HorarioProfessional() {
               sx={fieldSx}
             />
 
-            {/* Time range */}
-            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: { xs: 1, md: 1.5 } }}>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: { xs: 1, md: 1.5 },
+              }}
+            >
               <TextField
                 size="medium"
                 type="time"
@@ -301,7 +323,6 @@ export default function HorarioProfessional() {
               />
             </Box>
 
-            {/* Live preview pill */}
             {date && startTime && endTime && startTime < endTime && (
               <Box
                 sx={{
@@ -315,14 +336,26 @@ export default function HorarioProfessional() {
                   borderRadius: 2.5,
                 }}
               >
-                <AccessTimeRoundedIcon sx={{ fontSize: { xs: 13, md: 15 }, color: "#1D9E75", flexShrink: 0 }} />
-                <Typography sx={{ fontSize: { xs: 11, md: 13 }, color: "#1D9E75", fontWeight: 500 }}>
-                  {formatDate(date)} · {fmt(startTime + ":00")} – {fmt(endTime + ":00")}
+                <AccessTimeRoundedIcon
+                  sx={{
+                    fontSize: { xs: 13, md: 15 },
+                    color: "#1D9E75",
+                    flexShrink: 0,
+                  }}
+                />
+                <Typography
+                  sx={{
+                    fontSize: { xs: 11, md: 13 },
+                    color: "#1D9E75",
+                    fontWeight: 500,
+                  }}
+                >
+                  {formatDate(date)} · {fmt(startTime + ":00")} –{" "}
+                  {fmt(endTime + ":00")}
                 </Typography>
               </Box>
             )}
 
-            {/* Submit */}
             <Button
               fullWidth
               onClick={handleSubmit}
@@ -346,21 +379,26 @@ export default function HorarioProfessional() {
           </Box>
         </SectionPanel>
 
-        {/* ── RIGHT: Schedule list ── */}
         <SectionPanel
           label="Mis horarios"
           badge={
             !loadingList && (
-              <Typography sx={{ fontSize: { xs: 10, md: 11 }, color: "text.disabled" }}>
-                {schedules.length}{" "}
-                {schedules.length === 1 ? "turno" : "turnos"}
+              <Typography
+                sx={{ fontSize: { xs: 10, md: 11 }, color: "text.disabled" }}
+              >
+                {schedules.length} {schedules.length === 1 ? "turno" : "turnos"}
               </Typography>
             )
           }
         >
-          {/* Loading skeleton */}
           {loadingList && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 1, md: 1.5 } }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: { xs: 1, md: 1.5 },
+              }}
+            >
               {[1, 2, 3].map((i) => (
                 <Skeleton
                   key={i}
@@ -372,7 +410,6 @@ export default function HorarioProfessional() {
             </Box>
           )}
 
-          {/* Empty state */}
           {!loadingList && grouped.length === 0 && (
             <Box
               sx={{
@@ -385,22 +422,37 @@ export default function HorarioProfessional() {
               }}
             >
               <CalendarMonthRoundedIcon
-                sx={{ fontSize: { xs: 38, md: 48 }, color: "text.disabled", opacity: 0.35 }}
+                sx={{
+                  fontSize: { xs: 38, md: 48 },
+                  color: "text.disabled",
+                  opacity: 0.35,
+                }}
               />
-              <Typography sx={{ fontSize: { xs: 12, md: 14 }, color: "text.disabled" }}>
+              <Typography
+                sx={{ fontSize: { xs: 12, md: 14 }, color: "text.disabled" }}
+              >
                 Aún no tienes horarios registrados
               </Typography>
             </Box>
           )}
 
-          {/* Grouped list */}
           {!loadingList && grouped.length > 0 && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2.5, md: 3 } }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: { xs: 2.5, md: 3 },
+              }}
+            >
               {grouped.map(([dateStr, slots]) => (
                 <Box key={dateStr}>
-                  {/* Date header with divider */}
                   <Box
-                    sx={{ display: "flex", alignItems: "center", gap: 1, mb: { xs: 1, md: 1.25 } }}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      mb: { xs: 1, md: 1.25 },
+                    }}
                   >
                     <Typography
                       sx={{
@@ -413,21 +465,32 @@ export default function HorarioProfessional() {
                     >
                       {formatDate(dateStr)}
                     </Typography>
-                    <Box sx={{ flex: 1, height: "0.5px", bgcolor: "divider" }} />
+                    <Box
+                      sx={{ flex: 1, height: "0.5px", bgcolor: "divider" }}
+                    />
                   </Box>
 
-                  {/* Slots */}
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 0.75, md: 1 } }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: { xs: 0.75, md: 1 },
+                    }}
+                  >
                     {[...slots]
                       .sort((a, b) =>
-                        (a.schedule.start_time as unknown as string).localeCompare(
+                        (
+                          a.schedule.start_time as unknown as string
+                        ).localeCompare(
                           b.schedule.start_time as unknown as string,
                         ),
                       )
                       .map((ws) => {
                         const available = ws.is_available;
-                        const startStr = ws.schedule.start_time as unknown as string;
-                        const endStr = ws.schedule.end_time as unknown as string;
+                        const startStr = ws.schedule
+                          .start_time as unknown as string;
+                        const endStr = ws.schedule
+                          .end_time as unknown as string;
 
                         return (
                           <Box
@@ -445,7 +508,6 @@ export default function HorarioProfessional() {
                               transition: "background 0.15s",
                             }}
                           >
-                            {/* Time badge */}
                             <Box
                               sx={{
                                 display: "flex",
@@ -454,11 +516,18 @@ export default function HorarioProfessional() {
                                 px: { xs: 1, md: 1.25 },
                                 py: 0.5,
                                 borderRadius: 1.5,
-                                bgcolor: available ? "#1D9E75" : "rgba(0,0,0,0.18)",
+                                bgcolor: available
+                                  ? "#1D9E75"
+                                  : "rgba(0,0,0,0.18)",
                                 flexShrink: 0,
                               }}
                             >
-                              <AccessTimeRoundedIcon sx={{ fontSize: { xs: 11, md: 13 }, color: "#fff" }} />
+                              <AccessTimeRoundedIcon
+                                sx={{
+                                  fontSize: { xs: 11, md: 13 },
+                                  color: "#fff",
+                                }}
+                              />
                               <Typography
                                 sx={{
                                   fontSize: { xs: 10, md: 12 },
@@ -471,24 +540,27 @@ export default function HorarioProfessional() {
                               </Typography>
                             </Box>
 
-                            {/* Name */}
                             <Typography
                               sx={{
                                 fontSize: { xs: 12, md: 14 },
                                 fontWeight: 500,
                                 flex: 1,
-                                color: available ? "text.primary" : "text.disabled",
+                                color: available
+                                  ? "text.primary"
+                                  : "text.disabled",
                               }}
                             >
-                              {(ws.schedule as any).name ?? "Sin nombre"}
+                              {(ws.schedule as Schedule).name ?? "Sin nombre"}
                             </Typography>
 
-                            {/* Status chip */}
                             {available ? (
                               <Chip
                                 icon={
                                   <CheckCircleRoundedIcon
-                                    sx={{ fontSize: "12px !important", color: "#1D9E75 !important" }}
+                                    sx={{
+                                      fontSize: "12px !important",
+                                      color: "#1D9E75 !important",
+                                    }}
                                   />
                                 }
                                 label="Disponible"
@@ -500,14 +572,19 @@ export default function HorarioProfessional() {
                                   bgcolor: "transparent",
                                   color: "#1D9E75",
                                   border: "0.5px solid #A8DEC9",
-                                  "& .MuiChip-label": { px: { xs: 0.75, md: 1 } },
+                                  "& .MuiChip-label": {
+                                    px: { xs: 0.75, md: 1 },
+                                  },
                                 }}
                               />
                             ) : (
                               <Chip
                                 icon={
                                   <EventBusyRoundedIcon
-                                    sx={{ fontSize: "12px !important", color: "text.disabled !important" }}
+                                    sx={{
+                                      fontSize: "12px !important",
+                                      color: "text.disabled !important",
+                                    }}
                                   />
                                 }
                                 label="Ocupado"
@@ -520,7 +597,9 @@ export default function HorarioProfessional() {
                                   color: "text.disabled",
                                   border: "0.5px solid",
                                   borderColor: "divider",
-                                  "& .MuiChip-label": { px: { xs: 0.75, md: 1 } },
+                                  "& .MuiChip-label": {
+                                    px: { xs: 0.75, md: 1 },
+                                  },
                                 }}
                               />
                             )}
@@ -535,7 +614,6 @@ export default function HorarioProfessional() {
         </SectionPanel>
       </Box>
 
-      {/* ── Snackbar feedback ── */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}

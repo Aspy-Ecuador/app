@@ -21,7 +21,9 @@ const columns: GridColDef[] = [
     headerName: "N° de Recibo",
     disableColumnMenu: true,
     renderCell: (params) => (
-      <Typography variant="body1">{params.row.id}</Typography>
+      <Box display="flex" alignItems="center" height="100%">
+        <Typography variant="body1">{params.row.id}</Typography>
+      </Box>
     ),
     flex: 2,
     resizable: false,
@@ -31,7 +33,9 @@ const columns: GridColDef[] = [
     headerName: "Cliente",
     disableColumnMenu: true,
     renderCell: (params) => (
-      <Typography variant="body1">{params.row.client}</Typography>
+      <Box display="flex" alignItems="center" height="100%">
+        <Typography variant="body1">{params.row.client}</Typography>
+      </Box>
     ),
     flex: 3,
     resizable: false,
@@ -41,7 +45,9 @@ const columns: GridColDef[] = [
     headerName: "Fecha de Emisión",
     disableColumnMenu: true,
     renderCell: (params) => (
-      <Typography variant="body1">{params.row.date}</Typography>
+      <Box display="flex" alignItems="center" height="100%">
+        <Typography variant="body1">{params.row.date}</Typography>
+      </Box>
     ),
     flex: 3,
     resizable: false,
@@ -53,7 +59,9 @@ const columns: GridColDef[] = [
     flex: 2,
     resizable: false,
     renderCell: (params) => (
-      <Typography variant="body1">$ {params.row.price}</Typography>
+      <Box display="flex" alignItems="center" height="100%">
+        <Typography variant="body1">$ {params.row.price}</Typography>
+      </Box>
     ),
   },
   {
@@ -63,14 +71,16 @@ const columns: GridColDef[] = [
     flex: 2,
     resizable: false,
     renderCell: (params) => (
-      <Typography variant="body1">
-        {params.row.receipt.receipt_status.name}
-      </Typography>
+      <Box display="flex" alignItems="center" height="100%">
+        <Typography variant="body1">
+          {params.row.receipt.receipt_status.name}
+        </Typography>
+      </Box>
     ),
   },
   {
     field: "actions",
-    headerName: "",
+    headerName: "Descargar",
     flex: 2,
     disableColumnMenu: true,
     resizable: false,

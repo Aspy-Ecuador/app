@@ -48,9 +48,11 @@ export default function PaymentsList() {
       flex: 3,
       renderCell: (params) => {
         return (
-          <Typography variant="body1">
-            {params.row.client.first_name} {params.row.client.last_name}
-          </Typography>
+          <Box display="flex" alignItems="center" height="100%">
+            <Typography variant="body1">
+              {params.row.client.first_name} {params.row.client.last_name}
+            </Typography>
+          </Box>
         );
       },
       resizable: false,
@@ -63,9 +65,11 @@ export default function PaymentsList() {
       resizable: false,
       renderCell: (params) => {
         return (
-          <Typography variant="body1">
-            {params.row.creation_date.split(" ")[0]}
-          </Typography>
+          <Box display="flex" alignItems="center" height="100%">
+            <Typography variant="body1">
+              {params.row.creation_date.split("T")[0]}
+            </Typography>
+          </Box>
         );
       },
     },
@@ -79,7 +83,11 @@ export default function PaymentsList() {
       headerAlign: "left",
       renderCell: (params) => {
         return (
-          <Typography variant="body1">$ {params.row.service.price}</Typography>
+          <Box display="flex" alignItems="center" height="100%">
+            <Typography variant="body1">
+              $ {params.row.service.price}
+            </Typography>
+          </Box>
         );
       },
     },
@@ -114,9 +122,17 @@ export default function PaymentsList() {
       headerAlign: "center",
       renderCell: (params) => {
         return (
-          <Typography variant="body1">
-            {getStatusIcon(params.row.payment_status.payment_status_id)}
-          </Typography>
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            height="100%"
+            width="100%"
+          >
+            <Typography variant="body1">
+              {getStatusIcon(params.row.payment_status.payment_status_id)}
+            </Typography>
+          </Box>
         );
       },
     },

@@ -8,7 +8,7 @@ import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Header from "@components/Header";
 import Progress from "../Progress";
-import { getAge, translateRol } from "@/utils/utils";
+import { getAge } from "@/utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Typography from "@mui/material/Typography";
 import { getClient } from "@/utils/utils";
@@ -30,27 +30,17 @@ const columns: GridColDef[] = [
     resizable: false,
   },
   {
-    field: "role",
-    headerName: "Rol",
-    disableColumnMenu: true,
-    flex: 2,
-    renderCell: (params) => (
-      <Typography variant="body1">
-        {translateRol(params.row.user_account?.role?.name)}
-      </Typography>
-    ),
-    resizable: false,
-  },
-  {
     field: "email",
     headerName: "Correo",
     disableColumnMenu: true,
     flex: 2,
     renderCell: (params) => {
       return (
-        <Typography variant="body1">
-          {params.row.user_account?.email}
-        </Typography>
+        <Box display="flex" alignItems="center" height="100%">
+          <Typography variant="body1">
+            {params.row.user_account?.email}
+          </Typography>
+        </Box>
       );
     },
     resizable: false,
@@ -62,7 +52,11 @@ const columns: GridColDef[] = [
     flex: 2,
     renderCell: (params) => {
       return (
-        <Typography variant="body1">{getAge(params.row.birthdate)}</Typography>
+        <Box display="flex" alignItems="center" height="100%">
+          <Typography variant="body1">
+            {getAge(params.row.birthdate)}
+          </Typography>
+        </Box>
       );
     },
     resizable: false,
@@ -74,10 +68,24 @@ const columns: GridColDef[] = [
     flex: 2,
     renderCell: (params) => {
       return (
-        <Typography variant="body1">{params.row.occupation.name}</Typography>
+        <Box display="flex" alignItems="center" height="100%">
+          <Typography variant="body1">{params.row.occupation.name}</Typography>
+        </Box>
       );
     },
     resizable: false,
+  },
+  {
+    field: "phone",
+    headerName: "Celular",
+    disableColumnMenu: true,
+    flex: 3,
+    resizable: false,
+    renderCell: (params) => (
+      <Box display="flex" alignItems="center" height="100%">
+        <Typography variant="body1">{params.row.phone?.number}</Typography>
+      </Box>
+    ),
   },
 ];
 

@@ -12,7 +12,7 @@ import { getProfessional } from "@/utils/utils";
 import Progress from "@components/Progress";
 import type { Person } from "@/typesResponse/Person";
 import Typography from "@mui/material/Typography";
-import { translateRol } from "@/utils/utils";
+import { getAge } from "@/utils/utils";
 
 const columns: GridColDef[] = [
   {
@@ -30,15 +30,19 @@ const columns: GridColDef[] = [
     resizable: false,
   },
   {
-    field: "role",
-    headerName: "Rol",
+    field: "age",
+    headerName: "Edad",
     disableColumnMenu: true,
     flex: 2,
-    renderCell: (params) => (
-      <Typography variant="body1">
-        {translateRol(params.row.user_account?.role?.name)}
-      </Typography>
-    ),
+    renderCell: (params) => {
+      return (
+        <Box display="flex" alignItems="center" height="100%">
+          <Typography variant="body1">
+            {getAge(params.row.birthdate)}
+          </Typography>
+        </Box>
+      );
+    },
     resizable: false,
   },
   {
@@ -47,7 +51,11 @@ const columns: GridColDef[] = [
     disableColumnMenu: true,
     flex: 4,
     renderCell: (params) => (
-      <Typography variant="body1">{params.row.user_account?.email}</Typography>
+      <Box display="flex" alignItems="center" height="100%">
+        <Typography variant="body1">
+          {params.row.user_account?.email}
+        </Typography>
+      </Box>
     ),
     resizable: false,
   },
@@ -57,7 +65,9 @@ const columns: GridColDef[] = [
     disableColumnMenu: true,
     flex: 3,
     renderCell: (params) => (
-      <Typography variant="body1">{params.row.phone?.number}</Typography>
+      <Box display="flex" alignItems="center" height="100%">
+        <Typography variant="body1">{params.row.phone?.number}</Typography>
+      </Box>
     ),
     resizable: false,
   },
@@ -67,7 +77,9 @@ const columns: GridColDef[] = [
     disableColumnMenu: true,
     flex: 3,
     renderCell: (params) => (
-      <Typography variant="body1">{params.row.professional.title}</Typography>
+      <Box display="flex" alignItems="center" height="100%">
+        <Typography variant="body1">{params.row.professional.title}</Typography>
+      </Box>
     ),
     resizable: false,
   },
@@ -77,11 +89,25 @@ const columns: GridColDef[] = [
     disableColumnMenu: true,
     flex: 3,
     renderCell: (params) => (
-      <Typography variant="body1">
-        {params.row.professional.specialty}
-      </Typography>
+      <Box display="flex" alignItems="center" height="100%">
+        <Typography variant="body1">
+          {params.row.professional.specialty}
+        </Typography>
+      </Box>
     ),
     resizable: false,
+  },
+  {
+    field: "phone",
+    headerName: "Celular",
+    disableColumnMenu: true,
+    flex: 3,
+    resizable: false,
+    renderCell: (params) => (
+      <Box display="flex" alignItems="center" height="100%">
+        <Typography variant="body1">{params.row.phone?.number}</Typography>
+      </Box>
+    ),
   },
 ];
 

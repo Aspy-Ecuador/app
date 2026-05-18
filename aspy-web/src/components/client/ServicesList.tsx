@@ -35,7 +35,18 @@ export default function ServicesList() {
       disableColumnMenu: true,
       resizable: false,
       renderCell: (params) => {
-        return <Typography variant="body1">$ {params.value}</Typography>;
+        return (
+          <Box display="flex" alignItems="center" height="100%">
+            <Typography
+              variant="body1"
+              sx={{
+                color: "#0F6E56",
+              }}
+            >
+              ${Number(params.value).toFixed(2)}
+            </Typography>
+          </Box>
+        );
       },
     },
   ];

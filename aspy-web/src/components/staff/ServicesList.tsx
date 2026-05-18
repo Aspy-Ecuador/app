@@ -4,7 +4,7 @@ import type { GridColDef, GridRowId } from "@mui/x-data-grid";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
 import Table from "@components/Table";
 import Header from "@components/Header";
 import Progress from "@components/Progress";
@@ -54,7 +54,16 @@ export default function Services() {
       disableColumnMenu: true,
       resizable: false,
       renderCell: (params) => (
-        <Typography variant="body1">$ {params.value}</Typography>
+        <Box display="flex" alignItems="center" height="100%">
+          <Typography
+            variant="body1"
+            sx={{
+              color: "#0F6E56",
+            }}
+          >
+            ${Number(params.value).toFixed(2)}
+          </Typography>
+        </Box>
       ),
     },
     {
@@ -68,13 +77,25 @@ export default function Services() {
       align: "center",
       headerAlign: "center",
       renderCell: (params) => (
-        <Button
-          onClick={() => handleEdit(params.row.service_id)}
-          variant="text"
-          className="boton-editar"
-        >
-          <EditOutlinedIcon />
-        </Button>
+        <Box display="flex" alignItems="center" height="100%">
+          <IconButton
+            size="small"
+            onClick={() => handleEdit(params.row.service_id)}
+            sx={{
+              border: "0.5px solid",
+              borderColor: "divider",
+              bgcolor: "action.hover",
+              borderRadius: 1.5,
+              "&:hover": {
+                borderColor: "#9FE1CB",
+                color: "#0F6E56",
+                bgcolor: "#E1F5EE",
+              },
+            }}
+          >
+            <EditOutlinedIcon sx={{ fontSize: 13 }} />
+          </IconButton>
+        </Box>
       ),
     },
   ];
