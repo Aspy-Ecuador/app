@@ -13,7 +13,6 @@ import Chip from "@mui/material/Chip";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import Skeleton from "@mui/material/Skeleton";
-
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import EventBusyRoundedIcon from "@mui/icons-material/EventBusyRounded";
@@ -25,9 +24,10 @@ import professionalAPI from "@/API/professionalAPI";
 import type { WorkerProfessional } from "@/typesResponse/WorkerProfessional";
 import type { Schedule } from "@/typesResponse/Schedule";
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/** "2026-05-07" o "2026-05-07T00:00:00.000000Z" → "miércoles, 7 de mayo" */
+const todayStr = () => new Date().toISOString().split("T")[0];
+
 const formatDate = (dateStr: string) => {
   const [year, month, day] = dateStr.split("T")[0].split("-").map(Number);
   return new Date(year, month - 1, day).toLocaleDateString("es-ES", {
@@ -37,13 +37,9 @@ const formatDate = (dateStr: string) => {
   });
 };
 
-/** "09:00:00" → "09:00" */
 const fmt = (t: string) => t.slice(0, 5);
 
-/** Today's date as YYYY-MM-DD (for min attribute) */
-const today = () => new Date().toISOString().split("T")[0];
-
-// ─── Shared sub-components ───────────────────────────────────────────────────
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
 const SectionPanel = ({
   label,
@@ -59,15 +55,15 @@ const SectionPanel = ({
     sx={{
       border: "0.5px solid",
       borderColor: "divider",
-      borderRadius: { xs: 3, md: 4 },
+      borderRadius: 3,
       overflow: "hidden",
       height: "100%",
     }}
   >
     <Box
       sx={{
-        px: { xs: 1.75, md: 2.5 },
-        py: { xs: 1.25, md: 1.75 },
+        px: 2,
+        py: 1.5,
         borderBottom: "0.5px solid",
         borderColor: "divider",
         display: "flex",
@@ -77,7 +73,7 @@ const SectionPanel = ({
     >
       <Typography
         sx={{
-          fontSize: { xs: 10, md: 11 },
+          fontSize: 10,
           fontWeight: 600,
           letterSpacing: "0.08em",
           textTransform: "uppercase",
@@ -88,39 +84,35 @@ const SectionPanel = ({
       </Typography>
       {badge}
     </Box>
-    <Box sx={{ p: { xs: 2, md: 3 } }}>{children}</Box>
+    <Box sx={{ p: 2 }}>{children}</Box>
   </Paper>
 );
 
-// Shared TextField sx — responsive font size
 const fieldSx = {
   "& .MuiOutlinedInput-root": {
-    borderRadius: 2.5,
-    fontSize: { xs: 12, md: 14 },
+    borderRadius: 2,
+    fontSize: 13,
     bgcolor: "action.hover",
     "& fieldset": { borderColor: "divider" },
     "&:hover fieldset": { borderColor: "#1D9E75" },
     "&.Mui-focused fieldset": { borderColor: "#1D9E75" },
   },
-  "& .MuiInputLabel-root": { fontSize: { xs: 12, md: 14 } },
+  "& .MuiInputLabel-root": { fontSize: 13 },
   "& .MuiInputLabel-root.Mui-focused": { color: "#1D9E75" },
 };
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function HorarioProfessional() {
   const professionalId = getAuthenticatedPersonID();
 
-  // ── Form state
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  // ── Schedule list state
   const [schedules, setSchedules] = useState<WorkerProfessional[]>([]);
   const [loadingList, setLoadingList] = useState(true);
-
-  // ── Feedback
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
@@ -129,7 +121,6 @@ export default function HorarioProfessional() {
 
   const closeSnackbar = () => setSnackbar((s) => ({ ...s, open: false }));
 
-  // ── Fetch professional's own schedules
   const fetchSchedules = async () => {
     try {
       setLoadingList(true);
@@ -138,7 +129,7 @@ export default function HorarioProfessional() {
         all.filter((ws) => ws.professional.person_id === professionalId),
       );
     } catch {
-      // silent — list just stays empty
+      // silent
     } finally {
       setLoadingList(false);
     }
@@ -148,18 +139,21 @@ export default function HorarioProfessional() {
     fetchSchedules();
   }, []);
 
-  // ── Group schedules by date, sorted ascending
+  // ── Filtra solo hoy y fechas futuras, agrupa por fecha
   const grouped = useMemo(() => {
+    const today = todayStr();
     const map = new Map<string, WorkerProfessional[]>();
+
     schedules.forEach((ws) => {
       const d = (ws.schedule.date as unknown as string).split("T")[0];
+      if (d < today) return; // ← descarta pasados
       if (!map.has(d)) map.set(d, []);
       map.get(d)!.push(ws);
     });
+
     return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b));
   }, [schedules]);
 
-  // ── Submit
   const handleSubmit = async () => {
     if (!name.trim() || !date || !startTime || !endTime) {
       setSnackbar({
@@ -177,7 +171,6 @@ export default function HorarioProfessional() {
       });
       return;
     }
-
     try {
       setSubmitting(true);
       await professionalAPI.crearHorario({
@@ -207,6 +200,9 @@ export default function HorarioProfessional() {
       setSubmitting(false);
     }
   };
+
+  const today = todayStr();
+
   return (
     <>
       <Box
@@ -214,43 +210,24 @@ export default function HorarioProfessional() {
           display: "grid",
           gridTemplateColumns: {
             xs: "1fr",
-            md: "minmax(340px, 38%) minmax(0, 1fr)",
+            md: "minmax(300px, 36%) minmax(0,1fr)",
           },
-          gap: { xs: 1.5, md: 2.5 },
+          gap: { xs: 1.5, md: 2 },
           alignItems: "start",
         }}
       >
+        {/* ── Formulario ── */}
         <SectionPanel label="Nuevo horario">
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: { xs: 1.5, md: 2.25 },
-            }}
-          >
-            <Typography
-              sx={{
-                display: { xs: "none", md: "block" },
-                fontSize: 13,
-                color: "text.secondary",
-                lineHeight: 1.5,
-              }}
-            >
-              Configura un nuevo turno seleccionando el tipo, la fecha y el
-              rango horario.
-            </Typography>
-
-            <FormControl fullWidth size="medium">
-              <InputLabel sx={{ fontSize: { xs: 12, md: 14 } }}>
-                Tipo de turno
-              </InputLabel>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.75 }}>
+            <FormControl fullWidth size="small">
+              <InputLabel sx={{ fontSize: 13 }}>Tipo de turno</InputLabel>
               <Select
                 value={name}
                 label="Tipo de turno"
                 onChange={(e) => setName(e.target.value)}
                 sx={{
-                  fontSize: { xs: 12, md: 14 },
-                  borderRadius: 2.5,
+                  fontSize: 13,
+                  borderRadius: 2,
                   bgcolor: "action.hover",
                   "& .MuiOutlinedInput-notchedOutline": {
                     borderColor: "divider",
@@ -263,36 +240,23 @@ export default function HorarioProfessional() {
                   },
                 }}
               >
-                <MenuItem
-                  value="Turno Mañana"
-                  sx={{ fontSize: { xs: 12, md: 14 } }}
-                >
-                  Turno Mañana
-                </MenuItem>
-                <MenuItem
-                  value="Turno Tarde"
-                  sx={{ fontSize: { xs: 12, md: 14 } }}
-                >
-                  Turno Tarde
-                </MenuItem>
-                <MenuItem
-                  value="Turno Noche"
-                  sx={{ fontSize: { xs: 12, md: 14 } }}
-                >
-                  Turno Noche
-                </MenuItem>
+                {["Turno Mañana", "Turno Tarde", "Turno Noche"].map((t) => (
+                  <MenuItem key={t} value={t} sx={{ fontSize: 13 }}>
+                    {t}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
 
             <TextField
               fullWidth
-              size="medium"
+              size="small"
               type="date"
               label="Fecha"
               value={date}
               onChange={(e) => setDate(e.target.value)}
               InputLabelProps={{ shrink: true }}
-              inputProps={{ min: today() }}
+              inputProps={{ min: todayStr() }}
               sx={fieldSx}
             />
 
@@ -300,11 +264,11 @@ export default function HorarioProfessional() {
               sx={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
-                gap: { xs: 1, md: 1.5 },
+                gap: 1.25,
               }}
             >
               <TextField
-                size="medium"
+                size="small"
                 type="time"
                 label="Hora inicio"
                 value={startTime}
@@ -313,7 +277,7 @@ export default function HorarioProfessional() {
                 sx={fieldSx}
               />
               <TextField
-                size="medium"
+                size="small"
                 type="time"
                 label="Hora fin"
                 value={endTime}
@@ -323,32 +287,25 @@ export default function HorarioProfessional() {
               />
             </Box>
 
+            {/* Preview */}
             {date && startTime && endTime && startTime < endTime && (
               <Box
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 1.25,
-                  px: { xs: 1.25, md: 1.75 },
-                  py: { xs: 1, md: 1.25 },
+                  gap: 1,
+                  px: 1.5,
+                  py: 1,
                   bgcolor: "#F0FAF6",
                   border: "0.5px solid #A8DEC9",
-                  borderRadius: 2.5,
+                  borderRadius: 2,
                 }}
               >
                 <AccessTimeRoundedIcon
-                  sx={{
-                    fontSize: { xs: 13, md: 15 },
-                    color: "#1D9E75",
-                    flexShrink: 0,
-                  }}
+                  sx={{ fontSize: 13, color: "#1D9E75", flexShrink: 0 }}
                 />
                 <Typography
-                  sx={{
-                    fontSize: { xs: 11, md: 13 },
-                    color: "#1D9E75",
-                    fontWeight: 500,
-                  }}
+                  sx={{ fontSize: 12, color: "#1D9E75", fontWeight: 500 }}
                 >
                   {formatDate(date)} · {fmt(startTime + ":00")} –{" "}
                   {fmt(endTime + ":00")}
@@ -363,13 +320,11 @@ export default function HorarioProfessional() {
               sx={{
                 bgcolor: "#1D9E75",
                 color: "#fff",
-                fontSize: { xs: 12, md: 14 },
+                fontSize: 12,
                 fontWeight: 600,
-                borderRadius: 2.5,
-                py: { xs: 1, md: 1.4 },
-                mt: { xs: 0.5, md: 1 },
+                borderRadius: 2,
+                py: 1,
                 textTransform: "none",
-                letterSpacing: 0,
                 "&:hover": { bgcolor: "#0F6E56" },
                 "&.Mui-disabled": { bgcolor: "#A8DEC9", color: "#fff" },
               }}
@@ -379,32 +334,32 @@ export default function HorarioProfessional() {
           </Box>
         </SectionPanel>
 
+        {/* ── Lista de horarios ── */}
         <SectionPanel
           label="Mis horarios"
           badge={
             !loadingList && (
-              <Typography
-                sx={{ fontSize: { xs: 10, md: 11 }, color: "text.disabled" }}
-              >
-                {schedules.length} {schedules.length === 1 ? "turno" : "turnos"}
+              <Typography sx={{ fontSize: 10, color: "text.disabled" }}>
+                {
+                  schedules.filter(
+                    (ws) =>
+                      (ws.schedule.date as unknown as string).split("T")[0] >=
+                      today,
+                  ).length
+                }{" "}
+                turnos
               </Typography>
             )
           }
         >
           {loadingList && (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: { xs: 1, md: 1.5 },
-              }}
-            >
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
               {[1, 2, 3].map((i) => (
                 <Skeleton
                   key={i}
                   variant="rounded"
-                  height={56}
-                  sx={{ borderRadius: 2.5 }}
+                  height={48}
+                  sx={{ borderRadius: 2 }}
                 />
               ))}
             </Box>
@@ -416,199 +371,211 @@ export default function HorarioProfessional() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                justifyContent: "center",
-                py: { xs: 6, md: 10 },
-                gap: 1.5,
+                py: 8,
+                gap: 1.25,
               }}
             >
-              <CalendarMonthRoundedIcon
+              <Box
                 sx={{
-                  fontSize: { xs: 38, md: 48 },
+                  width: 44,
+                  height: 44,
+                  borderRadius: 2,
+                  bgcolor: "action.hover",
+                  border: "0.5px solid",
+                  borderColor: "divider",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                   color: "text.disabled",
-                  opacity: 0.35,
                 }}
-              />
-              <Typography
-                sx={{ fontSize: { xs: 12, md: 14 }, color: "text.disabled" }}
               >
-                Aún no tienes horarios registrados
+                <CalendarMonthRoundedIcon sx={{ fontSize: 20 }} />
+              </Box>
+              <Typography sx={{ fontSize: 12, color: "text.disabled" }}>
+                No tienes horarios próximos registrados
               </Typography>
             </Box>
           )}
 
           {!loadingList && grouped.length > 0 && (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: { xs: 2.5, md: 3 },
-              }}
-            >
-              {grouped.map(([dateStr, slots]) => (
-                <Box key={dateStr}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                      mb: { xs: 1, md: 1.25 },
-                    }}
-                  >
-                    <Typography
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+              {grouped.map(([dateStr, slots]) => {
+                const isToday = dateStr === today;
+                return (
+                  <Box key={dateStr}>
+                    {/* Cabecera de fecha */}
+                    <Box
                       sx={{
-                        fontSize: { xs: 11, md: 12 },
-                        fontWeight: 600,
-                        color: "text.secondary",
-                        textTransform: "capitalize",
-                        whiteSpace: "nowrap",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        mb: 1,
                       }}
                     >
-                      {formatDate(dateStr)}
-                    </Typography>
-                    <Box
-                      sx={{ flex: 1, height: "0.5px", bgcolor: "divider" }}
-                    />
-                  </Box>
-
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: { xs: 0.75, md: 1 },
-                    }}
-                  >
-                    {[...slots]
-                      .sort((a, b) =>
-                        (
-                          a.schedule.start_time as unknown as string
-                        ).localeCompare(
-                          b.schedule.start_time as unknown as string,
-                        ),
-                      )
-                      .map((ws) => {
-                        const available = ws.is_available;
-                        const startStr = ws.schedule
-                          .start_time as unknown as string;
-                        const endStr = ws.schedule
-                          .end_time as unknown as string;
-
-                        return (
-                          <Box
-                            key={ws.worker_schedule_id}
+                      <Typography
+                        sx={{
+                          fontSize: 11,
+                          fontWeight: 600,
+                          color: "text.secondary",
+                          textTransform: "capitalize",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {isToday ? "hoy, " : ""}
+                        {formatDate(dateStr)}
+                      </Typography>
+                      {isToday && (
+                        <Box
+                          sx={{
+                            px: 0.875,
+                            py: 0.25,
+                            borderRadius: "20px",
+                            bgcolor: "#E6F1FB",
+                          }}
+                        >
+                          <Typography
                             sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: { xs: 1.5, md: 2 },
-                              px: { xs: 1.5, md: 2 },
-                              py: { xs: 1, md: 1.25 },
-                              border: "0.5px solid",
-                              borderColor: available ? "#A8DEC9" : "divider",
-                              borderRadius: 2.5,
-                              bgcolor: available ? "#F0FAF6" : "action.hover",
-                              transition: "background 0.15s",
+                              fontSize: 9,
+                              fontWeight: 600,
+                              color: "#185FA5",
                             }}
                           >
+                            Hoy
+                          </Typography>
+                        </Box>
+                      )}
+                      <Box
+                        sx={{ flex: 1, height: "0.5px", bgcolor: "divider" }}
+                      />
+                    </Box>
+
+                    {/* Slots */}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 0.75,
+                      }}
+                    >
+                      {[...slots]
+                        .sort((a, b) =>
+                          (
+                            a.schedule.start_time as unknown as string
+                          ).localeCompare(
+                            b.schedule.start_time as unknown as string,
+                          ),
+                        )
+                        .map((ws) => {
+                          const available = ws.is_available;
+                          const startStr = ws.schedule
+                            .start_time as unknown as string;
+                          const endStr = ws.schedule
+                            .end_time as unknown as string;
+
+                          return (
                             <Box
+                              key={ws.worker_schedule_id}
                               sx={{
                                 display: "flex",
                                 alignItems: "center",
-                                gap: 0.5,
-                                px: { xs: 1, md: 1.25 },
-                                py: 0.5,
-                                borderRadius: 1.5,
-                                bgcolor: available
-                                  ? "#1D9E75"
-                                  : "rgba(0,0,0,0.18)",
-                                flexShrink: 0,
+                                gap: 1.5,
+                                px: 1.5,
+                                py: 1,
+                                border: "0.5px solid",
+                                borderColor: available ? "#A8DEC9" : "divider",
+                                borderRadius: 2,
+                                bgcolor: available ? "#F0FAF6" : "action.hover",
+                                transition: "background 0.15s",
                               }}
                             >
-                              <AccessTimeRoundedIcon
+                              {/* Pill de hora */}
+                              <Box
                                 sx={{
-                                  fontSize: { xs: 11, md: 13 },
-                                  color: "#fff",
-                                }}
-                              />
-                              <Typography
-                                sx={{
-                                  fontSize: { xs: 10, md: 12 },
-                                  fontWeight: 700,
-                                  color: "#fff",
-                                  lineHeight: 1,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 0.5,
+                                  px: 1,
+                                  py: 0.5,
+                                  borderRadius: 1.5,
+                                  flexShrink: 0,
+                                  bgcolor: available
+                                    ? "#1D9E75"
+                                    : "rgba(0,0,0,0.12)",
                                 }}
                               >
-                                {fmt(startStr)} – {fmt(endStr)}
+                                <AccessTimeRoundedIcon
+                                  sx={{ fontSize: 11, color: "#fff" }}
+                                />
+                                <Typography
+                                  sx={{
+                                    fontSize: 10,
+                                    fontWeight: 700,
+                                    color: "#fff",
+                                    lineHeight: 1,
+                                    fontFamily: "monospace",
+                                  }}
+                                >
+                                  {fmt(startStr)} – {fmt(endStr)}
+                                </Typography>
+                              </Box>
+
+                              {/* Nombre */}
+                              <Typography
+                                sx={{
+                                  fontSize: 12,
+                                  fontWeight: 500,
+                                  flex: 1,
+                                  color: available
+                                    ? "text.primary"
+                                    : "text.disabled",
+                                }}
+                              >
+                                {(ws.schedule as Schedule).name ?? "Sin nombre"}
                               </Typography>
-                            </Box>
 
-                            <Typography
-                              sx={{
-                                fontSize: { xs: 12, md: 14 },
-                                fontWeight: 500,
-                                flex: 1,
-                                color: available
-                                  ? "text.primary"
-                                  : "text.disabled",
-                              }}
-                            >
-                              {(ws.schedule as Schedule).name ?? "Sin nombre"}
-                            </Typography>
-
-                            {available ? (
+                              {/* Estado */}
                               <Chip
                                 icon={
-                                  <CheckCircleRoundedIcon
-                                    sx={{
-                                      fontSize: "12px !important",
-                                      color: "#1D9E75 !important",
-                                    }}
-                                  />
+                                  available ? (
+                                    <CheckCircleRoundedIcon
+                                      sx={{
+                                        fontSize: "11px !important",
+                                        color: "#1D9E75 !important",
+                                      }}
+                                    />
+                                  ) : (
+                                    <EventBusyRoundedIcon
+                                      sx={{
+                                        fontSize: "11px !important",
+                                        color: "text.disabled !important",
+                                      }}
+                                    />
+                                  )
                                 }
-                                label="Disponible"
+                                label={available ? "Disponible" : "Ocupado"}
                                 size="small"
                                 sx={{
-                                  height: { xs: 20, md: 24 },
-                                  fontSize: { xs: 9, md: 10 },
+                                  height: 22,
+                                  fontSize: 9,
                                   fontWeight: 600,
                                   bgcolor: "transparent",
-                                  color: "#1D9E75",
-                                  border: "0.5px solid #A8DEC9",
-                                  "& .MuiChip-label": {
-                                    px: { xs: 0.75, md: 1 },
-                                  },
-                                }}
-                              />
-                            ) : (
-                              <Chip
-                                icon={
-                                  <EventBusyRoundedIcon
-                                    sx={{
-                                      fontSize: "12px !important",
-                                      color: "text.disabled !important",
-                                    }}
-                                  />
-                                }
-                                label="Ocupado"
-                                size="small"
-                                sx={{
-                                  height: { xs: 20, md: 24 },
-                                  fontSize: { xs: 9, md: 10 },
-                                  fontWeight: 600,
-                                  bgcolor: "transparent",
-                                  color: "text.disabled",
+                                  color: available
+                                    ? "#1D9E75"
+                                    : "text.disabled",
                                   border: "0.5px solid",
-                                  borderColor: "divider",
-                                  "& .MuiChip-label": {
-                                    px: { xs: 0.75, md: 1 },
-                                  },
+                                  borderColor: available
+                                    ? "#A8DEC9"
+                                    : "divider",
+                                  "& .MuiChip-label": { px: 0.875 },
                                 }}
                               />
-                            )}
-                          </Box>
-                        );
-                      })}
+                            </Box>
+                          );
+                        })}
+                    </Box>
                   </Box>
-                </Box>
-              ))}
+                );
+              })}
             </Box>
           )}
         </SectionPanel>
