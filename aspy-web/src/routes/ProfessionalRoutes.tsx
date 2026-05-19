@@ -7,7 +7,7 @@ import History from "@professional/History";
 import NewReport from "@professional/NewReport";
 import Detail from "@professional/Detail";
 import EditUserAdmin from "@/components/admin/EditUserAdmin";
-import Horarioview from "@professional/Horarioview";
+import HorarioView from "@professional/Horarioview";
 
 export const ProfessionalRoutes = [
   { path: "/", element: <ControlPanel /> },
@@ -18,6 +18,6 @@ export const ProfessionalRoutes = [
   { path: "/pacientes/:id", element: <History /> },
   { path: "/pacientes/:appointment/nuevoReporte", element: <NewReport /> },
   { path: "/pacientes/:id/:citaId", element: <Detail /> },
-  { path: "/seleccionar-horario", element: <Horarioview /> },
+  { path: "/seleccionar-horario", element: <HorarioView /> },
   ...SharedRoutes,
 ];
