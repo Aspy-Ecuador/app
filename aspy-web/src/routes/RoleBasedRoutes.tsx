@@ -10,6 +10,7 @@ import AdminLayout from "@layouts/AdminLayout";
 import StaffLayout from "@layouts/StaffLayout";
 import ProfessionalLayout from "@layouts/ProfessionalLayout";
 import ClientLayout from "@layouts/ClientLayout";
+import NotFound from "@components/NotFound"; // Importación del componente de error 404
 
 const layouts: Record<Role, () => React.ReactElement> = {
   Admin: AdminLayout,
@@ -35,9 +36,13 @@ const RoleBasedRoutes = () => {
           </AppTheme>
         }
       >
+        {/* Renderiza las rutas dinámicas correspondientes al rol */}
         {routes.map((route, i) => (
           <Route key={i} path={route.path} element={route.element} />
         ))}
+        
+        {/* Ruta comodín para manejar errores 404 dentro del Layout del usuario */}
+        <Route path="*" element={<NotFound />} />
       </Route>
     </RRDRoutes>
   );

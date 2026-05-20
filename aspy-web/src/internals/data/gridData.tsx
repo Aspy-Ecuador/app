@@ -1,6 +1,6 @@
 import Avatar from '@mui/material/Avatar';
 import Chip from '@mui/material/Chip';
-import { GridCellParams, GridRowsProp, GridColDef } from '@mui/x-data-grid';
+import type { GridCellParams, GridRowsProp, GridColDef } from '@mui/x-data-grid';
 import { SparkLineChart } from '@mui/x-charts/SparkLineChart';
 
 type SparkLineData = number[];
@@ -30,14 +30,14 @@ function renderSparklineCell(params: GridCellParams<SparkLineData, any>) {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-      <SparkLineChart
+        <SparkLineChart
         data={value}
         width={colDef.computedWidth || 100}
         height={32}
         plotType="bar"
         showHighlight
         showTooltip
-        colors={['hsl(210, 98%, 42%)']}
+          color={'hsl(210, 98%, 42%)'}
         xAxis={{
           scaleType: 'band',
           data,

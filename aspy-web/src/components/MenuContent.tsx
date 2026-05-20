@@ -89,7 +89,8 @@ export default function MenuContent({ onNavigate }: MenuContentProps) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const role = getAuthenticatedUserRole();
-  const items = ROLE_MAP[role] ?? [];
+  const items: NavItem[] =
+    typeof role === 'string' && role in ROLE_MAP ? ROLE_MAP[role as keyof typeof ROLE_MAP] : [];
 
   const handleNav = (route: string) => {
     navigate(route.trim());
@@ -113,7 +114,7 @@ export default function MenuContent({ onNavigate }: MenuContentProps) {
         Menú principal
       </Typography>
 
-      {items.map((item, index) => {
+      {items.map((item: NavItem, index: number) => {
         const isActive =
           item.route === "/"
             ? pathname === "/"
