@@ -28,7 +28,7 @@ RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
 COPY nginx.conf /etc/nginx/sites-available/default
 
 # Exponer puerto 9000 (PHP-FPM)
-EXPOSE 9000
+EXPOSE 8000
 
 # El CMD por defecto de la imagen php:8.4-fpm ya ejecuta php-fpm, por lo que
 # no necesitas definirlo explícitamente a menos que quieras personalizarlo.
