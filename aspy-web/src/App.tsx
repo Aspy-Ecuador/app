@@ -1,9 +1,9 @@
 import RoleBasedRoutes from "@routes/RoleBasedRoutes";
 import SignInSide from "@components/SignInSide";
 import SignUp from "@components/SignUp";
-import NotFound from "@components/NotFound";
 import AppTheme from "./shared-theme/AppTheme";
 import CssBaseline from "@mui/material/CssBaseline";
+import LandingPage from "@pages/LandingPage";
 import { useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -12,6 +12,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import PrivateRoute from "@components/PrivateRoute";
+
 
 // Mapeo de rutas y títulos
 const routeTitles: { [key: string]: string } = {
@@ -30,7 +31,6 @@ const routeTitles: { [key: string]: string } = {
   "/pago": "Pago",
   "/sobreAspy": "Mas información",
   "/contacto": "Contacto",
-  "/404": "Página no encontrada",
 };
 
 const dynamicRoutes = [
@@ -60,18 +60,18 @@ const App = () => {
   return (
     <AppTheme themeComponents={xThemeComponents}>
       <CssBaseline enableColorScheme />
-      <Router basename="/app">
+      <Router>
         <DocumentTitleUpdater />
         <Routes>
-          {/* Rutas públicas sin layout */}
+          {/* Rutas públicas estructurales */}
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<SignInSide />} />
           <Route path="/register" element={<SignUp />} />
-          {/* Rutas privadas basadas en el rol */}
+
+          {/* Rutas privadas manejadas dinámicamente por rol */}
           <Route element={<PrivateRoute />}>
             <Route path="*" element={<RoleBasedRoutes />} />
           </Route>
-          {/* Rutas no encontradas */}
-          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </AppTheme>

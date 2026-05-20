@@ -66,7 +66,7 @@ export default function SignInCard() {
     try {
       setLoading(true);
       await login(email, password);
-      navigate("/");
+      navigate("/dashboard");
     } catch (error) {
       console.error("Login failed:", error);
       setLoginError("Credenciales incorrectas. Por favor, intente de nuevo.");

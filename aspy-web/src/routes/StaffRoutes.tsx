@@ -16,7 +16,7 @@ import CheckoutView from "@components/CheckoutView";
 import EditUserAdmin from "@/components/admin/EditUserAdmin";
 
 export const StaffRoutes = [
-  { path: "/", element: <ControlPanel /> },
+  { path: "/dashboard", element: <ControlPanel /> },
   { path: "/perfil", element: <Profile /> },
   { path: "/editar/:id", element: <EditUserAdmin /> },
   { path: "/profesionales", element: <ProffesionalList /> },

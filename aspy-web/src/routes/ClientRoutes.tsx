@@ -9,7 +9,7 @@ import ServicesList from "@client/ServicesList";
 import History from "@client/History";
 
 export const ClientRoutes = [
-  { path: "/", element: <ControlPanel /> },
+  { path: "/dashboard", element: <ControlPanel /> },
   { path: "/perfil", element: <Profile /> },
   { path: "/editar/:id", element: <EditUserAdmin /> },
   { path: "/agendar-cita", element: <AppointmentView isClient={true} /> },

@@ -1,4 +1,4 @@
-// aspy-web/src/page/AboutAspy.tsx
+// aspy-web/src/page/LandingPage.tsx
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import { C } from "@components/landing/constants";
@@ -9,18 +9,17 @@ import ServicesSection from "@components/landing/ServicesSection";
 import AspyBandSection from "@components/landing/AspyBandSection";
 import FooterCTA       from "@components/landing/FooterCTA";
 
-export default function AboutAspy() {
+export default function LandingPage() {
   return (
     <Box sx={{ background: C.offWhite, minHeight: "100vh", overflowX: "hidden" }}>
-      {/* showAuthButton=false oculta el chip/botón de login */}
-      <Navbar showAuthButton={false} />
-      <HeroSection showLoginCTA={false} />
+      <Navbar />
+      <HeroSection />
       <MissionSection />
       <Divider sx={{ borderColor: C.border, mx: { xs: 3, md: 8 } }} />
       <ServicesSection />
       <Divider sx={{ borderColor: C.border, mx: { xs: 3, md: 8 } }} />
       <AspyBandSection />
-      <FooterCTA showLoginCTA={false} />
+      <FooterCTA />
     </Box>
   );
 }
