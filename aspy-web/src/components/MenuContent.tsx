@@ -23,14 +23,14 @@ interface MenuContentProps {
 type NavItem = { text: string; route: string; icon: ReactNode };
 
 const adminListItems: NavItem[] = [
-  { text: "Vista General", route: "/", icon: <HomeRoundedIcon /> },
+  { text: "Vista General", route: "/dashboard", icon: <HomeRoundedIcon /> },
   { text: "Usuarios", route: "/usuarios", icon: <GroupRoundedIcon /> },
   { text: "Servicios", route: "/servicios", icon: <AssignmentRoundedIcon /> },
   { text: "Citas", route: "/citas", icon: <CalendarMonthRoundedIcon /> },
 ];
 
 const staffListItems: NavItem[] = [
-  { text: "Vista General", route: "/", icon: <HomeRoundedIcon /> },
+  { text: "Vista General", route: "/dashboard", icon: <HomeRoundedIcon /> },
   {
     text: "Profesionales",
     route: "/profesionales",
@@ -48,18 +48,22 @@ const staffListItems: NavItem[] = [
 ];
 
 const professionalListItems: NavItem[] = [
-  { text: "Vista General", route: "/", icon: <HomeRoundedIcon /> },
+  { text: "Vista General", route: "/dashboard", icon: <HomeRoundedIcon /> },
   {
     text: "Pacientes",
     route: "/pacientes",
     icon: <AssignmentIndRoundedIcon />,
   },
   { text: "Citas", route: "/citas", icon: <CalendarMonthRoundedIcon /> },
-  {text: "Crear Horarios", route: "/seleccionar-horario", icon: <EditCalendarRoundedIcon />},
+  {
+    text: "Crear Horarios",
+    route: "/seleccionar-horario",
+    icon: <EditCalendarRoundedIcon />,
+  },
 ];
 
 const clientListItems: NavItem[] = [
-  { text: "Vista General", route: "/", icon: <HomeRoundedIcon /> },
+  { text: "Vista General", route: "/dashboard", icon: <HomeRoundedIcon /> },
   {
     text: "Nueva cita",
     route: "/agendar-cita",
