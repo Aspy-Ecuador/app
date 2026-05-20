@@ -13,6 +13,7 @@ import {
 } from "react-router-dom";
 import PrivateRoute from "@components/PrivateRoute";
 
+
 // Mapeo de rutas y títulos
 const routeTitles: { [key: string]: string } = {
   "/": "Inicio",
