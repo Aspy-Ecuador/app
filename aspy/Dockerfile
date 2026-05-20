@@ -18,13 +18,10 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 WORKDIR /var/www
 
 # Copiar archivos composer.json y composer.lock para instalación de dependencias
-COPY composer.json composer.lock ./
+COPY . .
 
 # Instalar dependencias PHP (Laravel)
 RUN composer install --no-dev --optimize-autoloader
-
-# Copiar todo el código fuente al contenedor
-COPY . .
 
 # Exponer puerto 9000 (PHP-FPM)
 EXPOSE 9000
