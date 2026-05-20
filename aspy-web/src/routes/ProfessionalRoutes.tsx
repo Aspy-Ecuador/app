@@ -10,7 +10,7 @@ import EditUserAdmin from "@/components/admin/EditUserAdmin";
 import HorarioView from "@professional/Horarioview";
 
 export const ProfessionalRoutes = [
-  { path: "/", element: <ControlPanel /> },
+  { path: "/dashboard", element: <ControlPanel /> },
   { path: "/perfil", element: <Profile /> },
   { path: "/editar/:id", element: <EditUserAdmin /> },
   { path: "/pacientes", element: <PatientsList /> },

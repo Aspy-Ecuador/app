@@ -70,7 +70,7 @@ export default function Navbar({ showAuthButton = true }: NavbarProps) {
     setTimeout(() => scrollTo(id), drawerOpen ? 300 : 0);
   };
 
-  const goToPanel = () => navigate("/");
+  const goToPanel = () => navigate("/dashboard");
 
   return (
     <>
@@ -104,7 +104,12 @@ export default function Navbar({ showAuthButton = true }: NavbarProps) {
           {/* Logo */}
           <Box
             onClick={() => scrollTo("hero")}
-            sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer" }}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              cursor: "pointer",
+            }}
           >
             <Box
               sx={{
@@ -167,8 +172,8 @@ export default function Navbar({ showAuthButton = true }: NavbarProps) {
 
           {/* Right side */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {showAuthButton && (
-              authUser ? (
+            {showAuthButton &&
+              (authUser ? (
                 /* ── Con sesión: chip con nombre ── */
                 <Box
                   onClick={goToPanel}
@@ -180,13 +185,17 @@ export default function Navbar({ showAuthButton = true }: NavbarProps) {
                     py: { xs: 0.6, md: 0.75 },
                     borderRadius: 50,
                     cursor: "pointer",
-                    background: scrolled ? C.blueLight : "rgba(255,255,255,0.15)",
+                    background: scrolled
+                      ? C.blueLight
+                      : "rgba(255,255,255,0.15)",
                     border: scrolled
                       ? `1.5px solid ${C.blue}88`
                       : "1.5px solid rgba(255,255,255,0.45)",
                     transition: "all 0.25s ease",
                     "&:hover": {
-                      background: scrolled ? C.blueLight : "rgba(255,255,255,0.25)",
+                      background: scrolled
+                        ? C.blueLight
+                        : "rgba(255,255,255,0.25)",
                       transform: "translateY(-1px)",
                     },
                   }}
@@ -225,7 +234,10 @@ export default function Navbar({ showAuthButton = true }: NavbarProps) {
                   )}
                   {!isMobile && (
                     <DashboardRoundedIcon
-                      sx={{ fontSize: 15, color: scrolled ? C.blue : "rgba(255,255,255,0.7)" }}
+                      sx={{
+                        fontSize: 15,
+                        color: scrolled ? C.blue : "rgba(255,255,255,0.7)",
+                      }}
                     />
                   )}
                 </Box>
@@ -247,7 +259,9 @@ export default function Navbar({ showAuthButton = true }: NavbarProps) {
                       ? `linear-gradient(135deg, ${C.blue}, ${C.blueDark})`
                       : "rgba(255,255,255,0.18)",
                     color: "#fff",
-                    border: scrolled ? "none" : "1.5px solid rgba(255,255,255,0.5)",
+                    border: scrolled
+                      ? "none"
+                      : "1.5px solid rgba(255,255,255,0.5)",
                     backdropFilter: scrolled ? "none" : "blur(4px)",
                     transition: "all 0.25s ease",
                     "&:hover": {
@@ -261,8 +275,7 @@ export default function Navbar({ showAuthButton = true }: NavbarProps) {
                   <LoginRoundedIcon sx={{ fontSize: 16 }} />
                   {!isMobile && "Ingresar al sistema"}
                 </Box>
-              )
-            )}
+              ))}
 
             {isMobile && (
               <IconButton
@@ -286,12 +299,17 @@ export default function Navbar({ showAuthButton = true }: NavbarProps) {
         }}
       >
         <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
-          <IconButton onClick={() => setDrawerOpen(false)} sx={{ color: "#fff" }}>
+          <IconButton
+            onClick={() => setDrawerOpen(false)}
+            sx={{ color: "#fff" }}
+          >
             <CloseRoundedIcon />
           </IconButton>
         </Box>
 
-        <Typography sx={{ fontWeight: 800, fontSize: "1.2rem", color: "#fff", mb: 3 }}>
+        <Typography
+          sx={{ fontWeight: 800, fontSize: "1.2rem", color: "#fff", mb: 3 }}
+        >
           Fundación{" "}
           <Box component="span" sx={{ color: C.blue }}>
             Aspy
@@ -321,10 +339,13 @@ export default function Navbar({ showAuthButton = true }: NavbarProps) {
         </Box>
 
         {/* Drawer bottom — solo si showAuthButton */}
-        {showAuthButton && (
-          authUser ? (
+        {showAuthButton &&
+          (authUser ? (
             <Box
-              onClick={() => { setDrawerOpen(false); goToPanel(); }}
+              onClick={() => {
+                setDrawerOpen(false);
+                goToPanel();
+              }}
               sx={{
                 mt: 4,
                 display: "flex",
@@ -356,7 +377,9 @@ export default function Navbar({ showAuthButton = true }: NavbarProps) {
                 {getInitial(authUser)}
               </Box>
               <Box>
-                <Typography sx={{ color: "#fff", fontWeight: 600, fontSize: "0.9rem" }}>
+                <Typography
+                  sx={{ color: "#fff", fontWeight: 600, fontSize: "0.9rem" }}
+                >
                   {getDisplayName(authUser)}
                 </Typography>
                 <Typography sx={{ color: C.blue, fontSize: "0.75rem" }}>
@@ -366,7 +389,10 @@ export default function Navbar({ showAuthButton = true }: NavbarProps) {
             </Box>
           ) : (
             <Box
-              onClick={() => { setDrawerOpen(false); navigate("/login"); }}
+              onClick={() => {
+                setDrawerOpen(false);
+                navigate("/dashboard");
+              }}
               sx={{
                 mt: 4,
                 display: "flex",
@@ -385,8 +411,7 @@ export default function Navbar({ showAuthButton = true }: NavbarProps) {
               <LoginRoundedIcon sx={{ fontSize: 18 }} />
               Ingresar al sistema
             </Box>
-          )
-        )}
+          ))}
       </Drawer>
     </>
   );

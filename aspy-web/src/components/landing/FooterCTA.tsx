@@ -45,9 +45,15 @@ export default function FooterCTA({ showLoginCTA = true }: FooterCTAProps) {
     >
       {/* Línea de colores */}
       <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mb: 3 }}>
-        <Box sx={{ width: 32, height: 5, borderRadius: 2, background: C.blue }} />
-        <Box sx={{ width: 32, height: 5, borderRadius: 2, background: C.pink }} />
-        <Box sx={{ width: 32, height: 5, borderRadius: 2, background: C.yellow }} />
+        <Box
+          sx={{ width: 32, height: 5, borderRadius: 2, background: C.blue }}
+        />
+        <Box
+          sx={{ width: 32, height: 5, borderRadius: 2, background: C.pink }}
+        />
+        <Box
+          sx={{ width: 32, height: 5, borderRadius: 2, background: C.yellow }}
+        />
       </Box>
 
       <Typography
@@ -64,7 +70,13 @@ export default function FooterCTA({ showLoginCTA = true }: FooterCTAProps) {
 
       <Typography
         variant="body1"
-        sx={{ color: C.muted, mb: 5, maxWidth: 380, mx: "auto", lineHeight: 1.8 }}
+        sx={{
+          color: C.muted,
+          mb: 5,
+          maxWidth: 380,
+          mx: "auto",
+          lineHeight: 1.8,
+        }}
       >
         Síguenos en redes sociales y sé parte del cambio.
       </Typography>
@@ -109,7 +121,7 @@ export default function FooterCTA({ showLoginCTA = true }: FooterCTAProps) {
       {/* Botón login */}
       {showLoginCTA && (
         <Box
-          onClick={() => navigate("/login")}
+          onClick={() => navigate("/dashboard")}
           sx={{
             display: "inline-flex",
             alignItems: "center",
@@ -144,7 +156,8 @@ export default function FooterCTA({ showLoginCTA = true }: FooterCTAProps) {
           opacity: 0.7,
         }}
       >
-        © {new Date().getFullYear()} Fundación Aspy Ecuador · Todos los derechos reservados
+        © {new Date().getFullYear()} Fundación Aspy Ecuador · Todos los derechos
+        reservados
       </Typography>
     </Box>
   );

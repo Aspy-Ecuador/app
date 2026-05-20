@@ -10,7 +10,7 @@ import Appointment from "@/components/admin/Appointments";
 import EditUserAdmin from "@/components/admin/EditUserAdmin";
 
 export const AdminRoutes = [
-  { path: "/", element: <ControlPanel /> },
+  { path: "/dashboard", element: <ControlPanel /> },
   { path: "/perfil", element: <Profile /> },
   { path: "/editar/:id", element: <EditUserAdmin /> },
   { path: "/usuarios", element: <UsersList /> },

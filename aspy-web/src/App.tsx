@@ -4,6 +4,7 @@ import SignUp from "@components/SignUp";
 import NotFound from "@components/NotFound";
 import AppTheme from "./shared-theme/AppTheme";
 import CssBaseline from "@mui/material/CssBaseline";
+import LandingPage from "@pages/LandingPage";
 import { useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -63,10 +64,14 @@ const App = () => {
       <Router basename="/app">
         <DocumentTitleUpdater />
         <Routes>
+          {/* Ruta pública: landing page */}
+          <Route path="/" element={<LandingPage />} />
+
           {/* Rutas públicas sin layout */}
           <Route path="/login" element={<SignInSide />} />
           <Route path="/register" element={<SignUp />} />
           {/* Rutas privadas basadas en el rol */}
+
           <Route element={<PrivateRoute />}>
             <Route path="*" element={<RoleBasedRoutes />} />
           </Route>

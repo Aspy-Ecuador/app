@@ -69,11 +69,56 @@ export default function HeroSection({ showLoginCTA = true }: HeroSectionProps) {
       />
 
       {/* Decorative circles */}
-      <FloatCircle delay="0s"   sx={{ width: 320, height: 320, top: -80,    right: -60,    background: `${C.blue}16` }} />
-      <FloatCircle delay="2.5s" sx={{ width: 160, height: 160, bottom: -40, left: "28%",   background: `${C.yellow}18` }} />
-      <FloatCircle delay="4.5s" sx={{ width: 100, height: 100, top: "18%",  right: "22%",  background: `${C.pink}20` }} />
-      <FloatCircle delay="1s"   sx={{ width: 55,  height: 55,  bottom: "22%", right: "10%", background: `${C.blue}22` }} />
-      <FloatCircle delay="3s"   sx={{ width: 70,  height: 70,  top: "40%",  left: "6%",    background: `${C.pink}14` }} />
+      <FloatCircle
+        delay="0s"
+        sx={{
+          width: 320,
+          height: 320,
+          top: -80,
+          right: -60,
+          background: `${C.blue}16`,
+        }}
+      />
+      <FloatCircle
+        delay="2.5s"
+        sx={{
+          width: 160,
+          height: 160,
+          bottom: -40,
+          left: "28%",
+          background: `${C.yellow}18`,
+        }}
+      />
+      <FloatCircle
+        delay="4.5s"
+        sx={{
+          width: 100,
+          height: 100,
+          top: "18%",
+          right: "22%",
+          background: `${C.pink}20`,
+        }}
+      />
+      <FloatCircle
+        delay="1s"
+        sx={{
+          width: 55,
+          height: 55,
+          bottom: "22%",
+          right: "10%",
+          background: `${C.blue}22`,
+        }}
+      />
+      <FloatCircle
+        delay="3s"
+        sx={{
+          width: 70,
+          height: 70,
+          top: "40%",
+          left: "6%",
+          background: `${C.pink}14`,
+        }}
+      />
 
       {/* Content */}
       <Box
@@ -99,7 +144,9 @@ export default function HeroSection({ showLoginCTA = true }: HeroSectionProps) {
             animation: `${fadeIn} 1s ease 0.2s both`,
           }}
         >
-          <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: C.blue }} />
+          <Box
+            sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: C.blue }}
+          />
           <Typography
             sx={{
               fontSize: "0.78rem",
@@ -160,8 +207,8 @@ export default function HeroSection({ showLoginCTA = true }: HeroSectionProps) {
           }}
         >
           Organización social dedicada a mejorar la calidad de vida de personas
-          con discapacidad — especialmente dentro del espectro autista — a través
-          del acompañamiento, la terapia y la inclusión.
+          con discapacidad — especialmente dentro del espectro autista — a
+          través del acompañamiento, la terapia y la inclusión.
         </Typography>
 
         {/* CTA buttons */}
@@ -175,7 +222,7 @@ export default function HeroSection({ showLoginCTA = true }: HeroSectionProps) {
             }}
           >
             <Box
-              onClick={() => navigate("/login")}
+              onClick={() => navigate("/dashboard")}
               sx={{
                 display: "flex",
                 alignItems: "center",
