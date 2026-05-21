@@ -3,26 +3,74 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import type { GridColDef, GridRowId } from "@mui/x-data-grid";
 import type { Service } from "@typesResponse/Service";
+import type { ProfessionalService } from "@typesResponse/ProfessionalService";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import CircularProgress from "@mui/material/CircularProgress";
 import SimpleHeader from "@components/SimpleHeader";
 import Table from "@components/Table";
+import professionalServiceAPI from "@API/professionalServiceAPI";
 import Progress from "@components/Progress";
 import AssignmentTurnedInRoundedIcon from "@mui/icons-material/AssignmentTurnedInRounded";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 
 export default function ServicesList() {
-  const { data, loading } = useRoleData();
+  const { data, loading, refreshProServices } = useRoleData();
   const [selectedId, setSelectedId] = useState<GridRowId | null>(null);
+  const [savingMap, setSavingMap] = useState<Record<number, boolean>>({});
   const navigate = useNavigate();
   const location = useLocation();
 
   const services: Service[] = data?.services ?? [];
+
+  // Profesionales disponibles: personas cuyo user_account.role.name === "Professional"
+  const professionals = (data?.persons ?? []).filter(
+    (p: any) =>
+      p.professional !== null && p.user_account?.role?.name === "Professional",
+  );
+
+  // proServices: lista de relaciones profesional-servicio ya guardadas
+  const proServices: ProfessionalService[] = data?.proServices ?? [];
+
+  // Construye un mapa service_id -> person_id[] para saber qué profesionales ya tienen el servicio
+  const assignedMap: Record<number, number[]> = {};
+  for (const ps of proServices) {
+    if (!assignedMap[ps.service_id]) assignedMap[ps.service_id] = [];
+    assignedMap[ps.service_id].push(ps.professional.person_id);
+  }
+
+  async function handleSelectProfessional(
+    service_id: number,
+    person_id: number,
+  ) {
+    setSavingMap((prev) => ({ ...prev, [service_id]: true }));
+    try {
+      const existing = proServices.find((ps) => ps.service_id === service_id);
+      if (existing) {
+        await professionalServiceAPI.updateProService(
+          existing.professional_service_id,
+          person_id,
+        );
+      } else {
+        await professionalServiceAPI.createProfessionalService({
+          service_id: service_id,
+          professional_id: person_id,
+        });
+      }
+      await refreshProServices();
+    } catch (e) {
+      console.error("Error al asignar profesional:", e);
+    } finally {
+      setSavingMap((prev) => ({ ...prev, [service_id]: false }));
+    }
+  }
 
   const columns: GridColDef[] = [
     {
@@ -47,16 +95,91 @@ export default function ServicesList() {
       resizable: false,
       renderCell: (params) => (
         <Box display="flex" alignItems="center" height="100%">
-          <Typography
-            variant="body1"
-            sx={{
-              color: "#0F6E56",
-            }}
-          >
+          <Typography variant="body1" sx={{ color: "#0F6E56" }}>
             ${Number(params.value).toFixed(2)}
           </Typography>
         </Box>
       ),
+    },
+    {
+      field: "profesional",
+      headerName: "Profesional",
+      flex: 3,
+      sortable: false,
+      filterable: false,
+      disableColumnMenu: true,
+      resizable: false,
+      // Reemplaza el renderCell de la columna "profesional"
+      renderCell: (params) => {
+        const serviceId: number = params.row.service_id;
+        const existing = proServices.find((ps) => ps.service_id === serviceId);
+        const currentValue = existing?.professional.person_id ?? "";
+        const isSaving = savingMap[serviceId] ?? false;
+
+        return (
+          <Box display="flex" alignItems="center" height="100%" gap={1}>
+            <Select
+              displayEmpty
+              size="small"
+              value={currentValue}
+              disabled={isSaving}
+              onChange={(e) =>
+                handleSelectProfessional(serviceId, e.target.value as number)
+              }
+              renderValue={(selected) =>
+                !selected ? (
+                  <Typography sx={{ fontSize: 12, color: "text.disabled" }}>
+                    Seleccione un profesional
+                  </Typography>
+                ) : (
+                  <Typography sx={{ fontSize: 12 }}>
+                    {(() => {
+                      const p = professionals.find(
+                        (pr: any) => pr.person_id === selected,
+                      );
+                      return p
+                        ? `${p.first_name} ${p.last_name}`
+                        : "Profesional desconocido";
+                    })()}
+                  </Typography>
+                )
+              }
+              sx={{
+                fontSize: 12,
+                minWidth: 160,
+                bgcolor: "background.paper",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "divider",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#9FE1CB",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#0F6E56",
+                },
+              }}
+            >
+              {professionals.length === 0 && (
+                <MenuItem disabled sx={{ fontSize: 12 }}>
+                  Sin profesionales
+                </MenuItem>
+              )}
+              {professionals.map((person: any) => (
+                <MenuItem
+                  key={person.person_id}
+                  value={person.person_id}
+                  sx={{ fontSize: 12 }}
+                >
+                  {person.first_name} {person.last_name}
+                </MenuItem>
+              ))}
+            </Select>
+            {isSaving && (
+              <CircularProgress size={14} sx={{ color: "#0F6E56" }} />
+            )}
+          </Box>
+        );
+      },
     },
     {
       field: "acciones",

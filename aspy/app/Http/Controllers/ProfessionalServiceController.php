@@ -26,7 +26,12 @@ class ProfessionalServiceController extends Controller
 
     public function store(Request $request)
     {
-        $service = ProfessionalService::create($request->all());
+        $service = ProfessionalService::create([
+            'service_id'      => $request->service_id,
+            'professional_id' => $request->professional_id,
+            'created_by'      => $request->user()->id,
+            'modified_by'     => null,
+        ]);
 
         return response()->json($service, 201);
     }
@@ -34,10 +39,14 @@ class ProfessionalServiceController extends Controller
     public function update(Request $request, $id)
     {
         $service = ProfessionalService::find($id);
-        if (! $service) {
+        if (!$service) {
             return response()->json(['message' => 'Servicio no encontrado'], 404);
         }
-        $service->update($request->all());
+
+        $service->update([
+            'professional_id' => $request->professional_id,
+            'modified_by'     => $request->user()->id,
+        ]);
 
         return response()->json($service);
     }

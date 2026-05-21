@@ -17,6 +17,10 @@ export const adminLoaders: Loader[] = [
   { name: "appointments", fn: appointmentAPI.getAllAppointments },
   { name: "persons", fn: personAPI.getAllPersons },
   { name: "payments", fn: paymentAPI.getAllPayments },
+  {
+    name: "proServices",
+    fn: professionalServiceAPI.getAllProfessionalServices,
+  },
 ];
 
 export const clientLoaders: Loader[] = [
