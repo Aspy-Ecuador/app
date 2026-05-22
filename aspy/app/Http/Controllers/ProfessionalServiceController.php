@@ -29,7 +29,7 @@ class ProfessionalServiceController extends Controller
         $service = ProfessionalService::create([
             'service_id'      => $request->service_id,
             'professional_id' => $request->professional_id,
-            'created_by'      => $request->user()->id,
+            'created_by'      =>  auth()->id(),
             'modified_by'     => null,
         ]);
 
@@ -45,7 +45,7 @@ class ProfessionalServiceController extends Controller
 
         $service->update([
             'professional_id' => $request->professional_id,
-            'modified_by'     => $request->user()->id,
+            'modified_by'     =>  auth()->id(),
         ]);
 
         return response()->json($service);

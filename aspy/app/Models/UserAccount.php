@@ -11,7 +11,9 @@ use Laravel\Sanctum\HasApiTokens;
 
 class UserAccount extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory;
+    use Notifiable;
+    use HasApiTokens;
 
     protected $table = 'user_account';
 
@@ -37,9 +39,9 @@ class UserAccount extends Authenticatable
         'modification_date' => 'datetime',
     ];
 
-    const CREATED_AT = 'creation_date';
+    public const CREATED_AT = 'creation_date';
 
-    const UPDATED_AT = 'modification_date';
+    public const UPDATED_AT = 'modification_date';
 
     // Necesario para Authenticatable
     /*
@@ -48,7 +50,23 @@ class UserAccount extends Authenticatable
         return $this->password_hash;
     }
     */
-    
+
+    // Desactiva el manejo automático de timestamps
+    public $timestamps = false;
+
+    // Maneja las fechas manualmente en los eventos del modelo
+    protected static function booted(): void
+    {
+        static::creating(function ($model) {
+            $model->creation_date = now();
+            $model->modification_date = null;
+        });
+
+        static::updating(function ($model) {
+            $model->modification_date = now();
+        });
+    }
+
     public function role()
     {
         return $this->belongsTo(Role::class, 'role_id', 'role_id');

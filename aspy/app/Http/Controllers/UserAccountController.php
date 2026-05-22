@@ -1,5 +1,7 @@
 <?php
+
 // FINAL
+
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUserAccount;
@@ -18,7 +20,7 @@ use Illuminate\Http\JsonResponse;
 class UserAccountController extends Controller
 {
     public function index()
-    {        
+    {
         $users = UserAccount::with([
             'role',
             'status',
@@ -95,8 +97,8 @@ class UserAccountController extends Controller
             // ── UserAccount ───────────────────────────────────
             'email'                     => 'required|email|max:150|unique:user_account,email',
             'password'                  => 'required|string|min:8|confirmed', // espera password_confirmation
-            'role_id'                   => 'required|integer|exists:role,role_id',           
- 
+            'role_id'                   => 'required|integer|exists:role,role_id',
+
             // ── Datos base de Person ──────────────────────────
             'gender_id'                 => 'required|integer|exists:gender,gender_id',
             'occupation_id'             => 'required|integer|exists:occupation,occupation_id',
@@ -105,11 +107,11 @@ class UserAccountController extends Controller
             'first_name'                => 'required|string|max:100',
             'last_name'                 => 'required|string|max:100',
             'birthdate'                 => 'required|date',
- 
+
             // ── Phone ─────────────────────────────────────────
             'phone.number'              => 'required|string|max:30',
             'phone.type'                => 'required|string|max:50',
- 
+
             // ── Address ───────────────────────────────────────
             'address.type'              => 'required|string|max:50',
             'address.country_id'        => 'required|integer|exists:country,country_id',
@@ -117,21 +119,23 @@ class UserAccountController extends Controller
             'address.city_id'           => 'required|integer|exists:city,city_id',
             'address.primary_address'   => 'required|string|max:255',
             'address.secondary_address' => 'required|string|max:255',
- 
+
             // ── Identification ────────────────────────────────
             'identification.type'       => 'required|string|max:50',
             'identification.number'     => 'required|string|max:50',
- 
+
             // ── Subtipo (opcional) ────────────────────────────
             'role'                      => 'nullable|string|in:client,professional,staff',
             'specialty'                 => 'nullable|string|max:150|required_if:role,professional',
             'title'                     => 'nullable|string|max:150',
         ]);
- 
+
         $createdBy = auth()->id() ?? 0;
- 
+
+        \Log::info('Usuario autenticado:', ['user' => auth()->user()]);
+        \Log::info('ID autenticado:', ['user' =>  auth()->id()]);
         $person = DB::transaction(function () use ($validated, $createdBy) {
- 
+
             // 1. Crear UserAccount (contraseña encriptada)
             $userAccount = UserAccount::create([
                 'role_id'       => $validated['role_id'],
@@ -142,7 +146,7 @@ class UserAccountController extends Controller
                 'creation_date' => now()
 
             ]);
- 
+
             // 2. Crear Person vinculada al UserAccount recién creado
             $person = Person::create([
                 'user_id'           => $userAccount->user_account_id,
@@ -156,7 +160,7 @@ class UserAccountController extends Controller
                 'created_by'        => $createdBy,
                 'creation_date'     => now()
             ]);
- 
+
             // 3. Crear Phone
             $person->phone()->create([
                 'number'     => $validated['phone']['number'],
@@ -164,7 +168,7 @@ class UserAccountController extends Controller
                 'created_by' => $createdBy,
                 'creation_date' => now()
             ]);
- 
+
             // 4. Crear Address
             $person->address()->create([
                 'type'              => $validated['address']['type'] ?? null,
@@ -176,7 +180,7 @@ class UserAccountController extends Controller
                 'created_by'        => $createdBy,
                 'creation_date'     => now()
             ]);
- 
+
             // 5. Crear Identification
             $person->identification()->create([
                 'type'       => $validated['identification']['type'],
@@ -184,7 +188,7 @@ class UserAccountController extends Controller
                 'created_by' => $createdBy,
                 'creation_date' => now()
             ]);
- 
+
             // 6. Crear subtipo si se envía el campo role
             match ($validated['role'] ?? null) {
                 'client'       => Client::create([
@@ -206,10 +210,10 @@ class UserAccountController extends Controller
                                   ]),
                 default        => null,
             };
- 
+
             return $person;
         });
- 
+
         return response()->json(
             $person->load([
                 'userAccount.role',
@@ -363,7 +367,7 @@ class UserAccountController extends Controller
                         'modification_date' => now(),
                     ]
                 );
-            }        
+            }
             return $person;
         });
 

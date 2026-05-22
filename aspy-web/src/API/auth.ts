@@ -34,7 +34,16 @@ export const StoreUser = async () => {
 
 export const register = async (userRegister: UserForm) => {
   try {
-    await api.post("/user-account", userRegister);
+    await api.post("/user-account/registro", userRegister);
+  } catch (error) {
+    console.error("Error al agregar persona:", error);
+    throw error;
+  }
+};
+
+export const crearUsuario = async (userRegister: UserForm) => {
+  try {
+    await api.post("/user-account/crear", userRegister);
   } catch (error) {
     console.error("Error al agregar persona:", error);
     throw error;

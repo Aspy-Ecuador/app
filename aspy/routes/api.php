@@ -26,12 +26,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Register
 Route::prefix('user-account')->group(function () {
-    Route::post('/', [UserAccountController::class, 'store']);
+    Route::post('/registro', [UserAccountController::class, 'store']);
 });
 
 // UserAccount
 Route::middleware('auth:sanctum')->prefix('user-account')->group(function () {
     Route::get('/', [UserAccountController::class, 'index']);
+    Route::post('/crear', [UserAccountController::class, 'store']);
     Route::get('/{id}', [UserAccountController::class, 'show']);
     Route::put('/{id}', [UserAccountController::class, 'update']);
     Route::delete('/{id}', [UserAccountController::class, 'destroy']);

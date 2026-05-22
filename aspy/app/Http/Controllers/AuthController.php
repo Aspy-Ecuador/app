@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -13,16 +14,19 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required|string',
         ]);
-    
+
         $user = UserAccount::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password_hash)) {
 
-        return response()->json(['message' => 'Credenciales inválidas'], 401);
-    }
-    
+            return response()->json(['message' => 'Credenciales inválidas'], 401);
+        }
+
+        $user->last_login = now();
+        $user->saveQuietly();
+
         $token = $user->createToken('react-token')->plainTextToken;
-    
+
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
@@ -34,7 +38,7 @@ class AuthController extends Controller
             ],
         ]);
     }
-    
+
 
     public function user(Request $request)
     {
@@ -51,7 +55,7 @@ class AuthController extends Controller
             'person.maritalStatus',
             'person.education',
             'person.phone',
-            
+
         ]);
 
         return response()->json($user);
@@ -79,7 +83,7 @@ class AuthController extends Controller
             'person.addresses.city',
             'person.identifications',
         ]);
- 
+
         return response()->json($user);
     }
 }

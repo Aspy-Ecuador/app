@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { UserForm } from "@/typesRequest/UserForm";
 import { useRoleData } from "@/observer/RoleDataContext";
-import { register } from "@/API/auth";
+import { crearUsuario } from "@/API/auth";
 import Box from "@mui/material/Box";
 import UserFormAdmin from "@admin/UserFormAdmin";
 import Steps from "@components/Steps";
@@ -98,7 +98,7 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
 
   const handleClose = () => {
     setOpen(false);
-    navigate("/");
+    navigate("/dashboard");
   };
 
   const handleFinalSubmit = async (stepData: UserForm) => {
@@ -110,7 +110,7 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
       if (isEdit && user_id) {
         await userAccountAPI.updateUserAccount(user_id, payload);
       } else {
-        await register(payload);
+        await crearUsuario(payload);
       }
       await refreshAll();
       setOpen(true);
