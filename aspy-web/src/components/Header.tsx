@@ -2,10 +2,8 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   textHeader: string;
@@ -20,11 +18,10 @@ export default function Header({
   textIcon,
   handle,
 }: HeaderProps) {
-  const navigate = useNavigate();
-
   return (
     <Box
       sx={{
+        position: "relative",
         display: "flex",
         alignItems: "center",
         gap: 1,
@@ -33,19 +30,30 @@ export default function Header({
         borderColor: "divider",
       }}
     >
-      <IconButton
-        size="small"
-        onClick={() => navigate(-1)}
+      <Typography
+        variant="h3"
         sx={{
-          border: "0.5px solid",
-          borderColor: "divider",
-          borderRadius: 1.5,
+          position: "absolute",
+          left: "50%",
+          transform: "translateX(-50%)",
+          fontSize: {
+            xs: "1.05rem",
+            sm: "1.5rem",
+            md: "2rem",
+          },
+          maxWidth: {
+            xs: "45%",
+            sm: "60%",
+            md: "70%",
+          },
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          px: 1,
         }}
       >
-        <ArrowBackRoundedIcon sx={{ fontSize: 16 }} />
-      </IconButton>
-
-      <Typography variant="h3">{textHeader}</Typography>
+        {textHeader}
+      </Typography>
 
       <Box sx={{ ml: "auto" }}>
         {isCreate ? (

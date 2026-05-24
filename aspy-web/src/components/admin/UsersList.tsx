@@ -1,10 +1,10 @@
-// FINAL
+// FINAL - VERSIÓN OPTIMIZADA (PC INSTANTÁNEO / MÓVIL FLUIDO)
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { CardAdmin } from "@/types/CardAdmin";
 import { useRoleData } from "@/observer/RoleDataContext";
 import type { GridColDef, GridRowId } from "@mui/x-data-grid";
-import { translateRol } from "@/utils/utils";
+import { translateRol, exportUsersExcel, exportUsersPDF } from "@/utils/utils";
 import Progress from "@components/Progress";
 import SimpleHeader from "@components/SimpleHeader";
 import Box from "@mui/material/Box";
@@ -12,6 +12,9 @@ import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
+import Drawer from "@mui/material/Drawer"; 
+import useMediaQuery from "@mui/material/useMediaQuery"; 
+import { useTheme } from "@mui/material/styles";
 import ProfileView from "@components/ProfileView";
 import DataInformation from "@admin/DataInformation";
 import Table from "@components/Table";
@@ -19,6 +22,7 @@ import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined
 import AttributionOutlinedIcon from "@mui/icons-material/AttributionOutlined";
 import SupervisedUserCircleOutlinedIcon from "@mui/icons-material/SupervisedUserCircleOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import type { Person } from "@/typesResponse/Person";
 
 const roleChipSx = (role: string) => {
@@ -34,6 +38,7 @@ const columns: GridColDef[] = [
     headerName: "Nombre",
     disableColumnMenu: true,
     flex: 2,
+    minWidth: 130, // Aumentado ligeramente para mejor lectura en tablets
     resizable: false,
   },
   {
@@ -41,6 +46,7 @@ const columns: GridColDef[] = [
     headerName: "Apellido",
     disableColumnMenu: true,
     flex: 2,
+    minWidth: 130,
     resizable: false,
   },
   {
@@ -48,6 +54,7 @@ const columns: GridColDef[] = [
     headerName: "Rol",
     disableColumnMenu: true,
     flex: 2,
+    minWidth: 110,
     resizable: false,
     renderCell: (params) => {
       const roleName = params.row.user_account?.role?.name ?? "";
@@ -71,6 +78,7 @@ const columns: GridColDef[] = [
     headerName: "Correo",
     disableColumnMenu: true,
     flex: 4,
+    minWidth: 200,
     resizable: false,
     renderCell: (params) => (
       <Box display="flex" alignItems="center" height="100%">
@@ -85,6 +93,7 @@ const columns: GridColDef[] = [
     headerName: "Celular",
     disableColumnMenu: true,
     flex: 3,
+    minWidth: 130,
     resizable: false,
     renderCell: (params) => (
       <Box display="flex" alignItems="center" height="100%">
@@ -98,6 +107,10 @@ export default function UsersList() {
   const [selectedId, setSelectedId] = useState<GridRowId | null>(null);
   const { data, loading } = useRoleData();
   const navigate = useNavigate();
+  
+  const theme = useTheme();
+  // isMobile captura celulares y tablets (breakpoints menores a 900px de ancho)
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const users: Person[] = data.persons ?? [];
   const selectedUser =
@@ -130,9 +143,14 @@ export default function UsersList() {
     <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.75 }}>
       <SimpleHeader text="Lista de usuarios" chip="Usuarios" />
 
-      {/* Stats + botón agregar */}
+      {/* Stats + botones */}
       <Box
-        sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          flexWrap: "wrap",
+        }}
       >
         <DataInformation buttonsData={buttonsData} />
 
@@ -157,37 +175,130 @@ export default function UsersList() {
         >
           Agregar usuario
         </Button>
+
+        <Box sx={{ width: "0.5px", height: 36, bgcolor: "divider", mx: 0.5 }} />
+
+        <Button
+          onClick={() => exportUsersPDF(users)}
+          startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: "14px !important" }} />}
+          sx={{
+            fontSize: 12,
+            fontWeight: 500,
+            bgcolor: "#FEE2E2",
+            color: "#991B1B",
+            border: "0.5px solid #FCA5A5",
+            borderRadius: 3,
+            px: 1.75,
+            py: 1.25,
+            height: "auto",
+            textTransform: "none",
+            "&:hover": { bgcolor: "#FCA5A5" },
+          }}
+        >
+          PDF
+        </Button>
+
+        <Button
+          onClick={() => exportUsersExcel(users)}
+          startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: "14px !important" }} />}
+          sx={{
+            fontSize: 12,
+            fontWeight: 500,
+            bgcolor: "#F0FDF4",
+            color: "#166534",
+            border: "0.5px solid #86EFAC",
+            borderRadius: 3,
+            px: 1.75,
+            py: 1.25,
+            height: "auto",
+            textTransform: "none",
+            "&:hover": { bgcolor: "#86EFAC" },
+          }}
+        >
+          Excel
+        </Button>
       </Box>
 
       {/* Tabla + panel de perfil */}
       <Grid container spacing={1.5} alignItems="flex-start">
-        <Grid size={selectedUser ? 8 : 12}>
-          {users.length ? (
-            <Table<Person>
-              columns={columns}
-              rows={users}
-              getRowId={(row) => row.user_id}
-              selectedId={selectedId}
-              onRowSelect={setSelectedId}
-            />
-          ) : (
-            <Typography
-              sx={{
-                fontSize: 13,
-                color: "text.disabled",
-                textAlign: "center",
-                py: 4,
-              }}
-            >
-              No hay usuarios registrados
-            </Typography>
-          )}
+        {/* En PC (md en adelante), si hay usuario seleccionado ocupa 8, si no 12. Instantáneo. */}
+        <Grid size={{ xs: 12, md: selectedUser && !isMobile ? 8 : 12 }} sx={{ minWidth: 0 }}>
+          <Box 
+            sx={{ 
+              width: "100%", 
+              overflowX: "auto",
+              // Mejora estética: sutil sombreado al seleccionar fila
+              "& .Mui-selected": {
+                backgroundColor: "rgba(15, 110, 86, 0.08) !important",
+              }
+            }}
+          >
+            {users.length ? (
+              <Table<Person>
+                columns={columns}
+                rows={users}
+                getRowId={(row) => row.user_id}
+                selectedId={selectedId}
+                onRowSelect={setSelectedId}
+              />
+            ) : (
+              <Typography
+                sx={{
+                  fontSize: 13,
+                  color: "text.disabled",
+                  textAlign: "center",
+                  py: 4,
+                }}
+              >
+                No hay usuarios registrados
+              </Typography>
+            )}
+          </Box>
         </Grid>
 
+        {/* Lógica de Detalle Independiente */}
         {selectedUser && (
-          <Grid size={4}>
-            <ProfileView user={selectedUser} isRowPosition={false} />
-          </Grid>
+          isMobile ? (
+            /* COMPORTAMIENTO MÓVIL/TABLET: Drawer fluido con Glassmorphism */
+            <Drawer
+              anchor="bottom"
+              open={Boolean(selectedUser)}
+              onClose={() => setSelectedId(null)}
+              // Añade desenfoque al fondo para un toque premium
+              slotProps={{
+                backdrop: {
+                  sx: { backdropFilter: "blur(4px)", backgroundColor: "rgba(0,0,0,0.2)" }
+                }
+              }}
+              PaperProps={{
+                sx: {
+                  borderTopLeftRadius: 20,
+                  borderTopRightRadius: 20,
+                  p: 2,
+                  maxHeight: "85vh", // Evita que tape toda la pantalla
+                  boxShadow: "0px -4px 20px rgba(0,0,0,0.1)"
+                },
+              }}
+            >
+              {/* Handle visual para indicar que se puede cerrar */}
+              <Box 
+                sx={{ 
+                  width: 40, 
+                  height: 4, 
+                  bgcolor: "action.disabled", 
+                  borderRadius: 2, 
+                  mx: "auto", 
+                  mb: 2 
+                }} 
+              />
+              <ProfileView user={selectedUser} isRowPosition={false} />
+            </Drawer>
+          ) : (
+            /* COMPORTAMIENTO PC: Instantáneo al lado de la tabla */
+            <Grid size={{ md: 4 }}>
+              <ProfileView user={selectedUser} isRowPosition={false} />
+            </Grid>
+          )
         )}
       </Grid>
     </Box>

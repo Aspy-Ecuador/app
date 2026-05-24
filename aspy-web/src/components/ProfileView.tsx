@@ -87,7 +87,7 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: isRowPosition ? "220px minmax(0,1fr)" : "1fr",
+        gridTemplateColumns: isRowPosition ? { xs: "1fr", sm: "220px minmax(0,1fr)" } : "1fr",
         gap: 1.5,
         alignItems: "start",
       }}
@@ -103,7 +103,6 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
             textAlign: "center",
           }}
         >
-          {/* Avatar con iniciales + botón editar */}
           <Box sx={{ position: "relative", display: "inline-block" }}>
             <Box
               sx={{
@@ -164,7 +163,6 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
 
       {/* Panel info */}
       <SectionPanel label="Información personal">
-        {/* Sobre mí */}
         <Box
           sx={{
             p: 1.25,
@@ -182,7 +180,8 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
           </Typography>
         </Box>
 
-        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+        {/* 1 columna en móvil, 2 columnas desde sm en adelante */}
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
           <Field label="Nombre" value={person.first_name} />
           <Field label="Apellido" value={person.last_name} />
           <Field label="Edad" value={`${getAge(person.birthdate)} años`} />

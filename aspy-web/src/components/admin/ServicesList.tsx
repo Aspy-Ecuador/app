@@ -6,7 +6,6 @@ import type { Service } from "@typesResponse/Service";
 import type { ProfessionalService } from "@typesResponse/ProfessionalService";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -17,9 +16,11 @@ import SimpleHeader from "@components/SimpleHeader";
 import Table from "@components/Table";
 import professionalServiceAPI from "@API/professionalServiceAPI";
 import Progress from "@components/Progress";
+import { exportServicesPDF, exportServicesCSV } from "@/utils/utils";
 import AssignmentTurnedInRoundedIcon from "@mui/icons-material/AssignmentTurnedInRounded";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 
 export default function ServicesList() {
   const { data, loading, refreshProServices } = useRoleData();
@@ -30,16 +31,13 @@ export default function ServicesList() {
 
   const services: Service[] = data?.services ?? [];
 
-  // Profesionales disponibles: personas cuyo user_account.role.name === "Professional"
   const professionals = (data?.persons ?? []).filter(
     (p: any) =>
       p.professional !== null && p.user_account?.role?.name === "Professional",
   );
 
-  // proServices: lista de relaciones profesional-servicio ya guardadas
   const proServices: ProfessionalService[] = data?.proServices ?? [];
 
-  // Construye un mapa service_id -> person_id[] para saber qué profesionales ya tienen el servicio
   const assignedMap: Record<number, number[]> = {};
   for (const ps of proServices) {
     if (!assignedMap[ps.service_id]) assignedMap[ps.service_id] = [];
@@ -77,6 +75,7 @@ export default function ServicesList() {
       field: "service_id",
       headerName: "ID",
       flex: 1,
+      minWidth: 60,
       disableColumnMenu: true,
       resizable: false,
     },
@@ -84,6 +83,7 @@ export default function ServicesList() {
       field: "name",
       headerName: "Nombre",
       flex: 3,
+      minWidth: 130,
       disableColumnMenu: true,
       resizable: false,
     },
@@ -91,6 +91,7 @@ export default function ServicesList() {
       field: "price",
       headerName: "Costo",
       flex: 2,
+      minWidth: 80,
       disableColumnMenu: true,
       resizable: false,
       renderCell: (params) => (
@@ -105,11 +106,11 @@ export default function ServicesList() {
       field: "profesional",
       headerName: "Profesional",
       flex: 3,
+      minWidth: 210,
       sortable: false,
       filterable: false,
       disableColumnMenu: true,
       resizable: false,
-      // Reemplaza el renderCell de la columna "profesional"
       renderCell: (params) => {
         const serviceId: number = params.row.service_id;
         const existing = proServices.find((ps) => ps.service_id === serviceId);
@@ -148,15 +149,9 @@ export default function ServicesList() {
                 fontSize: 12,
                 minWidth: 160,
                 bgcolor: "background.paper",
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "divider",
-                },
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#9FE1CB",
-                },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0F6E56",
-                },
+                "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
+                "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#9FE1CB" },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#0F6E56" },
               }}
             >
               {professionals.length === 0 && (
@@ -174,9 +169,7 @@ export default function ServicesList() {
                 </MenuItem>
               ))}
             </Select>
-            {isSaving && (
-              <CircularProgress size={14} sx={{ color: "#0F6E56" }} />
-            )}
+            {isSaving && <CircularProgress size={14} sx={{ color: "#0F6E56" }} />}
           </Box>
         );
       },
@@ -185,6 +178,7 @@ export default function ServicesList() {
       field: "acciones",
       headerName: "",
       flex: 1,
+      minWidth: 56,
       sortable: false,
       filterable: false,
       disableColumnMenu: true,
@@ -221,8 +215,8 @@ export default function ServicesList() {
     <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.75 }}>
       <SimpleHeader text="Lista de servicios" chip="Servicios" />
 
-      {/* Stats + botón */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      {/* Stats + botones */}
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
         {/* Tarjeta total */}
         <Box
           sx={{
@@ -273,7 +267,6 @@ export default function ServicesList() {
 
         <Box sx={{ width: "0.5px", height: 36, bgcolor: "divider", mx: 0.5 }} />
 
-        {/* Botón agregar */}
         <Button
           onClick={() => navigate("/nuevo-servicio")}
           startIcon={<AddRoundedIcon sx={{ fontSize: "14px !important" }} />}
@@ -293,10 +286,54 @@ export default function ServicesList() {
         >
           Agregar servicio
         </Button>
+
+        <Box sx={{ width: "0.5px", height: 36, bgcolor: "divider", mx: 0.5 }} />
+
+        {/* Exportar PDF */}
+        <Button
+          onClick={() => exportServicesPDF(services, proServices, professionals)}
+          startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: "14px !important" }} />}
+          sx={{
+            fontSize: 12,
+            fontWeight: 500,
+            bgcolor: "#FEE2E2",
+            color: "#991B1B",
+            border: "0.5px solid #FCA5A5",
+            borderRadius: 3,
+            px: 1.75,
+            py: 1.25,
+            height: "auto",
+            textTransform: "none",
+            "&:hover": { bgcolor: "#FCA5A5" },
+          }}
+        >
+          PDF
+        </Button>
+
+        {/* Exportar CSV */}
+        <Button
+          onClick={() => exportServicesCSV(services, proServices, professionals)}
+          startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: "14px !important" }} />}
+          sx={{
+            fontSize: 12,
+            fontWeight: 500,
+            bgcolor: "#F0FDF4",
+            color: "#166534",
+            border: "0.5px solid #86EFAC",
+            borderRadius: 3,
+            px: 1.75,
+            py: 1.25,
+            height: "auto",
+            textTransform: "none",
+            "&:hover": { bgcolor: "#86EFAC" },
+          }}
+        >
+          Excel
+        </Button>
       </Box>
 
-      {/* Tabla */}
-      <Grid size={12}>
+      {/* Tabla: en PC se ve normal, en móvil scroll horizontal */}
+      <Box sx={{ width: "100%", overflowX: "auto" }}>
         {loading ? (
           <Progress />
         ) : services.length ? (
@@ -319,7 +356,7 @@ export default function ServicesList() {
             No hay servicios registrados
           </Typography>
         )}
-      </Grid>
+      </Box>
     </Box>
   );
 }

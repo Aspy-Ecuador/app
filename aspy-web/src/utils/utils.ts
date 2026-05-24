@@ -1,6 +1,7 @@
 import type { Appointment } from "@/typesResponse/Appointment";
 import type { Person } from "@/typesResponse/Person";
 import type { Service } from "@/typesResponse/Service";
+import type {ProfessionalService} from "@/typesResponse/ProfessionalService";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import autoTable from "jspdf-autotable";
@@ -13,6 +14,7 @@ import type { FileData } from "@/types/FileData";
 import type { Payment } from "@/typesResponse/Payment";
 import type { FlattenedReceipt } from "@/types/FlattenedReceipt";
 import type { AppointmentWithReports } from "@/types/AppointmentWithReports";
+
 
 type TotalIngresosMensual = {
   total: number;
@@ -702,4 +704,365 @@ export function handleDownloadInvoice(invoice: FlattenedReceipt) {
   doc.save(
     `Comprobante-ASPY-${invoice.receipt.receipt_id}-${invoice.client}.pdf`,
   );
+}
+
+// Generador de XLSX y PDF para exportar usuarios (solo datos básicos, sin info sensible)
+// FINAL
+export function exportUsersExcel(users: Person[]) {
+  const headers = ["#", "Nombre", "Apellido", "Rol", "Correo", "Celular", "ID Usuario", "ID Persona"];
+
+  const rows = users.map((u, i) => [
+    i + 1,
+    u.first_name,
+    u.last_name,
+    translateRol(u.user_account?.role?.name ?? ""),
+    u.user_account?.email ?? "",
+    u.phone?.number ?? "",
+    u.user_id,
+    u.person_id,
+  ]);
+
+  const csv = [headers, ...rows]
+    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+    .join("\n");
+
+  // BOM para que Excel abra con tildes y ñ correctamente
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `usuarios-aspy-${new Date().toISOString().split("T")[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// FINAL
+export function exportUsersPDF(users: Person[]) {
+  const doc = new jsPDF("p", "mm", "a4") as jsPDFWithAutoTable;
+  const W = 210;
+  const M = 14;
+
+  // ── Header ──────────────────────────────────────────────────
+  setColor(doc, COLOR.black, "fill");
+  doc.rect(0, 0, W, 40, "F");
+
+  setColor(doc, COLOR.blue, "fill");
+  doc.rect(0, 40, W * 0.5, 3, "F");
+  setColor(doc, COLOR.pink, "fill");
+  doc.rect(W * 0.5, 40, W * 0.25, 3, "F");
+  setColor(doc, COLOR.yellow, "fill");
+  doc.rect(W * 0.75, 40, W * 0.25, 3, "F");
+
+  doc.addImage(logoBase64, "PNG", M, 5, 45, 30);
+
+  setColor(doc, COLOR.white, "text");
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  doc.text("Fundación ASPY Ecuador", W - M, 17, { align: "right" });
+
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  setColor(doc, [200, 220, 235], "text");
+  doc.text("Av. Miguel H. Alcivar y Av. Alberto Borges, Guayaquil", W - M, 24, { align: "right" });
+  doc.text("Tel: 0999616051  |  fundacionaspyecuador@gmail.com", W - M, 30, { align: "right" });
+
+  // ── Título ───────────────────────────────────────────────────
+  setColor(doc, COLOR.lightGray, "fill");
+  doc.rect(0, 43, W, 18, "F");
+
+  setColor(doc, COLOR.black, "text");
+  doc.setFontSize(13);
+  doc.setFont("helvetica", "bold");
+  doc.text("LISTA DE USUARIOS", W / 2, 54, { align: "center" });
+
+  // Badge con fecha
+  setColor(doc, COLOR.blue, "fill");
+  doc.roundedRect(W - M - 44, 45, 44, 12, 2, 2, "F");
+  setColor(doc, COLOR.white, "text");
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "bold");
+  doc.text(new Date().toLocaleDateString("es-EC"), W - M - 22, 52.5, { align: "center" });
+
+  // ── Resumen de totales ────────────────────────────────────────
+  const totalUsers = users.length;
+  const totalProf = users.filter((u) => u.user_account?.role?.name === "Professional").length;
+  const totalClients = users.filter((u) => u.user_account?.role?.name === "Client").length;
+
+  let y = 72;
+
+  setColor(doc, COLOR.border, "draw");
+  setColor(doc, COLOR.white, "fill");
+  doc.setLineWidth(0.3);
+  doc.roundedRect(M, y, 55, 22, 2, 2, "FD");
+  doc.roundedRect(M + 60, y, 55, 22, 2, 2, "FD");
+  doc.roundedRect(M + 120, y, 55, 22, 2, 2, "FD");
+
+  const statLabel = (label: string, value: number, x: number) => {
+    setColor(doc, COLOR.gray, "text");
+    doc.setFontSize(7.5);
+    doc.setFont("helvetica", "normal");
+    doc.text(label, x + 27.5, y + 9, { align: "center" });
+    setColor(doc, COLOR.black, "text");
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.text(String(value), x + 27.5, y + 18, { align: "center" });
+  };
+
+  statLabel("Total usuarios", totalUsers, M);
+  statLabel("Profesionales", totalProf, M + 60);
+  statLabel("Pacientes", totalClients, M + 120);
+
+  // ── Tabla ────────────────────────────────────────────────────
+  y += 32;
+
+  setColor(doc, COLOR.black, "text");
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  doc.text("DETALLE DE USUARIOS", M, y);
+
+  setColor(doc, COLOR.blue, "draw");
+  doc.setLineWidth(0.8);
+  doc.line(M, y + 1.5, M + 52, y + 1.5);
+  setColor(doc, COLOR.border, "draw");
+  doc.setLineWidth(0.3);
+  doc.line(M + 52, y + 1.5, W - M, y + 1.5);
+
+  autoTable(doc, {
+    startY: y + 5,
+    head: [["#", "Nombre", "Apellido", "Rol", "Correo", "Celular"]],
+    body: users.map((u, i) => [
+      i + 1,
+      u.first_name,
+      u.last_name,
+      translateRol(u.user_account?.role?.name ?? ""),
+      u.user_account?.email ?? "",
+      u.phone?.number ?? "",
+    ]),
+    theme: "plain",
+    headStyles: {
+      fillColor: COLOR.black,
+      textColor: COLOR.white,
+      fontSize: 8,
+      fontStyle: "bold",
+      cellPadding: { top: 4, bottom: 4, left: 4, right: 4 },
+    },
+    bodyStyles: {
+      fontSize: 8,
+      textColor: COLOR.black,
+      cellPadding: { top: 4, bottom: 4, left: 4, right: 4 },
+    },
+    alternateRowStyles: { fillColor: COLOR.lightGray },
+    columnStyles: {
+      0: { halign: "center", cellWidth: 10 },
+      1: { cellWidth: 28 },
+      2: { cellWidth: 28 },
+      3: { cellWidth: 26 },
+      4: { halign: "left" },
+      5: { cellWidth: 26 },
+    },
+    margin: { left: M, right: M },
+    tableLineWidth: 0,
+  });
+
+  // ── Footer ───────────────────────────────────────────────────
+  setColor(doc, COLOR.blue, "fill");
+  doc.rect(0, 280, W * 0.5, 2, "F");
+  setColor(doc, COLOR.pink, "fill");
+  doc.rect(W * 0.5, 280, W * 0.25, 2, "F");
+  setColor(doc, COLOR.yellow, "fill");
+  doc.rect(W * 0.75, 280, W * 0.25, 2, "F");
+
+  setColor(doc, COLOR.black, "fill");
+  doc.rect(0, 282, W, 15, "F");
+
+  setColor(doc, [180, 200, 215], "text");
+  doc.setFontSize(7.5);
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    "Fundación ASPY Ecuador  |  fundacionaspyecuador@gmail.com  |  Tel: 0999616051",
+    W / 2, 289, { align: "center" },
+  );
+  setColor(doc, COLOR.blue, "text");
+  doc.text("Reporte generado automáticamente.", W / 2, 294, { align: "center" });
+
+  doc.save(`usuarios-aspy-${new Date().toISOString().split("T")[0]}.pdf`);
+}
+
+// FINAL
+export function exportServicesPDF(
+  services: Service[],
+  proServices: ProfessionalService[],
+  professionals: Person[],
+) {
+  const doc = new jsPDF("p", "mm", "a4") as jsPDFWithAutoTable;
+  const W = 210;
+  const M = 14;
+
+  // ── Header ──────────────────────────────────────────────────
+  setColor(doc, COLOR.black, "fill");
+  doc.rect(0, 0, W, 40, "F");
+
+  setColor(doc, COLOR.blue, "fill");
+  doc.rect(0, 40, W * 0.5, 3, "F");
+  setColor(doc, COLOR.pink, "fill");
+  doc.rect(W * 0.5, 40, W * 0.25, 3, "F");
+  setColor(doc, COLOR.yellow, "fill");
+  doc.rect(W * 0.75, 40, W * 0.25, 3, "F");
+
+  doc.addImage(logoBase64, "PNG", M, 5, 45, 30);
+
+  setColor(doc, COLOR.white, "text");
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  doc.text("Fundación ASPY Ecuador", W - M, 17, { align: "right" });
+
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  setColor(doc, [200, 220, 235], "text");
+  doc.text("Av. Miguel H. Alcivar y Av. Alberto Borges, Guayaquil", W - M, 24, { align: "right" });
+  doc.text("Tel: 0999616051  |  fundacionaspyecuador@gmail.com", W - M, 30, { align: "right" });
+
+  // ── Título ──────────────────────────────────────────────────
+  setColor(doc, COLOR.lightGray, "fill");
+  doc.rect(0, 43, W, 18, "F");
+
+  setColor(doc, COLOR.black, "text");
+  doc.setFontSize(13);
+  doc.setFont("helvetica", "bold");
+  doc.text("LISTA DE SERVICIOS", W / 2, 54, { align: "center" });
+
+  setColor(doc, COLOR.blue, "fill");
+  doc.roundedRect(W - M - 44, 45, 44, 12, 2, 2, "F");
+  setColor(doc, COLOR.white, "text");
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "bold");
+  doc.text(new Date().toLocaleDateString("es-EC"), W - M - 22, 52.5, { align: "center" });
+
+  // ── Resumen ──────────────────────────────────────────────────
+  let y = 72;
+
+  setColor(doc, COLOR.border, "draw");
+  setColor(doc, COLOR.white, "fill");
+  doc.setLineWidth(0.3);
+  doc.roundedRect(M, y, 55, 22, 2, 2, "FD");
+  doc.roundedRect(M + 60, y, 55, 22, 2, 2, "FD");
+
+  const statLabel = (label: string, value: number, x: number) => {
+    setColor(doc, COLOR.gray, "text");
+    doc.setFontSize(7.5);
+    doc.setFont("helvetica", "normal");
+    doc.text(label, x + 27.5, y + 9, { align: "center" });
+    setColor(doc, COLOR.black, "text");
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.text(String(value), x + 27.5, y + 18, { align: "center" });
+  };
+
+  statLabel("Total servicios", services.length, M);
+  statLabel("Con profesional", proServices.length, M + 60);
+
+  // ── Tabla ────────────────────────────────────────────────────
+  y += 32;
+
+  setColor(doc, COLOR.black, "text");
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  doc.text("DETALLE DE SERVICIOS", M, y);
+
+  setColor(doc, COLOR.blue, "draw");
+  doc.setLineWidth(0.8);
+  doc.line(M, y + 1.5, M + 54, y + 1.5);
+  setColor(doc, COLOR.border, "draw");
+  doc.setLineWidth(0.3);
+  doc.line(M + 54, y + 1.5, W - M, y + 1.5);
+
+  autoTable(doc, {
+    startY: y + 5,
+    head: [["#", "Nombre del servicio", "Costo", "Profesional asignado"]],
+    body: services.map((s, i) => {
+      const ps = proServices.find((p) => p.service_id === s.service_id);
+      const prof = ps
+        ? professionals.find((p) => p.person_id === ps.professional.person_id)
+        : null;
+      const profName = prof
+        ? `${prof.first_name} ${prof.last_name}`
+        : "Sin asignar";
+      return [i + 1, s.name, `$${Number(s.price).toFixed(2)}`, profName];
+    }),
+    theme: "plain",
+    headStyles: {
+      fillColor: COLOR.black,
+      textColor: COLOR.white,
+      fontSize: 8,
+      fontStyle: "bold",
+      cellPadding: { top: 4, bottom: 4, left: 4, right: 4 },
+    },
+    bodyStyles: {
+      fontSize: 8,
+      textColor: COLOR.black,
+      cellPadding: { top: 4, bottom: 4, left: 4, right: 4 },
+    },
+    alternateRowStyles: { fillColor: COLOR.lightGray },
+    columnStyles: {
+      0: { halign: "center", cellWidth: 10 },
+      1: { halign: "left" },
+      2: { halign: "right", cellWidth: 28 },
+      3: { halign: "left", cellWidth: 55 },
+    },
+    margin: { left: M, right: M },
+    tableLineWidth: 0,
+  });
+
+  // ── Footer ───────────────────────────────────────────────────
+  setColor(doc, COLOR.blue, "fill");
+  doc.rect(0, 280, W * 0.5, 2, "F");
+  setColor(doc, COLOR.pink, "fill");
+  doc.rect(W * 0.5, 280, W * 0.25, 2, "F");
+  setColor(doc, COLOR.yellow, "fill");
+  doc.rect(W * 0.75, 280, W * 0.25, 2, "F");
+
+  setColor(doc, COLOR.black, "fill");
+  doc.rect(0, 282, W, 15, "F");
+
+  setColor(doc, [180, 200, 215], "text");
+  doc.setFontSize(7.5);
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    "Fundación ASPY Ecuador  |  fundacionaspyecuador@gmail.com  |  Tel: 0999616051",
+    W / 2, 289, { align: "center" },
+  );
+  setColor(doc, COLOR.blue, "text");
+  doc.text("Reporte generado automáticamente.", W / 2, 294, { align: "center" });
+
+  doc.save(`servicios-aspy-${new Date().toISOString().split("T")[0]}.pdf`);
+}
+
+// FINAL
+export function exportServicesCSV(
+  services: Service[],
+  proServices: ProfessionalService[],
+  professionals: Person[],
+) {
+  const headers = ["#", "Nombre", "Costo", "Profesional asignado", "ID Servicio"];
+
+  const rows = services.map((s, i) => {
+    const ps = proServices.find((p) => p.service_id === s.service_id);
+    const prof = ps
+      ? professionals.find((p) => p.person_id === ps.professional.person_id)
+      : null;
+    const profName = prof ? `${prof.first_name} ${prof.last_name}` : "Sin asignar";
+    return [i + 1, s.name, `$${Number(s.price).toFixed(2)}`, profName, s.service_id];
+  });
+
+  const csv = [headers, ...rows]
+    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+    .join("\n");
+
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `servicios-aspy-${new Date().toISOString().split("T")[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }

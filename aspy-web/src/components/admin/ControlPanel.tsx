@@ -19,15 +19,8 @@ export default function ControlPanel() {
 
   if (loading) return <Progress />;
 
-  const handleCreateUser = () => {
-    const newPath = `/nuevo-usuario`;
-    navigate(newPath);
-  };
-
-  const handleCreateService = () => {
-    const newPath = `/nuevo-servicio`;
-    navigate(newPath);
-  };
+  const handleCreateUser = () => navigate("/nuevo-usuario");
+  const handleCreateService = () => navigate("/nuevo-servicio");
 
   const botones: ButtonControl[] = [
     {
@@ -43,17 +36,21 @@ export default function ControlPanel() {
   ];
 
   return (
-    <Box className="box-panel-control" sx={{ padding: 2 }}>
-      <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 1, md: 1 }}>
-        <Grid size={12}>
-          <WelcomePanel user={"Administrador " + getAuthenticatedUserName()} />
-        </Grid>
+    <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.75 }}>
+      <WelcomePanel user={"Administrador " + getAuthenticatedUserName()} />
 
-        <Grid size={8} className="grid-overview">
+      <Grid container spacing={1.5} alignItems="flex-start">
+        {/* Overview:
+            móvil/tablet → ancho completo
+            desktop      → 8/12 */}
+        <Grid size={{ xs: 12, md: 8 }} order={{ xs: 2, md: 1 }}>
           <Overview />
         </Grid>
 
-        <Grid size={4} className="gird-botones-citas">
+        {/* Botones:
+            móvil/tablet → ancho completo arriba
+            desktop      → 4/12 a la derecha */}
+        <Grid size={{ xs: 12, md: 4 }} order={{ xs: 1, md: 2 }}>
           <ButtonList botones={botones} />
         </Grid>
       </Grid>

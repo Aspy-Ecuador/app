@@ -26,20 +26,28 @@ export default function Appointments() {
   );
 
   return (
-    <Box className="box-panel-control" sx={{ padding: 2 }}>
-      <Grid container spacing={1}>
-        <Grid size={12} className="grid-p-patients-tittle">
-          <SimpleHeader text={"Citas"} chip="Citas agendadas" />
-        </Grid>
-        <Grid size={9}>
-          {loading ? (
-            <Progress />
-          ) : (
-            <Agenda appointments={appointmentProfessional} />
-          )}
-        </Grid>
-        <Grid size={3}>
+    <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.75 }}>
+      <SimpleHeader text="Citas" chip="Citas agendadas" />
+
+      <Grid container spacing={1.5} alignItems="flex-start">
+        {/* Selector de profesional:
+            móvil/tablet → fila completa arriba
+            desktop      → columna derecha (3/12) */}
+        <Grid
+          size={{ xs: 12, md: 3 }}
+          order={{ xs: 1, md: 2 }}
+        >
           <SelectProfessional onSelect={handleSelectProfessional} />
+        </Grid>
+
+        {/* Agenda:
+            móvil/tablet → fila completa debajo del selector
+            desktop      → columna izquierda (9/12) */}
+        <Grid
+          size={{ xs: 12, md: 9 }}
+          order={{ xs: 2, md: 1 }}
+        >
+          <Agenda appointments={appointmentProfessional} />
         </Grid>
       </Grid>
     </Box>
