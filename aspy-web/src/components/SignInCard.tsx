@@ -15,7 +15,9 @@ import Typography from "@mui/material/Typography";
 import ThemedLogo from "@/shared-theme/ThemedLogo";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
-
+import IconButton from "@mui/material/IconButton";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
@@ -49,6 +51,7 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
       borderColor: theme.palette.primary.main,
     },
   },
+    
 }));
 
 export default function SignInCard() {
@@ -61,6 +64,8 @@ export default function SignInCard() {
   const [loginError, setLoginError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const loginUser = async () => {
     try {
@@ -186,24 +191,34 @@ export default function SignInCard() {
           >
             Contraseña
           </FormLabel>
-          <StyledTextField
-            error={passwordError}
-            helperText={passwordErrorMessage}
-            name="password"
-            placeholder="•••••••••"
-            type="password"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              if (loginError) setLoginError("");
-            }}
-            autoComplete="current-password"
-            required
-            fullWidth
-            variant="outlined"
-            size="small"
-            color={passwordError ? "error" : "primary"}
-          />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <StyledTextField
+              error={passwordError}
+              helperText={passwordErrorMessage}
+              name="password"
+              placeholder="•••••••••"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (loginError) setLoginError("");
+              }}
+              autoComplete="current-password"
+              required
+              fullWidth
+              variant="outlined"
+              size="small"
+              color={passwordError ? "error" : "primary"}
+            />
+
+            <IconButton
+              aria-label="cambiar visibilidad de contraseña"
+              onClick={() => setShowPassword(!showPassword)}
+              size="small"
+            >
+              {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+            </IconButton>
+          </Box>
         </FormControl>
 
         <Button
