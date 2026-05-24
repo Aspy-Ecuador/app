@@ -12,7 +12,6 @@ import { getProfessional } from "@/utils/utils";
 import Progress from "@components/Progress";
 import type { Person } from "@/typesResponse/Person";
 import Typography from "@mui/material/Typography";
-import { getAge } from "@/utils/utils";
 
 const columns: GridColDef[] = [
   {
@@ -27,22 +26,6 @@ const columns: GridColDef[] = [
     headerName: "Apellidos",
     disableColumnMenu: true,
     flex: 2,
-    resizable: false,
-  },
-  {
-    field: "age",
-    headerName: "Edad",
-    disableColumnMenu: true,
-    flex: 2,
-    renderCell: (params) => {
-      return (
-        <Box display="flex" alignItems="center" height="100%">
-          <Typography variant="body1">
-            {getAge(params.row.birthdate)}
-          </Typography>
-        </Box>
-      );
-    },
     resizable: false,
   },
   {
@@ -79,20 +62,6 @@ const columns: GridColDef[] = [
     renderCell: (params) => (
       <Box display="flex" alignItems="center" height="100%">
         <Typography variant="body1">{params.row.professional.title}</Typography>
-      </Box>
-    ),
-    resizable: false,
-  },
-  {
-    field: "specialty",
-    headerName: "Especialidad",
-    disableColumnMenu: true,
-    flex: 3,
-    renderCell: (params) => (
-      <Box display="flex" alignItems="center" height="100%">
-        <Typography variant="body1">
-          {params.row.professional.specialty}
-        </Typography>
       </Box>
     ),
     resizable: false,

@@ -17,28 +17,15 @@ interface TimeLinePatientsProps {
   selectedComments: string;
 }
 
-const statusStyle = (statusName: string) => {
-  const n = statusName.toLowerCase();
-  if (n.includes("asist") && !n.includes("no"))
-    return {
-      dot: "#1D9E75",
-      dotBg: "#E1F5EE",
-      chip: "#E1F5EE",
-      chipColor: "#0F6E56",
-    };
-  if (n.includes("no asist") || n.includes("falt"))
-    return {
-      dot: "#E24B4A",
-      dotBg: "#FCEBEB",
-      chip: "#FCEBEB",
-      chipColor: "#A32D2D",
-    };
-  return {
-    dot: "#BA7517",
-    dotBg: "#FAEEDA",
-    chip: "#FAEEDA",
-    chipColor: "#854F0B",
-  };
+const getStatusStyle = (statusName: string) => {
+  const name = statusName.toLowerCase();
+  if (name.includes("guardada"))
+    return { bg: "#E1F5EE", color: "#0F6E56", accent: "#1D9E75" };
+  if (name.includes("perdida"))
+    return { bg: "#FCEBEB", color: "#A32D2D", accent: "#E24B4A" };
+  if (name.includes("completada"))
+    return { bg: "#E6F1FB", color: "#185FA5", accent: "#3B82F6" };
+  return { bg: "#FAEEDA", color: "#854F0B", accent: "#EF9F27" };
 };
 
 export default function TimeLinePatients({
@@ -122,7 +109,7 @@ export default function TimeLinePatients({
           </Typography>
         ) : (
           appointmentsReportUser.map((report, index) => {
-            const style = statusStyle(report.appointment_status.name);
+            const style = getStatusStyle(report.appointment_status.name);
             const isActive =
               report.report?.file === selectedComments && !!selectedComments;
             const isLast = index === appointmentsReportUser.length - 1;
@@ -148,8 +135,8 @@ export default function TimeLinePatients({
                       height: 10,
                       borderRadius: "50%",
                       border: "2px solid",
-                      borderColor: style.dot,
-                      bgcolor: style.dotBg,
+                      borderColor: style.accent,
+                      bgcolor: style.bg,
                       flexShrink: 0,
                     }}
                   />
@@ -195,15 +182,16 @@ export default function TimeLinePatients({
                       }}
                     >
                       <Typography>
-                        Fecha: {report.worker_schedule.schedule.date}
+                        Fecha:{" "}
+                        {report.worker_schedule.schedule.date.split("T")[0]}
                       </Typography>
                       <Box
                         sx={{
                           px: 0.875,
                           py: 0.25,
                           borderRadius: "20px",
-                          bgcolor: style.chip,
-                          color: style.chipColor,
+                          bgcolor: style.bg,
+                          color: style.color,
                         }}
                       >
                         {report.appointment_status.name}

@@ -16,7 +16,7 @@ export const ProfessionalRoutes = [
   { path: "/pacientes", element: <PatientsList /> },
   { path: "/citas", element: <Appointments /> },
   { path: "/pacientes/:id", element: <History /> },
-  { path: "/pacientes/:appointment/nuevoReporte", element: <NewReport /> },
+  { path: "/pacientes/:appointmentId/nuevoReporte", element: <NewReport /> },
   { path: "/pacientes/:id/:citaId", element: <Detail /> },
   { path: "/seleccionar-horario", element: <HorarioView /> },
   ...SharedRoutes,

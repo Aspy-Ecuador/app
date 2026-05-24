@@ -202,7 +202,7 @@ export default function ShowAppointment({
               <Typography
                 sx={{ fontSize: 12, color: "text.secondary", ml: "auto" }}
               >
-                {schedule.date}
+                {schedule.date.split("T")[0]}
               </Typography>
             </Box>
           </Card>

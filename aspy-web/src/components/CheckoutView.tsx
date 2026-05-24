@@ -6,6 +6,7 @@ import type { AppointmentRequest } from "@/typesRequest/AppointmentRequest";
 import type { FileData } from "@/types/FileData";
 import { useRoleData } from "@/observer/RoleDataContext";
 import { getAuthenticatedPersonID } from "@/utils/store";
+import { uploadToCloudinary } from "@/utils/utils";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
@@ -55,15 +56,14 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
     if (file != null) {
       setLoad(true);
 
-      // const uploadedFileUrl = await uploadToCloudinary(file);
+      const uploadedFileUrl = await uploadToCloudinary(file);
       const resolvedClientId = isClient
         ? getAuthenticatedPersonID()
         : parsedClientId;
 
       const dataSend: AppointmentRequest = {
         payment_type: "Transferencia",
-        payment_file:
-          "https://res.cloudinary.com/dyqznwbdb/raw/upload/v1777582266/pdfs/tlmcvftgfpjxiiymcupb.pdf",
+        payment_file: uploadedFileUrl,
         client_id: resolvedClientId,
         professional_id: parsedProfessionalId,
         service_id: parsedServiceId,
@@ -84,7 +84,7 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
 
   const handleClose = () => {
     setOpen(false);
-    navigate("/");
+    navigate("/dashboard");
   };
 
   const getStepContent = (step: number) => {

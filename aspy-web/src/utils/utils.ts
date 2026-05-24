@@ -1,7 +1,7 @@
 import type { Appointment } from "@/typesResponse/Appointment";
 import type { Person } from "@/typesResponse/Person";
 import type { Service } from "@/typesResponse/Service";
-import type {ProfessionalService} from "@/typesResponse/ProfessionalService";
+import type { ProfessionalService } from "@/typesResponse/ProfessionalService";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import autoTable from "jspdf-autotable";
@@ -14,7 +14,6 @@ import type { FileData } from "@/types/FileData";
 import type { Payment } from "@/typesResponse/Payment";
 import type { FlattenedReceipt } from "@/types/FlattenedReceipt";
 import type { AppointmentWithReports } from "@/types/AppointmentWithReports";
-
 
 type TotalIngresosMensual = {
   total: number;
@@ -172,9 +171,8 @@ export function getNextAppointments(data: Appointment[]): Appointment[] {
   const today = new Date();
   const todayStr = today.toISOString().split("T")[0];
   return data.filter(
-    (app) =>
-      app.worker_schedule.schedule.date >= todayStr &&
-      app.appointment_status.appointment_status_id !== 3,
+    (app) => app.worker_schedule.schedule.date >= todayStr, //&&
+    //app.appointment_status.appointment_status_id !== 3,
   );
 }
 
@@ -709,7 +707,16 @@ export function handleDownloadInvoice(invoice: FlattenedReceipt) {
 // Generador de XLSX y PDF para exportar usuarios (solo datos básicos, sin info sensible)
 // FINAL
 export function exportUsersExcel(users: Person[]) {
-  const headers = ["#", "Nombre", "Apellido", "Rol", "Correo", "Celular", "ID Usuario", "ID Persona"];
+  const headers = [
+    "#",
+    "Nombre",
+    "Apellido",
+    "Rol",
+    "Correo",
+    "Celular",
+    "ID Usuario",
+    "ID Persona",
+  ];
 
   const rows = users.map((u, i) => [
     i + 1,
@@ -723,7 +730,9 @@ export function exportUsersExcel(users: Person[]) {
   ]);
 
   const csv = [headers, ...rows]
-    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+    .map((row) =>
+      row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
+    )
     .join("\n");
 
   // BOM para que Excel abra con tildes y ñ correctamente
@@ -763,8 +772,12 @@ export function exportUsersPDF(users: Person[]) {
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   setColor(doc, [200, 220, 235], "text");
-  doc.text("Av. Miguel H. Alcivar y Av. Alberto Borges, Guayaquil", W - M, 24, { align: "right" });
-  doc.text("Tel: 0999616051  |  fundacionaspyecuador@gmail.com", W - M, 30, { align: "right" });
+  doc.text("Av. Miguel H. Alcivar y Av. Alberto Borges, Guayaquil", W - M, 24, {
+    align: "right",
+  });
+  doc.text("Tel: 0999616051  |  fundacionaspyecuador@gmail.com", W - M, 30, {
+    align: "right",
+  });
 
   // ── Título ───────────────────────────────────────────────────
   setColor(doc, COLOR.lightGray, "fill");
@@ -781,12 +794,18 @@ export function exportUsersPDF(users: Person[]) {
   setColor(doc, COLOR.white, "text");
   doc.setFontSize(8);
   doc.setFont("helvetica", "bold");
-  doc.text(new Date().toLocaleDateString("es-EC"), W - M - 22, 52.5, { align: "center" });
+  doc.text(new Date().toLocaleDateString("es-EC"), W - M - 22, 52.5, {
+    align: "center",
+  });
 
   // ── Resumen de totales ────────────────────────────────────────
   const totalUsers = users.length;
-  const totalProf = users.filter((u) => u.user_account?.role?.name === "Professional").length;
-  const totalClients = users.filter((u) => u.user_account?.role?.name === "Client").length;
+  const totalProf = users.filter(
+    (u) => u.user_account?.role?.name === "Professional",
+  ).length;
+  const totalClients = users.filter(
+    (u) => u.user_account?.role?.name === "Client",
+  ).length;
 
   let y = 72;
 
@@ -880,10 +899,14 @@ export function exportUsersPDF(users: Person[]) {
   doc.setFont("helvetica", "normal");
   doc.text(
     "Fundación ASPY Ecuador  |  fundacionaspyecuador@gmail.com  |  Tel: 0999616051",
-    W / 2, 289, { align: "center" },
+    W / 2,
+    289,
+    { align: "center" },
   );
   setColor(doc, COLOR.blue, "text");
-  doc.text("Reporte generado automáticamente.", W / 2, 294, { align: "center" });
+  doc.text("Reporte generado automáticamente.", W / 2, 294, {
+    align: "center",
+  });
 
   doc.save(`usuarios-aspy-${new Date().toISOString().split("T")[0]}.pdf`);
 }
@@ -919,8 +942,12 @@ export function exportServicesPDF(
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   setColor(doc, [200, 220, 235], "text");
-  doc.text("Av. Miguel H. Alcivar y Av. Alberto Borges, Guayaquil", W - M, 24, { align: "right" });
-  doc.text("Tel: 0999616051  |  fundacionaspyecuador@gmail.com", W - M, 30, { align: "right" });
+  doc.text("Av. Miguel H. Alcivar y Av. Alberto Borges, Guayaquil", W - M, 24, {
+    align: "right",
+  });
+  doc.text("Tel: 0999616051  |  fundacionaspyecuador@gmail.com", W - M, 30, {
+    align: "right",
+  });
 
   // ── Título ──────────────────────────────────────────────────
   setColor(doc, COLOR.lightGray, "fill");
@@ -936,7 +963,9 @@ export function exportServicesPDF(
   setColor(doc, COLOR.white, "text");
   doc.setFontSize(8);
   doc.setFont("helvetica", "bold");
-  doc.text(new Date().toLocaleDateString("es-EC"), W - M - 22, 52.5, { align: "center" });
+  doc.text(new Date().toLocaleDateString("es-EC"), W - M - 22, 52.5, {
+    align: "center",
+  });
 
   // ── Resumen ──────────────────────────────────────────────────
   let y = 72;
@@ -1029,10 +1058,14 @@ export function exportServicesPDF(
   doc.setFont("helvetica", "normal");
   doc.text(
     "Fundación ASPY Ecuador  |  fundacionaspyecuador@gmail.com  |  Tel: 0999616051",
-    W / 2, 289, { align: "center" },
+    W / 2,
+    289,
+    { align: "center" },
   );
   setColor(doc, COLOR.blue, "text");
-  doc.text("Reporte generado automáticamente.", W / 2, 294, { align: "center" });
+  doc.text("Reporte generado automáticamente.", W / 2, 294, {
+    align: "center",
+  });
 
   doc.save(`servicios-aspy-${new Date().toISOString().split("T")[0]}.pdf`);
 }
@@ -1043,19 +1076,35 @@ export function exportServicesCSV(
   proServices: ProfessionalService[],
   professionals: Person[],
 ) {
-  const headers = ["#", "Nombre", "Costo", "Profesional asignado", "ID Servicio"];
+  const headers = [
+    "#",
+    "Nombre",
+    "Costo",
+    "Profesional asignado",
+    "ID Servicio",
+  ];
 
   const rows = services.map((s, i) => {
     const ps = proServices.find((p) => p.service_id === s.service_id);
     const prof = ps
       ? professionals.find((p) => p.person_id === ps.professional.person_id)
       : null;
-    const profName = prof ? `${prof.first_name} ${prof.last_name}` : "Sin asignar";
-    return [i + 1, s.name, `$${Number(s.price).toFixed(2)}`, profName, s.service_id];
+    const profName = prof
+      ? `${prof.first_name} ${prof.last_name}`
+      : "Sin asignar";
+    return [
+      i + 1,
+      s.name,
+      `$${Number(s.price).toFixed(2)}`,
+      profName,
+      s.service_id,
+    ];
   });
 
   const csv = [headers, ...rows]
-    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+    .map((row) =>
+      row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
+    )
     .join("\n");
 
   const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });

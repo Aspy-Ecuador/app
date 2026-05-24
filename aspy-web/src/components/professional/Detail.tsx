@@ -144,7 +144,7 @@ export default function AppointmentDetail() {
                       sx={{ fontSize: 14, color: "text.disabled" }}
                     />
                     <Typography variant="body2" fontWeight={500}>
-                      {appointment?.worker_schedule.schedule.date}
+                      {appointment?.worker_schedule.schedule.date.split("T")[0]}
                     </Typography>
                   </Stack>
                   <Stack direction="row" alignItems="center" spacing={1}>

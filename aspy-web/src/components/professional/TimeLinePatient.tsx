@@ -193,7 +193,7 @@ export default function TimeLinePatients({ patient }: TimeLinePatientsProps) {
                           color: C.black,
                         }}
                       >
-                        {report.worker_schedule.schedule.date}
+                        {report.worker_schedule.schedule.date.split("T")[0]}
                       </Typography>
                     </Box>
                     <Chip

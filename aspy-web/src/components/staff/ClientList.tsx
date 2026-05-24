@@ -8,7 +8,6 @@ import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Header from "@components/Header";
 import Progress from "../Progress";
-import { getAge } from "@/utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Typography from "@mui/material/Typography";
 import { getClient } from "@/utils/utils";
@@ -39,22 +38,6 @@ const columns: GridColDef[] = [
         <Box display="flex" alignItems="center" height="100%">
           <Typography variant="body1">
             {params.row.user_account?.email}
-          </Typography>
-        </Box>
-      );
-    },
-    resizable: false,
-  },
-  {
-    field: "age",
-    headerName: "Edad",
-    disableColumnMenu: true,
-    flex: 2,
-    renderCell: (params) => {
-      return (
-        <Box display="flex" alignItems="center" height="100%">
-          <Typography variant="body1">
-            {getAge(params.row.birthdate)}
           </Typography>
         </Box>
       );

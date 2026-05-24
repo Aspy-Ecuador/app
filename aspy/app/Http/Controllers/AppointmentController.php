@@ -147,8 +147,8 @@ class AppointmentController extends Controller
             $payment->modification_date = now();
             $payment->save();
 
-            if ($appointment->receipt) {
-                $appointment->receipt->delete();
+            if ($appointment->payment->receipt) {
+                $appointment->payment->receipt->delete();
             }
 
             $workerSchedule = WorkerSchedule::findOrFail($appointment->worker_schedule_id);

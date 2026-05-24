@@ -25,7 +25,7 @@ interface AddReportProps {
 }
 
 export default function AddReport({ setReport }: AddReportProps) {
-  const { appointment } = useParams();
+  const { appointmentId } = useParams();
   const [reporte, setReporte] = useState<FileData | null>(null);
   const [sending, setSending] = useState(false);
   const [open, setOpen] = useState(false);
@@ -57,18 +57,18 @@ export default function AddReport({ setReport }: AddReportProps) {
   };
 
   const handleSend = async () => {
-    if (!reporte || !appointment) return;
+    if (!reporte || !appointmentId) return;
     setSending(true);
     try {
       const reportUrl = await uploadToCloudinary(reporte);
       const dataAppointment = getAppointment(
         data.appointments,
-        Number(appointment),
+        Number(appointmentId),
       );
       if (!dataAppointment) return;
 
       const dataRequest: ReportRequest = {
-        appointmentId: Number(appointment),
+        appointmentId: Number(appointmentId),
         file: reportUrl,
         sign: `${dataAppointment.professional.first_name} ${dataAppointment.professional.last_name}`,
       };
@@ -257,7 +257,7 @@ export default function AddReport({ setReport }: AddReportProps) {
         open={open}
         handleClose={() => {
           setOpen(false);
-          navigate("/");
+          navigate("/dashboard");
         }}
         isRegister={true}
         message="Se ha registrado con éxito!!"

@@ -74,7 +74,7 @@ const statusStyle = (statusName: string) => {
 
 const LEGEND = [
   { label: "Confirmada", color: "#1D9E75" },
-  { label: "Pendiente", color: "#BA7517" },
+  { label: "Guardada", color: "#BA7517" },
   { label: "Completada", color: "#378ADD" },
   { label: "Cancelada", color: "#E24B4A" },
 ];

@@ -143,7 +143,7 @@ export default function ShowAppointment({
                         Fecha
                       </Typography>
                       <Typography variant="body2">
-                        {cita.worker_schedule.schedule.date}
+                        {cita.worker_schedule.schedule.date.split("T")[0]}
                       </Typography>
                     </Stack>
                     <Stack direction="row" sx={sxRow}>
@@ -290,7 +290,7 @@ export default function ShowAppointment({
                         Fecha
                       </Typography>
                       <Typography variant="body2">
-                        {cita.worker_schedule.schedule.date}
+                        {cita.worker_schedule.schedule.date.split("T")[0]}
                       </Typography>
                     </Stack>
                     <Stack direction="row" sx={sxRow}>
@@ -315,7 +315,7 @@ export default function ShowAppointment({
                       startIcon={<AddCircleOutlineIcon fontSize="small" />}
                       onClick={() =>
                         navigate(
-                          `pacientes/${cita.appointment_id}/nuevoReporte`,
+                          `/pacientes/${cita.appointment_id}/nuevoReporte`,
                         )
                       }
                       sx={{

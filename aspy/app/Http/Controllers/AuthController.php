@@ -54,6 +54,7 @@ class AuthController extends Controller
             'person.occupation',
             'person.maritalStatus',
             'person.education',
+            'person.address.city.state.country',
             'person.phone',
 
         ]);

@@ -99,7 +99,16 @@ export default function InvoiceView({
         <Field label="Cliente" value={client} />
         <Field label="Dirección" value={address} />
         <Field label="Contacto" value={email} />
-        <Field label="Fecha" value={date} />
+        <Field
+          label="Fecha"
+          value={
+            date.split("T")[0] +
+            " / " +
+            date.split("T")[1].split(":")[0] +
+            ":" +
+            date.split("T")[1].split(":")[1]
+          }
+        />
 
         <Box
           sx={{

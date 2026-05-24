@@ -118,15 +118,17 @@ export default function ReceiptList() {
 
   if (loading) return <Progress />;
 
-  const flattenedRows: FlattenedReceipt[] = payments.map((r) => ({
-    id: r.receipt.receipt_id,
-    client_id: r.client.person_id,
-    client: `${r.client.first_name} ${r.client.last_name}`,
-    service: r.service.name,
-    price: r.service.price,
-    date: r.creation_date.split("T")[0],
-    receipt: r.receipt,
-  }));
+  const flattenedRows: FlattenedReceipt[] = payments
+    .filter((r) => r.receipt !== null)
+    .map((r) => ({
+      id: r.receipt.receipt_id,
+      client_id: r.client.person_id,
+      client: `${r.client.first_name} ${r.client.last_name}`,
+      service: r.service.name,
+      price: r.service.price,
+      date: r.creation_date.split("T")[0],
+      receipt: r.receipt,
+    }));
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>

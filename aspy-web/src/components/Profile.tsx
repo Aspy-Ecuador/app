@@ -11,7 +11,7 @@ export default function Profile() {
   };
 
   const user = getUserInfoFromLocalStorage();
-
+  console.log("User info from localStorage:", user);
   return (
     <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.75 }}>
       <SimpleHeader text="Mi perfil" chip="Cuenta" />
