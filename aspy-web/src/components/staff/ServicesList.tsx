@@ -1,28 +1,30 @@
-// FINAL
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import type { GridColDef, GridRowId } from "@mui/x-data-grid";
 import type { Service } from "@typesResponse/Service";
 import type { ProfessionalService } from "@typesResponse/ProfessionalService";
 import { useRoleData } from "@/observer/RoleDataContext";
-import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import CircularProgress from "@mui/material/CircularProgress";
-import Table from "@components/Table";
+import Grid from "@mui/material/Grid";
 import Header from "@components/Header";
-import Progress from "@components/Progress";
+import Table from "@components/Table";
 import professionalServiceAPI from "@API/professionalServiceAPI";
+import Progress from "@components/Progress";
+import { exportServicesPDF, exportServicesCSV } from "@/utils/utils";
+import AssignmentTurnedInRoundedIcon from "@mui/icons-material/AssignmentTurnedInRounded";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 
-export default function Services() {
+export default function ServicesList() {
   const { data, loading, refreshProServices } = useRoleData();
   const [selectedId, setSelectedId] = useState<GridRowId | null>(null);
   const [savingMap, setSavingMap] = useState<Record<number, boolean>>({});
-
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -34,6 +36,12 @@ export default function Services() {
   );
 
   const proServices: ProfessionalService[] = data?.proServices ?? [];
+
+  const assignedMap: Record<number, number[]> = {};
+  for (const ps of proServices) {
+    if (!assignedMap[ps.service_id]) assignedMap[ps.service_id] = [];
+    assignedMap[ps.service_id].push(ps.professional.person_id);
+  }
 
   async function handleSelectProfessional(
     service_id: number,
@@ -49,7 +57,7 @@ export default function Services() {
         );
       } else {
         await professionalServiceAPI.createProfessionalService({
-          service_id,
+          service_id: service_id,
           professional_id: person_id,
         });
       }
@@ -87,7 +95,7 @@ export default function Services() {
       resizable: false,
       renderCell: (params) => (
         <Box display="flex" alignItems="center" height="100%">
-          <Typography variant="body1" sx={{ color: "#0F6E56" }}>
+          <Typography variant="body1" sx={{ color: "#0F6E56", fontWeight: 500 }}>
             ${Number(params.value).toFixed(2)}
           </Typography>
         </Box>
@@ -140,15 +148,9 @@ export default function Services() {
                 fontSize: 12,
                 minWidth: 160,
                 bgcolor: "background.paper",
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "divider",
-                },
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#9FE1CB",
-                },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0F6E56",
-                },
+                "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
+                "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#9FE1CB" },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#0F6E56" },
               }}
             >
               {professionals.length === 0 && (
@@ -166,9 +168,7 @@ export default function Services() {
                 </MenuItem>
               ))}
             </Select>
-            {isSaving && (
-              <CircularProgress size={14} sx={{ color: "#0F6E56" }} />
-            )}
+            {isSaving && <CircularProgress size={14} sx={{ color: "#0F6E56" }} />}
           </Box>
         );
       },
@@ -212,16 +212,139 @@ export default function Services() {
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
-      <Grid container spacing={1}>
-        <Grid size={12} className="grid-p-patients-tittle">
+      
+      {/* Contenedor principal con Header inyectado para el botón '+' */}
+      <Grid container spacing={2}>
+        <Grid 
+          size={12} 
+          className="grid-p-patients-tittle"
+          sx={{
+            "& button": {
+              display: "inline-flex !important",
+              alignItems: "center !important",
+              justifyContent: "center !important",
+              minWidth: "40px !important",
+              width: 40,
+              height: 40,
+              padding: 0,
+              borderRadius: "50%",
+            },
+            "& .MuiButton-startIcon, & .MuiButton-endIcon": {
+              margin: "0 !important", 
+            },
+            "& svg": {
+              margin: "0 !important",
+            }
+          }}
+        >
           <Header
-            textHeader={"Servicios"}
+            textHeader={"Lista de servicios"}
             isCreate={true}
-            textIcon={"Agregar Servicio"}
+            textIcon="" 
             handle={() => navigate("/crear-servicio")}
           />
         </Grid>
 
+        {/* Panel de Estadísticas y Exportación */}
+        <Grid size={12}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap", mb: 1 }}>
+            
+            {/* Tarjeta total de servicios */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.25,
+                px: 1.75,
+                py: 1.25,
+                border: "0.5px solid",
+                borderColor: "divider",
+                borderRadius: 3,
+                bgcolor: "background.paper",
+              }}
+            >
+              <Box
+                sx={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: "8px",
+                  flexShrink: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  bgcolor: "#EEEDFE",
+                  color: "#534AB7",
+                  "& svg": { fontSize: 16 },
+                }}
+              >
+                <AssignmentTurnedInRoundedIcon fontSize="inherit" />
+              </Box>
+              <Box>
+                <Typography
+                  sx={{
+                    fontSize: 10,
+                    fontWeight: 500,
+                    letterSpacing: "0.04em",
+                    textTransform: "uppercase",
+                    color: "text.disabled",
+                    lineHeight: 1,
+                  }}
+                >
+                  Total servicios
+                </Typography>
+                <Typography sx={{ fontSize: 18, fontWeight: 500, lineHeight: 1.3 }}>
+                  {services.length}
+                </Typography>
+              </Box>
+            </Box>
+
+            <Box sx={{ width: "0.5px", height: 36, bgcolor: "divider", mx: 0.5 }} />
+
+            {/* Exportar PDF */}
+            <Button
+              onClick={() => exportServicesPDF(services, proServices, professionals)}
+              startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: "14px !important" }} />}
+              sx={{
+                fontSize: 12,
+                fontWeight: 500,
+                bgcolor: "#FEE2E2",
+                color: "#991B1B",
+                border: "0.5px solid #FCA5A5",
+                borderRadius: 3,
+                px: 1.75,
+                py: 1.25,
+                height: "auto",
+                textTransform: "none",
+                "&:hover": { bgcolor: "#FCA5A5" },
+              }}
+            >
+              PDF
+            </Button>
+
+            {/* Exportar CSV */}
+            <Button
+              onClick={() => exportServicesCSV(services, proServices, professionals)}
+              startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: "14px !important" }} />}
+              sx={{
+                fontSize: 12,
+                fontWeight: 500,
+                bgcolor: "#F0FDF4",
+                color: "#166534",
+                border: "0.5px solid #86EFAC",
+                borderRadius: 3,
+                px: 1.75,
+                py: 1.25,
+                height: "auto",
+                textTransform: "none",
+                "&:hover": { bgcolor: "#86EFAC" },
+              }}
+            >
+              Excel
+            </Button>
+          </Box>
+        </Grid>
+
+        {/* Tabla Responsiva */}
         <Grid size={12}>
           <Box sx={{ width: "100%", overflowX: "auto" }}>
             {loading ? (
@@ -248,6 +371,7 @@ export default function Services() {
             )}
           </Box>
         </Grid>
+
       </Grid>
     </Box>
   );

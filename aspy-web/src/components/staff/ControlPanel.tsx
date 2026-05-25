@@ -48,21 +48,10 @@ export default function ControlPanel() {
       <WelcomePanel user={"Secr. " + getAuthenticatedUserName()} />
 
       <Grid container spacing={2} alignItems="flex-start">
-        {/* Columna de citas */}
-        <Grid size={8}>
-          <Typography
-            sx={{
-              textTransform: "uppercase",
-              mb: 1.25,
-            }}
-          >
-            Citas de hoy
-          </Typography>
-          <ShowAppointment appointments={appointments} />
-        </Grid>
 
-        {/* Sidebar de acciones */}
-        <Grid size={4}>
+
+                {/* Sidebar de acciones — ancho completo en móvil, 4 en desktop */}
+        <Grid size={{ xs: 12, md: 4 }}>
           <Paper
             elevation={0}
             sx={{
@@ -97,6 +86,22 @@ export default function ControlPanel() {
             </Box>
           </Paper>
         </Grid>
+
+        {/* Columna de citas — ancho completo en móvil, 8 en desktop */}
+        <Grid size={{ xs: 12, md: 8 }}>
+          <Typography
+            sx={{
+              textTransform: "uppercase",
+              mb: 1.25,
+            }}
+          >
+            Citas de hoy
+          </Typography>
+          <ShowAppointment appointments={appointments} />
+        </Grid>
+
+
+
       </Grid>
     </Box>
   );

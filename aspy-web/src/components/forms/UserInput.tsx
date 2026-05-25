@@ -40,8 +40,11 @@ export default function UserInput({
 
   const [dynamicOptions, setDynamicOptions] = useState<Option[]>(options);
 
-  // Observar el campo del cual depende
   const dependentValue = dependsOn ? watch(dependsOn) : null;
+
+  // ← MODIFICADO: solo se usa cuando hay getOptions (flujo manual)
+  // Si las opciones vienen filtradas desde el padre, se usan directo
+  const currentOptions = getOptions ? dynamicOptions : options;
 
   useEffect(() => {
     if (!dependsOn || !getOptions) return;
@@ -60,7 +63,7 @@ export default function UserInput({
       }
     });
 
-    return () => subscription.unsubscribe(); // cleanup
+    return () => subscription.unsubscribe();
   }, [dependsOn, getOptions, id, setValue, watch]);
 
   const inputError = findInputError(errors, id);
@@ -84,10 +87,10 @@ export default function UserInput({
           id={id}
           {...register(id, validation)}
           className="border border-gray-300 rounded-md p-2 w-full"
-          disabled={dependsOn ? !dependentValue : false} // Deshabilitar si depende de otro campo que no tiene valor
+          disabled={dependsOn ? !dependentValue : false}
         >
           <option value="">Seleccione una opción</option>
-          {dynamicOptions?.map((option) => (
+          {currentOptions?.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>

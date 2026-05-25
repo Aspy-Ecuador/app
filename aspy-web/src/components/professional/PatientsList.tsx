@@ -5,7 +5,8 @@ import type { GridColDef, GridRowId } from "@mui/x-data-grid";
 import SimpleHeader from "@components/SimpleHeader";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Slide from "@mui/material/Slide";
+import Drawer from "@mui/material/Drawer";
+import Grid from "@mui/material/Grid";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import OverviewPersona from "@professional/OverviewPersona";
@@ -16,12 +17,30 @@ import { getAge, getClients } from "@/utils/utils";
 import { getAuthenticatedUserID } from "@/utils/store";
 import type { Person } from "@/typesResponse/Person";
 
-// ─── Columnas desktop ─────────────────────────────────────────────
-const columnsDesktop: GridColDef[] = [
-  { field: "first_name", headerName: "Nombres",  disableColumnMenu: true, flex: 2, resizable: false },
-  { field: "last_name",  headerName: "Apellidos", disableColumnMenu: true, flex: 2, resizable: false },
+const columns: GridColDef[] = [
   {
-    field: "email", headerName: "Correo", disableColumnMenu: true, flex: 2, resizable: false,
+    field: "first_name",
+    headerName: "Nombres",
+    disableColumnMenu: true,
+    flex: 2,
+    minWidth: 110,
+    resizable: false,
+  },
+  {
+    field: "last_name",
+    headerName: "Apellidos",
+    disableColumnMenu: true,
+    flex: 2,
+    minWidth: 110,
+    resizable: false,
+  },
+  {
+    field: "email",
+    headerName: "Correo",
+    disableColumnMenu: true,
+    flex: 3,
+    minWidth: 160,
+    resizable: false,
     renderCell: (params) => (
       <Box display="flex" alignItems="center" height="100%">
         <Typography variant="body1">{params.row.user_account?.email}</Typography>
@@ -29,7 +48,12 @@ const columnsDesktop: GridColDef[] = [
     ),
   },
   {
-    field: "age", headerName: "Edad", disableColumnMenu: true, flex: 1, resizable: false,
+    field: "age",
+    headerName: "Edad",
+    disableColumnMenu: true,
+    flex: 1,
+    minWidth: 70,
+    resizable: false,
     renderCell: (params) => (
       <Box display="flex" alignItems="center" height="100%">
         <Typography variant="body1">{getAge(params.row.birthdate)}</Typography>
@@ -37,7 +61,12 @@ const columnsDesktop: GridColDef[] = [
     ),
   },
   {
-    field: "occupation", headerName: "Ocupación", disableColumnMenu: true, flex: 2, resizable: false,
+    field: "occupation",
+    headerName: "Ocupación",
+    disableColumnMenu: true,
+    flex: 2,
+    minWidth: 120,
+    resizable: false,
     renderCell: (params) => (
       <Box display="flex" alignItems="center" height="100%">
         <Typography variant="body1">{params.row.occupation.name}</Typography>
@@ -45,7 +74,12 @@ const columnsDesktop: GridColDef[] = [
     ),
   },
   {
-    field: "phone", headerName: "Celular", disableColumnMenu: true, flex: 2, resizable: false,
+    field: "phone",
+    headerName: "Celular",
+    disableColumnMenu: true,
+    flex: 2,
+    minWidth: 120,
+    resizable: false,
     renderCell: (params) => (
       <Box display="flex" alignItems="center" height="100%">
         <Typography variant="body1">{params.row.phone?.number}</Typography>
@@ -54,27 +88,12 @@ const columnsDesktop: GridColDef[] = [
   },
 ];
 
-// ─── Columnas móvil (solo lo esencial) ───────────────────────────
-const columnsMobile: GridColDef[] = [
-  { field: "first_name", headerName: "Nombre",  disableColumnMenu: true, flex: 2, resizable: false },
-  { field: "last_name",  headerName: "Apellido", disableColumnMenu: true, flex: 2, resizable: false },
-  {
-    field: "age", headerName: "Edad", disableColumnMenu: true, flex: 1, resizable: false,
-    renderCell: (params) => (
-      <Box display="flex" alignItems="center" height="100%">
-        <Typography variant="body2">{getAge(params.row.birthdate)}</Typography>
-      </Box>
-    ),
-  },
-];
-
-// ─── Componente ───────────────────────────────────────────────────
 export default function PatientsList() {
   const [selectedId, setSelectedId] = useState<GridRowId | null>(null);
   const { data, loading } = useRoleData();
   const navigate = useNavigate();
   const location = useLocation();
-  const theme    = useTheme();
+  const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   if (loading) return <Progress />;
@@ -96,34 +115,28 @@ export default function PatientsList() {
     }
   };
 
+  const overviewPanel = selectedUser && (
+    <OverviewPersona
+      key={selectedUser.user_id}
+      selectedData={selectedUser}
+      moreInfo={handleMoreInfo}
+    />
+  );
+
   return (
-    <Box sx={{ p: { xs: 1.5, sm: 2, md: 2.5 }, minHeight: "100%" }}>
+    <Box sx={{ p: 2, minHeight: "100%" }}>
+      <Grid container spacing={1}>
 
-      {/* ── Header ──────────────────────────────────────────────── */}
-      <SimpleHeader text="Lista de pacientes" chip="Pacientes" />
+        {/* Header */}
+        <Grid size={12}>
+          <SimpleHeader text="Lista de pacientes" chip="Pacientes" />
+        </Grid>
 
-      {/* ── Layout principal ─────────────────────────────────────── */}
-      <Box
-        sx={{
-          mt: 2,
-          display: "flex",
-          flexDirection: { xs: "column", md: "row" },
-          gap: 2,
-          alignItems: "flex-start",
-        }}
-      >
         {/* Tabla */}
-        <Box
-          sx={{
-            flex: { xs: "1 1 auto", md: selectedUser ? "0 0 58%" : "1 1 100%" },
-            width: "100%",
-            minWidth: 0,
-            transition: "flex 0.3s ease",
-          }}
-        >
+        <Grid size={{ xs: 12, md: selectedUser && !isMobile ? 8 : 12 }} sx={{ overflowX: "auto" }}>
           {users.length ? (
             <Table<Person>
-              columns={isMobile ? columnsMobile : columnsDesktop}
+              columns={columns}
               rows={users}
               getRowId={(row) => row.user_id}
               selectedId={selectedId}
@@ -145,31 +158,54 @@ export default function PatientsList() {
               </Typography>
             </Box>
           )}
-        </Box>
+        </Grid>
 
-        {/* Overview — debajo en móvil, lateral en desktop */}
-        {selectedUser && (
-          <Slide
-            direction={isMobile ? "up" : "left"}
-            in={!!selectedUser}
-            mountOnEnter
-            unmountOnExit
-          >
-            <Box
-              sx={{
-                flex: { xs: "1 1 auto", md: "0 0 40%" },
-                width: "100%",
-              }}
-            >
-              <OverviewPersona
-                key={selectedUser.user_id}
-                selectedData={selectedUser}
-                moreInfo={handleMoreInfo}
-              />
-            </Box>
-          </Slide>
+        {/* Panel lateral — solo desktop */}
+        {selectedUser && !isMobile && (
+          <Grid size={{ md: 4 }}>
+            {overviewPanel}
+          </Grid>
         )}
-      </Box>
+      </Grid>
+
+      {/* Drawer — solo móvil/tablet */}
+      {isMobile && (
+        <Drawer
+          anchor="bottom"
+          open={Boolean(selectedUser)}
+          onClose={() => setSelectedId(null)}
+          slotProps={{
+            backdrop: {
+              sx: {
+                backdropFilter: "blur(4px)",
+                backgroundColor: "rgba(0,0,0,0.2)",
+              },
+            },
+          }}
+          PaperProps={{
+            sx: {
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              p: 2,
+              maxHeight: "85vh",
+              boxShadow: "0px -4px 20px rgba(0,0,0,0.1)",
+            },
+          }}
+        >
+          <Box
+            sx={{
+              width: 40,
+              height: 4,
+              bgcolor: "action.disabled",
+              borderRadius: 2,
+              mx: "auto",
+              mb: 2,
+              flexShrink: 0,
+            }}
+          />
+          {overviewPanel}
+        </Drawer>
+      )}
     </Box>
   );
 }

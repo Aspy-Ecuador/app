@@ -130,25 +130,28 @@ export default function InvoiceView({
             <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
               {service}
             </Typography>
+            {/* Precio formateado a 2 decimales */}
             <Typography
               sx={{ fontSize: 12, fontWeight: 500, fontFamily: "monospace" }}
             >
-              ${price}
+              ${Number(price).toFixed(2)}
             </Typography>
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-between", pt: 1 }}>
             <Typography sx={{ fontSize: 12, fontWeight: 500 }}>
               Total
             </Typography>
+            {/* Total con la clase texto-dinero y formateo de 2 decimales */}
             <Typography
+              className="texto-dinero"
               sx={{
                 fontSize: 15,
-                fontWeight: 500,
+                fontWeight: 600, // Aumentado para mayor impacto visual
                 color: "#0F6E56",
                 fontFamily: "monospace",
               }}
             >
-              ${total}
+              ${Number(total).toFixed(2)}
             </Typography>
           </Box>
         </Box>

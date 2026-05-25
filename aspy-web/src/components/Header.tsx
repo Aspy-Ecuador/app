@@ -31,7 +31,7 @@ export default function Header({
       }}
     >
       <Typography
-        variant="h3"
+        variant="h2"
         sx={{
           position: "absolute",
           left: "50%",

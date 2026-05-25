@@ -155,8 +155,8 @@ export default function AppointmentCreation({
   };
 
   useEffect(() => {
-  refreshWorkerProfessional();
-}, []);
+    refreshWorkerProfessional();
+  }, []);
 
   if (loading) return <Progress />;
 
@@ -164,7 +164,11 @@ export default function AppointmentCreation({
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: "260px minmax(0,1fr)",
+        gridTemplateColumns: {
+          xs: "1fr",           // móvil: una columna, apilados
+          sm: "1fr",           // tablet pequeña: igual
+          md: "260px minmax(0,1fr)", // desktop: formulario fijo + calendario
+        },
         gap: 1.5,
         alignItems: "start",
       }}

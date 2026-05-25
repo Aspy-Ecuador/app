@@ -1,8 +1,9 @@
 // FINAL
+import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import type { GridRowId } from "@mui/x-data-grid";
-import type { GridColDef } from "@mui/x-data-grid";
+import type { GridRowId, GridColDef } from "@mui/x-data-grid";
 import Button from "@mui/material/Button";
+import Tooltip from "@mui/material/Tooltip"; // Añadido para mejor UX en los iconos
 import Table from "@components/Table";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -13,16 +14,14 @@ import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import AccessTimeFilledRoundedIcon from "@mui/icons-material/AccessTimeFilledRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import CancelRoundedIcon from "@mui/icons-material/CancelRounded";
+
 import { useRoleData } from "@/observer/RoleDataContext";
 import Progress from "../Progress";
 import type { Payment } from "@/typesResponse/Payment";
-import { useState } from "react";
 
 export default function PaymentsList() {
   const { data, loading } = useRoleData();
-
   const payments: Payment[] = data.payments ?? [];
-
   const [selectedId, setSelectedId] = useState<GridRowId | null>(null);
 
   const navigate = useNavigate();
@@ -39,13 +38,23 @@ export default function PaymentsList() {
       headerName: "N° de Pago",
       disableColumnMenu: true,
       flex: 2,
+      minWidth: 110,
       resizable: false,
+      renderCell: (params) => (
+        <Box display="flex" alignItems="center" height="100%">
+          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+            #{params.row.payment_id}
+          </Typography>
+        </Box>
+      ),
     },
     {
       field: "person",
       headerName: "Cliente",
       disableColumnMenu: true,
       flex: 3,
+      minWidth: 150,
+      resizable: false,
       renderCell: (params) => {
         return (
           <Box display="flex" alignItems="center" height="100%">
@@ -55,13 +64,13 @@ export default function PaymentsList() {
           </Box>
         );
       },
-      resizable: false,
     },
     {
       field: "creation_date",
       headerName: "Fecha de Emisión",
       disableColumnMenu: true,
       flex: 3,
+      minWidth: 140,
       resizable: false,
       renderCell: (params) => {
         return (
@@ -78,14 +87,16 @@ export default function PaymentsList() {
       headerName: "Total",
       disableColumnMenu: true,
       flex: 1,
+      minWidth: 100,
       resizable: false,
       align: "left",
       headerAlign: "left",
       renderCell: (params) => {
         return (
           <Box display="flex" alignItems="center" height="100%">
-            <Typography variant="body1">
-              $ {params.row.service.price}
+            {/* Manteniendo la consistencia financiera visual de los comprobantes */}
+            <Typography variant="body1" sx={{ color: "#0F6E56", fontWeight: 600 }}>
+              ${Number(params.row.service.price).toFixed(2)}
             </Typography>
           </Box>
         );
@@ -95,6 +106,7 @@ export default function PaymentsList() {
       field: "actions",
       headerName: "Verificar",
       flex: 2,
+      minWidth: 100,
       disableColumnMenu: true,
       resizable: false,
       sortable: false,
@@ -106,16 +118,23 @@ export default function PaymentsList() {
           variant="text"
           color="primary"
           className="boton-editar"
+          sx={{
+            minWidth: 0,
+            p: 0.75,
+            borderRadius: 2,
+            "&:hover": { bgcolor: "#E6F1FB" }, // Hover premium coordinado
+          }}
         >
-          <VisibilityRoundedIcon />
+          <VisibilityRoundedIcon fontSize="small" />
         </Button>
       ),
     },
     {
       field: "status",
-      headerName: "Estado de aprobación",
+      headerName: "Aprobación",
       disableColumnMenu: true,
       flex: 2,
+      minWidth: 120,
       resizable: false,
       sortable: false,
       align: "center",
@@ -129,9 +148,7 @@ export default function PaymentsList() {
             height="100%"
             width="100%"
           >
-            <Typography variant="body1">
-              {getStatusIcon(params.row.payment_status.payment_status_id)}
-            </Typography>
+            {getStatusIcon(params.row.payment_status.payment_status_id)}
           </Box>
         );
       },
@@ -146,7 +163,9 @@ export default function PaymentsList() {
         <Grid size={12} className="grid-p-patients-tittle">
           <SimpleHeader text={"Lista de pagos"} chip="Pagos" />
         </Grid>
-        <Grid size={12}>
+        
+        {/* Contenedor de la tabla adaptado para scroll horizontal en móviles */}
+        <Grid size={12} sx={{ overflowX: "auto" }}>
           <Table<Payment>
             columns={columns}
             rows={payments}
@@ -160,14 +179,27 @@ export default function PaymentsList() {
   );
 }
 
+// Lógica de iconos envuelta en Tooltips para una mejor UX
 const getStatusIcon = (status: number) => {
   switch (status) {
     case 1:
-      return <CheckCircleRoundedIcon color="success" />;
+      return (
+        <Tooltip title="Aprobado" arrow>
+          <CheckCircleRoundedIcon sx={{ color: "#0F6E56" }} />
+        </Tooltip>
+      );
     case 2:
-      return <AccessTimeFilledRoundedIcon color="warning" />;
+      return (
+        <Tooltip title="Pendiente" arrow>
+          <AccessTimeFilledRoundedIcon sx={{ color: "#b9b716" }} />
+        </Tooltip>
+      );
     case 3:
-      return <CancelRoundedIcon color="error" />;
+      return (
+        <Tooltip title="Rechazado/Anulado" arrow>
+          <CancelRoundedIcon sx={{ color: "#991B1B" }} />
+        </Tooltip>
+      );
     default:
       return null;
   }

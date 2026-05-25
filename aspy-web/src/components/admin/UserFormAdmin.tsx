@@ -1,6 +1,6 @@
 // FINAL
 import { useEffect, useMemo } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { inputCreateUserAdminConfig } from "@/config/userFormAdminConfig";
 import { useRoleData } from "@/observer/RoleDataContext";
 import type { UserForm } from "@/typesRequest/UserForm";
@@ -9,7 +9,7 @@ import UserInput from "@forms/UserInput";
 import Progress from "@components/Progress";
 import CircularProgress from "@mui/material/CircularProgress";
 import type { Person } from "@/typesResponse/Person";
-import { useWatch } from "react-hook-form";
+
 interface UserFormProps {
   isEditMode: boolean;
   userId?: number;
@@ -103,10 +103,12 @@ export default function UserFormAdmin({
   }, [isEditMode, userId, users, methods]);
 
   const roleSelect = Number(
-    useWatch({
-      control: methods.control,
-      name: "role_id",
-    }) ?? 0,
+    useWatch({ control: methods.control, name: "role_id" }) ?? 0,
+  );
+
+  // ← NUEVO: observa la provincia seleccionada
+  const selectedStateId = Number(
+    useWatch({ control: methods.control, name: "address.state_id" }) ?? 0,
   );
 
   useEffect(() => {
@@ -115,30 +117,44 @@ export default function UserFormAdmin({
     }
   }, [roleSelect, onRoleChange]);
 
+  // ← NUEVO: resetea la ciudad cuando cambia la provincia
+  useEffect(() => {
+    if (selectedStateId) {
+      methods.setValue("address.city_id", 0);
+    }
+  }, [selectedStateId]);
+
   const filteredInputs = inputCreateUserAdminConfig.filter((input) => {
     const isProfessionalField = ["title", "specialty"].includes(input.key);
     return !(isProfessionalField && roleSelect !== 2);
   });
 
-  const list_inputs = filteredInputs.slice(start, end).map((input) => (
-    <UserInput
-      key={input.key}
-      label={input.label}
-      type={input.type}
-      id={input.key}
-      validation={
-        input.key === "password_confirmation"
-          ? {
-              ...input.validation,
-              validate: (value: string) =>
-                value === methods.getValues("password") ||
-                "Las contraseñas no coinciden",
-            }
-          : input.validation
-      }
-      options={input.options}
-    />
-  ));
+  // ← MODIFICADO: filtra ciudades según la provincia seleccionada
+  const list_inputs = filteredInputs.slice(start, end).map((input) => {
+    const resolvedOptions = input.dependsOn
+      ? input.options?.filter((opt) => opt.state_id === selectedStateId)
+      : input.options;
+
+    return (
+      <UserInput
+        key={input.key}
+        label={input.label}
+        type={input.type}
+        id={input.key}
+        validation={
+          input.key === "password_confirmation"
+            ? {
+                ...input.validation,
+                validate: (value: string) =>
+                  value === methods.getValues("password") ||
+                  "Las contraseñas no coinciden",
+              }
+            : input.validation
+        }
+        options={resolvedOptions}
+      />
+    );
+  });
 
   const onSubmit = methods.handleSubmit((data) => {
     if (isLast) {
