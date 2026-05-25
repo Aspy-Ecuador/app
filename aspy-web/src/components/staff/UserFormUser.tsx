@@ -1,7 +1,8 @@
-// FINAL
+// UserFormProfessional.tsx - FINAL
 import { useEffect, useMemo } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { inputCreateUserAdminConfig } from "@/config/userFormAdminConfig";
+import type { InputConfig } from "@/config/userFormAdminConfig";
 import { useRoleData } from "@/observer/RoleDataContext";
 import type { UserForm } from "@/typesRequest/UserForm";
 import Button from "@mui/material/Button";
@@ -13,34 +14,56 @@ import type { Person } from "@/typesResponse/Person";
 interface UserFormProps {
   isEditMode: boolean;
   userId?: number;
+  roleId: number; // ← NUEVO: reemplaza la constante hardcodeada
   start: number;
   end: number;
   onNext: (data: UserForm) => void;
   onBack: () => void;
   onFinish: (data: UserForm) => void;
   isLast?: boolean;
-  onRoleChange?: (roleId: number) => void;
   load?: boolean;
 }
 
-export default function UserFormAdmin({
+// Etiquetas por role_id para mostrar en el select deshabilitado
+const roleLabelMap: Record<number, string> = {
+  2: "Profesional",
+  3: "Cliente",
+  4: "Secretario",
+};
+
+export default function UserFormUser({
   isEditMode,
   userId,
+  roleId, // ← recibe el rol dinámico
   start,
   end,
   onNext,
   onBack,
   onFinish,
   isLast,
-  onRoleChange,
   load,
 }: UserFormProps) {
   const methods = useForm<UserForm>();
   const { data, loading } = useRoleData();
 
-  const users: Person[] = useMemo(() => {
-    return data.persons ?? [];
-  }, [data.persons]);
+  const users: Person[] = useMemo(() => data.persons ?? [], [data.persons]);
+
+  // Construye la config con role_id bloqueado al valor recibido por prop
+  const lockedInputConfig: InputConfig[] = inputCreateUserAdminConfig.map(
+    (input) => {
+      if (input.key !== "role_id") return input;
+      return {
+        ...input,
+        disabled: true,
+        options: [{ label: roleLabelMap[roleId] ?? "Rol", value: roleId }],
+      };
+    },
+  );
+
+  // Fija role_id al montar
+  useEffect(() => {
+    methods.setValue("role_id", roleId);
+  }, [methods, roleId]); // ← roleId en dependencias por si cambia
 
   useEffect(() => {
     if (isEditMode) {
@@ -57,7 +80,7 @@ export default function UserFormAdmin({
           occupation_id: user.occupation_id,
           marital_status_id: user.marital_status_id,
           education_id: user.education_id,
-          role_id: user.user_account.role_id,
+          role_id: roleId, // ← dinámico
           phone: {
             number: user.phone?.number ?? "",
             type: user.phone?.type ?? "",
@@ -86,6 +109,7 @@ export default function UserFormAdmin({
         birthdate: "",
         password: "",
         password_confirmation: "",
+        role_id: roleId, // ← dinámico
         phone: { number: "", type: "" },
         identification: { type: "", number: "" },
         address: {
@@ -100,74 +124,51 @@ export default function UserFormAdmin({
         specialty: "",
       });
     }
-  }, [isEditMode, userId, users, methods]);
+  }, [isEditMode, userId, users, methods, roleId]); // ← roleId en dependencias
 
-  const roleSelect = Number(
-    useWatch({ control: methods.control, name: "role_id" }) ?? 0,
-  );
-
-  // ← NUEVO: observa la provincia seleccionada
   const selectedStateId = Number(
     useWatch({ control: methods.control, name: "address.state_id" }) ?? 0,
   );
 
-  useEffect(() => {
-    if (onRoleChange) {
-      onRoleChange(roleSelect);
-    }
-  }, [roleSelect, onRoleChange]);
-
-  // ← NUEVO: resetea la ciudad cuando cambia la provincia
   useEffect(() => {
     if (selectedStateId) {
       methods.setValue("address.city_id", 0);
     }
   }, [selectedStateId]);
 
-  const filteredInputs = inputCreateUserAdminConfig.filter((input) => {
-    const isProfessionalField = ["title", "specialty"].includes(input.key);
-    return !(isProfessionalField && roleSelect !== 2);
-  });
-
-  // ← MODIFICADO: filtra ciudades según la provincia seleccionada
-  const list_inputs = filteredInputs.slice(start, end).map((input) => {
-    const resolvedOptions = input.dependsOn
-      ? input.options?.filter((opt) => opt.state_id === selectedStateId)
-      : input.options;
-
-    return (
-      <UserInput
-        key={input.key}
-        label={input.label}
-        type={input.type}
-        id={input.key}
-        validation={
-          input.key === "password_confirmation"
-            ? {
-                ...input.validation,
-                validate: (value: string) =>
-                  value === methods.getValues("password") ||
-                  "Las contraseñas no coinciden",
-              }
-            : input.validation
-        }
-        options={resolvedOptions}
-      />
-    );
-  });
+  const list_inputs = lockedInputConfig.slice(start, end).map((input) => (
+    <UserInput
+      key={input.key}
+      label={input.label}
+      type={input.type}
+      id={input.key}
+      disabled={input.disabled}
+      validation={
+        input.key === "password_confirmation"
+          ? {
+              ...input.validation,
+              validate: (value: string) =>
+                value === methods.getValues("password") ||
+                "Las contraseñas no coinciden",
+            }
+          : input.validation
+      }
+      options={
+        input.dependsOn
+          ? input.options?.filter((opt) => opt.state_id === selectedStateId)
+          : input.options
+      }
+    />
+  ));
 
   const onSubmit = methods.handleSubmit((data) => {
+    const safeData = { ...data, role_id: roleId }; // ← garantiza el rol correcto
     if (isLast) {
-      onFinish(data);
+      onFinish(safeData);
     } else {
-      onNext(data);
+      onNext(safeData);
     }
   });
-
-  const getButtonLabel = () => {
-    if (isLast) return isEditMode ? "Guardar" : "Crear";
-    return "Siguiente";
-  };
 
   if (loading) return <Progress />;
 
@@ -201,8 +202,14 @@ export default function UserFormAdmin({
           >
             {load ? (
               <CircularProgress size={24} sx={{ color: "white" }} />
+            ) : isLast ? (
+              isEditMode ? (
+                "Guardar"
+              ) : (
+                "Crear"
+              )
             ) : (
-              getButtonLabel()
+              "Siguiente"
             )}
           </Button>
         </div>

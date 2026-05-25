@@ -39,6 +39,12 @@ const appointmentAPI = {
       appointmentId: appointmentId,
     });
   },
+
+  cancelAppointment: async (appointmentId: number): Promise<AxiosResponse> => {
+    return api.put(`/appointment/appointment-cancel`, {
+      appointmentId: appointmentId,
+    });
+  },
 };
 
 export default appointmentAPI;

@@ -1,6 +1,6 @@
 // FINAL
 import { useEffect } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { inputRegisterUserConfig } from "@/config/userFormRegister";
 import type { UserForm } from "@/typesRequest/UserForm";
 import Box from "@mui/material/Box";
@@ -55,26 +55,45 @@ export default function FormRegister({
     });
   }, [methods]);
 
-  const list_inputs = inputRegisterUserConfig.slice(start, end).map((input) => (
-    <Box key={input.key} sx={{ minWidth: 0, width: "100%" }}>
-      <UserInput
-        label={input.label}
-        type={input.type}
-        id={input.key}
-        validation={
-          input.key === "password_confirmation"
-            ? {
-                ...input.validation,
-                validate: (value: string) =>
-                  value === methods.getValues("password") ||
-                  "Las contraseñas no coinciden",
-              }
-            : input.validation
-        }
-        options={input.options}
-      />
-    </Box>
-  ));
+  // ← NUEVO: observa la provincia seleccionada
+  const selectedStateId = Number(
+    useWatch({ control: methods.control, name: "address.state_id" }) ?? 0,
+  );
+
+  // ← NUEVO: resetea la ciudad cuando cambia la provincia
+  useEffect(() => {
+    if (selectedStateId) {
+      methods.setValue("address.city_id", 0);
+    }
+  }, [selectedStateId]);
+
+  // ← MODIFICADO: filtra ciudades según la provincia seleccionada
+  const list_inputs = inputRegisterUserConfig.slice(start, end).map((input) => {
+    const resolvedOptions = input.dependsOn
+      ? input.options?.filter((opt) => opt.state_id === selectedStateId)
+      : input.options;
+
+    return (
+      <Box key={input.key} sx={{ minWidth: 0, width: "100%" }}>
+        <UserInput
+          label={input.label}
+          type={input.type}
+          id={input.key}
+          validation={
+            input.key === "password_confirmation"
+              ? {
+                  ...input.validation,
+                  validate: (value: string) =>
+                    value === methods.getValues("password") ||
+                    "Las contraseñas no coinciden",
+                }
+              : input.validation
+          }
+          options={resolvedOptions}
+        />
+      </Box>
+    );
+  });
 
   const onSubmit = methods.handleSubmit((data) => {
     if (isLast) {
@@ -87,7 +106,6 @@ export default function FormRegister({
   return (
     <FormProvider {...methods}>
       <form onSubmit={(e) => e.preventDefault()} noValidate>
-        {/* Grid de inputs */}
         <Box
           sx={{
             display: "grid",
@@ -104,7 +122,6 @@ export default function FormRegister({
 
         <Divider sx={{ mb: 2.5 }} />
 
-        {/* Botones de navegación */}
         <Box
           sx={{
             display: "flex",

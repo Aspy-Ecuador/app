@@ -97,6 +97,7 @@ Route::middleware('auth:sanctum')->prefix('appointment')->group(function () {
     Route::put('/appointment-approve', [AppointmentController::class, 'approveAppointment']);
     Route::put('/appointment-complete', [AppointmentController::class, 'completeAppointment']);
     Route::put('/appointment-missed', [AppointmentController::class, 'missedAppointment']);
+    Route::put('/appointment-cancel', [AppointmentController::class, 'cancelAppointment']);    
     Route::post('/create-report', [AppointmentController::class, 'createReport']);
 });
 

@@ -46,44 +46,62 @@ export default function AppointmentDetail() {
 
   return (
     <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.75 }}>
+
       {/* ── Header ── */}
       <Box
         sx={{
+          position: "relative",
           display: "flex",
           alignItems: "center",
-          gap: 1,
           pb: 1.5,
           borderBottom: "0.5px solid",
           borderColor: "divider",
         }}
       >
-        <IconButton
-          size="small"
-          onClick={() => navigate(-1)}
+        {/* Título centrado absoluto */}
+        <Typography
+          variant="h2"
           sx={{
-            border: "0.5px solid",
-            borderColor: "divider",
-            borderRadius: 1.5,
+            position: "absolute",
+            left: "50%",
+            transform: "translateX(-50%)",
+            fontSize: { xs: "1.05rem", sm: "1.5rem", md: "2rem" },
+            maxWidth: { xs: "45%", sm: "60%", md: "70%" },
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            px: 1,
           }}
         >
-          <ArrowBackRoundedIcon sx={{ fontSize: 16 }} />
-        </IconButton>
-        <Typography sx={{ fontSize: 15, fontWeight: 500 }}>
           Detalles de la cita
         </Typography>
-        <Chip
-          label={`#${appointment?.appointment_id}`}
-          size="small"
-          sx={{
-            ml: "auto",
-            bgcolor: "#E6F1FB",
-            color: "#185FA5",
-            fontWeight: 500,
-            fontSize: 11,
-            height: 22,
-            "& .MuiChip-label": { px: 1.25 },
-          }}
-        />
+
+       {/* Chip + botón volver a la derecha */}
+        <Box sx={{ ml: "auto", display: "flex", alignItems: "center", gap: 1 }}>
+          <Chip
+            label={`#${appointment?.appointment_id}`}
+            size="small"
+            sx={{
+              bgcolor: "#E6F1FB",
+              color: "#185FA5",
+              fontWeight: 500,
+              fontSize: 11,
+              height: 22,
+              "& .MuiChip-label": { px: 1.25 },
+            }}
+          />
+          <IconButton
+            size="small"
+            onClick={() => navigate(-1)}
+            sx={{
+              border: "0.5px solid",
+              borderColor: "divider",
+              borderRadius: 1.5,
+            }}
+          >
+            <ArrowBackRoundedIcon sx={{ fontSize: 16 }} />
+          </IconButton>
+        </Box>
       </Box>
 
       {/* ── Contenido ── */}
@@ -129,28 +147,19 @@ export default function AppointmentDetail() {
                 <Typography
                   variant="overline"
                   color="text.secondary"
-                  sx={{
-                    letterSpacing: 2,
-                    fontSize: 10,
-                    display: "block",
-                    mb: 1,
-                  }}
+                  sx={{ letterSpacing: 2, fontSize: 10, display: "block", mb: 1 }}
                 >
                   Horario
                 </Typography>
                 <Stack spacing={1}>
                   <Stack direction="row" alignItems="center" spacing={1}>
-                    <CalendarTodayRoundedIcon
-                      sx={{ fontSize: 14, color: "text.disabled" }}
-                    />
+                    <CalendarTodayRoundedIcon sx={{ fontSize: 14, color: "text.disabled" }} />
                     <Typography variant="body2" fontWeight={500}>
                       {appointment?.worker_schedule.schedule.date.split("T")[0]}
                     </Typography>
                   </Stack>
                   <Stack direction="row" alignItems="center" spacing={1}>
-                    <AccessTimeRoundedIcon
-                      sx={{ fontSize: 14, color: "text.disabled" }}
-                    />
+                    <AccessTimeRoundedIcon sx={{ fontSize: 14, color: "text.disabled" }} />
                     <Typography variant="body2" fontWeight={500}>
                       {appointment?.worker_schedule.schedule.start_time}
                       {" – "}
@@ -167,12 +176,7 @@ export default function AppointmentDetail() {
                 <Typography
                   variant="overline"
                   color="text.secondary"
-                  sx={{
-                    letterSpacing: 2,
-                    fontSize: 10,
-                    display: "block",
-                    mb: 1,
-                  }}
+                  sx={{ letterSpacing: 2, fontSize: 10, display: "block", mb: 1 }}
                 >
                   Profesional
                 </Typography>
@@ -203,9 +207,7 @@ export default function AppointmentDetail() {
                       {appointment?.professional.last_name}
                     </Typography>
                     <Stack direction="row" alignItems="center" spacing={0.5}>
-                      <PersonOutlineRoundedIcon
-                        sx={{ fontSize: 12, color: "text.disabled" }}
-                      />
+                      <PersonOutlineRoundedIcon sx={{ fontSize: 12, color: "text.disabled" }} />
                       <Typography variant="caption" color="text.secondary">
                         Profesional
                       </Typography>
@@ -221,12 +223,7 @@ export default function AppointmentDetail() {
                 <Typography
                   variant="overline"
                   color="text.secondary"
-                  sx={{
-                    letterSpacing: 2,
-                    fontSize: 10,
-                    display: "block",
-                    mb: 1,
-                  }}
+                  sx={{ letterSpacing: 2, fontSize: 10, display: "block", mb: 1 }}
                 >
                   Paciente
                 </Typography>
@@ -257,9 +254,7 @@ export default function AppointmentDetail() {
                       {appointment?.client.last_name}
                     </Typography>
                     <Stack direction="row" alignItems="center" spacing={0.5}>
-                      <PersonOutlineRoundedIcon
-                        sx={{ fontSize: 12, color: "text.disabled" }}
-                      />
+                      <PersonOutlineRoundedIcon sx={{ fontSize: 12, color: "text.disabled" }} />
                       <Typography variant="caption" color="text.secondary">
                         Paciente
                       </Typography>
@@ -295,9 +290,7 @@ export default function AppointmentDetail() {
                 gap: 1,
               }}
             >
-              <InsertDriveFileOutlinedIcon
-                sx={{ fontSize: 15, color: "text.disabled" }}
-              />
+              <InsertDriveFileOutlinedIcon sx={{ fontSize: 15, color: "text.disabled" }} />
               <Typography variant="caption" color="text.secondary">
                 Reporte de la cita #{appointment?.appointment_id}
               </Typography>
@@ -324,9 +317,7 @@ export default function AppointmentDetail() {
                   justifyContent="center"
                   sx={{ height: "100%", gap: 1.5, py: 10 }}
                 >
-                  <InsertDriveFileOutlinedIcon
-                    sx={{ fontSize: 40, color: "text.disabled" }}
-                  />
+                  <InsertDriveFileOutlinedIcon sx={{ fontSize: 40, color: "text.disabled" }} />
                   <Typography variant="body2" color="text.disabled">
                     No hay reporte disponible para esta cita
                   </Typography>

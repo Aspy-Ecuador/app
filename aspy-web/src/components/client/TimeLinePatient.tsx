@@ -17,15 +17,18 @@ interface TimeLinePatientsProps {
   selectedComments: string;
 }
 
-const getStatusStyle = (statusName: string) => {
-  const name = statusName.toLowerCase();
-  if (name.includes("guardada"))
+const getStatusStyle = (statusId: number) => {
+  if (statusId === 1)
+    return { bg: "#FAEEDA", color: "#854F0B", accent: "#BA7517" };
+  if (statusId === 2)
     return { bg: "#E1F5EE", color: "#0F6E56", accent: "#1D9E75" };
-  if (name.includes("perdida"))
+  if (statusId === 3)
+    return { bg: "#E6F1FB", color: "#185FA5", accent: "#378ADD" };
+  if (statusId === 4)
     return { bg: "#FCEBEB", color: "#A32D2D", accent: "#E24B4A" };
-  if (name.includes("completada"))
-    return { bg: "#E6F1FB", color: "#185FA5", accent: "#3B82F6" };
-  return { bg: "#FAEEDA", color: "#854F0B", accent: "#EF9F27" };
+  if (statusId === 5)
+    return { bg: "#F3F0F9", color: "#4B3080", accent: "#7C5CBF" };
+  return { bg: "#F5F5F5", color: "#616161", accent: "#9E9E9E" };
 };
 
 export default function TimeLinePatients({
@@ -109,7 +112,9 @@ export default function TimeLinePatients({
           </Typography>
         ) : (
           appointmentsReportUser.map((report, index) => {
-            const style = getStatusStyle(report.appointment_status.name);
+            const style = getStatusStyle(
+              report.appointment_status.appointment_status_id,
+            );
             const isActive =
               report.report?.file === selectedComments && !!selectedComments;
             const isLast = index === appointmentsReportUser.length - 1;

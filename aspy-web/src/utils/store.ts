@@ -94,6 +94,14 @@ export const getAuthenticatedUserRole = (): string | null | undefined => {
   return user.role.name; // Devuelve el rol del usuario autenticado
 };
 
+export const getAuthenticatedUserIdRole = (): number | null | undefined => {
+  const user = getAuthenticatedUser();
+  if (!user || user === null || typeof user === "string") {
+    throw new Error("No authenticated user found");
+  }
+  return user.role.role_id; // Devuelve el ID del rol del usuario autenticado
+};
+
 // Función para obtener el nombre del usuario autenticado
 export const getAuthenticatedUserName = (): string => {
   const user = getAuthenticatedUser();

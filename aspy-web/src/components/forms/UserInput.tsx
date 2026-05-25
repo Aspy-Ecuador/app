@@ -20,6 +20,7 @@ interface UserInputProps {
   options?: Option[];
   dependsOn?: string;
   getOptions?: (selectedValue: number) => Option[];
+  disabled?: boolean;
 }
 
 export default function UserInput({
@@ -30,6 +31,7 @@ export default function UserInput({
   options = [],
   dependsOn,
   getOptions,
+  disabled = false, // ← NUEVO
 }: UserInputProps) {
   const {
     register,
@@ -40,8 +42,9 @@ export default function UserInput({
 
   const [dynamicOptions, setDynamicOptions] = useState<Option[]>(options);
 
-  // Observar el campo del cual depende
   const dependentValue = dependsOn ? watch(dependsOn) : null;
+
+  const currentOptions = getOptions ? dynamicOptions : options;
 
   useEffect(() => {
     if (!dependsOn || !getOptions) return;
@@ -60,11 +63,15 @@ export default function UserInput({
       }
     });
 
-    return () => subscription.unsubscribe(); // cleanup
+    return () => subscription.unsubscribe();
   }, [dependsOn, getOptions, id, setValue, watch]);
 
   const inputError = findInputError(errors, id);
   const isInvalid = isFormInvalid(inputError);
+
+  // Si disabled viene explícito desde el padre, toma precedencia.
+  // Si no, mantiene la lógica original: deshabilitar cuando depende de otro campo vacío.
+  const isDisabled = disabled || (dependsOn ? !dependentValue : false); // ← MODIFICADO
 
   return (
     <div className="flex flex-col gap-2 w-full">
@@ -84,10 +91,10 @@ export default function UserInput({
           id={id}
           {...register(id, validation)}
           className="border border-gray-300 rounded-md p-2 w-full"
-          disabled={dependsOn ? !dependentValue : false} // Deshabilitar si depende de otro campo que no tiene valor
+          disabled={isDisabled} // ← MODIFICADO
         >
           <option value="">Seleccione una opción</option>
-          {dynamicOptions?.map((option) => (
+          {currentOptions?.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
@@ -100,6 +107,7 @@ export default function UserInput({
           type={type}
           variant="outlined"
           size="small"
+          disabled={isDisabled} // ← NUEVO: también aplica a TextField
           className="w-full md:w-[300px]"
           sx={{
             "& input::-webkit-outer-spin-button": {
