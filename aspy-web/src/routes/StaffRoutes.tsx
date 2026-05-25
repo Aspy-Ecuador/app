@@ -14,12 +14,14 @@ import AppointmentView from "@components/AppointmentView";
 import CheckoutView from "@components/CheckoutView";
 import EditUser from "@staff/EditUser";
 import CreateUser from "@staff/CreateUser";
+import EditUserAdmin from "@admin/EditUserAdmin";
 
 export const StaffRoutes = [
   { path: "/dashboard", element: <ControlPanel /> },
   { path: "/perfil", element: <Profile /> },
   { path: "/editarCliente/:id", element: <EditUser /> },
   { path: "/editarProfesional/:id", element: <EditUser /> },
+  { path: "/editarSecretario/:id", element: <EditUserAdmin /> },
   { path: "/profesionales", element: <ProffesionalList /> },
   { path: "/pacientes", element: <ClientList /> },
   { path: "/recibos", element: <ReceiptList /> },

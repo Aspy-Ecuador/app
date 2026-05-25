@@ -12,7 +12,7 @@ import HorarioView from "@professional/Horarioview";
 export const ProfessionalRoutes = [
   { path: "/dashboard", element: <ControlPanel /> },
   { path: "/perfil", element: <Profile /> },
-  { path: "/editar/:id", element: <EditUserAdmin /> },
+  { path: "/editarProfesional/:id", element: <EditUserAdmin /> },
   { path: "/pacientes", element: <PatientsList /> },
   { path: "/citas", element: <Appointments /> },
   { path: "/pacientes/:id", element: <History /> },

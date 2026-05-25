@@ -11,7 +11,7 @@ import History from "@client/History";
 export const ClientRoutes = [
   { path: "/dashboard", element: <ControlPanel /> },
   { path: "/perfil", element: <Profile /> },
-  { path: "/editar/:id", element: <EditUserAdmin /> },
+  { path: "/editarCliente/:id", element: <EditUserAdmin /> },
   { path: "/agendar-cita", element: <AppointmentView isClient={true} /> },
   { path: "/recibos", element: <ReceiptList /> },
   { path: "/consultarServicios", element: <ServicesList /> },
