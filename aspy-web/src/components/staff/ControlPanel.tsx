@@ -11,7 +11,6 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import PersonAddAltRoundedIcon from "@mui/icons-material/PersonAddAltRounded";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
-import PermContactCalendarRoundedIcon from "@mui/icons-material/PermContactCalendarRounded";
 import Progress from "@components/Progress";
 import ButtonList from "@components/ButtonList";
 import ShowAppointment from "@staff/ShowAppointment";
@@ -26,11 +25,6 @@ export default function ControlPanel() {
       text: "Agendar cita",
       icon: <EditCalendarRoundedIcon />,
       accion: () => navigate("/agendar-cita"),
-    },
-    {
-      text: "Registrar usuario",
-      icon: <PermContactCalendarRoundedIcon />,
-      accion: () => navigate("/registrarUsuario"),
     },
     {
       text: "Agregar servicio",
@@ -48,9 +42,7 @@ export default function ControlPanel() {
       <WelcomePanel user={"Secr. " + getAuthenticatedUserName()} />
 
       <Grid container spacing={2} alignItems="flex-start">
-
-
-                {/* Sidebar de acciones — ancho completo en móvil, 4 en desktop */}
+        {/* Sidebar de acciones — ancho completo en móvil, 4 en desktop */}
         <Grid size={{ xs: 12, md: 4 }}>
           <Paper
             elevation={0}
@@ -99,9 +91,6 @@ export default function ControlPanel() {
           </Typography>
           <ShowAppointment appointments={appointments} />
         </Grid>
-
-
-
       </Grid>
     </Box>
   );
