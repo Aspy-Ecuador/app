@@ -292,10 +292,10 @@ export default function PaymentForm({
               variant="body2"
               sx={{ color: "text.secondary", mb: 0.5 }}
             >
-              Suba el comprobante de pago en formato PDF.
+              Suba el comprobante de pago en formato PDF o Imagen.
             </Typography>
             <UploadButton
-              accept="application/pdf"
+              accept="image/*,application/pdf"
               label="Subir comprobante"
               icon={<UploadFile fontSize="small" />}
               buttonClassName="bg-white text-blue-700 font-semibold border-2 border-blue-500 hover:bg-blue-50 rounded-xl px-4 py-2 transition-all"
