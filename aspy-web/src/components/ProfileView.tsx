@@ -132,6 +132,11 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
 
   const roleName =
     "person" in user ? user.role.name : user.user_account.role.name;
+  console.log("ProfileView renderizado con user:", roleName);
+  const ruta =
+    roleName === "Professional"
+      ? `/editarProfesional/${person.user_id}`
+      : `/editarCliente/${person.user_id}`;
 
   const initials =
     `${person.first_name?.[0] ?? ""}${person.last_name?.[0] ?? ""}`.toUpperCase();
@@ -218,7 +223,7 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
             </Box>
             <IconButton
               size="small"
-              onClick={() => navigate(`/editar/${person.user_id}`)}
+              onClick={() => navigate(ruta)}
               sx={{
                 position: "absolute",
                 bottom: 0,

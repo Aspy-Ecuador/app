@@ -130,6 +130,7 @@ class AppointmentController extends Controller
         }            
     }
 
+    // Rechazar cita
     public function rejectAppointment(Request $request)
     {
         $request->validate([
@@ -174,6 +175,7 @@ class AppointmentController extends Controller
         }
     }
 
+    // Aprobar cita
     public function approveAppointment(Request $request)
     {
         $request->validate([
@@ -218,6 +220,7 @@ class AppointmentController extends Controller
         }
     }
 
+    // Asistió
     public function completeAppointment(Request $request)
     {
         $request->validate([
@@ -250,6 +253,7 @@ class AppointmentController extends Controller
         }
     }
 
+    // No asistió
     public function missedAppointment(Request $request)
     {
         $request->validate([
@@ -282,6 +286,45 @@ class AppointmentController extends Controller
         }
     }
 
+    // Cancelar cita
+    public function cancelAppointment(Request $request)
+    {
+        $request->validate([
+            'appointmentId' => 'required|integer',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $appointment = Appointment::findOrFail($request->appointmentId);
+
+            $appointment->appointment_status_id = 5;
+            $appointment->modified_by = auth()->id();
+            $appointment->modification_date = now();
+            $appointment->save();
+
+            $workerSchedule = WorkerSchedule::findOrFail($appointment->worker_schedule_id);
+            $workerSchedule->is_available = true;
+            $workerSchedule->modified_by = auth()->id();
+            $workerSchedule->modification_date = now();
+            $workerSchedule->save();
+
+            DB::commit();
+
+            return response()->json([
+                'message'     => 'Appointment cancelled successfully.',
+                'appointment' => $appointment,
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to cancel appointment.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+    
     public function createReport(Request $request)
     {
         $request->validate([

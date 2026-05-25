@@ -8,17 +8,18 @@ import Appointments from "@staff/Appointments";
 import PaymentsList from "@components/staff/PaymentsList";
 import Services from "@components/staff/ServicesList";
 import PaymentDetails from "@staff/PaymentDetails";
-import CreateUserAdmin from "@admin/CreateUserAdmin";
 import CreateService from "@components/CreateService";
 import EditService from "@components/EditService";
 import AppointmentView from "@components/AppointmentView";
 import CheckoutView from "@components/CheckoutView";
-import EditUserAdmin from "@/components/admin/EditUserAdmin";
+import EditUser from "@staff/EditUser";
+import CreateUser from "@staff/CreateUser";
 
 export const StaffRoutes = [
   { path: "/dashboard", element: <ControlPanel /> },
   { path: "/perfil", element: <Profile /> },
-  { path: "/editar/:id", element: <EditUserAdmin /> },
+  { path: "/editarCliente/:id", element: <EditUser /> },
+  { path: "/editarProfesional/:id", element: <EditUser /> },
   { path: "/profesionales", element: <ProffesionalList /> },
   { path: "/pacientes", element: <ClientList /> },
   { path: "/recibos", element: <ReceiptList /> },
@@ -26,7 +27,8 @@ export const StaffRoutes = [
   { path: "/citas", element: <Appointments /> },
   { path: "/servicios", element: <Services /> },
   { path: "/agendar-cita", element: <AppointmentView isClient={false} /> },
-  { path: "/registrarUsuario", element: <CreateUserAdmin /> },
+  { path: "/registrarProfesional", element: <CreateUser /> },
+  { path: "/registrarCliente", element: <CreateUser /> },
   { path: "/crear-servicio", element: <CreateService /> },
   { path: "/pagos/:id", element: <PaymentDetails /> },
   { path: "/servicios/:id", element: <EditService /> },

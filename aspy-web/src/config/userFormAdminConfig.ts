@@ -1,4 +1,20 @@
 // FINAL
+export type InputOption = {
+  label: string;
+  value: number | string;
+  state_id?: number; // ← opcional, solo lo usan las ciudades
+};
+
+export type InputConfig = {
+  label: string;
+  key: string;
+  type: string;
+  validation: object;
+  options?: InputOption[];
+  dependsOn?: string;
+  disabled?: boolean; // ← opcional, solo lo usa role_id en el config profesional
+};
+
 export const inputCreateUserAdminConfig = [
   // ── STEP 1: Datos personales
   {

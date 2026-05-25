@@ -87,11 +87,12 @@ export default function ProffesionalList() {
 
   const selectedUser =
     selectedId !== null
-      ? (users.find((item) => String(item.user_id) === String(selectedId)) ?? null)
+      ? (users.find((item) => String(item.user_id) === String(selectedId)) ??
+        null)
       : null;
 
   const handleCreateProfessional = () => {
-    navigate("/registrarUsuario");
+    navigate("/registrarProfesional");
   };
 
   if (loading) return <Progress />;
@@ -103,10 +104,9 @@ export default function ProffesionalList() {
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container spacing={1}>
-
         {/* Header - Aplicando corrección de centrado estético para el '+' */}
-        <Grid 
-          size={12} 
+        <Grid
+          size={12}
           className="grid-p-patients-tittle"
           sx={{
             // Apuntamos al botón dentro del Header para garantizar simetría perfecta
@@ -122,11 +122,11 @@ export default function ProffesionalList() {
             },
             // Eliminamos los márgenes por defecto de Material UI en los iconos internos de botones
             "& .MuiButton-startIcon, & .MuiButton-endIcon": {
-              margin: "0 !important", 
+              margin: "0 !important",
             },
             "& svg": {
               margin: "0 !important",
-            }
+            },
           }}
         >
           <Header
@@ -138,7 +138,10 @@ export default function ProffesionalList() {
         </Grid>
 
         {/* Tabla */}
-        <Grid size={{ xs: 12, md: selectedUser && !isMobile ? 8 : 12 }} sx={{ overflowX: "auto" }}>
+        <Grid
+          size={{ xs: 12, md: selectedUser && !isMobile ? 8 : 12 }}
+          sx={{ overflowX: "auto" }}
+        >
           <Table<Person>
             columns={columns}
             rows={users}
@@ -150,9 +153,7 @@ export default function ProffesionalList() {
 
         {/* Panel lateral — solo desktop */}
         {selectedUser && !isMobile && (
-          <Grid size={{ md: 4 }}>
-            {profilePanel}
-          </Grid>
+          <Grid size={{ md: 4 }}>{profilePanel}</Grid>
         )}
       </Grid>
 

@@ -20,6 +20,7 @@ interface UserInputProps {
   options?: Option[];
   dependsOn?: string;
   getOptions?: (selectedValue: number) => Option[];
+  disabled?: boolean;
 }
 
 export default function UserInput({
@@ -30,6 +31,7 @@ export default function UserInput({
   options = [],
   dependsOn,
   getOptions,
+  disabled = false, // ← NUEVO
 }: UserInputProps) {
   const {
     register,
@@ -42,8 +44,6 @@ export default function UserInput({
 
   const dependentValue = dependsOn ? watch(dependsOn) : null;
 
-  // ← MODIFICADO: solo se usa cuando hay getOptions (flujo manual)
-  // Si las opciones vienen filtradas desde el padre, se usan directo
   const currentOptions = getOptions ? dynamicOptions : options;
 
   useEffect(() => {
@@ -69,6 +69,10 @@ export default function UserInput({
   const inputError = findInputError(errors, id);
   const isInvalid = isFormInvalid(inputError);
 
+  // Si disabled viene explícito desde el padre, toma precedencia.
+  // Si no, mantiene la lógica original: deshabilitar cuando depende de otro campo vacío.
+  const isDisabled = disabled || (dependsOn ? !dependentValue : false); // ← MODIFICADO
+
   return (
     <div className="flex flex-col gap-2 w-full">
       <div className="flex flex-row gap-2 w-full">
@@ -87,7 +91,7 @@ export default function UserInput({
           id={id}
           {...register(id, validation)}
           className="border border-gray-300 rounded-md p-2 w-full"
-          disabled={dependsOn ? !dependentValue : false}
+          disabled={isDisabled} // ← MODIFICADO
         >
           <option value="">Seleccione una opción</option>
           {currentOptions?.map((option) => (
@@ -103,6 +107,7 @@ export default function UserInput({
           type={type}
           variant="outlined"
           size="small"
+          disabled={isDisabled} // ← NUEVO: también aplica a TextField
           className="w-full md:w-[300px]"
           sx={{
             "& input::-webkit-outer-spin-button": {
