@@ -1,13 +1,32 @@
 // FINAL
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Header from "@components/Header";
-import FormViewAdmin from "./FormViewAdmin";
+import FormViewUser from "@staff/FormViewUser";
 
 export default function EditUserAdmin() {
   const { id } = useParams();
   const numericId = parseInt(id!);
+
+  const ruta = useLocation();
+
+  let textheader = "";
+  let rol = 0;
+
+  if (ruta.pathname.includes("/editarCliente")) {
+    textheader = "Editar cliente";
+    rol = 3;
+  } else if (ruta.pathname.includes("/editarProfesional")) {
+    textheader = "Editar profesional";
+    rol = 2;
+  } else if (ruta.pathname.includes("/editarSecretario")) {
+    textheader = "Editar secretario";
+    rol = 4;
+  } else if (ruta.pathname.includes("/editarAdmin")) {
+    textheader = "Editar admin";
+    rol = 1;
+  }
 
   const navigate = useNavigate();
   const handleBack = () => {
@@ -18,14 +37,14 @@ export default function EditUserAdmin() {
       <Grid container spacing={2}>
         <Grid size={12} className="grid-p-patients-tittle">
           <Header
-            textHeader={"Editar Usuario"}
+            textHeader={textheader}
             isCreate={false}
             handle={handleBack}
           />
         </Grid>
 
         <Grid size={12}>
-          <FormViewAdmin isEdit={true} user_id={numericId} />
+          <FormViewUser isEdit={true} user_id={numericId} role_id={rol} />
         </Grid>
       </Grid>
     </Box>

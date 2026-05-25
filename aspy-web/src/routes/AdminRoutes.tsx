@@ -12,7 +12,7 @@ import EditUser from "@staff/EditUser";
 export const AdminRoutes = [
   { path: "/dashboard", element: <ControlPanel /> },
   { path: "/perfil", element: <Profile /> },
-  { path: "/editarCliente/:id", element: <EditUser /> },      // <- reemplaza /editar/:id
+  { path: "/editarCliente/:id", element: <EditUser /> }, // <- reemplaza /editar/:id
   { path: "/editarProfesional/:id", element: <EditUser /> },
   { path: "/editarStaff/:id", element: <EditUser /> },
   { path: "/editarAdmin/:id", element: <EditUser /> },
