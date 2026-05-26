@@ -6,13 +6,13 @@ import PatientsList from "@professional/PatientsList";
 import History from "@professional/History";
 import NewReport from "@professional/NewReport";
 import Detail from "@professional/Detail";
-import EditUserAdmin from "@/components/admin/EditUserAdmin";
 import HorarioView from "@professional/Horarioview";
+import EditUser from "@staff/EditUser";
 
 export const ProfessionalRoutes = [
   { path: "/dashboard", element: <ControlPanel /> },
   { path: "/perfil", element: <Profile /> },
-  { path: "/editar/:id", element: <EditUserAdmin /> },
+  { path: "/editarProfesional/:id", element: <EditUser /> },
   { path: "/pacientes", element: <PatientsList /> },
   { path: "/citas", element: <Appointments /> },
   { path: "/pacientes/:id", element: <History /> },

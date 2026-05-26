@@ -7,12 +7,15 @@ import EditService from "@/components/EditService";
 import CreateService from "@/components/CreateService";
 import CreateUserAdmin from "@admin/CreateUserAdmin";
 import Appointment from "@/components/admin/Appointments";
-import EditUserAdmin from "@/components/admin/EditUserAdmin";
+import EditUser from "@staff/EditUser";
 
 export const AdminRoutes = [
   { path: "/dashboard", element: <ControlPanel /> },
   { path: "/perfil", element: <Profile /> },
-  { path: "/editar/:id", element: <EditUserAdmin /> },
+  { path: "/editarCliente/:id", element: <EditUser /> },      // <- reemplaza /editar/:id
+  { path: "/editarProfesional/:id", element: <EditUser /> },
+  { path: "/editarStaff/:id", element: <EditUser /> },
+  { path: "/editarAdmin/:id", element: <EditUser /> },
   { path: "/usuarios", element: <UsersList /> },
   { path: "/servicios", element: <ServicesList /> },
   { path: "/servicios/:id", element: <EditService /> },

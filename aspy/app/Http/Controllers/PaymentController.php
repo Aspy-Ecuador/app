@@ -11,7 +11,7 @@ class PaymentController extends Controller
     public function index()
     {
         $payments = Payment::with([
-            'client.person',
+            'client.person.identification',
             'service',
             'paymentData',
             'paymentStatus',
