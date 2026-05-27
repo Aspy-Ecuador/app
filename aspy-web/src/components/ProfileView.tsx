@@ -134,6 +134,7 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
     "person" in user ? user.role.name : user.user_account.role.name;
   console.log("ProfileView renderizado con user:", roleName);
   const ruta =
+<<<<<<< HEAD
     roleName === "Professional"
       ? `/editarProfesional/${person.user_id}`
       : roleName === "Client"
@@ -141,6 +142,15 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
         : roleName === "Admin"
           ? `/editarAdmin/${person.user_id}`
           : `/editarSecretario/${person.user_id}`;
+=======
+  roleName === "Professional"
+    ? `/editarProfesional/${person.user_id}`
+    : roleName === "Staff"
+    ? `/editarStaff/${person.user_id}`
+    : roleName === "Admin"
+    ? `/editarAdmin/${person.user_id}`
+    : `/editarCliente/${person.user_id}`;
+>>>>>>> fix-version-pruebas-aspy
 
   const initials =
     `${person.first_name?.[0] ?? ""}${person.last_name?.[0] ?? ""}`.toUpperCase();

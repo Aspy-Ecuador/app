@@ -20,6 +20,12 @@ export default function EditUserAdmin() {
   } else if (ruta.pathname.includes("/editarProfesional")) {
     textheader = "Editar profesional";
     rol = 2;
+  } else if (ruta.pathname.includes("/editarStaff")) {
+    textheader = "Editar Secretario/a";
+    rol = 4;
+  } else if (ruta.pathname.includes("/editarAdmin")) {
+    textheader = "Editar admin";
+    rol = 1;
   }
 
   const navigate = useNavigate();

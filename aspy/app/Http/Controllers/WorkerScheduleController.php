@@ -95,8 +95,16 @@ class WorkerScheduleController extends Controller
 
     public function destroy($id)
     {
-        $workerSchedule = WorkerSchedule::findOrFail($id);
+        $workerSchedule = WorkerSchedule::with('schedule')->findOrFail($id);
+
+        if (!$workerSchedule->is_available) {
+            return response()->json(['message' => 'No se puede eliminar un horario ocupado'], 422);
+        }
+
+        $schedule = $workerSchedule->schedule;
+
         $workerSchedule->delete();
+        $schedule->delete();
 
         return response()->noContent();
     }

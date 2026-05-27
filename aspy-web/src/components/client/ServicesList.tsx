@@ -51,7 +51,9 @@ export default function ServicesList() {
     },
   ];
 
-  const services: Service[] = data.services;
+  const services: Service[] = (data?.services ?? []).filter(
+    (s: Service) => s.is_available,
+  );
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>

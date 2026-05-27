@@ -45,6 +45,7 @@ Route::middleware('auth:sanctum')->prefix('person')->group(function () {
     Route::post('/', [PersonController::class, 'store']);
     Route::put('/{id}', [PersonController::class, 'update']);
     Route::delete('/{id}', [PersonController::class, 'destroy']);
+    Route::patch('/{id}/available', [PersonController::class, 'changeAvailable']);
 });
 
 // Professional
@@ -68,6 +69,7 @@ Route::middleware('auth:sanctum')->prefix('service')->group(function () {
     Route::post('/', [ServiceController::class, 'store']);
     Route::put('/{id}', [ServiceController::class, 'update']);
     Route::delete('/{id}', [ServiceController::class, 'destroy']);
+    Route::patch('/{id}/available', [ServiceController::class, 'changeAvailable']);
 });
 
 // ProfessionalService

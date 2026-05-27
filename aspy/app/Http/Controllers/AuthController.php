@@ -18,10 +18,13 @@ class AuthController extends Controller
         $user = UserAccount::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password_hash)) {
-
             return response()->json(['message' => 'Credenciales inválidas'], 401);
         }
 
+        if (!$user->is_available) {
+            return response()->json(['message' => 'Usuario inactivo'], 403);
+        }
+        
         $user->last_login = now();
         $user->saveQuietly();
 

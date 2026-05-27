@@ -5,6 +5,7 @@ export interface Service {
   name: string;
   price: number;
 
+  is_available: boolean;
   created_by: number | null;
   modified_by: number | null;
 

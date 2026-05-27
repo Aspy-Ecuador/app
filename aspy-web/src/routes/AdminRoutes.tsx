@@ -7,15 +7,22 @@ import EditService from "@/components/EditService";
 import CreateService from "@/components/CreateService";
 import CreateUserAdmin from "@admin/CreateUserAdmin";
 import Appointment from "@/components/admin/Appointments";
-import EditUserAdmin from "@/components/admin/EditUserAdmin";
+import EditUser from "@staff/EditUser";
 
 export const AdminRoutes = [
   { path: "/dashboard", element: <ControlPanel /> },
   { path: "/perfil", element: <Profile /> },
+<<<<<<< HEAD
   { path: "/editarCliente/:id", element: <EditUserAdmin /> },
   { path: "/editarProfesional/:id", element: <EditUserAdmin /> },
   { path: "/editarSecretario/:id", element: <EditUserAdmin /> },
   { path: "/editarAdmin/:id", element: <EditUserAdmin /> },
+=======
+  { path: "/editarCliente/:id", element: <EditUser /> },      // <- reemplaza /editar/:id
+  { path: "/editarProfesional/:id", element: <EditUser /> },
+  { path: "/editarStaff/:id", element: <EditUser /> },
+  { path: "/editarAdmin/:id", element: <EditUser /> },
+>>>>>>> fix-version-pruebas-aspy
   { path: "/usuarios", element: <UsersList /> },
   { path: "/servicios", element: <ServicesList /> },
   { path: "/servicios/:id", element: <EditService /> },

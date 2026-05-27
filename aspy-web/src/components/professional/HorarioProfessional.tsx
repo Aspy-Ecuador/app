@@ -5,10 +5,6 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import InputLabel from "@mui/material/InputLabel";
-import FormControl from "@mui/material/FormControl";
 import Chip from "@mui/material/Chip";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
@@ -17,7 +13,9 @@ import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import EventBusyRoundedIcon from "@mui/icons-material/EventBusyRounded";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
-
+import IconButton from "@mui/material/IconButton";
+import CircularProgress from "@mui/material/CircularProgress";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import { getAuthenticatedPersonID } from "@store";
 import workerScheduleAPI from "@/API/workerScheduleAPI";
 import professionalAPI from "@/API/professionalAPI";
@@ -38,6 +36,15 @@ const formatDate = (dateStr: string) => {
 };
 
 const fmt = (t: string) => t.slice(0, 5);
+
+// Lógica inteligente para detectar el turno automáticamente
+const getTurno = (time: string): string => {
+  if (!time) return "";
+  const [h] = time.split(":").map(Number);
+  if (h < 12) return "Turno Mañana";
+  if (h < 18) return "Turno Tarde";
+  return "Turno Noche";
+};
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -99,6 +106,10 @@ const fieldSx = {
   },
   "& .MuiInputLabel-root": { fontSize: 13 },
   "& .MuiInputLabel-root.Mui-focused": { color: "#1D9E75" },
+  // Garantizamos que el icono del reloj del navegador se vea y sea cliqueable para el scroll
+  "& input[type='time']::-webkit-calendar-picker-indicator": {
+    cursor: "pointer",
+  },
 };
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -106,13 +117,13 @@ const fieldSx = {
 export default function HorarioProfessional() {
   const professionalId = getAuthenticatedPersonID();
 
-  const [name, setName] = useState("");
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [schedules, setSchedules] = useState<WorkerProfessional[]>([]);
   const [loadingList, setLoadingList] = useState(true);
+  const [deletingMap, setDeletingMap] = useState<Record<number, boolean>>({});
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
@@ -155,7 +166,9 @@ export default function HorarioProfessional() {
   }, [schedules]);
 
   const handleSubmit = async () => {
-    if (!name.trim() || !date || !startTime || !endTime) {
+    const turno = getTurno(startTime);
+
+    if (!turno || !date || !startTime || !endTime) {
       setSnackbar({
         open: true,
         message: "Completa todos los campos antes de guardar.",
@@ -178,14 +191,13 @@ export default function HorarioProfessional() {
         date,
         start_time: startTime + ":00",
         end_time: endTime + ":00",
-        name: name.trim(),
+        name: turno,
       });
       setSnackbar({
         open: true,
         message: "Horario creado correctamente.",
         severity: "success",
       });
-      setName("");
       setDate("");
       setStartTime("");
       setEndTime("");
@@ -198,6 +210,23 @@ export default function HorarioProfessional() {
       });
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (workerScheduleId: number) => {
+    setDeletingMap((prev) => ({ ...prev, [workerScheduleId]: true }));
+    try {
+      await workerScheduleAPI.deleteWorkerSchedule(workerScheduleId);
+      await fetchSchedules();
+    } catch (error: any) {
+      setSnackbar({
+        open: true,
+        message:
+          error?.response?.data?.message || "Error al eliminar el horario.",
+        severity: "error",
+      });
+    } finally {
+      setDeletingMap((prev) => ({ ...prev, [workerScheduleId]: false }));
     }
   };
 
@@ -219,35 +248,6 @@ export default function HorarioProfessional() {
         {/* ── Formulario ── */}
         <SectionPanel label="Nuevo horario">
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.75 }}>
-            <FormControl fullWidth size="small">
-              <InputLabel sx={{ fontSize: 13 }}>Tipo de turno</InputLabel>
-              <Select
-                value={name}
-                label="Tipo de turno"
-                onChange={(e) => setName(e.target.value)}
-                sx={{
-                  fontSize: 13,
-                  borderRadius: 2,
-                  bgcolor: "action.hover",
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "divider",
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#1D9E75",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#1D9E75",
-                  },
-                }}
-              >
-                {["Turno Mañana", "Turno Tarde", "Turno Noche"].map((t) => (
-                  <MenuItem key={t} value={t} sx={{ fontSize: 13 }}>
-                    {t}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
             <TextField
               fullWidth
               size="small"
@@ -267,6 +267,7 @@ export default function HorarioProfessional() {
                 gap: 1.25,
               }}
             >
+              {/* Aquí están tus selectores de hora intactos */}
               <TextField
                 size="small"
                 type="time"
@@ -286,6 +287,45 @@ export default function HorarioProfessional() {
                 sx={fieldSx}
               />
             </Box>
+
+            {/* Turno detectado automáticamente */}
+            {startTime && (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  px: 1.5,
+                  py: 1,
+                  bgcolor: "action.hover",
+                  border: "0.5px solid",
+                  borderColor: "divider",
+                  borderRadius: 2,
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontSize: 10,
+                    fontWeight: 500,
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    color: "text.disabled",
+                  }}
+                >
+                  Tipo de turno
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "text.primary",
+                    ml: "auto",
+                  }}
+                >
+                  {getTurno(startTime)}
+                </Typography>
+              </Box>
+            )}
 
             {/* Preview */}
             {date && startTime && endTime && startTime < endTime && (
@@ -569,6 +609,43 @@ export default function HorarioProfessional() {
                                   "& .MuiChip-label": { px: 0.875 },
                                 }}
                               />
+                              {available && (
+                                <IconButton
+                                  size="small"
+                                  disabled={
+                                    deletingMap[ws.worker_schedule_id] ?? false
+                                  }
+                                  onClick={() =>
+                                    handleDelete(ws.worker_schedule_id)
+                                  }
+                                  sx={{
+                                    width: 26,
+                                    height: 26,
+                                    border: "0.5px solid",
+                                    borderColor: "divider",
+                                    bgcolor: "action.hover",
+                                    borderRadius: 1.5,
+                                    flexShrink: 0,
+                                    "&:hover": {
+                                      borderColor: "#FCA5A5",
+                                      color: "#991B1B",
+                                      bgcolor: "#FEE2E2",
+                                    },
+                                    "&.Mui-disabled": { opacity: 0.5 },
+                                  }}
+                                >
+                                  {deletingMap[ws.worker_schedule_id] ? (
+                                    <CircularProgress
+                                      size={12}
+                                      sx={{ color: "#E24B4A" }}
+                                    />
+                                  ) : (
+                                    <DeleteOutlineRoundedIcon
+                                      sx={{ fontSize: 13 }}
+                                    />
+                                  )}
+                                </IconButton>
+                              )}
                             </Box>
                           );
                         })}

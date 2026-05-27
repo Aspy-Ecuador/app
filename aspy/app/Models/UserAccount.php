@@ -27,6 +27,7 @@ class UserAccount extends Authenticatable
         'last_login',
         'created_by',
         'modified_by',
+        'is_available',
     ];
 
     protected $hidden = [
@@ -35,6 +36,7 @@ class UserAccount extends Authenticatable
 
     protected $casts = [
         'last_login' => 'datetime',
+        'is_available' => 'boolean',
         'creation_date' => 'datetime',
         'modification_date' => 'datetime',
     ];
