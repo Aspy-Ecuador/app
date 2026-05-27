@@ -18,12 +18,14 @@ class Service extends Model
     protected $fillable = [
         'name',
         'price',
+        'is_available',
         'created_by',
         'modified_by',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
+        'is_available' => 'boolean',
         'creation_date' => 'datetime',
         'modification_date' => 'datetime',
     ];

@@ -91,9 +91,9 @@ export default function OptionsMenu() {
         ))}
 
         <MenuItem
-          onClick={() => {
-            logout();
-            navigate("/login");
+          onClick={async () => {
+            await logout();
+            navigate("/");
           }}
           sx={{
             ...menuItemSx,

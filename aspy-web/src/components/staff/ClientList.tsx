@@ -13,79 +13,18 @@ import Progress from "../Progress";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Typography from "@mui/material/Typography";
 import { getClient } from "@/utils/utils";
+import Switch from "@mui/material/Switch";
+import CircularProgress from "@mui/material/CircularProgress";
+import personAPI from "@API/personAPI";
 import type { Person } from "@/typesResponse/Person";
-
-// Añadimos minWidth a todas las columnas para garantizar el scroll en móviles
-const columns: GridColDef[] = [
-  {
-    field: "first_name",
-    headerName: "Nombres",
-    disableColumnMenu: true,
-    flex: 2,
-    minWidth: 110,
-    resizable: false,
-  },
-  {
-    field: "last_name",
-    headerName: "Apellidos",
-    disableColumnMenu: true,
-    flex: 2,
-    minWidth: 110,
-    resizable: false,
-  },
-  {
-    field: "email",
-    headerName: "Correo",
-    disableColumnMenu: true,
-    flex: 2,
-    minWidth: 160,
-    renderCell: (params) => {
-      return (
-        <Box display="flex" alignItems="center" height="100%">
-          <Typography variant="body1">
-            {params.row.user_account?.email}
-          </Typography>
-        </Box>
-      );
-    },
-    resizable: false,
-  },
-  {
-    field: "occupation",
-    headerName: "Ocupación",
-    disableColumnMenu: true,
-    flex: 2,
-    minWidth: 120,
-    renderCell: (params) => {
-      return (
-        <Box display="flex" alignItems="center" height="100%">
-          <Typography variant="body1">{params.row.occupation.name}</Typography>
-        </Box>
-      );
-    },
-    resizable: false,
-  },
-  {
-    field: "phone",
-    headerName: "Celular",
-    disableColumnMenu: true,
-    flex: 3,
-    minWidth: 120,
-    resizable: false,
-    renderCell: (params) => (
-      <Box display="flex" alignItems="center" height="100%">
-        <Typography variant="body1">{params.row.phone?.number}</Typography>
-      </Box>
-    ),
-  },
-];
 
 export default function ClientsList() {
   const [selectedId, setSelectedId] = useState<GridRowId | null>(null);
-  const { data, loading } = useRoleData();
+  const { data, loading, refreshPersons } = useRoleData();
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [togglingMap, setTogglingMap] = useState<Record<number, boolean>>({});
 
   //Usuario seleccionado
   const users: Person[] = getClient(data.persons ?? []);
@@ -100,6 +39,127 @@ export default function ClientsList() {
     const newPath = `/registrarCliente`;
     navigate(newPath);
   };
+
+  async function handleToggleAvailable(person_id: number, current: boolean) {
+    setTogglingMap((prev) => ({ ...prev, [person_id]: true }));
+    try {
+      await personAPI.changeAvailable(person_id, !current);
+      await refreshPersons(); // o el refresh que uses en useRoleData
+    } catch (e) {
+      console.error("Error al cambiar disponibilidad:", e);
+    } finally {
+      setTogglingMap((prev) => ({ ...prev, [person_id]: false }));
+    }
+  }
+
+  const columns: GridColDef[] = [
+    {
+      field: "first_name",
+      headerName: "Nombres",
+      disableColumnMenu: true,
+      flex: 2,
+      minWidth: 110,
+      resizable: false,
+    },
+    {
+      field: "last_name",
+      headerName: "Apellidos",
+      disableColumnMenu: true,
+      flex: 2,
+      minWidth: 110,
+      resizable: false,
+    },
+    {
+      field: "email",
+      headerName: "Correo",
+      disableColumnMenu: true,
+      flex: 2,
+      minWidth: 160,
+      renderCell: (params) => {
+        return (
+          <Box display="flex" alignItems="center" height="100%">
+            <Typography variant="body1">
+              {params.row.user_account?.email}
+            </Typography>
+          </Box>
+        );
+      },
+      resizable: false,
+    },
+    {
+      field: "occupation",
+      headerName: "Ocupación",
+      disableColumnMenu: true,
+      flex: 2,
+      minWidth: 120,
+      renderCell: (params) => {
+        return (
+          <Box display="flex" alignItems="center" height="100%">
+            <Typography variant="body1">
+              {params.row.occupation.name}
+            </Typography>
+          </Box>
+        );
+      },
+      resizable: false,
+    },
+    {
+      field: "phone",
+      headerName: "Celular",
+      disableColumnMenu: true,
+      flex: 3,
+      minWidth: 120,
+      resizable: false,
+      renderCell: (params) => (
+        <Box display="flex" alignItems="center" height="100%">
+          <Typography variant="body1">{params.row.phone?.number}</Typography>
+        </Box>
+      ),
+    },
+    {
+      field: "is_available",
+      headerName: "Habilitado",
+      disableColumnMenu: true,
+      flex: 1,
+      minWidth: 90,
+      sortable: false,
+      filterable: false,
+      resizable: false,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => {
+        const personId: number = params.row.person_id;
+        const isAvailable: boolean =
+          params.row.user_account?.is_available ?? true;
+        const isToggling = togglingMap[personId] ?? false;
+
+        return (
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            height="100%"
+          >
+            {isToggling ? (
+              <CircularProgress size={14} sx={{ color: "#0F6E56" }} />
+            ) : (
+              <Switch
+                size="small"
+                checked={isAvailable}
+                onChange={() => handleToggleAvailable(personId, isAvailable)}
+                sx={{
+                  "& .MuiSwitch-switchBase.Mui-checked": { color: "#1D9E75" },
+                  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+                    bgcolor: "#1D9E75",
+                  },
+                }}
+              />
+            )}
+          </Box>
+        );
+      },
+    },
+  ];
 
   if (loading) return <Progress />;
 

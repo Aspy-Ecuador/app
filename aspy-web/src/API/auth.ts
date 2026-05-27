@@ -5,16 +5,8 @@ import type { UserForm } from "@/typesRequest/UserForm";
 import { setAuthenticatedUser } from "@store";
 
 export const login = async (email: string, password: string) => {
-  const response = await api.post("/login", {
-    email,
-    password,
-  });
-
+  const response = await api.post("/login", { email, password });
   const data = response.data;
-
-  if (!response) {
-    throw new Error("Credenciales incorrectas");
-  }
 
   localStorage.setItem("token", data.access_token);
   await StoreUser();

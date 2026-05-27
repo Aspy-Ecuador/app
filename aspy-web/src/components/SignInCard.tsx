@@ -51,7 +51,6 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
       borderColor: theme.palette.primary.main,
     },
   },
-    
 }));
 
 export default function SignInCard() {
@@ -72,9 +71,13 @@ export default function SignInCard() {
       setLoading(true);
       await login(email, password);
       navigate("/dashboard");
-    } catch (error) {
-      console.error("Login failed:", error);
-      setLoginError("Credenciales incorrectas. Por favor, intente de nuevo.");
+    } catch (error: any) {
+      const status = error?.response?.status;
+      if (status === 403) {
+        setLoginError("Tu cuenta está inactiva. Contacta al administrador.");
+      } else {
+        setLoginError("Credenciales incorrectas. Por favor, intente de nuevo.");
+      }
     } finally {
       setLoading(false);
     }
@@ -216,7 +219,11 @@ export default function SignInCard() {
               onClick={() => setShowPassword(!showPassword)}
               size="small"
             >
-              {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+              {showPassword ? (
+                <VisibilityOff fontSize="small" />
+              ) : (
+                <Visibility fontSize="small" />
+              )}
             </IconButton>
           </Box>
         </FormControl>

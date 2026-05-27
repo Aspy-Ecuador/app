@@ -118,4 +118,18 @@ class PersonController extends Controller
  
         return response()->json(['message' => 'Person deleted successfully']);
     }
+
+    public function changeAvailable($id, Request $request)
+    {
+        $person = Person::find($id);
+
+        if (!$person) {
+            return response()->json(['message' => 'Person not found'], 404);
+        }
+
+        $person->userAccount->is_available = $request->boolean('is_available');
+        $person->userAccount->save();
+
+        return response()->json(['message' => 'User availability updated', 'user_account' => $person->userAccount]);
+    }    
 }

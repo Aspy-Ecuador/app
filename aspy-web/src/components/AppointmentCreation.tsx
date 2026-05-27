@@ -110,10 +110,19 @@ export default function AppointmentCreation({
   const navigate = useNavigate();
   const { data, loading, refreshWorkerProfessional } = useRoleData();
 
-  const servicesOptions: Service[] = data.services;
-  const proServices: ProfessionalService[] = data.proServices;
-  const workerProfessional: WorkerProfessional[] = data.workerProfessional;
-  const persons: Person[] = data.persons;
+  const servicesOptions = useMemo<Service[]>(
+    () => (data?.services ?? []).filter((s: Service) => s.is_available),
+    [data],
+  );
+  const proServices = useMemo<ProfessionalService[]>(
+    () => data?.proServices ?? [],
+    [data],
+  );
+  const workerProfessional = useMemo<WorkerProfessional[]>(
+    () => data?.workerProfessional ?? [],
+    [data],
+  );
+  const persons = useMemo<Person[]>(() => data?.persons ?? [], [data]);
 
   const professionalsOptions = useMemo<Person[]>(() => {
     if (serviceId === null) return [];
@@ -122,12 +131,16 @@ export default function AppointmentCreation({
       .map((ps) =>
         persons.find((p) => p.person_id === ps.professional.person_id),
       )
-      .filter((p): p is Person => p !== undefined);
+      .filter(
+        (p): p is Person => p !== undefined && p.user_account.is_available,
+      );
   }, [serviceId, proServices, persons]);
 
   const clientsOptions = useMemo<Person[]>(() => {
     if (isClient) return [];
-    return persons.filter((p) => p.user_account.role.role_id === 3);
+    return persons.filter(
+      (p) => p.user_account.role.role_id === 3 && p.user_account.is_available,
+    );
   }, [isClient, persons]);
 
   const workerSchedules = useMemo<WorkerProfessional[]>(() => {
@@ -165,8 +178,8 @@ export default function AppointmentCreation({
       sx={{
         display: "grid",
         gridTemplateColumns: {
-          xs: "1fr",           // móvil: una columna, apilados
-          sm: "1fr",           // tablet pequeña: igual
+          xs: "1fr", // móvil: una columna, apilados
+          sm: "1fr", // tablet pequeña: igual
           md: "260px minmax(0,1fr)", // desktop: formulario fijo + calendario
         },
         gap: 1.5,

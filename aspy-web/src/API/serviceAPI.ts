@@ -15,6 +15,12 @@ const serviceAPI = {
     id: number,
     data: ServiceRequest,
   ): Promise<AxiosResponse> => api.put(`/service/${id}`, data),
+
+  changeAvailable: async (
+    id: number,
+    is_available: boolean,
+  ): Promise<AxiosResponse> =>
+    api.patch(`/service/${id}/available`, { is_available }),
 };
 
 export default serviceAPI;

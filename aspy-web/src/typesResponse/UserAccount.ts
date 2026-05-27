@@ -7,6 +7,8 @@ export interface UserAccount {
   role_id: number;
   status_id: number;
 
+  is_available: boolean;
+
   email: string;
   last_login: string | null;
 

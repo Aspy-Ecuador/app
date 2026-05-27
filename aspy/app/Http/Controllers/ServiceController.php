@@ -73,4 +73,18 @@ class ServiceController extends Controller
  
         return response()->json(['message' => 'Service deleted successfully']);
     }
+
+    public function changeAvailable($id, Request $request)
+    {
+        $service = Service::find($id);
+
+        if (!$service) {
+            return response()->json(['message' => 'Service not found'], 404);
+        }
+
+        $service->is_available = $request->boolean('is_available');
+        $service->save();
+
+        return response()->json(['message' => 'Service availability updated', 'service' => $service]);
+    }
 }

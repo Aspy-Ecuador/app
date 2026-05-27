@@ -13,7 +13,9 @@ import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import EventBusyRoundedIcon from "@mui/icons-material/EventBusyRounded";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
-
+import IconButton from "@mui/material/IconButton";
+import CircularProgress from "@mui/material/CircularProgress";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import { getAuthenticatedPersonID } from "@store";
 import workerScheduleAPI from "@/API/workerScheduleAPI";
 import professionalAPI from "@/API/professionalAPI";
@@ -121,6 +123,7 @@ export default function HorarioProfessional() {
   const [submitting, setSubmitting] = useState(false);
   const [schedules, setSchedules] = useState<WorkerProfessional[]>([]);
   const [loadingList, setLoadingList] = useState(true);
+  const [deletingMap, setDeletingMap] = useState<Record<number, boolean>>({});
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
@@ -210,6 +213,23 @@ export default function HorarioProfessional() {
     }
   };
 
+  const handleDelete = async (workerScheduleId: number) => {
+    setDeletingMap((prev) => ({ ...prev, [workerScheduleId]: true }));
+    try {
+      await workerScheduleAPI.deleteWorkerSchedule(workerScheduleId);
+      await fetchSchedules();
+    } catch (error: any) {
+      setSnackbar({
+        open: true,
+        message:
+          error?.response?.data?.message || "Error al eliminar el horario.",
+        severity: "error",
+      });
+    } finally {
+      setDeletingMap((prev) => ({ ...prev, [workerScheduleId]: false }));
+    }
+  };
+
   const today = todayStr();
 
   return (
@@ -283,10 +303,25 @@ export default function HorarioProfessional() {
                   borderRadius: 2,
                 }}
               >
-                <Typography sx={{ fontSize: 10, fontWeight: 500, letterSpacing: "0.06em", textTransform: "uppercase", color: "text.disabled" }}>
+                <Typography
+                  sx={{
+                    fontSize: 10,
+                    fontWeight: 500,
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    color: "text.disabled",
+                  }}
+                >
                   Tipo de turno
                 </Typography>
-                <Typography sx={{ fontSize: 12, fontWeight: 600, color: "text.primary", ml: "auto" }}>
+                <Typography
+                  sx={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "text.primary",
+                    ml: "auto",
+                  }}
+                >
                   {getTurno(startTime)}
                 </Typography>
               </Box>
@@ -574,6 +609,43 @@ export default function HorarioProfessional() {
                                   "& .MuiChip-label": { px: 0.875 },
                                 }}
                               />
+                              {available && (
+                                <IconButton
+                                  size="small"
+                                  disabled={
+                                    deletingMap[ws.worker_schedule_id] ?? false
+                                  }
+                                  onClick={() =>
+                                    handleDelete(ws.worker_schedule_id)
+                                  }
+                                  sx={{
+                                    width: 26,
+                                    height: 26,
+                                    border: "0.5px solid",
+                                    borderColor: "divider",
+                                    bgcolor: "action.hover",
+                                    borderRadius: 1.5,
+                                    flexShrink: 0,
+                                    "&:hover": {
+                                      borderColor: "#FCA5A5",
+                                      color: "#991B1B",
+                                      bgcolor: "#FEE2E2",
+                                    },
+                                    "&.Mui-disabled": { opacity: 0.5 },
+                                  }}
+                                >
+                                  {deletingMap[ws.worker_schedule_id] ? (
+                                    <CircularProgress
+                                      size={12}
+                                      sx={{ color: "#E24B4A" }}
+                                    />
+                                  ) : (
+                                    <DeleteOutlineRoundedIcon
+                                      sx={{ fontSize: 13 }}
+                                    />
+                                  )}
+                                </IconButton>
+                              )}
                             </Box>
                           );
                         })}
