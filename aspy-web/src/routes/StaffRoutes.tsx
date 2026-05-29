@@ -14,23 +14,15 @@ import AppointmentView from "@components/AppointmentView";
 import CheckoutView from "@components/CheckoutView";
 import EditUser from "@staff/EditUser";
 import CreateUser from "@staff/CreateUser";
-<<<<<<< HEAD
-import EditUserAdmin from "@admin/EditUserAdmin";
-=======
 import CreateUserAdmin from "@/components/admin/CreateUserAdmin";
->>>>>>> fix-version-pruebas-aspy
 
 export const StaffRoutes = [
   { path: "/dashboard", element: <ControlPanel /> },
   { path: "/perfil", element: <Profile /> },
   { path: "/editarCliente/:id", element: <EditUser /> },
   { path: "/editarProfesional/:id", element: <EditUser /> },
-<<<<<<< HEAD
-  { path: "/editarSecretario/:id", element: <EditUserAdmin /> },
-=======
   { path: "/editarStaff/:id", element: <EditUser /> },
   { path: "/editarAdmin/:id", element: <EditUser /> },
->>>>>>> fix-version-pruebas-aspy
   { path: "/profesionales", element: <ProffesionalList /> },
   { path: "/pacientes", element: <ClientList /> },
   { path: "/recibos", element: <ReceiptList /> },

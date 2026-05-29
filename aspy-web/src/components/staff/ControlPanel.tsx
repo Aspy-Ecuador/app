@@ -18,11 +18,7 @@ import TextField from "@mui/material/TextField";
 import IconButton from "@mui/material/IconButton";
 import PersonAddAltRoundedIcon from "@mui/icons-material/PersonAddAltRounded";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
-<<<<<<< HEAD
-=======
-import PermContactCalendarRoundedIcon from "@mui/icons-material/PermContactCalendarRounded";
 import FilterAltOffRoundedIcon from "@mui/icons-material/FilterAltOffRounded";
->>>>>>> fix-version-pruebas-aspy
 import Progress from "@components/Progress";
 import ButtonList from "@components/ButtonList";
 import ShowAppointment from "@staff/ShowAppointment";
@@ -77,8 +73,13 @@ export default function ControlPanel() {
     return appointments.filter((a) => {
       const date = a.worker_schedule.schedule.date.split("T")[0];
       if (filterDate && date !== filterDate) return false;
-      if (filterProfessional && String(a.professional.person_id) !== filterProfessional) return false;
-      if (filterService && String(a.service.service_id) !== filterService) return false;
+      if (
+        filterProfessional &&
+        String(a.professional.person_id) !== filterProfessional
+      )
+        return false;
+      if (filterService && String(a.service.service_id) !== filterService)
+        return false;
       return true;
     });
   }, [appointments, filterDate, filterProfessional, filterService]);
@@ -112,15 +113,9 @@ export default function ControlPanel() {
       <WelcomePanel user={"Secr. " + getAuthenticatedUserName()} />
 
       <Grid container spacing={2} alignItems="flex-start">
-<<<<<<< HEAD
-        {/* Sidebar de acciones — ancho completo en móvil, 4 en desktop */}
-=======
-
         {/* Sidebar — acciones rápidas + filtros */}
->>>>>>> fix-version-pruebas-aspy
         <Grid size={{ xs: 12, md: 4 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-
             {/* Acciones rápidas */}
             <Paper
               elevation={0}
@@ -195,12 +190,21 @@ export default function ControlPanel() {
                     title="Limpiar filtros"
                     sx={{ p: 0.25 }}
                   >
-                    <FilterAltOffRoundedIcon sx={{ fontSize: 14, color: "text.disabled" }} />
+                    <FilterAltOffRoundedIcon
+                      sx={{ fontSize: 14, color: "text.disabled" }}
+                    />
                   </IconButton>
                 )}
               </Box>
 
-              <Box sx={{ p: 1.5, display: "flex", flexDirection: "column", gap: 1.5 }}>
+              <Box
+                sx={{
+                  p: 1.5,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 1.5,
+                }}
+              >
                 <TextField
                   type="date"
                   size="small"
@@ -228,10 +232,16 @@ export default function ControlPanel() {
                     sx={selectSx}
                   >
                     <MenuItem value="" sx={{ fontSize: 12 }}>
-                      <Typography sx={{ fontSize: 12, color: "text.disabled" }}>Todos</Typography>
+                      <Typography sx={{ fontSize: 12, color: "text.disabled" }}>
+                        Todos
+                      </Typography>
                     </MenuItem>
                     {professionals.map((p) => (
-                      <MenuItem key={p.person_id} value={String(p.person_id)} sx={{ fontSize: 12 }}>
+                      <MenuItem
+                        key={p.person_id}
+                        value={String(p.person_id)}
+                        sx={{ fontSize: 12 }}
+                      >
                         {p.first_name} {p.last_name}
                       </MenuItem>
                     ))}
@@ -247,10 +257,16 @@ export default function ControlPanel() {
                     sx={selectSx}
                   >
                     <MenuItem value="" sx={{ fontSize: 12 }}>
-                      <Typography sx={{ fontSize: 12, color: "text.disabled" }}>Todos</Typography>
+                      <Typography sx={{ fontSize: 12, color: "text.disabled" }}>
+                        Todos
+                      </Typography>
                     </MenuItem>
                     {services.map((s) => (
-                      <MenuItem key={s.service_id} value={String(s.service_id)} sx={{ fontSize: 12 }}>
+                      <MenuItem
+                        key={s.service_id}
+                        value={String(s.service_id)}
+                        sx={{ fontSize: 12 }}
+                      >
                         {s.name}
                       </MenuItem>
                     ))}
@@ -258,16 +274,13 @@ export default function ControlPanel() {
                 </FormControl>
               </Box>
             </Paper>
-
           </Box>
         </Grid>
 
         {/* Columna de citas */}
         <Grid size={{ xs: 12, md: 8 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.25 }}>
-            <Typography sx={{ textTransform: "uppercase" }}>
-              Citas
-            </Typography>
+            <Typography sx={{ textTransform: "uppercase" }}>Citas</Typography>
             {hasFilters && (
               <Typography sx={{ fontSize: 11, color: "text.disabled" }}>
                 · {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
@@ -293,22 +306,6 @@ export default function ControlPanel() {
             </Box>
           )}
         </Grid>
-
-<<<<<<< HEAD
-        {/* Columna de citas — ancho completo en móvil, 8 en desktop */}
-        <Grid size={{ xs: 12, md: 8 }}>
-          <Typography
-            sx={{
-              textTransform: "uppercase",
-              mb: 1.25,
-            }}
-          >
-            Citas de hoy
-          </Typography>
-          <ShowAppointment appointments={appointments} />
-        </Grid>
-=======
->>>>>>> fix-version-pruebas-aspy
       </Grid>
     </Box>
   );

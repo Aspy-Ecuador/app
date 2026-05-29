@@ -12,11 +12,7 @@ import EditUser from "@staff/EditUser";
 export const ProfessionalRoutes = [
   { path: "/dashboard", element: <ControlPanel /> },
   { path: "/perfil", element: <Profile /> },
-<<<<<<< HEAD
-  { path: "/editarProfesional/:id", element: <EditUserAdmin /> },
-=======
   { path: "/editarProfesional/:id", element: <EditUser /> },
->>>>>>> fix-version-pruebas-aspy
   { path: "/pacientes", element: <PatientsList /> },
   { path: "/citas", element: <Appointments /> },
   { path: "/pacientes/:id", element: <History /> },
