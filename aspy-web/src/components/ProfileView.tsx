@@ -136,8 +136,8 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
   const ruta =
     roleName === "Professional"
       ? `/editarProfesional/${person.user_id}`
-      : roleName === "Client"
-        ? `/editarCliente/${person.user_id}`
+      : roleName === "Staff"
+        ? `/editarStaff/${person.user_id}`
         : roleName === "Admin"
           ? `/editarAdmin/${person.user_id}`
           : `/editarSecretario/${person.user_id}`;
