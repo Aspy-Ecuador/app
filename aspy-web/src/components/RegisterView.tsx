@@ -32,6 +32,9 @@ function buildPayload(data: UserForm) {
       city_id: Number(data.address.city_id),
     },
     identification: data.identification,
+    // NUEVO: Esto le avisa al backend que el usuario completó la lectura y aceptó el modal
+    accepted_privacy_policy: true,
+    policy_version: "1.0", 
   };
 }
 
