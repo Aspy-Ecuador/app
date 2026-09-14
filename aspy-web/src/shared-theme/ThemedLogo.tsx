@@ -1,4 +1,4 @@
-import LightImage from "../assets/logo mediano.png";
+import LightImage from "../assets/logoReal.png";
 
 const ThemedLogo = () => {
   // Selecciona la imagen según el modo actual

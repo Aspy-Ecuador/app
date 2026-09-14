@@ -1,37 +1,46 @@
-// FINAL
 import CssBaseline from "@mui/material/CssBaseline";
 import Stack from "@mui/material/Stack";
 import AppTheme from "@shared-theme/AppTheme";
 import SignInCard from "@components/SignInCard";
 import Content from "@components/Content";
 
+import fondoAspy from "../assets/fondoAspy.webp";
+
 export default function SignInSide(props: { disableCustomTheme?: boolean }) {
   return (
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
+
       <Stack
         direction="column"
         component="main"
         sx={[
           {
+            position: "relative",
             justifyContent: "center",
-            height: "calc((1 - var(--template-frame-height, 0)) * 100%)",
-            marginTop: "max(40px - var(--template-frame-height, 0px), 0px)",
-            minHeight: "100%",
+            minHeight: "100vh",
+            overflow: "hidden",
           },
           (theme) => ({
             "&::before": {
               content: '""',
-              display: "block",
               position: "absolute",
-              zIndex: -1,
               inset: 0,
-              backgroundImage:
-                "radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))",
+              zIndex: 0,
+
+              backgroundImage: `url(${fondoAspy})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
               backgroundRepeat: "no-repeat",
+
               ...theme.applyStyles("dark", {
-                backgroundImage:
-                  "radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))",
+                backgroundImage: `
+                  linear-gradient(
+                    rgba(0, 0, 0, 0.6),
+                    rgba(0, 0, 0, 0.6)
+                  ),
+                  url(${fondoAspy})
+                `,
               }),
             },
           }),
@@ -40,6 +49,8 @@ export default function SignInSide(props: { disableCustomTheme?: boolean }) {
         <Stack
           direction={{ xs: "column-reverse", md: "row" }}
           sx={{
+            position: "relative",
+            zIndex: 1,
             justifyContent: "center",
             gap: { xs: 6, sm: 12 },
             p: 2,

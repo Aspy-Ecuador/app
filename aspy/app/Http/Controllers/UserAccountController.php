@@ -10,6 +10,7 @@ use App\Models\Person;
 use App\Models\Professional;
 use App\Models\Staff;
 use App\Models\UserAccount;
+use App\Models\UserConsent;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -98,6 +99,8 @@ class UserAccountController extends Controller
             'email'                     => 'required|email|max:150|unique:user_account,email',
             'password'                  => 'required|string|min:8|confirmed', // espera password_confirmation
             'role_id'                   => 'required|integer|exists:role,role_id',
+            'accepted_privacy_policy'   => 'required|accepted',
+            'policy_version'            => 'required|string|max:10',
 
             // ── Datos base de Person ──────────────────────────
             'gender_id'                 => 'required|integer|exists:gender,gender_id',
@@ -134,7 +137,7 @@ class UserAccountController extends Controller
 
         \Log::info('Usuario autenticado:', ['user' => auth()->user()]);
         \Log::info('ID autenticado:', ['user' =>  auth()->id()]);
-        $person = DB::transaction(function () use ($validated, $createdBy) {
+        $person = DB::transaction(function () use ($validated, $createdBy, $request) {
 
             // 1. Crear UserAccount (contraseña encriptada)
             $userAccount = UserAccount::create([
@@ -145,6 +148,13 @@ class UserAccountController extends Controller
                 'created_by'    => $createdBy,
                 'creation_date' => now()
 
+            ]);
+
+            UserConsent::create([
+                'user_id'        => $userAccount->user_account_id,
+                'policy_version' => $validated['policy_version'],
+                'ip_address'     => $request->ip(),
+                'accepted_at'    => now(),
             ]);
 
             // 2. Crear Person vinculada al UserAccount recién creado

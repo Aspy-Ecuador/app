@@ -27,7 +27,7 @@ interface FormRegisterProps {
   end: number;
   onNext: (data: UserForm) => void;
   onBack: () => void;
-  onFinish: (data: UserForm) => void;
+  onFinish: (data: UserForm, acceptedPrivacyPolicy: boolean) => void;
   isLast?: boolean;
   load?: boolean;
 }
@@ -117,7 +117,7 @@ export default function FormRegister({
 
   const onSubmit = methods.handleSubmit((data) => {
     if (isLast) {
-      onFinish(data);
+      onFinish(data, acceptedTerms);
     } else {
       onNext(data);
     }

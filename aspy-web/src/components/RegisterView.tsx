@@ -10,7 +10,7 @@ import type { UserForm } from "@/typesRequest/UserForm";
 
 const stepsName = ["Datos personales", "Datos generales", "Seguridad"];
 
-function buildPayload(data: UserForm) {
+function buildPayload(data: UserForm, acceptedPrivacyPolicy: boolean) {
   return {
     email: data.email,
     password: data.password,
@@ -33,7 +33,7 @@ function buildPayload(data: UserForm) {
     },
     identification: data.identification,
     // NUEVO: Esto le avisa al backend que el usuario completó la lectura y aceptó el modal
-    accepted_privacy_policy: true,
+    accepted_privacy_policy: acceptedPrivacyPolicy,
     policy_version: "1.0", 
   };
 }
@@ -66,9 +66,9 @@ export default function RegisterView() {
     navigate("/app");
   };
 
-  const handleFinalSubmit = async (stepData: UserForm) => {
+  const handleFinalSubmit = async (stepData: UserForm, acceptedPrivacyPolicy: boolean) => {
     const fullData = { ...formData, ...stepData } as UserForm;
-    const payload = buildPayload(fullData);
+    const payload = buildPayload(fullData, acceptedPrivacyPolicy);
     setLoad(true);
     try {
       await register(payload);

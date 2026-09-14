@@ -83,4 +83,9 @@ class UserAccount extends Authenticatable
     {
         return $this->hasOne(Person::class, 'user_id', 'user_account_id');
     }
+
+    public function consents()
+    {
+        return $this->hasMany(UserConsent::class, 'user_id', 'user_account_id');
+    }
 }

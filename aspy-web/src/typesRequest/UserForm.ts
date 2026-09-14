@@ -5,6 +5,8 @@ export interface UserForm {
   password: string;
   password_confirmation: string; // requerido por Laravel `confirmed`
   role_id: number;
+  accepted_privacy_policy?: boolean;
+  policy_version?: string;
 
   // ── Person ────────────────────────────────────────
   first_name: string;
