@@ -140,7 +140,7 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
         ? `/editarStaff/${person.user_id}`
         : roleName === "Admin"
           ? `/editarAdmin/${person.user_id}`
-          : `/editarSecretario/${person.user_id}`;
+          : `/editarCliente/${person.user_id}`;
 
   const initials =
     `${person.first_name?.[0] ?? ""}${person.last_name?.[0] ?? ""}`.toUpperCase();

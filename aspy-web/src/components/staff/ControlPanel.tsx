@@ -306,19 +306,6 @@ export default function ControlPanel() {
             </Box>
           )}
         </Grid>
-
-        {/* Columna de citas — ancho completo en móvil, 8 en desktop */}
-        <Grid size={{ xs: 12, md: 8 }}>
-          <Typography
-            sx={{
-              textTransform: "uppercase",
-              mb: 1.25,
-            }}
-          >
-            Citas de hoy
-          </Typography>
-          <ShowAppointment appointments={appointments} />
-        </Grid>
       </Grid>
     </Box>
   );
