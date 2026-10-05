@@ -34,7 +34,6 @@ pnpm-lock.yaml
 tsconfig.tsbuildinfo
 .vite
 bootstrap
-aspy
 storage
 vendor
 nginx
@@ -65,7 +64,6 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
-aspy
 vendor
 postgresql
 .vite
