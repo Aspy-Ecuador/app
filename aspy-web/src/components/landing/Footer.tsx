@@ -10,7 +10,9 @@ import PlaceRoundedIcon from "@mui/icons-material/PlaceRounded";
 import ScheduleRoundedIcon from "@mui/icons-material/ScheduleRounded";
 import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
 import type { LandingContent } from "@/content/landing/types";
-import { C, DISPLAY_FONT, NAV_ITEMS, NAV_HEIGHT, focusRing, scrollTo } from "./constants";
+import { formatPhoneEc, telHref } from "@/content/landing/format";
+import MapRoundedIcon from "@mui/icons-material/MapRounded";
+import { C, DISPLAY_FONT, NAV_ITEMS, NAV_HEIGHT, focusRing, mapsEmbedUrl, mapsSearchUrl, placeFromMapsUrl, scrollTo, whatsappUrl } from "./constants";
 import { BrandMark, Reveal, SocialIcon } from "./shared";
 
 interface FooterProps {
@@ -36,11 +38,12 @@ interface ContactItem {
 function contactItems(c: LandingContent["contact"]): ContactItem[] {
   const items: ContactItem[] = [];
   if (c.whatsapp)
-    items.push({ icon: <WhatsAppIcon />, label: "WhatsApp", value: `+${c.whatsapp}`, href: `https://wa.me/${c.whatsapp}` });
-  if (c.phone) items.push({ icon: <PhoneRoundedIcon />, label: "Teléfono", value: c.phone, href: `tel:${c.phone.replace(/\s/g, "")}` });
+    items.push({ icon: <WhatsAppIcon />, label: "WhatsApp", value: formatPhoneEc(c.whatsapp), href: whatsappUrl(c.whatsapp, c.whatsappMessage) });
+  if (c.phone) items.push({ icon: <PhoneRoundedIcon />, label: "Teléfono", value: formatPhoneEc(c.phone), href: telHref(c.phone) });
   if (c.email) items.push({ icon: <MailRoundedIcon />, label: "Correo", value: c.email, href: `mailto:${c.email}` });
-  if (c.address) items.push({ icon: <PlaceRoundedIcon />, label: "Dirección", value: c.address, href: c.mapUrl || undefined });
-  if (c.schedule) items.push({ icon: <ScheduleRoundedIcon />, label: "Horario", value: c.schedule });
+  if (c.address)
+    items.push({ icon: <PlaceRoundedIcon />, label: "Dirección", value: c.address, href: c.mapUrl || mapsSearchUrl(c.mapQuery || c.address) });
+  if (c.schedule.trim()) items.push({ icon: <ScheduleRoundedIcon />, label: "Horario", value: c.schedule.trim() });
   return items;
 }
 
@@ -55,6 +58,9 @@ const footerLink = {
 
 export default function Footer({ contact, social, footer, navigation, logo, ctaLabel, showCtas = true, primaryHref = "/register" }: FooterProps) {
   const items = contactItems(contact);
+  // Ubicación del mapa: la exacta de Sanity, si no la ficha de Google Maps (nombre + coordenadas), si no la dirección
+  const place = contact.mapQuery ? null : placeFromMapsUrl(contact.mapUrl);
+  const mapLocation = contact.showMap ? (contact.mapQuery || place?.name || contact.address).trim() : "";
   const external = (href?: string) => (href?.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {});
   const goTo = (e: MouseEvent, id: string) => {
     e.preventDefault();
@@ -116,7 +122,7 @@ export default function Footer({ contact, social, footer, navigation, logo, ctaL
               {contact.whatsapp ? (
                 <Box
                   component="a"
-                  href={`https://wa.me/${contact.whatsapp}`}
+                  href={whatsappUrl(contact.whatsapp, contact.whatsappMessage)}
                   target="_blank"
                   rel="noopener noreferrer"
                   sx={{ display: "inline-flex", alignItems: "center", gap: 1, px: 3, py: 1.4, borderRadius: 50, fontWeight: 600, color: "#fff", textDecoration: "none", border: "1.5px solid rgba(255,255,255,0.5)", "&:hover": { bgcolor: "rgba(255,255,255,0.1)" }, ...focusRing }}
@@ -161,7 +167,7 @@ export default function Footer({ contact, social, footer, navigation, logo, ctaL
                         <Typography sx={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.65)" }}>
                           {it.label}
                         </Typography>
-                        <Typography sx={{ fontWeight: 600, color: "#fff", overflowWrap: "anywhere" }}>{it.value}</Typography>
+                        <Typography sx={{ fontWeight: 600, color: "#fff", overflowWrap: "anywhere", whiteSpace: "pre-line" }}>{it.value}</Typography>
                       </Box>
                     </>
                   );
@@ -182,6 +188,78 @@ export default function Footer({ contact, social, footer, navigation, logo, ctaL
             )}
           </Box>
         </Reveal>
+
+        {/* Mapa (se muestra si hay dirección o ubicación exacta) */}
+        {mapLocation && (
+          <Reveal>
+            <Box
+              sx={{
+                mt: 3,
+                borderRadius: { xs: "24px", md: "30px" },
+                overflow: "hidden",
+                bgcolor: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", md: "0.85fr 1.15fr" },
+              }}
+            >
+              <Box sx={{ p: { xs: 3, md: 5 }, display: "flex", flexDirection: "column", justifyContent: "center", gap: 2 }}>
+                {contact.mapTitle && (
+                  <Typography component="h3" sx={{ fontFamily: DISPLAY_FONT, fontWeight: 800, fontSize: { xs: "1.5rem", md: "1.9rem" }, letterSpacing: "-0.02em" }}>
+                    {contact.mapTitle}
+                  </Typography>
+                )}
+                {contact.address && (
+                  <Box sx={{ display: "flex", gap: 1.25, alignItems: "flex-start" }}>
+                    <PlaceRoundedIcon sx={{ color: C.yellow, mt: "2px" }} />
+                    <Typography sx={{ color: "rgba(255,255,255,0.85)", lineHeight: 1.6 }}>{contact.address}</Typography>
+                  </Box>
+                )}
+                {contact.schedule && (
+                  <Box sx={{ display: "flex", gap: 1.25, alignItems: "flex-start" }}>
+                    <ScheduleRoundedIcon sx={{ color: C.yellow, mt: "2px" }} />
+                    <Typography sx={{ color: "rgba(255,255,255,0.85)", lineHeight: 1.6, whiteSpace: "pre-line" }}>{contact.schedule.trim()}</Typography>
+                  </Box>
+                )}
+                <Box
+                  component="a"
+                  href={contact.mapUrl || mapsSearchUrl(mapLocation)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{
+                    alignSelf: "flex-start",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 1,
+                    mt: 1,
+                    px: 3,
+                    py: 1.3,
+                    borderRadius: 50,
+                    fontWeight: 700,
+                    color: C.darkBg,
+                    bgcolor: "#fff",
+                    textDecoration: "none",
+                    transition: "transform 0.2s",
+                    "&:hover": { transform: "translateY(-2px)" },
+                    ...focusRing,
+                  }}
+                >
+                  <MapRoundedIcon sx={{ fontSize: 19, color: C.blueDark }} />
+                  {contact.mapButtonLabel || "Abrir en Google Maps"}
+                </Box>
+              </Box>
+              <Box
+                component="iframe"
+                title={`Mapa: ${contact.address || mapLocation}`}
+                src={mapsEmbedUrl(mapLocation, place?.near)}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
+                sx={{ display: "block", width: "100%", height: { xs: 260, md: "100%" }, minHeight: { md: 340 }, border: 0 }}
+              />
+            </Box>
+          </Reveal>
+        )}
 
         {/* Footer */}
         <Box
@@ -248,7 +326,7 @@ export default function Footer({ contact, social, footer, navigation, logo, ctaL
                       {it.value}
                     </Box>
                   ) : (
-                    <Typography sx={{ color: "rgba(255,255,255,0.7)", fontSize: "0.92rem" }}>{it.value}</Typography>
+                    <Typography sx={{ color: "rgba(255,255,255,0.7)", fontSize: "0.92rem", whiteSpace: "pre-line" }}>{it.value}</Typography>
                   )}
                 </li>
               ))}

@@ -173,7 +173,14 @@ export const defaultLandingContent: LandingContent = {
     address: "",
     schedule: "",
     mapUrl: "",
+    showMap: true,
+    mapQuery: "",
+    mapButtonLabel: "Abrir en Google Maps",
+    mapTitle: "Visítanos",
     whatsappCtaLabel: "Escríbenos por WhatsApp",
+    whatsappMessage: "Hola, quisiera más información sobre la Fundación Aspy.",
+    whatsappFloatingButton: true,
+    whatsappFloatingLabel: "¿Tienes dudas? Escríbenos",
   },
 
   social: [

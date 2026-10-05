@@ -16,7 +16,15 @@ export default function TestimonialsSection({ content }: { content: LandingConte
       <Reveal>
         <SectionHeader eyebrow={content.eyebrow} title={content.title} />
       </Reveal>
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, gap: 3 }}>
+      <Box
+        sx={{
+          display: "grid",
+          // Con 1 o 2 testimonios, las tarjetas quedan centradas
+          gridTemplateColumns: { xs: "1fr", md: `repeat(${Math.min(content.items.length, 3)}, minmax(0, 380px))` },
+          justifyContent: "center",
+          gap: 3,
+        }}
+      >
         {content.items.map((t, i) => (
           <Reveal key={t.author + i} delay={(i % 3) * 0.1} sx={{ height: "100%" }}>
             <Box

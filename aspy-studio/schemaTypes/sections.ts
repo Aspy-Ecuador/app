@@ -2,6 +2,8 @@
 // En conjunto replican `LandingContent` (aspy-web/src/content/landing/types.ts).
 // Si cambias un campo aquí, cámbialo también allá y en la consulta de aspy-web/src/content/landing/sanity.ts.
 import { defineArrayMember, defineField, defineType } from "sanity";
+import type { ArrayRule, StringRule } from "sanity";
+import { createElement } from "react";
 // @sanity/icons v5: cada ícono se importa desde su propio módulo
 import { CogIcon } from "@sanity/icons/Cog";
 import { HomeIcon } from "@sanity/icons/Home";
@@ -36,18 +38,76 @@ const imageList = (name: string, title: string, description: string, min = 0, ma
     type: "array",
     of: [defineArrayMember({ type: "image", options: { hotspot: true }, fields: [altField] })],
     options: { layout: "grid" },
-    validation: (r) => (min ? r.min(min).max(max) : r.max(max)),
+    validation: maxItems(max, "imágenes", min),
   });
 
-const text = (name: string, title: string, description?: string, required = true, rows?: number) =>
+const text = (name: string, title: string, description?: string, required = true, rows?: number, max?: number) =>
   defineField({
     name,
     title,
-    description,
+    description: max ? [description, `Máximo ${max} caracteres.`].filter(Boolean).join(" ") : description,
     type: rows ? "text" : "string",
     ...(rows ? { rows } : {}),
-    validation: required ? (r) => r.required() : undefined,
+    // Reglas separadas para que cada una tenga su propio mensaje
+    validation:
+      required || max
+        ? (r) => [
+            ...(required ? [r.required().error("Este campo es obligatorio")] : []),
+            ...(max ? [r.max(max).error(`Máximo ${max} caracteres`)] : []),
+          ]
+        : undefined,
   });
+
+/**
+ * Íconos disponibles (los mismos que conoce la web en SERVICE_ICONS).
+ * En el Studio se muestran con un emoji para reconocerlos; en la web se dibuja
+ * el ícono equivalente con el estilo del sitio.
+ */
+const ICONS: { value: string; emoji: string; title: string }[] = [
+  { value: "heart", emoji: "❤️", title: "Corazón" },
+  { value: "person", emoji: "🧑", title: "Persona" },
+  { value: "groups", emoji: "👥", title: "Personas" },
+  { value: "family", emoji: "👨‍👩‍👧", title: "Familia" },
+  { value: "child", emoji: "🧒", title: "Niños" },
+  { value: "chart", emoji: "📊", title: "Estadística" },
+  { value: "growth", emoji: "📈", title: "Crecimiento" },
+  { value: "calendar", emoji: "📅", title: "Calendario" },
+  { value: "star", emoji: "⭐", title: "Estrella" },
+  { value: "trophy", emoji: "🏆", title: "Trofeo" },
+  { value: "school", emoji: "🎓", title: "Educación" },
+  { value: "psychology", emoji: "🧠", title: "Psicología" },
+  { value: "health", emoji: "🩺", title: "Salud" },
+  { value: "accessibility", emoji: "♿", title: "Accesibilidad" },
+  { value: "handshake", emoji: "🤝", title: "Alianza" },
+  { value: "volunteer", emoji: "🙌", title: "Voluntariado" },
+  { value: "music", emoji: "🎵", title: "Música" },
+  { value: "smile", emoji: "😊", title: "Sonrisa" },
+  { value: "home", emoji: "🏠", title: "Hogar" },
+  { value: "world", emoji: "🌎", title: "Comunidad" },
+];
+const ICON_OPTIONS = ICONS.map(({ value, emoji, title }) => ({ value, title: `${emoji}  ${title}` }));
+const ICON_EMOJI: Record<string, string> = Object.fromEntries(ICONS.map(({ value, emoji }) => [value, emoji]));
+
+/** Muestra el emoji del ícono elegido en las listas del Studio. */
+const emojiMedia = (icon?: string) => () =>
+  createElement("span", { style: { fontSize: 22, lineHeight: 1 } }, ICON_EMOJI[icon ?? ""] ?? "✨");
+
+/** Campo de ícono: opciones a la vista (no en un desplegable). */
+const iconField = (description?: string, required = false) =>
+  defineField({
+    name: "icon",
+    title: required ? "Ícono" : "Ícono (opcional)",
+    description,
+    type: "string",
+    options: { list: ICON_OPTIONS, layout: "radio", direction: "horizontal" },
+    ...(required ? { initialValue: "heart", validation: (r: StringRule) => r.required().error("Elige un ícono") } : {}),
+  });
+
+/** Límite de elementos de una lista, con mensaje claro para la fundación. */
+const maxItems = (max: number, what: string, min = 0) => (r: ArrayRule<unknown[]>) => [
+  ...(min ? [r.min(min).error(`Mínimo ${min} ${min === 1 ? what.replace(/es$|s$/, "") : what}`)] : []),
+  r.max(max).error(`Máximo ${max} ${what}`),
+];
 
 /** Documento único de sección: título fijo en la vista previa. */
 const section = (
@@ -94,8 +154,8 @@ export const siteSettings = section("siteSettings", "Ajustes generales", CogIcon
 ]);
 
 export const heroSection = section("heroSection", "Portada", HomeIcon, [
-  text("badge", "Etiqueta superior", "Ej.: Fundación sin fines de lucro · Guayaquil, Ecuador"),
-  text("title", "Título"),
+  text("badge", "Etiqueta superior", "Ej.: Fundación sin fines de lucro · Guayaquil, Ecuador", true, undefined, 70),
+  text("title", "Título", undefined, true, undefined, 40),
   defineField({
     name: "highlight",
     title: "Palabra destacada",
@@ -107,8 +167,8 @@ export const heroSection = section("heroSection", "Portada", HomeIcon, [
         return !value || title.includes(value) ? true : "Debe ser parte del título";
       }),
   }),
-  text("tagline", "Lema", "Ej.: Todo es posible", false),
-  text("description", "Descripción", undefined, true, 4),
+  text("tagline", "Lema", "Ej.: Todo es posible", false, undefined, 40),
+  text("description", "Descripción", undefined, true, 4, 320),
   imageList(
     "images",
     "Fotos del collage",
@@ -128,8 +188,8 @@ export const heroSection = section("heroSection", "Portada", HomeIcon, [
     title: "Etiquetas sobre las fotos",
     description: "Hasta 3 palabras cortas. Ej.: Terapia, Inclusión, Arte",
     type: "array",
-    of: [defineArrayMember({ type: "string" })],
-    validation: (r) => r.max(3),
+    of: [defineArrayMember({ type: "string", validation: (r) => r.max(20).error("Máximo 20 caracteres") })],
+    validation: maxItems(3, "etiquetas"),
   }),
   text("primaryCtaLabel", "Botón principal", "Lleva al registro. Ej.: Agendar una cita"),
   text("secondaryCtaLabel", "Botón secundario", "Baja a la sección Nosotros. Ej.: Conocer más"),
@@ -150,11 +210,18 @@ export const impactSection = section(
         defineArrayMember({
           type: "object",
           name: "stat",
-          fields: [text("value", "Valor", "Ej.: +500"), text("label", "Descripción", "Ej.: familias acompañadas")],
-          preview: { select: { title: "value", subtitle: "label" } },
+          fields: [
+            text("value", "Valor", "Ej.: +500, 98% o 1.200. El número se anima contando desde 0.", true, undefined, 10),
+            text("label", "Descripción", "Ej.: familias acompañadas", true, undefined, 40),
+            iconField("Elige el que mejor represente la cifra. Si no eliges uno, se asigna automáticamente."),
+          ],
+          preview: {
+            select: { title: "value", subtitle: "label", icon: "icon" },
+            prepare: ({ title, subtitle, icon }) => ({ title, subtitle, media: emojiMedia(icon) }),
+          },
         }),
       ],
-      validation: (r) => r.max(4),
+      validation: maxItems(4, "cifras"),
     }),
   ],
 );
@@ -166,7 +233,8 @@ export const missionSection = section("missionSection", "Nosotros", UsersIcon, [
     name: "paragraphs",
     title: "Párrafos",
     type: "array",
-    of: [defineArrayMember({ type: "text", rows: 4 })],
+    of: [defineArrayMember({ type: "text", rows: 4, validation: (r) => r.max(700).error("Máximo 700 caracteres por párrafo") })],
+    validation: maxItems(4, "párrafos"),
   }),
   imageList("images", "Galería", "Se usan las 3 primeras: 2 horizontales y 1 vertical (la segunda).", 0, 3),
 ]);
@@ -184,27 +252,9 @@ export const servicesSection = section("servicesSection", "Servicios", HeartIcon
         type: "object",
         name: "service",
         fields: [
-          text("title", "Nombre"),
-          text("description", "Descripción", undefined, true, 3),
-          defineField({
-            name: "icon",
-            title: "Ícono",
-            type: "string",
-            initialValue: "heart",
-            options: {
-              list: [
-                { title: "Accesibilidad", value: "accessibility" },
-                { title: "Corazón", value: "heart" },
-                { title: "Educación", value: "school" },
-                { title: "Apretón de manos", value: "handshake" },
-                { title: "Grupo de personas", value: "groups" },
-                { title: "Música", value: "music" },
-                { title: "Psicología", value: "psychology" },
-                { title: "Familia", value: "family" },
-              ],
-            },
-            validation: (r) => r.required(),
-          }),
+          text("title", "Nombre", undefined, true, undefined, 50),
+          text("description", "Descripción", undefined, true, 3, 200),
+          iconField(undefined, true),
           defineField({
             name: "accent",
             title: "Color",
@@ -222,9 +272,13 @@ export const servicesSection = section("servicesSection", "Servicios", HeartIcon
             validation: (r) => r.required(),
           }),
         ],
-        preview: { select: { title: "title", subtitle: "description" } },
+        preview: {
+          select: { title: "title", subtitle: "description", icon: "icon" },
+          prepare: ({ title, subtitle, icon }) => ({ title, subtitle, media: emojiMedia(icon) }),
+        },
       }),
     ],
+    validation: maxItems(9, "servicios"),
   }),
 ]);
 
@@ -241,10 +295,10 @@ export const stepsSection = section("stepsSection", "Cómo agendar", CalendarIco
       defineArrayMember({
         type: "object",
         name: "step",
-        fields: [text("title", "Título"), text("description", "Descripción", undefined, true, 3)],
+        fields: [text("title", "Título", undefined, true, undefined, 40), text("description", "Descripción", undefined, true, 3, 200)],
       }),
     ],
-    validation: (r) => r.max(4),
+    validation: maxItems(4, "pasos"),
   }),
   text("ctaLabel", "Texto del botón", "Ej.: Crear mi cuenta", false),
 ]);
@@ -266,13 +320,14 @@ export const testimonialsSection = section(
           type: "object",
           name: "testimonial",
           fields: [
-            text("quote", "Testimonio", undefined, true, 4),
-            text("author", "Nombre"),
-            text("role", "Relación con la fundación", "Ej.: Madre de un participante", false),
+            text("quote", "Testimonio", undefined, true, 4, 300),
+            text("author", "Nombre", undefined, true, undefined, 60),
+            text("role", "Relación con la fundación", "Ej.: Madre de un participante", false, undefined, 80),
           ],
           preview: { select: { title: "author", subtitle: "quote" } },
         }),
       ],
+      validation: maxItems(6, "testimonios"),
     }),
   ],
 );
@@ -281,7 +336,7 @@ export const bandSection = section("bandSection", "ASPY Band", PlayIcon, [
   text("eyebrow", "Etiqueta"),
   text("title", "Título"),
   text("highlight", "Palabra destacada", "Parte del título que va en rosado", false),
-  text("description", "Descripción", undefined, true, 4),
+  text("description", "Descripción", undefined, true, 4, 450),
   image("image", "Foto"),
   defineField({
     name: "link",
@@ -304,13 +359,22 @@ export const supportSection = section("supportSection", "Aliados y donaciones", 
         type: "object",
         name: "partner",
         fields: [
-          text("name", "Nombre"),
-          image("logo", "Logo (opcional)"),
+          text("name", "Nombre", "Se muestra si no hay logo y al pasar el mouse sobre el logo.", true, undefined, 60),
+          defineField({
+            name: "logo",
+            title: "Logo (opcional)",
+            description:
+              "PNG o SVG, idealmente con fondo transparente o blanco y en horizontal. Se muestra dentro de un recuadro blanco.",
+            type: "image",
+            options: { accept: "image/png,image/jpeg,image/webp,image/svg+xml" },
+            fields: [altField],
+          }),
           defineField({ name: "url", title: "Sitio web (opcional)", type: "url" }),
         ],
         preview: { select: { title: "name", media: "logo" } },
       }),
     ],
+    validation: maxItems(12, "aliados"),
   }),
   defineField({
     name: "donation",
@@ -332,6 +396,7 @@ export const supportSection = section("supportSection", "Aliados y donaciones", 
             preview: { select: { title: "label", subtitle: "value" } },
           }),
         ],
+        validation: maxItems(6, "datos"),
       }),
       defineField({
         name: "cta",
@@ -353,53 +418,97 @@ export const contactSection = section(
     defineField({
       name: "whatsapp",
       title: "WhatsApp",
-      description: "Número con código de país, sin + ni espacios. Ej.: 593991234567",
+      description: "Número con código de país, sin + ni espacios. Ej.: 593991234567. En la web se mostrará como 099 123 4567.",
       type: "string",
       validation: (r) => r.regex(/^\d{8,15}$/, { name: "número" }).warning("Solo números, con código de país"),
     }),
     text("whatsappCtaLabel", "Texto del botón de WhatsApp", "Ej.: Escríbenos por WhatsApp", false),
+    text(
+      "whatsappMessage",
+      "Mensaje predeterminado de WhatsApp",
+      "Texto que ya aparece escrito cuando la persona abre el chat. Ej.: Hola, quisiera más información.",
+      false,
+      2,
+    ),
+    defineField({
+      name: "whatsappFloatingButton",
+      title: "Mostrar botón flotante de WhatsApp",
+      description: "Botón verde fijo en la esquina de la página. Solo aparece si hay un número de WhatsApp.",
+      type: "boolean",
+      initialValue: true,
+    }),
+    text("whatsappFloatingLabel", "Texto junto al botón flotante", "Ej.: ¿Tienes dudas? Escríbenos", false),
     text("phone", "Teléfono", undefined, false),
     defineField({ name: "email", title: "Correo", type: "email" }),
     text("address", "Dirección", undefined, false),
-    defineField({ name: "mapUrl", title: "Enlace de Google Maps", type: "url" }),
-    text("schedule", "Horario de atención", "Ej.: Lun a Vie · 08:00 – 17:00", false),
+    defineField({
+      name: "showMap",
+      title: "Mostrar mapa",
+      description: "Mapa de Google Maps en la sección de contacto. Necesita una dirección o una ubicación exacta.",
+      type: "boolean",
+      initialValue: true,
+    }),
+    text("mapTitle", "Título junto al mapa", "Ej.: Visítanos", false, undefined, 40),
+    text(
+      "mapQuery",
+      "Ubicación exacta para el mapa (opcional)",
+      "Si el mapa no marca bien el lugar con la dirección, escribe aquí las coordenadas (ej.: -2.1462, -79.8923) o el nombre exacto del lugar en Google Maps.",
+      false,
+      undefined,
+      150,
+    ),
+    text("mapButtonLabel", "Texto del botón del mapa", "Ej.: Abrir en Google Maps", false, undefined, 40),
+    defineField({
+      name: "mapUrl",
+      title: "Enlace de Google Maps (opcional)",
+      description:
+        "Abre la ficha de la fundación en Google Maps y copia el enlace de la barra del navegador (empieza con https://www.google.com/maps/place/…). Así el botón abre la ficha y el mapa marca exactamente la fundación. Si está vacío, se usa la dirección.",
+      type: "url",
+    }),
+    text(
+      "schedule",
+      "Horario de atención",
+      "Una línea por horario (Enter para pasar a la siguiente). Ej.: «Lun a Vie · 10:00 – 18:00» y en otra línea «Sábados · 10:00 – 14:00».",
+      false,
+      3,
+      200,
+    ),
   ],
   "Los datos vacíos no se muestran en la página.",
 );
 
-export const socialSection = section("socialSection", "Redes sociales", ShareIcon, [
+/** Una red social: si el enlace está vacío, su ícono no se muestra en la web. */
+const socialField = (name: string, title: string, example: string) =>
   defineField({
-    name: "links",
-    title: "Redes sociales",
-    type: "array",
-    of: [
-      defineArrayMember({
-        type: "object",
-        name: "socialLink",
-        fields: [
-          defineField({
-            name: "network",
-            title: "Red",
-            type: "string",
-            options: {
-              list: [
-                { title: "Instagram", value: "instagram" },
-                { title: "Facebook", value: "facebook" },
-                { title: "TikTok", value: "tiktok" },
-                { title: "YouTube", value: "youtube" },
-                { title: "LinkedIn", value: "linkedin" },
-              ],
-            },
-            validation: (r) => r.required(),
-          }),
-          text("label", "Texto", "Ej.: @aspyecuador"),
-          defineField({ name: "url", title: "Enlace", type: "url", validation: (r) => r.required() }),
-        ],
-        preview: { select: { title: "label", subtitle: "network" } },
+    name,
+    title,
+    type: "object",
+    options: { collapsible: false },
+    fields: [
+      defineField({
+        name: "url",
+        title: "Enlace",
+        description: "Déjalo vacío si no tienen esta red: el ícono no aparecerá en la página.",
+        type: "url",
+        validation: (r) => r.uri({ scheme: ["https"] }).error("Debe empezar con https://"),
       }),
+      text("label", "Texto visible", `Ej.: ${example}`, false, undefined, 40),
     ],
-  }),
-]);
+  });
+
+export const socialSection = section(
+  "socialSection",
+  "Redes sociales",
+  ShareIcon,
+  [
+    socialField("instagram", "Instagram de la fundación", "@aspyecuador"),
+    socialField("instagramBand", "Instagram de ASPY Band", "@aspy_band"),
+    socialField("facebook", "Facebook", "Fundación Aspy Ecuador"),
+    socialField("tiktok", "TikTok", "@aspyecuador"),
+    socialField("youtube", "YouTube", "Fundación Aspy"),
+  ],
+  "Solo se muestran en la página las redes que tengan enlace.",
+);
 
 export const footerSection = section("footerSection", "Pie de página", BlockContentIcon, [
   text("description", "Descripción", undefined, true, 2),

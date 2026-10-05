@@ -90,7 +90,8 @@ export default function Navbar({ navigation, logo, showAuthButton = true }: Navb
     setTimeout(() => scrollTo(id), drawerOpen ? 250 : 0);
   };
 
-  const light = !scrolled; // sobre el hero oscuro el texto es claro
+  // Texto claro solo sobre el hero en modo oscuro (en claro el fondo del hero es la ilustración clara)
+  const light = !scrolled && theme.palette.mode === "dark";
 
   return (
     <>

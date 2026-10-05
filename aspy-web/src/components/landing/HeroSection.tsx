@@ -3,9 +3,11 @@ import type { MouseEvent } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { useTheme } from "@mui/material/styles";
 import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
 import ArrowDownwardRoundedIcon from "@mui/icons-material/ArrowDownwardRounded";
 import isotipo from "@/assets/landing/isotipo-aspy.svg";
+import fondoAspy from "@/assets/fondoAspy.webp";
 import type { LandingContent } from "@/content/landing/types";
 import { C, DISPLAY_FONT, NAV_HEIGHT, fadeIn, fadeUp, float, focusRing, reducedMotion, scrollTo } from "./constants";
 import { SocialIcon } from "./shared";
@@ -18,6 +20,8 @@ interface HeroSectionProps {
   showCtas?: boolean;
   /** Destino del botón principal (registro o panel si ya hay sesión). */
   primaryHref?: string;
+  /** Flecha para bajar (se oculta si las cifras de impacto ya se montan sobre la portada). */
+  showScrollHint?: boolean;
 }
 
 /** Divide el título para pintar `highlight` con degradado. */
@@ -43,7 +47,44 @@ function renderTitle(title: string, highlight: string) {
   );
 }
 
-export default function HeroSection({ content, social, showCtas = true, primaryHref = "/register" }: HeroSectionProps) {
+// Colores del hero según el modo: fondo claro (ilustración del login) o con velo oscuro
+const HERO_COLORS = {
+  light: {
+    text: "#1A1A2E",
+    body: "#33404B",
+    badge: C.blueDark,
+    tagline: C.pinkDark,
+    primaryBg: C.darkBg,
+    primaryText: "#fff",
+    primaryIcon: C.blue,
+    outline: "rgba(26,26,46,0.35)",
+    outlineHover: "rgba(26,26,46,0.06)",
+    soft: "rgba(26,26,46,0.6)",
+  },
+  dark: {
+    text: "#fff",
+    body: "rgba(255,255,255,0.82)",
+    badge: "#BFE6F2",
+    tagline: C.yellow,
+    primaryBg: "#fff",
+    primaryText: C.darkBg,
+    primaryIcon: C.blueDark,
+    outline: "rgba(255,255,255,0.4)",
+    outlineHover: "rgba(255,255,255,0.08)",
+    soft: "rgba(255,255,255,0.7)",
+  },
+};
+
+export default function HeroSection({ content, social, showCtas = true, primaryHref = "/register", showScrollHint = true }: HeroSectionProps) {
+  const isDark = useTheme().palette.mode === "dark";
+  const hc = HERO_COLORS[isDark ? "dark" : "light"];
+  // Mismo fondo que el inicio de sesión; en claro, un velo suave del lado del texto para que se lea bien
+  const background = isDark
+    ? `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${fondoAspy})`
+    : {
+        xs: `linear-gradient(180deg, rgba(255,248,240,0.82), rgba(255,248,240,0.6)), url(${fondoAspy})`,
+        md: `linear-gradient(90deg, rgba(255,248,240,0.88) 0%, rgba(255,248,240,0.6) 45%, rgba(255,248,240,0) 72%), url(${fondoAspy})`,
+      };
   const goToAbout = (e: MouseEvent) => {
     e.preventDefault();
     scrollTo("nosotros");
@@ -57,10 +98,10 @@ export default function HeroSection({ content, social, showCtas = true, primaryH
       sx={{
         position: "relative",
         overflow: "hidden",
-        color: "#fff",
-        background: `radial-gradient(900px 520px at 88% 18%, ${C.blue}2E, transparent 60%),
-          radial-gradient(700px 480px at 6% 92%, ${C.pink}24, transparent 60%),
-          linear-gradient(160deg, ${C.darkBg} 0%, ${C.darkBg2} 55%, #0F2233 100%)`,
+        color: hc.text,
+        backgroundImage: background,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
         pt: `calc(${NAV_HEIGHT}px + 40px)`,
         pb: { xs: 12, md: 16 },
         minHeight: { md: "min(100vh, 900px)" },
@@ -114,7 +155,7 @@ export default function HeroSection({ content, social, showCtas = true, primaryH
             }}
           >
             <Box sx={{ width: 7, height: 7, borderRadius: "50%", bgcolor: C.blue, boxShadow: `0 0 0 4px ${C.blue}33` }} />
-            <Typography component="span" sx={{ fontSize: { xs: "0.7rem", sm: "0.76rem" }, color: "#BFE6F2", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+            <Typography component="span" sx={{ fontSize: { xs: "0.7rem", sm: "0.76rem" }, color: hc.badge, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>
               {content.badge}
             </Typography>
           </Box>
@@ -134,8 +175,8 @@ export default function HeroSection({ content, social, showCtas = true, primaryH
 
           {content.tagline && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mt: 2 }}>
-              <Box sx={{ width: 32, height: 3, borderRadius: 2, bgcolor: C.yellow }} />
-              <Typography sx={{ color: C.yellow, fontWeight: 600, fontSize: { xs: "1.05rem", md: "1.2rem" }, fontStyle: "italic" }}>
+              <Box sx={{ width: 32, height: 3, borderRadius: 2, bgcolor: hc.tagline }} />
+              <Typography sx={{ color: hc.tagline, fontWeight: 600, fontSize: { xs: "1.05rem", md: "1.2rem" }, fontStyle: "italic" }}>
                 {content.tagline}
               </Typography>
             </Box>
@@ -145,7 +186,7 @@ export default function HeroSection({ content, social, showCtas = true, primaryH
             sx={{
               mt: 3,
               maxWidth: 540,
-              color: "rgba(255,255,255,0.8)",
+              color: hc.body,
               fontSize: { xs: "1.02rem", md: "1.12rem" },
               lineHeight: 1.8,
             }}
@@ -167,9 +208,9 @@ export default function HeroSection({ content, social, showCtas = true, primaryH
                   borderRadius: 50,
                   fontWeight: 700,
                   fontSize: "1rem",
-                  color: C.darkBg,
+                  color: hc.primaryText,
                   textDecoration: "none",
-                  bgcolor: "#fff",
+                  bgcolor: hc.primaryBg,
                   boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
                   transition: "transform 0.2s, box-shadow 0.2s",
                   "&:hover": { transform: "translateY(-2px)", boxShadow: `0 14px 36px ${C.blue}55` },
@@ -177,7 +218,7 @@ export default function HeroSection({ content, social, showCtas = true, primaryH
                   ...reducedMotion,
                 }}
               >
-                <EventAvailableRoundedIcon sx={{ fontSize: 20, color: C.blueDark }} />
+                <EventAvailableRoundedIcon sx={{ fontSize: 20, color: hc.primaryIcon }} />
                 {content.primaryCtaLabel}
               </Box>
               <Box
@@ -192,11 +233,11 @@ export default function HeroSection({ content, social, showCtas = true, primaryH
                   borderRadius: 50,
                   fontWeight: 600,
                   fontSize: "1rem",
-                  color: "#fff",
+                  color: hc.text,
                   textDecoration: "none",
-                  border: "1.5px solid rgba(255,255,255,0.35)",
+                  border: `1.5px solid ${hc.outline}`,
                   transition: "background-color 0.2s, border-color 0.2s",
-                  "&:hover": { bgcolor: "rgba(255,255,255,0.08)", borderColor: "rgba(255,255,255,0.7)" },
+                  "&:hover": { bgcolor: hc.outlineHover, borderColor: hc.text },
                   ...focusRing,
                 }}
               >
@@ -207,7 +248,7 @@ export default function HeroSection({ content, social, showCtas = true, primaryH
 
           {social.length > 0 && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 4, flexWrap: "wrap", animation: `${fadeIn} 1s ease 0.5s both`, ...reducedMotion }}>
-              <Typography component="span" sx={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.55)" }}>
+              <Typography component="span" sx={{ fontSize: "0.8rem", color: hc.soft }}>
                 {content.socialLabel}
               </Typography>
               {social.map((s) => (
@@ -223,7 +264,7 @@ export default function HeroSection({ content, social, showCtas = true, primaryH
                     gap: 0.75,
                     fontSize: "0.88rem",
                     fontWeight: 600,
-                    color: "rgba(255,255,255,0.85)",
+                    color: hc.text,
                     textDecoration: "none",
                     borderRadius: 1,
                     "&:hover": { color: C.blue },
@@ -253,7 +294,7 @@ export default function HeroSection({ content, social, showCtas = true, primaryH
       </Box>
 
       {/* Indicador de scroll (solo escritorio) */}
-      {showCtas && (
+      {showCtas && showScrollHint && (
         <Box
           component="a"
           href="#nosotros"
@@ -269,11 +310,11 @@ export default function HeroSection({ content, social, showCtas = true, primaryH
             width: 40,
             height: 40,
             borderRadius: "50%",
-            border: "1.5px solid rgba(255,255,255,0.3)",
-            color: "rgba(255,255,255,0.75)",
+            border: `1.5px solid ${hc.outline}`,
+            color: hc.soft,
             zIndex: 1,
             animation: `${float} 2.2s ease-in-out infinite`,
-            "&:hover": { color: "#fff", borderColor: "#fff" },
+            "&:hover": { color: hc.text, borderColor: hc.text },
             ...focusRing,
             ...reducedMotion,
           }}

@@ -142,8 +142,8 @@ type AspyPalette = {
 const aspyLight: AspyPalette = {
   text: "#1A1A2E",
   muted: "#5E6E7A",
-  border: "#E2EBF0",
-  surface: "#FAFBFC",
+  border: "#EFE3D6",
+  surface: "#FFF8F1",
   card: "#FFFFFF",
   navBg: "rgba(255, 255, 255, 0.96)",
   blueLight: "#D6F0F8",

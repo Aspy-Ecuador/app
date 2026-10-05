@@ -11,6 +11,7 @@ import TestimonialsSection from "@components/landing/TestimonialsSection";
 import AspyBandSection from "@components/landing/AspyBandSection";
 import SupportSection from "@components/landing/SupportSection";
 import Footer from "@components/landing/Footer";
+import WhatsAppButton from "@components/landing/WhatsAppButton";
 import { useLandingContent } from "@/content/landing/useLandingContent";
 
 export default function LandingPage() {
@@ -22,7 +23,7 @@ export default function LandingPage() {
     <Box sx={{ bgcolor: C.offWhite, minHeight: "100vh", overflowX: "hidden", ...largeScreenZoom }}>
       <Navbar navigation={content.navigation} logo={content.site.logo} />
       <Box component="main">
-        <HeroSection content={content.hero} social={content.social} primaryHref={scheduleHref} />
+        <HeroSection content={content.hero} social={content.social} showScrollHint={content.impact.stats.length === 0} primaryHref={scheduleHref} />
         <ImpactSection content={content.impact} />
         <MissionSection content={content.mission} />
         <ServicesSection content={content.services} />
@@ -40,6 +41,7 @@ export default function LandingPage() {
         ctaLabel={content.hero.primaryCtaLabel}
         primaryHref={scheduleHref}
       />
+      <WhatsAppButton contact={content.contact} />
     </Box>
   );
 }

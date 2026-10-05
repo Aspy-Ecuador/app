@@ -69,6 +69,17 @@ function convert(value, p) {
 }
 
 const c = (key) => convert(content[key], key);
+
+// Redes: un campo fijo por red (el 1.er Instagram es el de la fundación y el 2.º el de ASPY Band)
+function socialFields(list) {
+  const out = {};
+  let instagram = 0;
+  for (const { network, label, url } of list) {
+    const key = network === "instagram" ? (instagram++ ? "instagramBand" : "instagram") : network;
+    out[key] = { url, ...(label ? { label } : {}) };
+  }
+  return out;
+}
 const docs = {
   siteSettings: { logo: convert(content.site.logo, "site.logo"), navigation: c("navigation") },
   heroSection: c("hero"),
@@ -80,7 +91,7 @@ const docs = {
   bandSection: c("band"),
   supportSection: c("support"),
   contactSection: c("contact"),
-  socialSection: { links: c("social") },
+  socialSection: socialFields(content.social),
   footerSection: c("footer"),
 };
 const lines = Object.entries(docs).map(([id, fields]) => JSON.stringify({ _id: id, _type: id, ...fields }));

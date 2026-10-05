@@ -22,7 +22,19 @@ export type ServiceIconName =
   | "groups"
   | "music"
   | "psychology"
-  | "family";
+  | "family"
+  | "person"
+  | "chart"
+  | "growth"
+  | "calendar"
+  | "star"
+  | "trophy"
+  | "home"
+  | "health"
+  | "smile"
+  | "volunteer"
+  | "world"
+  | "child";
 
 /** Color de acento de la marca. */
 export type Accent = "blue" | "pink" | "yellow";
@@ -61,7 +73,7 @@ export interface LandingContent {
   };
   impact: {
     /** Cifras reales, p. ej. { value: "+500", label: "familias acompañadas" }. */
-    stats: { value: string; label: string }[];
+    stats: { value: string; label: string; icon?: ServiceIconName }[];
   };
   mission: {
     eyebrow: string;
@@ -121,10 +133,23 @@ export interface LandingContent {
     phone: string;
     email: string;
     address: string;
+    /** Horario de atención; puede tener varias líneas (una por horario). */
     schedule: string;
-    /** Enlace a Google Maps. */
+    /** Enlace a Google Maps (p. ej., la ficha de la fundación). Si está vacío, se busca la dirección. */
     mapUrl: string;
+    /** Muestra el mapa embebido en la sección de contacto. */
+    showMap: boolean;
+    /** Ubicación exacta para el mapa (coordenadas o nombre del lugar). Si está vacío, se usa la dirección. */
+    mapQuery: string;
+    mapButtonLabel: string;
+    mapTitle: string;
     whatsappCtaLabel: string;
+    /** Mensaje con que se abre el chat de WhatsApp. */
+    whatsappMessage: string;
+    /** Muestra el botón flotante de WhatsApp (solo si hay número). */
+    whatsappFloatingButton: boolean;
+    /** Texto que aparece junto al botón flotante. */
+    whatsappFloatingLabel: string;
   };
   social: { network: SocialNetwork; label: string; url: string }[];
   footer: {

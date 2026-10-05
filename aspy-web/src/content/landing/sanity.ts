@@ -26,7 +26,7 @@ const QUERY = `{
   "band": *[_id == "bandSection"][0]{ ..., image${IMG} },
   "support": *[_id == "supportSection"][0]{ ..., partners[]{ name, url, logo${IMG} } },
   "contact": *[_id == "contactSection"][0],
-  "social": *[_id == "socialSection"][0].links,
+  "social": *[_id == "socialSection"][0],
   "footer": *[_id == "footerSection"][0]
 }`;
 
@@ -109,8 +109,64 @@ function merge<T>(base: T, remote: unknown, isArrayItem = false): T {
   return typeof remote === typeof base ? (remote as T) : base;
 }
 
+/** Máximos de cada lista (los mismos que valida el Studio en aspy-studio/schemaTypes/sections.ts). */
+export const LIST_LIMITS = {
+  heroImages: 8,
+  chips: 3,
+  stats: 4,
+  paragraphs: 4,
+  missionImages: 3,
+  services: 9,
+  steps: 4,
+  testimonials: 6,
+  partners: 12,
+  donationDetails: 6,
+  social: 6,
+} as const;
+
+/** Recorta las listas por si llega contenido que no pasó por las validaciones del Studio. */
+function applyLimits(c: LandingContent): LandingContent {
+  const L = LIST_LIMITS;
+  return {
+    ...c,
+    hero: { ...c.hero, images: c.hero.images.slice(0, L.heroImages), chips: c.hero.chips.slice(0, L.chips) },
+    impact: { ...c.impact, stats: c.impact.stats.slice(0, L.stats) },
+    mission: { ...c.mission, paragraphs: c.mission.paragraphs.slice(0, L.paragraphs), images: c.mission.images.slice(0, L.missionImages) },
+    services: { ...c.services, items: c.services.items.slice(0, L.services) },
+    steps: { ...c.steps, items: c.steps.items.slice(0, L.steps) },
+    testimonials: { ...c.testimonials, items: c.testimonials.items.slice(0, L.testimonials) },
+    support: {
+      ...c.support,
+      partners: c.support.partners.slice(0, L.partners),
+      donation: { ...c.support.donation, details: c.support.donation.details.slice(0, L.donationDetails) },
+    },
+    social: c.social.slice(0, L.social),
+  };
+}
+
+// Redes: en Sanity hay un campo fijo por red; solo se muestran las que tienen enlace (en este orden)
+const SOCIAL_FIELDS = [
+  { key: "instagram", network: "instagram", label: "Instagram" },
+  { key: "instagramBand", network: "instagram", label: "Instagram" },
+  { key: "facebook", network: "facebook", label: "Facebook" },
+  { key: "tiktok", network: "tiktok", label: "TikTok" },
+  { key: "youtube", network: "youtube", label: "YouTube" },
+] as const;
+
+/** Convierte el documento de redes de Sanity en la lista que usa la web. */
+function normalizeSocial(remote: unknown): unknown {
+  if (!isObject(remote) || !isObject(remote.social)) return remote;
+  const doc = remote.social;
+  const social = SOCIAL_FIELDS.flatMap(({ key, network, label }) => {
+    const field = doc[key];
+    if (!isObject(field) || typeof field.url !== "string" || !field.url.trim()) return [];
+    return [{ network, label: typeof field.label === "string" && field.label.trim() ? field.label : label, url: field.url }];
+  });
+  return { ...remote, social };
+}
+
 export function mergeLandingContent(base: LandingContent, remote: unknown): LandingContent {
-  return merge(base, remote);
+  return applyLimits(merge(base, normalizeSocial(remote)));
 }
 
 // ─── Caché local (evita mostrar el contenido viejo en cada visita) ──

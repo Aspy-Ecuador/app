@@ -21,25 +21,38 @@ export default function SupportSection({ content }: { content: LandingContent["s
       {partners.length > 0 && (
         <Box component="ul" sx={{ listStyle: "none", m: 0, p: 0, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 2 }}>
           {partners.map((p, i) => {
-            const inner = p.logo ? (
-              <Box component="img" src={p.logo.src} alt={p.logo.alt || p.name} loading="lazy" sx={{ height: 44, maxWidth: 180, objectFit: "contain" }} />
+            const hasLogo = Boolean(p.logo?.src);
+            const inner = hasLogo ? (
+              <Box
+                component="img"
+                src={p.logo!.src}
+                alt={p.logo!.alt || p.name}
+                loading="lazy"
+                decoding="async"
+                sx={{ maxHeight: 56, maxWidth: "100%", width: "auto", objectFit: "contain", display: "block" }}
+              />
             ) : (
               <>
-                <HandshakeRoundedIcon sx={{ color: C.blueDark, fontSize: 24 }} />
-                <Typography component="span" sx={{ fontWeight: 700, color: C.black }}>{p.name}</Typography>
+                <HandshakeRoundedIcon sx={{ color: C.blueDark, fontSize: 24, flexShrink: 0 }} />
+                <Typography component="span" sx={{ fontWeight: 700, color: C.black, lineHeight: 1.3 }}>{p.name}</Typography>
               </>
             );
             const cardSx = {
               display: "flex",
               alignItems: "center",
+              justifyContent: "center",
               gap: 1.25,
-              px: 3,
-              py: 2,
-              minHeight: 76,
+              // Tamaño parejo para que logos anchos y cuadrados se vean uniformes
+              width: { xs: 150, sm: 190 },
+              height: { xs: 84, sm: 100 },
+              px: 2.5,
               borderRadius: "18px",
-              bgcolor: C.offWhite,
+              // Los logos casi siempre están pensados para fondo blanco: recuadro blanco también en modo oscuro
+              bgcolor: hasLogo ? "#FFFFFF" : C.offWhite,
               border: "1px solid",
-              borderColor: C.border,
+              borderColor: hasLogo ? "rgba(26,26,46,0.08)" : C.border,
+              boxShadow: hasLogo ? "0 6px 18px rgba(18,38,58,0.06)" : "none",
+              textAlign: "center",
               textDecoration: "none",
               transition: "border-color 0.2s, transform 0.2s",
               "&:hover": { borderColor: `${C.blue}88`, transform: "translateY(-2px)" },
@@ -49,11 +62,11 @@ export default function SupportSection({ content }: { content: LandingContent["s
               <li key={p.name}>
                 <Reveal delay={i * 0.06}>
                   {p.url ? (
-                    <Box component="a" href={p.url} target="_blank" rel="noopener noreferrer" aria-label={p.name} sx={cardSx}>
+                    <Box component="a" href={p.url} target="_blank" rel="noopener noreferrer" aria-label={p.name} title={p.name} sx={cardSx}>
                       {inner}
                     </Box>
                   ) : (
-                    <Box sx={cardSx}>{inner}</Box>
+                    <Box title={p.name} sx={cardSx}>{inner}</Box>
                   )}
                 </Reveal>
               </li>

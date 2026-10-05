@@ -10,6 +10,18 @@ import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 import MusicNoteRoundedIcon from "@mui/icons-material/MusicNoteRounded";
 import PsychologyRoundedIcon from "@mui/icons-material/PsychologyRounded";
 import FamilyRestroomRoundedIcon from "@mui/icons-material/FamilyRestroomRounded";
+import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
+import BarChartRoundedIcon from "@mui/icons-material/BarChartRounded";
+import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
+import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
+import StarRoundedIcon from "@mui/icons-material/StarRounded";
+import EmojiEventsRoundedIcon from "@mui/icons-material/EmojiEventsRounded";
+import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
+import MedicalServicesRoundedIcon from "@mui/icons-material/MedicalServicesRounded";
+import SentimentSatisfiedAltRoundedIcon from "@mui/icons-material/SentimentSatisfiedAltRounded";
+import VolunteerActivismRoundedIcon from "@mui/icons-material/VolunteerActivismRounded";
+import PublicRoundedIcon from "@mui/icons-material/PublicRounded";
+import ChildCareRoundedIcon from "@mui/icons-material/ChildCareRounded";
 
 // ─── Paleta ───────────────────────────────────────────────────────
 // Los acentos (blue, pink, yellow…) son hex fijos porque se combinan con
@@ -83,6 +95,28 @@ export const reducedMotion = {
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────
+/** Google Maps (formatos públicos, sin clave de API). */
+export const mapsSearchUrl = (query: string) =>
+  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+/** Mapa embebido; con `near` ("lat,lng") se centra en ese punto y marca el lugar por su nombre. */
+export const mapsEmbedUrl = (query: string, near?: string) =>
+  `https://www.google.com/maps?q=${encodeURIComponent(query)}${near ? `&ll=${near}&z=17` : "&z=16"}&output=embed`;
+
+/**
+ * Lee el nombre y las coordenadas de un enlace de ficha de Google Maps
+ * (https://www.google.com/maps/place/<Nombre>/@<lat>,<lng>,…). Los enlaces cortos no los traen.
+ */
+export function placeFromMapsUrl(url: string): { name: string; near: string } | null {
+  const m = url.match(/\/maps\/place\/([^/]+)\/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
+  if (!m) return null;
+  const name = decodeURIComponent(m[1].replace(/\+/g, " "));
+  return { name, near: `${m[2]},${m[3]}` };
+}
+
+/** Enlace que abre un chat de WhatsApp con el número y un mensaje ya escrito. */
+export const whatsappUrl = (number: string, message?: string) =>
+  `https://wa.me/${number.replace(/\D/g, "")}${message ? `?text=${encodeURIComponent(message)}` : ""}`;
+
 export const scrollTo = (id: string) =>
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 
@@ -106,6 +140,18 @@ export const SERVICE_ICONS: Record<ServiceIconName, typeof FavoriteRoundedIcon> 
   music: MusicNoteRoundedIcon,
   psychology: PsychologyRoundedIcon,
   family: FamilyRestroomRoundedIcon,
+  person: PersonRoundedIcon,
+  chart: BarChartRoundedIcon,
+  growth: TrendingUpRoundedIcon,
+  calendar: CalendarMonthRoundedIcon,
+  star: StarRoundedIcon,
+  trophy: EmojiEventsRoundedIcon,
+  home: HomeRoundedIcon,
+  health: MedicalServicesRoundedIcon,
+  smile: SentimentSatisfiedAltRoundedIcon,
+  volunteer: VolunteerActivismRoundedIcon,
+  world: PublicRoundedIcon,
+  child: ChildCareRoundedIcon,
 };
 
 /** Estilo de foco visible para links y botones de la landing (teclado). */
