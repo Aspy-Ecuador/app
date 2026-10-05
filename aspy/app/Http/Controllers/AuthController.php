@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\UserAccount;
@@ -81,11 +82,9 @@ class AuthController extends Controller
             'status',
             'person.gender',
             'person.occupation',
-            'person.phones',
-            'person.addresses.country',
-            'person.addresses.state',
-            'person.addresses.city',
-            'person.identifications',
+            'person.phone',
+            'person.address.city.state.country',
+            'person.identification',
         ]);
 
         return response()->json($user);

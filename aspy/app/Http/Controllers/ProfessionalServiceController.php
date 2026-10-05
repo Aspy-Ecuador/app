@@ -26,6 +26,11 @@ class ProfessionalServiceController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'service_id'      => 'required|integer|exists:service,service_id',
+            'professional_id' => 'required|integer|exists:professional,person_id',
+        ]);
+
         $service = ProfessionalService::create([
             'service_id'      => $request->service_id,
             'professional_id' => $request->professional_id,
@@ -42,6 +47,10 @@ class ProfessionalServiceController extends Controller
         if (!$service) {
             return response()->json(['message' => 'Servicio no encontrado'], 404);
         }
+
+        $request->validate([
+            'professional_id' => 'required|integer|exists:professional,person_id',
+        ]);
 
         $service->update([
             'professional_id' => $request->professional_id,

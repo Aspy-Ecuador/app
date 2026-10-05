@@ -50,7 +50,8 @@ return [
     |
     */
 
-    'expiration' => null,
+    // Minutos de validez de un token (por defecto 7 días). Al vencer, hay que volver a iniciar sesión.
+    'expiration' => env('SANCTUM_EXPIRATION', 60 * 24 * 7),
 
     /*
     |--------------------------------------------------------------------------

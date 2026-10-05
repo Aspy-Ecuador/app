@@ -20,6 +20,17 @@ use Illuminate\Http\JsonResponse;
 
 class UserAccountController extends Controller
 {
+    /** Subtipo (client/professional/staff) que corresponde a cada role_id. */
+    private static function subtypeForRole(int $roleId): ?string
+    {
+        return match ($roleId) {
+            self::ROLE_CLIENT => 'client',
+            self::ROLE_PROFESSIONAL => 'professional',
+            self::ROLE_STAFF => 'staff',
+            default => null,
+        };
+    }
+
     public function index()
     {
         $users = UserAccount::with([
@@ -59,11 +70,19 @@ class UserAccountController extends Controller
 
     public function show($id)
     {
+        if (! $this->isStaffOrAdmin() && (int) $id !== auth()->id()) {
+            return $this->forbidden();
+        }
+
         $user = UserAccount::with([
             'role',
             'status',
             'person',
         ])->find($id);
+
+        if (! $user) {
+            return response()->json(['message' => 'Usuario no encontrado'], 404);
+        }
 
         if ($user->person) {
             $person = $user->person;
@@ -133,10 +152,18 @@ class UserAccountController extends Controller
             'title'                     => 'nullable|string|max:150',
         ]);
 
+        // El rol lo decide el servidor, nunca el formulario:
+        // - Registro público (/registro, sin sesión): siempre Cliente.
+        // - Alta por staff (/crear): cualquier rol excepto Admin; solo un Admin crea Admins.
+        if (! auth()->check()) {
+            $validated['role_id'] = self::ROLE_CLIENT;
+        } elseif ((int) $validated['role_id'] === self::ROLE_ADMIN && ! $this->isAdmin()) {
+            return $this->forbidden('Solo un administrador puede crear administradores.');
+        }
+        $validated['role'] = self::subtypeForRole((int) $validated['role_id']);
+
         $createdBy = auth()->id() ?? 0;
 
-        \Log::info('Usuario autenticado:', ['user' => auth()->user()]);
-        \Log::info('ID autenticado:', ['user' =>  auth()->id()]);
         $person = DB::transaction(function () use ($validated, $createdBy, $request) {
 
             // 1. Crear UserAccount (contraseña encriptada)
@@ -286,6 +313,27 @@ class UserAccountController extends Controller
 
         $updatedBy = auth()->id() ?? 0;
 
+        $target = Person::with('userAccount')->findOrFail($id);
+        $isSelf = (int) $target->user_id === (int) auth()->id();
+
+        if (! $isSelf && ! $this->isStaffOrAdmin()) {
+            return $this->forbidden();
+        }
+        if (! $this->isAdmin()) {
+            // Solo un Admin puede editar cuentas Admin o asignar el rol Admin
+            if ($target->userAccount?->role_id === self::ROLE_ADMIN && ! $isSelf) {
+                return $this->forbidden();
+            }
+            if ((int) $validated['role_id'] === self::ROLE_ADMIN && $target->userAccount?->role_id !== self::ROLE_ADMIN) {
+                return $this->forbidden('Solo un administrador puede asignar el rol de administrador.');
+            }
+        }
+        if ($isSelf && ! $this->isStaffOrAdmin()) {
+            // Un usuario no puede cambiarse su propio rol
+            $validated['role_id'] = $target->userAccount->role_id;
+        }
+        $validated['role'] = self::subtypeForRole((int) $validated['role_id']);
+
         $person = DB::transaction(function () use ($validated, $id, $updatedBy) {
 
             // 1. Buscar person + user
@@ -347,7 +395,7 @@ class UserAccountController extends Controller
             ]);
 
             // 7. Subtipo
-            if ($validated['role'] === 'professional') {
+            if (($validated['role'] ?? null) === 'professional') {
                 $person->professional()->updateOrCreate(
                     ['person_id' => $person->person_id],
                     [
@@ -359,7 +407,7 @@ class UserAccountController extends Controller
                 );
             }
 
-            if ($validated['role'] === 'client') {
+            if (($validated['role'] ?? null) === 'client') {
                 $person->client()->updateOrCreate(
                     ['person_id' => $person->person_id],
                     [
@@ -369,7 +417,7 @@ class UserAccountController extends Controller
                 );
             }
 
-            if ($validated['role'] === 'staff') {
+            if (($validated['role'] ?? null) === 'staff') {
                 $person->staff()->updateOrCreate(
                     ['person_id' => $person->person_id],
                     [
@@ -409,7 +457,12 @@ class UserAccountController extends Controller
         try {
             $user = UserAccount::findOrFail($id);
 
-            $person = Person::where('user_id', $user->user_id)->first();
+            if ($user->role_id === self::ROLE_ADMIN && ! $this->isAdmin()) {
+                DB::rollBack();
+                return $this->forbidden();
+            }
+
+            $person = Person::where('user_id', $user->user_account_id)->first();
 
             if ($person) {
                 $professional = Professional::where('person_id', $person->person_id)->first();
@@ -437,7 +490,7 @@ class UserAccountController extends Controller
             return response()->json(['message' => 'Usuario y datos relacionados eliminados correctamente'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Error al eliminar usuario: '.$e->getMessage()], 500);
+            return $this->serverError('Error al eliminar usuario.', $e);
         }
     }
 }

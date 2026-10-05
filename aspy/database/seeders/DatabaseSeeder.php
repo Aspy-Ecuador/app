@@ -77,8 +77,9 @@ class DatabaseSeeder extends Seeder
         DB::table('appointment_status')->insert([
             ['name' => 'Guardada'],
             ['name' => 'Agendada'],
-            ['name' => 'Completada'],
-            ['name' => 'Perdida'],
+            ['name' => 'Asistió'],
+            ['name' => 'No Asistió'],
+            ['name' => 'Cancelada'],
         ]);
  
         // ============================================================

@@ -3,20 +3,46 @@
 namespace App\Http\Controllers;
 
 use App\Models\Appointment;
+use App\Models\AppointmentReport;
 use App\Models\Payment;
 use App\Models\PaymentData;
+use App\Models\ProfessionalService;
 use App\Models\Receipt;
 use App\Models\WorkerSchedule;
-use App\Models\AppointmentReport;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class AppointmentController extends Controller
 {
+    // IDs de appointment_status
+    private const STATUS_SAVED = 1;      // Guardada (pago pendiente de revisión)
+    private const STATUS_SCHEDULED = 2;  // Agendada
+    private const STATUS_ATTENDED = 3;   // Asistió
+    private const STATUS_MISSED = 4;     // No asistió
+    private const STATUS_CANCELLED = 5;  // Cancelada
+
+    private const CLIENT_CANCEL_MIN_HOURS = 24;
+
+    /** Citas visibles para el usuario actual. */
+    private function visibleAppointments(): Builder
+    {
+        $query = Appointment::query();
+
+        if ($this->isStaffOrAdmin()) {
+            return $query;
+        }
+        if ($this->isProfessional()) {
+            return $query->where('professional_id', $this->currentPersonId());
+        }
+
+        return $query->where('client_id', $this->currentPersonId());
+    }
+
     public function index()
     {
-        $appointments = Appointment::with([
+        $appointments = $this->visibleAppointments()->with([
             'client.person',
             'professional.person',
             'workerSchedule.schedule',
@@ -43,15 +69,17 @@ class AppointmentController extends Controller
 
     public function show($id)
     {
-        $appointment = Appointment::with(['client.person', 'professional.person', 'workerSchedule.schedule', 'appointmentStatus', 'service'])->findOrFail($id);
+        $appointment = $this->visibleAppointments()
+            ->with(['client.person', 'professional.person', 'workerSchedule.schedule', 'appointmentStatus', 'service'])
+            ->findOrFail($id);
+
         return [
             'appointment_id' => $appointment->appointment_id,
-            'appointment_status' => $appointment->appointment_status,
-            'date' => $appointment->date,
+            'appointment_status' => $appointment->appointmentStatus,
             'client' => $appointment->client->person,
             'professional' => $appointment->professional->person,
             'service' => $appointment->service,
-            'worker_schedule' => $appointment->worker_schedule,
+            'worker_schedule' => $appointment->workerSchedule,
             'created_by' => $appointment->created_by,
             'modified_by' => $appointment->modified_by,
             'creation_date' => $appointment->creation_date,
@@ -61,54 +89,73 @@ class AppointmentController extends Controller
 
     public function createAppointment(Request $request)
     {
-        $request->validate([
-            'client_id'       => 'required|integer',
-            'professional_id' => 'required|integer',
-            'service_id'      => 'required|integer',
-            'worker_schedule_id' => 'required|integer',
-            'payment_type'    => 'required|string',
-            'payment_file'    => 'required|string',
+        $validated = $request->validate([
+            'client_id'          => 'required|integer|exists:client,person_id',
+            'professional_id'    => 'required|integer|exists:professional,person_id',
+            'service_id'         => 'required|integer|exists:service,service_id',
+            'worker_schedule_id' => 'required|integer|exists:worker_schedule,worker_schedule_id',
+            'payment_type'       => 'required|string|max:50',
+            'payment_file'       => 'required|string|max:2048',
         ]);
 
+        // Un cliente solo puede agendar citas para sí mismo
+        if ($this->isClient() && (int) $validated['client_id'] !== $this->currentPersonId()) {
+            return $this->forbidden();
+        }
+
+        $offersService = ProfessionalService::where('service_id', $validated['service_id'])
+            ->where('professional_id', $validated['professional_id'])
+            ->exists();
+        if (! $offersService) {
+            return response()->json(['message' => 'El profesional no ofrece este servicio.'], 422);
+        }
+
         DB::beginTransaction();
-        
+
         try {
+            // Bloquea el horario para evitar que dos personas reserven el mismo turno
+            $workerSchedule = WorkerSchedule::lockForUpdate()->findOrFail($validated['worker_schedule_id']);
+
+            if ((int) $workerSchedule->professional_id !== (int) $validated['professional_id'] || ! $workerSchedule->is_available) {
+                DB::rollBack();
+                return response()->json(['message' => 'El horario seleccionado ya no está disponible.'], 422);
+            }
+
             $paymentData = PaymentData::create([
-                'client_id'  => $request->client_id,
-                'type'       => $request->payment_type,
-                'file'       => $request->payment_file,
+                'client_id'  => $validated['client_id'],
+                'type'       => $validated['payment_type'],
+                'file'       => $validated['payment_file'],
                 'created_by' => auth()->id(),
-                'creation_date' => now(),         
+                'creation_date' => now(),
             ]);
 
             $payment = Payment::create([
-                'client_id'         => $request->client_id,
-                'service_id'        => $request->service_id,
+                'client_id'         => $validated['client_id'],
+                'service_id'        => $validated['service_id'],
                 'payment_data_id'   => $paymentData->payment_data_id,
                 'payment_status_id' => 2,
                 'created_by'        => auth()->id(),
-                'creation_date' => now(),               
+                'creation_date' => now(),
             ]);
 
             $appointment = Appointment::create([
                 'payment_id'            => $payment->payment_id,
-                'client_id'             => $request->client_id,
-                'professional_id'       => $request->professional_id,
-                'worker_schedule_id'    => $request->worker_schedule_id,
-                'appointment_status_id' => 1,
-                'service_id'            => $request->service_id,
-                'created_by'            => auth()->id(),       
-                'creation_date' => now(),         
+                'client_id'             => $validated['client_id'],
+                'professional_id'       => $validated['professional_id'],
+                'worker_schedule_id'    => $validated['worker_schedule_id'],
+                'appointment_status_id' => self::STATUS_SAVED,
+                'service_id'            => $validated['service_id'],
+                'created_by'            => auth()->id(),
+                'creation_date' => now(),
             ]);
 
-            $receipt = Receipt::create([
+            Receipt::create([
                 'payment_id'        => $payment->payment_id,
                 'receipt_status_id' => 2,
-                'created_by'        => auth()->id(), 
-                'creation_date' => now(),               
+                'created_by'        => auth()->id(),
+                'creation_date' => now(),
             ]);
 
-            $workerSchedule = WorkerSchedule::findOrFail($request->worker_schedule_id);
             $workerSchedule->is_available = false;
             $workerSchedule->modified_by = auth()->id();
             $workerSchedule->modification_date = now();
@@ -123,14 +170,11 @@ class AppointmentController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'message' => 'Failed to create appointment.',
-                'error'   => $e->getMessage(),
-            ], 500);
-        }            
+            return $this->serverError('Failed to create appointment.', $e);
+        }
     }
 
-    // Rechazar cita
+    // Rechazar cita (staff)
     public function rejectAppointment(Request $request)
     {
         $request->validate([
@@ -141,6 +185,11 @@ class AppointmentController extends Controller
 
         try {
             $appointment = Appointment::findOrFail($request->appointmentId);
+
+            if ((int) $appointment->appointment_status_id !== self::STATUS_SAVED) {
+                DB::rollBack();
+                return response()->json(['message' => 'Solo se pueden rechazar citas pendientes de aprobación.'], 422);
+            }
 
             $payment = $appointment->payment;
             $payment->payment_status_id = 3;
@@ -168,14 +217,11 @@ class AppointmentController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'message' => 'Failed to reject appointment.',
-                'error'   => $e->getMessage(),
-            ], 500);
+            return $this->serverError('Failed to reject appointment.', $e);
         }
     }
 
-    // Aprobar cita
+    // Aprobar cita (staff)
     public function approveAppointment(Request $request)
     {
         $request->validate([
@@ -187,22 +233,29 @@ class AppointmentController extends Controller
         try {
             $appointment = Appointment::findOrFail($request->appointmentId);
 
+            if ((int) $appointment->appointment_status_id !== self::STATUS_SAVED) {
+                DB::rollBack();
+                return response()->json(['message' => 'Solo se pueden aprobar citas pendientes de aprobación.'], 422);
+            }
+
             $payment = $appointment->payment;
             $payment->payment_status_id = 1;
             $payment->modified_by = auth()->id();
             $payment->modification_date = now();
             $payment->save();
 
-            $appointment->appointment_status_id = 2;
+            $appointment->appointment_status_id = self::STATUS_SCHEDULED;
             $appointment->modified_by = auth()->id();
             $appointment->modification_date = now();
             $appointment->save();
 
             $receipt = $appointment->payment->receipt;
-            $receipt->receipt_status_id = 1;
-            $receipt->modified_by = auth()->id();
-            $receipt->modification_date = now();
-            $receipt->save();
+            if ($receipt) {
+                $receipt->receipt_status_id = 1;
+                $receipt->modified_by = auth()->id();
+                $receipt->modification_date = now();
+                $receipt->save();
+            }
 
             DB::commit();
 
@@ -213,92 +266,83 @@ class AppointmentController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'message' => 'Failed to approve appointment.',
-                'error'   => $e->getMessage(),
-            ], 500);
+            return $this->serverError('Failed to approve appointment.', $e);
         }
     }
 
-    // Asistió
+    // Asistió (profesional de la cita o staff)
     public function completeAppointment(Request $request)
     {
-        $request->validate([
-            'appointmentId' => 'required|integer',
-        ]);
-
-        DB::beginTransaction();
-
-        try {
-            $appointment = Appointment::findOrFail($request->appointmentId);
-
-            $appointment->appointment_status_id = 3;
-            $appointment->modified_by = auth()->id();
-            $appointment->modification_date = now();
-            $appointment->save();
-
-            DB::commit();
-
-            return response()->json([
-                'message'     => 'Appointment completed successfully.',
-                'appointment' => $appointment,
-            ], 200);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'message' => 'Failed to complete appointment.',
-                'error'   => $e->getMessage(),
-            ], 500);
-        }
+        return $this->markAttendance($request, self::STATUS_ATTENDED, 'Appointment completed successfully.');
     }
 
-    // No asistió
+    // No asistió (profesional de la cita o staff)
     public function missedAppointment(Request $request)
+    {
+        return $this->markAttendance($request, self::STATUS_MISSED, 'Appointment marked as missed.');
+    }
+
+    private function markAttendance(Request $request, int $status, string $message)
     {
         $request->validate([
             'appointmentId' => 'required|integer',
         ]);
 
-        DB::beginTransaction();
+        $appointment = Appointment::findOrFail($request->appointmentId);
+
+        if (! $this->isStaffOrAdmin() && (int) $appointment->professional_id !== $this->currentPersonId()) {
+            return $this->forbidden();
+        }
+        if (! in_array((int) $appointment->appointment_status_id, [self::STATUS_SCHEDULED, self::STATUS_ATTENDED, self::STATUS_MISSED], true)) {
+            return response()->json(['message' => 'Solo se puede marcar la asistencia de citas agendadas.'], 422);
+        }
 
         try {
-            $appointment = Appointment::findOrFail($request->appointmentId);
-
-            $appointment->appointment_status_id = 4;
+            $appointment->appointment_status_id = $status;
             $appointment->modified_by = auth()->id();
             $appointment->modification_date = now();
             $appointment->save();
 
-            DB::commit();
-
             return response()->json([
-                'message'     => 'Appointment marked as missed.',
+                'message'     => $message,
                 'appointment' => $appointment,
             ], 200);
 
         } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'message' => 'Failed to mark appointment as missed.',
-                'error'   => $e->getMessage(),
-            ], 500);
+            return $this->serverError('Failed to update appointment.', $e);
         }
     }
 
-    // Cancelar cita
+    // Cancelar cita (cliente dueño con 24h de anticipación, o staff)
     public function cancelAppointment(Request $request)
     {
         $request->validate([
             'appointmentId' => 'required|integer',
         ]);
 
+        $appointment = Appointment::with('workerSchedule.schedule')->findOrFail($request->appointmentId);
+
+        if (! in_array((int) $appointment->appointment_status_id, [self::STATUS_SAVED, self::STATUS_SCHEDULED], true)) {
+            return response()->json(['message' => 'Esta cita ya no se puede cancelar.'], 422);
+        }
+
+        if (! $this->isStaffOrAdmin()) {
+            if ((int) $appointment->client_id !== $this->currentPersonId()) {
+                return $this->forbidden();
+            }
+
+            $start = $this->appointmentStart($appointment);
+            if (! $start || now()->diffInHours($start, false) <= self::CLIENT_CANCEL_MIN_HOURS) {
+                return response()->json([
+                    'message' => 'Solo puedes cancelar con más de 24 horas de anticipación.',
+                ], 422);
+            }
+        }
+
         DB::beginTransaction();
 
         try {
-            $appointment = Appointment::findOrFail($request->appointmentId);
-
-            $appointment->appointment_status_id = 5;
+            $appointment->appointment_status_id = self::STATUS_CANCELLED;
             $appointment->modified_by = auth()->id();
             $appointment->modification_date = now();
             $appointment->save();
@@ -318,35 +362,48 @@ class AppointmentController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'message' => 'Failed to cancel appointment.',
-                'error'   => $e->getMessage(),
-            ], 500);
+            return $this->serverError('Failed to cancel appointment.', $e);
         }
     }
-    
+
+    private function appointmentStart(Appointment $appointment): ?Carbon
+    {
+        $schedule = $appointment->workerSchedule?->schedule;
+        if (! $schedule) {
+            return null;
+        }
+
+        $date = substr((string) $schedule->getRawOriginal('date'), 0, 10);
+
+        return Carbon::parse("{$date} {$schedule->start_time}");
+    }
+
+    // Reporte de sesión (solo el profesional de la cita)
     public function createReport(Request $request)
     {
         $request->validate([
             'appointmentId' => 'required|integer',
-            'file'          => 'required|string',
-            'sign'          => 'required|string',
+            'file'          => 'required|string|max:2048',
+            'sign'          => 'required|string|max:2048',
         ]);
 
-        DB::beginTransaction();
+        $appointment = Appointment::findOrFail($request->appointmentId);
+
+        if (! $this->isAdmin() && (int) $appointment->professional_id !== $this->currentPersonId()) {
+            return $this->forbidden();
+        }
+        if (AppointmentReport::where('appointment_id', $appointment->appointment_id)->exists()) {
+            return response()->json(['message' => 'Esta cita ya tiene un reporte.'], 422);
+        }
 
         try {
-            $appointment = Appointment::findOrFail($request->appointmentId);
-
             $report = AppointmentReport::create([
-                'appointment_id' => $request->appointmentId,
-                'file'       => $request->file,
-                'sign'           => $request->sign,
+                'appointment_id' => $appointment->appointment_id,
+                'file'           => $request->input('file'),
+                'sign'           => $request->input('sign'),
                 'created_by'     => auth()->id(),
                 'creation_date'  => now(),
             ]);
-
-            DB::commit();
 
             return response()->json([
                 'message' => 'Report created successfully.',
@@ -354,11 +411,7 @@ class AppointmentController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'message' => 'Failed to create report.',
-                'error'   => $e->getMessage(),
-            ], 500);
+            return $this->serverError('Failed to create report.', $e);
         }
     }
 }

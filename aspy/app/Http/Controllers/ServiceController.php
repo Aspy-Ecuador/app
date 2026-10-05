@@ -32,7 +32,7 @@ class ServiceController extends Controller
             'price'      => 'required|numeric|min:0',            
         ]);
  
-        $validated['created_by'] = 1;
+        $validated['created_by'] = auth()->id();
         $validated['creation_date'] = now();
 
         $service = Service::create($validated);
@@ -53,7 +53,7 @@ class ServiceController extends Controller
             'price'       => 'sometimes|required|numeric|min:0',
         ]);
  
-        $validated['modified_by'] = 1;
+        $validated['modified_by'] = auth()->id();
         $validated['modification_date'] = now();
 
         $service->update($validated);

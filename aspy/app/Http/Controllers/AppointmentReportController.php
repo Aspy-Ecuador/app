@@ -4,18 +4,39 @@ namespace App\Http\Controllers;
 
 use App\Models\AppointmentReport;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class AppointmentReportController extends Controller
 {
+    /**
+     * Reportes de sesión (información clínica): el cliente ve los de sus citas,
+     * el profesional los de las citas que atendió y el admin todos.
+     */
+    private function visibleReports(): Builder
+    {
+        $query = AppointmentReport::query();
+
+        if ($this->isAdmin()) {
+            return $query;
+        }
+        if (! $this->isProfessional() && ! $this->isClient()) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        $column = $this->isProfessional() ? 'professional_id' : 'client_id';
+
+        return $query->whereHas('appointment', fn (Builder $q) => $q->where($column, $this->currentPersonId()));
+    }
+
     public function index()
     {
-        return AppointmentReport::with('appointment')->get();
+        return $this->visibleReports()->with('appointment')->get();
     }
 
     public function show($id)
     {
-        return AppointmentReport::with('appointment')->findOrFail($id);
+        return $this->visibleReports()->with('appointment')->findOrFail($id);
     }
 
     public function store(Request $request)
@@ -39,7 +60,7 @@ class AppointmentReportController extends Controller
         ]);
 
         $validated['modification_date'] = Carbon::now();
-        $validated['modified_by'] = 'system';
+        $validated['modified_by'] = auth()->id();
 
         $report->update($validated);
 

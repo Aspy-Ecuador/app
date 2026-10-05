@@ -11,12 +11,17 @@ class ProfessionalController extends Controller
     public function createHorario(Request $request)
     {
         $validated = $request->validate([
-            'professional_id' => 'required|integer',
-            'date' => 'required|date',
-            'start_time' => 'required',
-            'end_time' => 'required',
-            'name' => 'required|string',
+            'professional_id' => 'required|integer|exists:professional,person_id',
+            'date' => 'required|date|after_or_equal:today',
+            'start_time' => 'required|date_format:H:i,H:i:s',
+            'end_time' => 'required|date_format:H:i,H:i:s|after:start_time',
+            'name' => 'required|string|max:150',
         ]);
+
+        // Un profesional solo puede crear horarios para sí mismo
+        if ($this->isProfessional() && (int) $validated['professional_id'] !== $this->currentPersonId()) {
+            return $this->forbidden();
+        }
 
         // Validar horarios solapados
         $existingSchedule = WorkerSchedule::query()
@@ -41,7 +46,7 @@ class ProfessionalController extends Controller
             'start_time' => $validated['start_time'],
             'end_time' => $validated['end_time'],
             'name' => $validated['name'],
-            'created_by' => $validated['professional_id'],
+            'created_by' => auth()->id(),
         ]);
 
         // Crear worker_schedule
@@ -49,7 +54,7 @@ class ProfessionalController extends Controller
             'schedule_id' => $schedule->schedule_id,
             'professional_id' => $validated['professional_id'],
             'is_available' => true,
-            'created_by' => $validated['professional_id'],
+            'created_by' => auth()->id(),
         ]);
 
         return response()->json([

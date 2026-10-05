@@ -2,15 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Appointment;
 use App\Models\Payment;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class PaymentController extends Controller
 {
+    /** Pagos visibles: staff/admin todos, cliente los suyos, profesional los de sus citas. */
+    private function visiblePayments(): Builder
+    {
+        $query = Payment::query();
+
+        if ($this->isStaffOrAdmin()) {
+            return $query;
+        }
+        if ($this->isProfessional()) {
+            return $query->whereIn(
+                'payment_id',
+                Appointment::where('professional_id', $this->currentPersonId())->select('payment_id')
+            );
+        }
+
+        return $query->where('client_id', $this->currentPersonId());
+    }
+
     public function index()
     {
-        $payments = Payment::with([
+        $payments = $this->visiblePayments()->with([
             'client.person.identification',
             'service',
             'paymentData',
@@ -28,7 +48,7 @@ class PaymentController extends Controller
 
     public function show($id)
     {
-        $payment = Payment::with(['client', 'service', 'paymentData', 'paymentStatus', 'receipt'])->findOrFail($id);
+        $payment = $this->visiblePayments()->with(['client', 'service', 'paymentData', 'paymentStatus', 'receipt'])->findOrFail($id);
         return [
             ...$payment->toArray(),
             'client' => $payment->client->person,
@@ -59,7 +79,7 @@ class PaymentController extends Controller
         ]);
 
         $validated['modification_date'] = Carbon::now();
-        $validated['modified_by'] = 'system';
+        $validated['modified_by'] = auth()->id();
 
         $payment->update($validated);
 
