@@ -1,170 +1,71 @@
 // aspy-web/src/components/landing/MissionSection.tsx
-import { useEffect, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { styled } from "@mui/material/styles";
-import aspy1 from "@/assets/Aspy1.jpeg";
-import aspy2 from "@/assets/Aspy2.jpeg";
-import aspy3 from "@/assets/Aspy3.jpeg";
+import type { LandingContent } from "@/content/landing/types";
 import { C } from "./constants";
+import { Reveal, Section, SectionHeader } from "./shared";
 
-// ─── Styled ──────────────────────────────────────────────────────
-const PhotoCard = styled(Box)({
-  borderRadius: 18,
-  overflow: "hidden",
-  "& img": {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    display: "block",
-    transition: "transform 0.5s ease",
-  },
-  "&:hover img": { transform: "scale(1.06)" },
-});
+const SHADOWS = [C.blue, C.pink, C.yellow];
+// Galería asimétrica: 1ª arriba-izq, 2ª columna derecha completa, 3ª abajo-izq
+const POSITIONS = [
+  { gridColumn: "1", gridRow: "1" },
+  { gridColumn: "2", gridRow: "1 / 3" },
+  { gridColumn: "1", gridRow: "2" },
+];
 
-// ─── FadeSection (animación al entrar en viewport) ───────────────
-function FadeSection({ children, id }: { children: React.ReactNode; id?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+export default function MissionSection({ content }: { content: LandingContent["mission"] }) {
+  const images = content.images.slice(0, 3);
 
   return (
-    <Box
-      id={id}
-      ref={ref}
-      sx={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "none" : "translateY(32px)",
-        transition: "opacity 0.7s ease, transform 0.7s ease",
-      }}
-    >
-      {children}
-    </Box>
-  );
-}
-
-// ─── Componente ──────────────────────────────────────────────────
-export default function MissionSection() {
-  return (
-    <FadeSection id="nosotros">
+    <Section id="nosotros" label="Nuestra misión" sx={{ bgcolor: C.offWhite }}>
       <Box
         sx={{
-          maxWidth: 1100,
-          mx: "auto",
-          px: { xs: 3, md: 6 },
-          py: { xs: 8, md: 11 },
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", md: images.length ? "1fr 1fr" : "1fr" },
+          gap: { xs: 6, md: 9 },
+          alignItems: "center",
         }}
       >
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-            gap: { xs: 6, md: 9 },
-            alignItems: "center",
-          }}
-        >
-          {/* Texto */}
-          <Box>
-            <Box
-              sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}
-            >
-              <Box
-                sx={{ width: 36, height: 4, borderRadius: 2, background: C.blue }}
-              />
-              <Typography
-                variant="overline"
-                sx={{ color: C.blue, letterSpacing: 2, fontWeight: 700 }}
-              >
-                Nuestra misión
+        <Reveal>
+          <SectionHeader eyebrow={content.eyebrow} title={content.title} align="left" />
+          <Box sx={{ mt: { xs: -2, md: -3 }, display: "flex", flexDirection: "column", gap: 2.25 }}>
+            {content.paragraphs.map((p) => (
+              <Typography key={p.slice(0, 24)} sx={{ color: C.muted, fontSize: "1.02rem", lineHeight: 1.85 }}>
+                {p}
               </Typography>
+            ))}
+          </Box>
+        </Reveal>
+
+        {images.length > 0 && (
+          <Reveal delay={0.15}>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gridTemplateRows: { xs: "170px 140px", sm: "220px 170px", md: "240px 190px" },
+                gap: 2,
+              }}
+            >
+              {images.map((img, i) => (
+                <Box
+                  key={img.src}
+                  sx={{
+                    ...POSITIONS[i],
+                    borderRadius: "20px",
+                    overflow: "hidden",
+                    boxShadow: `0 10px 30px ${SHADOWS[i]}33`,
+                    "& img": { width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 0.5s ease" },
+                    "&:hover img": { transform: "scale(1.05)" },
+                  }}
+                >
+                  <img src={img.src} alt={img.alt} loading="lazy" decoding="async" />
+                </Box>
+              ))}
             </Box>
-
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: 800,
-                color: C.black,
-                lineHeight: 1.25,
-                mb: 2.5,
-                fontSize: { xs: "1.7rem", md: "2rem" },
-              }}
-            >
-              Inclusión, dignidad y oportunidad para todos
-            </Typography>
-
-            <Typography
-              variant="body1"
-              sx={{ color: C.muted, lineHeight: 1.9, mb: 2 }}
-            >
-              ASPY nació con el propósito de brindar atención integral a personas
-              con discapacidad, especialmente a niños, adolescentes y jóvenes
-              dentro del espectro autista (incluyendo Síndrome de Asperger),
-              ofreciéndoles herramientas reales para desarrollar sus capacidades y
-              participar plenamente en la sociedad.
-            </Typography>
-
-            <Typography variant="body1" sx={{ color: C.muted, lineHeight: 1.9 }}>
-              A través de alianzas con el Municipio de Guayaquil y otras
-              instituciones, la fundación ejecuta programas de rehabilitación,
-              arte, tecnología y capacitación que transforman vidas y fortalecen
-              comunidades.
-            </Typography>
-          </Box>
-
-          {/* Galería asimétrica */}
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gridTemplateRows: { xs: "180px 140px", md: "220px 160px" },
-              gap: 2,
-            }}
-          >
-            <PhotoCard
-              sx={{
-                gridColumn: "1",
-                gridRow: "1",
-                boxShadow: `0 6px 24px ${C.blue}25`,
-              }}
-            >
-              <img src={aspy1} alt="Actividades ASPY" />
-            </PhotoCard>
-            <PhotoCard
-              sx={{
-                gridColumn: "2",
-                gridRow: "1 / 3",
-                boxShadow: `0 6px 24px ${C.pink}25`,
-              }}
-            >
-              <img src={aspy2} alt="Inclusión ASPY" />
-            </PhotoCard>
-            <PhotoCard
-              sx={{
-                gridColumn: "1",
-                gridRow: "2",
-                boxShadow: `0 6px 24px ${C.yellow}40`,
-              }}
-            >
-              <img src={aspy3} alt="Comunidad ASPY" />
-            </PhotoCard>
-          </Box>
-        </Box>
+          </Reveal>
+        )}
       </Box>
-    </FadeSection>
+    </Section>
   );
 }

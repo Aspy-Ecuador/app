@@ -1,222 +1,103 @@
 // aspy-web/src/components/landing/AspyBandSection.tsx
-import { useEffect, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { styled } from "@mui/material/styles";
 import InstagramIcon from "@mui/icons-material/Instagram";
 import MusicNoteRoundedIcon from "@mui/icons-material/MusicNoteRounded";
-import aspyBanda from "@/assets/Aspy-banda.jpeg";
-import { C, openLink } from "./constants";
+import type { LandingContent } from "@/content/landing/types";
+import { C, DISPLAY_FONT, focusRing } from "./constants";
+import { Reveal, Section } from "./shared";
 
-// ─── Styled ──────────────────────────────────────────────────────
-const PhotoCard = styled(Box)({
-  borderRadius: 18,
-  overflow: "hidden",
-  "& img": {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    display: "block",
-    transition: "transform 0.5s ease",
-  },
-  "&:hover img": { transform: "scale(1.06)" },
-});
-
-const SocialBtn = styled(Box)(({ theme }) => ({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: theme.spacing(1),
-  padding: theme.spacing(1.1, 2.8),
-  borderRadius: 50,
-  border: "1.5px solid",
-  cursor: "pointer",
-  fontFamily: "inherit",
-  fontWeight: 600,
-  fontSize: "0.88rem",
-  transition: "all 0.2s ease",
-  userSelect: "none",
-}));
-
-// ─── FadeSection ────────────────────────────────────────────────
-function FadeSection({ children, id }: { children: React.ReactNode; id?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+export default function AspyBandSection({ content }: { content: LandingContent["band"] }) {
+  const i = content.highlight ? content.title.lastIndexOf(content.highlight) : -1;
 
   return (
-    <Box
-      id={id}
-      ref={ref}
-      sx={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "none" : "translateY(32px)",
-        transition: "opacity 0.7s ease, transform 0.7s ease",
-      }}
-    >
-      {children}
-    </Box>
-  );
-}
-
-// ─── Componente ──────────────────────────────────────────────────
-export default function AspyBandSection() {
-  return (
-    <FadeSection id="aspyband">
-      <Box
-        sx={{
-          maxWidth: 1100,
-          mx: "auto",
-          px: { xs: 3, md: 6 },
-          py: { xs: 8, md: 11 },
-        }}
-      >
+    <Section id="aspyband" label="ASPY Band" sx={{ bgcolor: C.offWhite }}>
+      <Reveal>
         <Box
           sx={{
-            borderRadius: 5,
-            background: `linear-gradient(135deg, ${C.darkBg} 0%, #1B3A52 100%)`,
-            p: { xs: 4, md: 7 },
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "auto 1fr" },
-            gap: { xs: 4, md: 7 },
-            alignItems: "center",
             position: "relative",
             overflow: "hidden",
+            borderRadius: { xs: "26px", md: "36px" },
+            background: `radial-gradient(600px 300px at 90% 0%, ${C.pink}30, transparent 60%),
+              linear-gradient(135deg, ${C.darkBg} 0%, ${C.darkBg2} 100%)`,
+            border: "1px solid rgba(255,255,255,0.08)",
+            p: { xs: 3.5, sm: 5, md: 7 },
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "0.9fr 1.1fr" },
+            gap: { xs: 4, md: 7 },
+            alignItems: "center",
           }}
         >
-          {/* Círculos decorativos */}
           <Box
             sx={{
-              position: "absolute",
-              top: -50,
-              right: -50,
-              width: 220,
-              height: 220,
-              borderRadius: "50%",
-              background: `${C.blue}12`,
-            }}
-          />
-          <Box
-            sx={{
-              position: "absolute",
-              bottom: -30,
-              left: "35%",
-              width: 120,
-              height: 120,
-              borderRadius: "50%",
-              background: `${C.pink}10`,
-            }}
-          />
-          <Box
-            sx={{
-              position: "absolute",
-              top: "30%",
-              right: "12%",
-              width: 60,
-              height: 60,
-              borderRadius: "50%",
-              background: `${C.yellow}15`,
-            }}
-          />
-
-          {/* Foto */}
-          <PhotoCard
-            sx={{
-              width: { xs: "100%", md: 320 },
-              height: { xs: 220, md: 300 },
-              flexShrink: 0,
-              zIndex: 1,
-              boxShadow: "0 16px 48px rgba(0,0,0,0.35)",
+              position: "relative",
+              borderRadius: "24px",
+              overflow: "hidden",
+              boxShadow: "0 24px 50px rgba(0,0,0,0.4)",
+              aspectRatio: { xs: "4 / 3", md: "1 / 1" },
+              "& img": { width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 0.6s ease" },
+              "&:hover img": { transform: "scale(1.05)" },
             }}
           >
-            <img src={aspyBanda} alt="ASPY Band" />
-          </PhotoCard>
+            <img src={content.image.src} alt={content.image.alt} loading="lazy" decoding="async" />
+          </Box>
 
-          {/* Texto */}
-          <Box sx={{ zIndex: 1 }}>
-            <Box
-              sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}
-            >
-              <Box
-                sx={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 2,
-                  background: `${C.yellow}28`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <MusicNoteRoundedIcon sx={{ color: C.yellow, fontSize: 20 }} />
+          <Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
+              <Box sx={{ width: 38, height: 38, borderRadius: "12px", bgcolor: `${C.yellow}28`, display: "grid", placeItems: "center" }}>
+                <MusicNoteRoundedIcon sx={{ color: C.yellow, fontSize: 21 }} />
               </Box>
-              <Typography
-                variant="overline"
-                sx={{ color: C.yellow, letterSpacing: 2, fontWeight: 700 }}
-              >
-                Proyecto especial
+              <Typography component="span" sx={{ color: C.yellow, fontSize: "0.78rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase" }}>
+                {content.eyebrow}
               </Typography>
             </Box>
 
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: 800,
-                color: "#fff",
-                fontSize: { xs: "1.8rem", md: "2.4rem" },
-                mb: 2,
-                lineHeight: 1.15,
-              }}
-            >
-              ASPY{" "}
-              <Box component="span" sx={{ color: C.pink }}>
-                Band
+            <Typography component="h2" sx={{ fontFamily: DISPLAY_FONT, fontWeight: 800, color: "#fff", fontSize: { xs: "2rem", md: "2.8rem" }, lineHeight: 1.1, letterSpacing: "-0.02em", mb: 2 }}>
+              {i < 0 ? (
+                content.title
+              ) : (
+                <>
+                  {content.title.slice(0, i)}
+                  <Box component="span" sx={{ color: C.pink }}>{content.highlight}</Box>
+                  {content.title.slice(i + content.highlight.length)}
+                </>
+              )}
+            </Typography>
+
+            <Typography sx={{ color: "rgba(255,255,255,0.8)", lineHeight: 1.85, fontSize: { xs: "1rem", md: "1.05rem" }, mb: 4, maxWidth: 520 }}>
+              {content.description}
+            </Typography>
+
+            {content.link.href && (
+              <Box
+                component="a"
+                href={content.link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 1,
+                  px: 2.75,
+                  py: 1.25,
+                  borderRadius: 50,
+                  fontWeight: 600,
+                  fontSize: "0.92rem",
+                  textDecoration: "none",
+                  color: C.pink,
+                  border: `1.5px solid ${C.pink}77`,
+                  transition: "background-color 0.2s, border-color 0.2s",
+                  "&:hover": { bgcolor: `${C.pink}22`, borderColor: C.pink },
+                  ...focusRing,
+                }}
+              >
+                <InstagramIcon sx={{ fontSize: 19 }} />
+                {content.link.label}
               </Box>
-            </Typography>
-
-            <Typography
-              variant="body1"
-              sx={{
-                color: "rgba(255,255,255,0.78)",
-                lineHeight: 1.88,
-                mb: 3.5,
-                maxWidth: 480,
-              }}
-            >
-              Un grupo musical formado íntegramente por jóvenes con Síndrome de
-              Asperger. La música se convierte en terapia, en lenguaje común y
-              en puente hacia la inclusión social. ASPY Band no solo toca —
-              demuestra que el talento no tiene límites.
-            </Typography>
-
-            <SocialBtn
-              onClick={openLink("https://www.instagram.com/aspy_band/")}
-              sx={{
-                color: C.pink,
-                borderColor: `${C.pink}66`,
-                "&:hover": { background: `${C.pink}22`, borderColor: C.pink },
-              }}
-            >
-              <InstagramIcon sx={{ fontSize: 19 }} />
-              Seguir a ASPY Band
-            </SocialBtn>
+            )}
           </Box>
         </Box>
-      </Box>
-    </FadeSection>
+      </Reveal>
+    </Section>
   );
 }

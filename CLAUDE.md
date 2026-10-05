@@ -47,6 +47,25 @@ Sistema web de la **Fundación Aspy Ecuador** (Guayaquil; personas con discapaci
 - `API/api.ts`: axios con el token. Ante un 401 (token vencido) borra la sesión y redirige a `/login`.
 - Alias de imports en `vite.config.ts` / `tsconfig.app.json` (`@components`, `@shared-theme`, `@API`…).
 
+### Landing (`/` y `/sobreAspy`)
+- **El contenido está separado del diseño:**
+  - `src/content/landing/types.ts`: modelo tipado `LandingContent`, contrato para el CMS.
+  - `defaultContent.ts`: textos y fotos actuales.
+  - `sanity.ts`: lee el documento publicado vía la API HTTP de Sanity (sin dependencias ni token) y lo mezcla sobre el contenido local. Un campo ausente o una imagen sin archivo nunca deja la página vacía. Guarda una copia en `localStorage` para no "parpadear" en las visitas siguientes.
+  - `useLandingContent()`: devuelve el contenido. Sin `VITE_SANITY_PROJECT_ID` usa solo el local.
+  - Casi todo es editable: logo, textos del menú y de los botones, portada, collage, secciones, contacto, redes y footer.
+  - Las secciones reciben el contenido por props: `components/landing/` → Hero, Impact, Mission, Services, Steps, Testimonials, AspyBand, Support y Footer (contacto).
+- **Collage de la portada** (`HeroCollage.tsx`): 1 foto principal y 2 secundarias que se turnan cada `hero.rotationSeconds` con un fundido. Se pausa al pasar el mouse o con la pestaña oculta, y no rota con "reducir movimiento".
+- **Responsive:** probado en celular (360–390), tablet (768 / 1024), laptop (1440) y TV (1920 / 2560 / 3840). En pantallas grandes, `largeScreenZoom` agranda toda la landing (×1,15 en Full HD, ×1,5 en 2K, ×2 en 4K).
+- **Lista vacía o texto vacío = la sección se oculta.** Cifras, testimonios, contacto (WhatsApp, teléfono, correo, dirección, horario, mapa) y datos de donación están vacíos a propósito: **no inventes datos de la fundación**, los carga la fundación.
+- Los íconos de servicios se eligen por nombre (`SERVICE_ICONS` en `constants.tsx`); los acentos son `blue`, `pink` y `yellow`.
+- Piezas comunes en `components/landing/shared.tsx`: `Reveal` (aparición al hacer scroll; respeta "reducir movimiento"), `Section`, `SectionHeader`, `BrandMark` (logo oficial) y `SocialIcon`. Constantes, paleta (`C`) y fuente de títulos (`DISPLAY_FONT`) en `constants.tsx`.
+- Accesibilidad: links y botones son `<a>` o `RouterLink` reales con foco visible (`focusRing`), un solo `h1`, y todas las imágenes con `alt`.
+- **Logo oficial:** `src/assets/logoReal.png` (el colorido con "todo es posible", ~1 MB). En la web se usa su versión optimizada `src/assets/landing/logo-aspy.webp` (~110 KB), mediante `BrandMark` (navbar y footer) y `ThemedLogo` (login). Tiene contorno blanco, así que sirve sobre fondos claros y oscuros. El isotipo de anillos (`isotipo-aspy.svg`) es solo un adorno del hero.
+- Fotos optimizadas en WebP en `src/assets/landing/` (los JPEG originales de `src/assets/` quedan como fuente para subirlos a Sanity). `public/og-image.jpg` es la vista previa al compartir el link.
+- Fuentes cargadas en `index.html`: Inter (toda la app) y Plus Jakarta Sans (títulos de la landing). `index.html` también tiene el SEO y las etiquetas Open Graph.
+
+
 ## Modelo de seguridad (no romperlo)
 
 La seguridad vive en el **backend**. Las rutas del frontend por rol son solo comodidad visual.
@@ -137,13 +156,17 @@ La seguridad vive en el **backend**. Las rutas del frontend por rol son solo com
 - La regla de 24 h para cancelar usa la hora del servidor; conviene fijar `APP_TIMEZONE=America/Guayaquil`.
 - El bundle del frontend pesa ~2.5 MB: se puede partir con `React.lazy` por rol.
 - Quedan usos de `any` en `utils/utils.ts` y en las tablas.
-- **Próximo proyecto: Sanity CMS** para que la fundación edite las imágenes de la landing:
-  - Imágenes actuales fijas en el código: `HeroSection` y `AspyBandSection` (`Aspy-banda.jpeg`), `MissionSection` (`Aspy1-3.jpeg`), login (`fondoAspy.webp`).
-  - Plan:
-    1. Crear un documento único `landingPage` en Sanity.
-    2. Agregar `src/API/sanity.ts` con un hook `useLandingContent()` que use las imágenes locales como respaldo si Sanity falla.
-    3. Pasar las imágenes por props a esas secciones.
-    4. Dataset público de solo lectura, sin token en el frontend, CORS solo para el dominio y `localhost:5173`, y cuentas de Sanity con rol Editor.
+- **Sanity: conectado (2026-10-05).** Proyecto **Fundacion-Aspy-CM**, Project ID `1windn04`, dataset `production` (público, solo lectura sin token).
+  - Studio publicado en https://aspy-ecuador.sanity.studio. Se vuelve a publicar con `npm run deploy` dentro de `aspy-studio/`.
+  - Ya se hizo la carga inicial (`npm run seed`) con todo el contenido y las fotos. **No vuelvas a correr `npm run seed`**: reemplaza lo que la fundación haya editado.
+  - CORS configurado: `https://aspy-web.vercel.app`, `http://localhost:5173` y `http://localhost:3333`, todos sin credenciales.
+  - En Vercel deben existir `VITE_SANITY_PROJECT_ID=1windn04` y `VITE_SANITY_DATASET=production`.
+  - Pasos de configuración en el README, sección "Sanity". Detalles técnicos:
+  - `aspy-studio/` contiene el Studio. **Cada sección es un documento único y aparece en la barra lateral** (`schemaTypes/sections.ts`; el orden está en `SECTIONS` y en la `structure` de `sanity.config.ts`). El `_id` de cada documento es igual a su tipo: `siteSettings`, `heroSection`, `impactSection`, `missionSection`, `servicesSection`, `stepsSection`, `testimonialsSection`, `bandSection`, `supportSection`, `contactSection`, `socialSection`, `footerSection`. No se pueden crear copias ni borrarlos.
+  - La carga inicial (`seed/secciones.ndjson`, generada con `node scripts/build-seed.mjs`) solo sirve para crear el contenido desde cero en un proyecto NUEVO.
+  - Íconos: `@sanity/icons` v5 se importa por módulo (`import { HomeIcon } from "@sanity/icons/Home"`); el import desde la raíz compila en TypeScript pero rompe el build.
+  - **Al cambiar un campo hay que tocar 3 lugares:** `aspy-studio/schemaTypes/sections.ts`, `aspy-web/src/content/landing/types.ts` (más `defaultContent.ts`) y la consulta en `aspy-web/src/content/landing/sanity.ts`. Los nombres de campo de Sanity no admiten guiones.
+  - Seguridad: dataset **público de solo lectura**, sin token en el frontend, CORS solo para `https://aspy-web.vercel.app` y `http://localhost:5173`, y la fundación con rol **Editor**.
 
 ## Convenciones
 

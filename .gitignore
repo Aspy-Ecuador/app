@@ -73,6 +73,8 @@ yarn.lock
 *.d.ts
 *.tsbuildinfo
 *.svg
+# Los SVG del frontend sí se versionan (logos e íconos que importa el código)
+!aspy-web/src/assets/**/*.svg
 *.tsbuildinfo
 .package-lock.json
 aspy-web/.env

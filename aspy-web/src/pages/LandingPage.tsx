@@ -1,25 +1,45 @@
-// aspy-web/src/page/LandingPage.tsx
+// aspy-web/src/pages/LandingPage.tsx
 import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
-import { C } from "@components/landing/constants";
-import Navbar          from "@components/landing/Navbar";
-import HeroSection     from "@components/landing/HeroSection";
-import MissionSection  from "@components/landing/MissionSection";
+import { C, largeScreenZoom } from "@components/landing/constants";
+import Navbar from "@components/landing/Navbar";
+import HeroSection from "@components/landing/HeroSection";
+import ImpactSection from "@components/landing/ImpactSection";
+import MissionSection from "@components/landing/MissionSection";
 import ServicesSection from "@components/landing/ServicesSection";
+import StepsSection from "@components/landing/StepsSection";
+import TestimonialsSection from "@components/landing/TestimonialsSection";
 import AspyBandSection from "@components/landing/AspyBandSection";
-import FooterCTA       from "@components/landing/FooterCTA";
+import SupportSection from "@components/landing/SupportSection";
+import Footer from "@components/landing/Footer";
+import { useLandingContent } from "@/content/landing/useLandingContent";
 
 export default function LandingPage() {
+  const content = useLandingContent();
+  // Con sesión iniciada, "Agendar" lleva al panel; si no, al registro
+  const scheduleHref = localStorage.getItem("token") ? "/dashboard" : "/register";
+
   return (
-    <Box sx={{ background: C.offWhite, minHeight: "100vh", overflowX: "hidden" }}>
-      <Navbar />
-      <HeroSection />
-      <MissionSection />
-      <Divider sx={{ borderColor: C.border, mx: { xs: 3, md: 8 } }} />
-      <ServicesSection />
-      <Divider sx={{ borderColor: C.border, mx: { xs: 3, md: 8 } }} />
-      <AspyBandSection />
-      <FooterCTA />
+    <Box sx={{ bgcolor: C.offWhite, minHeight: "100vh", overflowX: "hidden", ...largeScreenZoom }}>
+      <Navbar navigation={content.navigation} logo={content.site.logo} />
+      <Box component="main">
+        <HeroSection content={content.hero} social={content.social} primaryHref={scheduleHref} />
+        <ImpactSection content={content.impact} />
+        <MissionSection content={content.mission} />
+        <ServicesSection content={content.services} />
+        <StepsSection content={content.steps} ctaHref={scheduleHref} />
+        <TestimonialsSection content={content.testimonials} />
+        <AspyBandSection content={content.band} />
+        <SupportSection content={content.support} />
+      </Box>
+      <Footer
+        contact={content.contact}
+        social={content.social}
+        footer={content.footer}
+        navigation={content.navigation}
+        logo={content.site.logo}
+        ctaLabel={content.hero.primaryCtaLabel}
+        primaryHref={scheduleHref}
+      />
     </Box>
   );
 }

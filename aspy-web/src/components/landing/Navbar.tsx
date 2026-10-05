@@ -1,18 +1,20 @@
 // aspy-web/src/components/landing/Navbar.tsx
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import type { MouseEvent } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
-import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
-import { C, NAV, scrollTo } from "./constants";
+import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
+import type { LandingContent } from "@/content/landing/types";
+import { C, NAV_ITEMS, NAV_HEIGHT, focusRing, scrollTo } from "./constants";
+import { BrandMark } from "./shared";
 
 interface StoredUser {
   firstName?: string;
@@ -42,245 +44,217 @@ function getDisplayName(user: StoredUser): string {
   return user.firstName ?? user.name ?? "Mi cuenta";
 }
 
+/** Botón principal reutilizable (pill con degradado de marca). */
+const primaryPill = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 0.75,
+  px: 2.25,
+  py: 1,
+  borderRadius: 50,
+  fontSize: "0.875rem",
+  fontWeight: 700,
+  color: "#fff",
+  textDecoration: "none",
+  background: `linear-gradient(135deg, ${C.blue}, ${C.blueDark})`,
+  boxShadow: `0 6px 18px ${C.blue}40`,
+  transition: "transform 0.2s, box-shadow 0.2s",
+  "&:hover": { transform: "translateY(-1px)", boxShadow: `0 10px 24px ${C.blue}55` },
+  ...focusRing,
+};
+
 interface NavbarProps {
-  /** Muestra el botón de login o chip de usuario. Default: true */
+  navigation: LandingContent["navigation"];
+  logo: LandingContent["site"]["logo"];
+  /** Muestra los botones de ingreso/agenda o el chip de usuario. Default: true */
   showAuthButton?: boolean;
 }
 
-export default function Navbar({ showAuthButton = true }: NavbarProps) {
-  const navigate = useNavigate();
+export default function Navbar({ navigation, logo, showAuthButton = true }: NavbarProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [scrolled, setScrolled] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [authUser, setAuthUser] = useState<StoredUser | null>(null);
+  const [authUser] = useState<StoredUser | null>(getStoredUser);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-    setAuthUser(getStoredUser());
-  }, []);
-
-  const handleNav = (id: string) => {
+  const goToSection = (e: MouseEvent, id: string) => {
+    e.preventDefault();
     setDrawerOpen(false);
-    setTimeout(() => scrollTo(id), drawerOpen ? 300 : 0);
+    setTimeout(() => scrollTo(id), drawerOpen ? 250 : 0);
   };
 
-  const goToPanel = () => navigate("/dashboard");
+  const light = !scrolled; // sobre el hero oscuro el texto es claro
 
   return (
     <>
       <Box
-        component="nav"
+        component="header"
         sx={{
           position: "fixed",
           top: 0,
           left: 0,
           right: 0,
           zIndex: 1000,
-          transition: "all 0.3s ease",
+          transition: "background-color 0.3s ease, box-shadow 0.3s ease",
           bgcolor: scrolled ? C.navBg : "transparent",
-          backdropFilter: scrolled ? "blur(12px)" : "none",
+          backdropFilter: scrolled ? "blur(14px)" : "none",
           boxShadow: scrolled ? "0 1px 24px rgba(0,0,0,0.08)" : "none",
-          borderBottom: scrolled ? `1px solid ${C.border}` : "none",
+          borderBottom: "1px solid",
+          borderColor: scrolled ? C.border : "transparent",
         }}
       >
         <Box
+          component="nav"
+          aria-label="Principal"
           sx={{
-            maxWidth: 1200,
+            maxWidth: 1180,
             mx: "auto",
-            px: { xs: 2, md: 5 },
-            py: { xs: 1.5, md: scrolled ? 1.25 : 1.75 },
+            px: { xs: 2.5, sm: 4, md: 5 },
+            height: NAV_HEIGHT,
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            transition: "padding 0.3s ease",
+            gap: 2,
           }}
         >
-          {/* Logo */}
           <Box
-            onClick={() => scrollTo("hero")}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              cursor: "pointer",
-            }}
+            component="a"
+            href="#hero"
+            onClick={(e: MouseEvent) => goToSection(e, "hero")}
+            aria-label="Ir al inicio"
+            sx={{ textDecoration: "none", borderRadius: 2, ...focusRing }}
           >
-            <Box
-              sx={{
-                width: 34,
-                height: 34,
-                borderRadius: "10px",
-                background: `linear-gradient(135deg, ${C.blue}, ${C.pink})`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <FavoriteRoundedIcon sx={{ fontSize: 18, color: "#fff" }} />
-            </Box>
-            <Typography
-              sx={{
-                fontWeight: 800,
-                fontSize: "1.1rem",
-                color: scrolled ? C.black : "#fff",
-                letterSpacing: "-0.02em",
-                transition: "color 0.3s",
-              }}
-            >
-              Fundación{" "}
-              <Box component="span" sx={{ color: C.blue }}>
-                Aspy
-              </Box>
-            </Typography>
+            <BrandMark logo={logo} height={isMobile ? 62 : 76} />
           </Box>
 
-          {/* Desktop nav links */}
           {!isMobile && (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              {NAV.map((item) => (
-                <Box
-                  key={item.id}
-                  onClick={() => handleNav(item.id)}
-                  sx={{
-                    px: 1.75,
-                    py: 0.875,
-                    borderRadius: 2,
-                    cursor: "pointer",
-                    fontSize: "0.875rem",
-                    fontWeight: 500,
-                    color: scrolled ? C.muted : "rgba(255,255,255,0.85)",
-                    transition: "all 0.18s",
-                    "&:hover": {
-                      color: scrolled ? C.black : "#fff",
-                      bgcolor: scrolled
-                        ? `${C.blue}1A`
-                        : "rgba(255,255,255,0.12)",
-                    },
-                  }}
-                >
-                  {item.label}
-                </Box>
+            <Box component="ul" sx={{ display: "flex", alignItems: "center", gap: 0.25, listStyle: "none", m: 0, p: 0 }}>
+              {NAV_ITEMS.map(({ key, id }) => (
+                <li key={id}>
+                  <Box
+                    component="a"
+                    href={`#${id}`}
+                    onClick={(e: MouseEvent) => goToSection(e, id)}
+                    sx={{
+                      display: "block",
+                      px: 1.5,
+                      py: 0.875,
+                      borderRadius: 2,
+                      fontSize: "0.875rem",
+                      fontWeight: 500,
+                      textDecoration: "none",
+                      color: light ? "rgba(255,255,255,0.85)" : C.muted,
+                      transition: "color 0.18s, background-color 0.18s",
+                      "&:hover": {
+                        color: light ? "#fff" : C.black,
+                        bgcolor: light ? "rgba(255,255,255,0.12)" : `${C.blue}1A`,
+                      },
+                      ...focusRing,
+                    }}
+                  >
+                    {navigation.labels[key]}
+                  </Box>
+                </li>
               ))}
             </Box>
           )}
 
-          {/* Right side */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {showAuthButton &&
+            {showAuthButton && !isMobile &&
               (authUser ? (
-                /* ── Con sesión: chip con nombre ── */
                 <Box
-                  onClick={goToPanel}
+                  component={RouterLink}
+                  to="/dashboard"
                   sx={{
                     display: "flex",
                     alignItems: "center",
                     gap: 1,
-                    px: { xs: 1.25, md: 1.75 },
-                    py: { xs: 0.6, md: 0.75 },
+                    pl: 0.75,
+                    pr: 1.75,
+                    py: 0.625,
                     borderRadius: 50,
-                    cursor: "pointer",
-                    background: scrolled
-                      ? C.blueLight
-                      : "rgba(255,255,255,0.15)",
-                    border: scrolled
-                      ? `1.5px solid ${C.blue}88`
-                      : "1.5px solid rgba(255,255,255,0.45)",
-                    transition: "all 0.25s ease",
-                    "&:hover": {
-                      background: scrolled
-                        ? C.blueLight
-                        : "rgba(255,255,255,0.25)",
-                      transform: "translateY(-1px)",
-                    },
+                    textDecoration: "none",
+                    background: light ? "rgba(255,255,255,0.15)" : C.blueLight,
+                    border: `1.5px solid ${light ? "rgba(255,255,255,0.45)" : `${C.blue}88`}`,
+                    transition: "transform 0.2s",
+                    "&:hover": { transform: "translateY(-1px)" },
+                    ...focusRing,
                   }}
                 >
                   <Box
+                    aria-hidden
                     sx={{
-                      width: 26,
-                      height: 26,
+                      width: 28,
+                      height: 28,
                       borderRadius: "50%",
                       background: `linear-gradient(135deg, ${C.blue}, ${C.pink})`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "0.72rem",
+                      display: "grid",
+                      placeItems: "center",
+                      fontSize: "0.75rem",
                       fontWeight: 800,
                       color: "#fff",
-                      flexShrink: 0,
                     }}
                   >
                     {getInitial(authUser)}
                   </Box>
-                  {!isMobile && (
-                    <Typography
-                      sx={{
-                        fontSize: "0.85rem",
-                        fontWeight: 600,
-                        color: scrolled ? C.blueDark : "#fff",
-                        maxWidth: 120,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {getDisplayName(authUser)}
-                    </Typography>
-                  )}
-                  {!isMobile && (
-                    <DashboardRoundedIcon
-                      sx={{
-                        fontSize: 15,
-                        color: scrolled ? C.blue : "rgba(255,255,255,0.7)",
-                      }}
-                    />
-                  )}
+                  <Typography
+                    component="span"
+                    sx={{
+                      fontSize: "0.85rem",
+                      fontWeight: 600,
+                      color: light ? "#fff" : C.blueDark,
+                      maxWidth: 140,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {getDisplayName(authUser)}
+                  </Typography>
+                  <DashboardRoundedIcon sx={{ fontSize: 15, color: light ? "rgba(255,255,255,0.7)" : C.blue }} />
                 </Box>
               ) : (
-                /* ── Sin sesión: botón login ── */
-                <Box
-                  onClick={() => navigate("/login")}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.75,
-                    px: { xs: 1.5, md: 2 },
-                    py: { xs: 0.75, md: 0.875 },
-                    borderRadius: 2,
-                    cursor: "pointer",
-                    fontSize: { xs: "0.78rem", md: "0.875rem" },
-                    fontWeight: 600,
-                    background: scrolled
-                      ? `linear-gradient(135deg, ${C.blue}, ${C.blueDark})`
-                      : "rgba(255,255,255,0.18)",
-                    color: "#fff",
-                    border: scrolled
-                      ? "none"
-                      : "1.5px solid rgba(255,255,255,0.5)",
-                    backdropFilter: scrolled ? "none" : "blur(4px)",
-                    transition: "all 0.25s ease",
-                    "&:hover": {
-                      transform: "translateY(-1px)",
-                      boxShadow: `0 6px 20px ${C.blue}55`,
-                      background: `linear-gradient(135deg, ${C.blue}, ${C.blueDark})`,
-                      border: "none",
-                    },
-                  }}
-                >
-                  <LoginRoundedIcon sx={{ fontSize: 16 }} />
-                  {!isMobile && "Ingresar al sistema"}
-                </Box>
+                <>
+                  <Box
+                    component={RouterLink}
+                    to="/login"
+                    sx={{
+                      px: 1.75,
+                      py: 1,
+                      borderRadius: 50,
+                      fontSize: "0.875rem",
+                      fontWeight: 600,
+                      textDecoration: "none",
+                      color: light ? "#fff" : C.black,
+                      "&:hover": { bgcolor: light ? "rgba(255,255,255,0.12)" : `${C.blue}1A` },
+                      ...focusRing,
+                    }}
+                  >
+                    {navigation.loginLabel}
+                  </Box>
+                  <Box component={RouterLink} to="/register" sx={primaryPill}>
+                    <EventAvailableRoundedIcon sx={{ fontSize: 17 }} />
+                    {navigation.ctaLabel}
+                  </Box>
+                </>
               ))}
 
             {isMobile && (
               <IconButton
                 onClick={() => setDrawerOpen(true)}
-                sx={{ color: scrolled ? C.black : "#fff" }}
+                aria-label="Abrir menú"
+                sx={{
+                  color: light ? "#fff" : C.black,
+                  borderColor: light ? "rgba(255,255,255,0.35)" : C.border,
+                  bgcolor: light ? "rgba(255,255,255,0.08)" : "transparent",
+                }}
               >
                 <MenuRoundedIcon />
               </IconButton>
@@ -289,129 +263,83 @@ export default function Navbar({ showAuthButton = true }: NavbarProps) {
         </Box>
       </Box>
 
-      {/* Mobile Drawer */}
+      {/* Menú móvil */}
       <Drawer
         anchor="right"
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        PaperProps={{
-          sx: { width: 280, bgcolor: C.darkBg, px: 3, py: 4 },
-        }}
+        PaperProps={{ sx: { width: 300, bgcolor: C.darkBg, px: 3, py: 3, backgroundImage: "none" } }}
       >
-        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 4 }}>
+          <BrandMark logo={logo} height={64} />
           <IconButton
             onClick={() => setDrawerOpen(false)}
-            sx={{ color: "#fff" }}
+            aria-label="Cerrar menú"
+            sx={{ color: "#fff", borderColor: "rgba(255,255,255,0.2)", bgcolor: "transparent" }}
           >
             <CloseRoundedIcon />
           </IconButton>
         </Box>
 
-        <Typography
-          sx={{ fontWeight: 800, fontSize: "1.2rem", color: "#fff", mb: 3 }}
-        >
-          Fundación{" "}
-          <Box component="span" sx={{ color: C.blue }}>
-            Aspy
-          </Box>
-        </Typography>
-
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-          {NAV.map((item) => (
-            <Box
-              key={item.id}
-              onClick={() => handleNav(item.id)}
-              sx={{
-                px: 1.5,
-                py: 1.25,
-                borderRadius: 2,
-                cursor: "pointer",
-                fontSize: "1rem",
-                fontWeight: 500,
-                color: "rgba(255,255,255,0.75)",
-                transition: "all 0.15s",
-                "&:hover": { color: "#fff", bgcolor: "rgba(255,255,255,0.08)" },
-              }}
-            >
-              {item.label}
-            </Box>
+        <Box component="ul" sx={{ listStyle: "none", m: 0, p: 0, display: "flex", flexDirection: "column", gap: 0.5 }}>
+          {NAV_ITEMS.map(({ key, id }) => (
+            <li key={id}>
+              <Box
+                component="a"
+                href={`#${id}`}
+                onClick={(e: MouseEvent) => goToSection(e, id)}
+                sx={{
+                  display: "block",
+                  px: 1.5,
+                  py: 1.25,
+                  borderRadius: 2,
+                  fontSize: "1rem",
+                  fontWeight: 500,
+                  textDecoration: "none",
+                  color: "rgba(255,255,255,0.8)",
+                  "&:hover": { color: "#fff", bgcolor: "rgba(255,255,255,0.08)" },
+                  ...focusRing,
+                }}
+              >
+                {navigation.labels[key]}
+              </Box>
+            </li>
           ))}
         </Box>
 
-        {/* Drawer bottom — solo si showAuthButton */}
-        {showAuthButton &&
-          (authUser ? (
-            <Box
-              onClick={() => {
-                setDrawerOpen(false);
-                goToPanel();
-              }}
-              sx={{
-                mt: 4,
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                px: 2,
-                py: 1.5,
-                borderRadius: 2,
-                cursor: "pointer",
-                background: `${C.blue}22`,
-                border: `1px solid ${C.blue}44`,
-              }}
-            >
-              <Box
-                sx={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: "50%",
-                  background: `linear-gradient(135deg, ${C.blue}, ${C.pink})`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "0.8rem",
-                  fontWeight: 800,
-                  color: "#fff",
-                  flexShrink: 0,
-                }}
-              >
-                {getInitial(authUser)}
+        {showAuthButton && (
+          <Box sx={{ mt: 4, display: "flex", flexDirection: "column", gap: 1.25 }}>
+            {authUser ? (
+              <Box component={RouterLink} to="/dashboard" sx={{ ...primaryPill, justifyContent: "center", py: 1.4 }}>
+                <DashboardRoundedIcon sx={{ fontSize: 18 }} />
+                Ir a mi panel
               </Box>
-              <Box>
-                <Typography
-                  sx={{ color: "#fff", fontWeight: 600, fontSize: "0.9rem" }}
+            ) : (
+              <>
+                <Box component={RouterLink} to="/register" sx={{ ...primaryPill, justifyContent: "center", py: 1.4 }}>
+                  <EventAvailableRoundedIcon sx={{ fontSize: 18 }} />
+                  {navigation.ctaLabel}
+                </Box>
+                <Box
+                  component={RouterLink}
+                  to="/login"
+                  sx={{
+                    textAlign: "center",
+                    py: 1.3,
+                    borderRadius: 50,
+                    border: "1.5px solid rgba(255,255,255,0.3)",
+                    color: "#fff",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                    ...focusRing,
+                  }}
                 >
-                  {getDisplayName(authUser)}
-                </Typography>
-                <Typography sx={{ color: C.blue, fontSize: "0.75rem" }}>
-                  Ir al panel →
-                </Typography>
-              </Box>
-            </Box>
-          ) : (
-            <Box
-              onClick={() => {
-                setDrawerOpen(false);
-                navigate("/dashboard");
-              }}
-              sx={{
-                mt: 4,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 1,
-                py: 1.5,
-                borderRadius: 2,
-                cursor: "pointer",
-                background: `linear-gradient(135deg, ${C.blue}, ${C.blueDark})`,
-                color: "#fff",
-                fontWeight: 600,
-                fontSize: "0.95rem",
-              }}
-            >
-              <LoginRoundedIcon sx={{ fontSize: 18 }} />
-              Ingresar al sistema
-            </Box>
-          ))}
+                  {navigation.loginLabel}
+                </Box>
+              </>
+            )}
+          </Box>
+        )}
       </Drawer>
     </>
   );

@@ -51,6 +51,8 @@ Aspy/
 │       ├── routes/             Rutas por rol
 │       ├── observer/           RoleDataContext: carga los datos según el rol
 │       └── shared-theme/       Tema MUI (colores claro/oscuro, tokens)
+├── aspy-studio/          Sanity Studio: panel para editar la landing (esquema + carga inicial)
+├── scripts/              Pruebas de seguridad de la API
 ├── start-dev.bat         Levanta backend + frontend en Windows
 └── start-dev.sh          Igual, en Linux/macOS/Git Bash
 ```
@@ -120,6 +122,30 @@ Con las dependencias ya instaladas, desde la raíz:
 | `aspy-web/` | `npm run lint` | ESLint |
 
 ---
+
+## Sanity (contenido editable de la landing)
+
+La fundación edita la landing (textos, fotos del collage, servicios, contacto, etc.) desde **Sanity Studio**, sin tocar código. El Studio está en `aspy-studio/`.
+
+### Configuración inicial (una sola vez)
+1. Crea una cuenta en https://www.sanity.io y un proyecto nuevo en https://www.sanity.io/manage. Anota el **Project ID**.
+2. En `aspy-studio/`:
+   ```bash
+   cd aspy-studio
+   cp .env.example .env              # pon SANITY_STUDIO_PROJECT_ID=<tu project id>
+   npm install
+   npx sanity login                  # inicia sesión con tu cuenta de Sanity
+   npx sanity dataset create production --visibility public   # si el proyecto no lo creó
+   npm run seed                      # carga el contenido y las fotos actuales
+   npm run dev                       # Studio local: http://localhost:3333
+   ```
+3. **CORS**: en sanity.io/manage → API → CORS origins, agrega `https://aspy-web.vercel.app` y `http://localhost:5173`, ambos **sin** "Allow credentials".
+4. **Frontend**: en `aspy-web/.env` y en Vercel (Settings → Environment Variables) define `VITE_SANITY_PROJECT_ID` y `VITE_SANITY_DATASET=production`. Luego vuelve a desplegar.
+5. **Publicar el Studio en internet**: `npm run deploy` (queda en `https://aspy-ecuador.sanity.studio`).
+6. **Invitar a la fundación**: sanity.io/manage → Members → Invite, con rol **Editor**.
+
+### Uso diario (fundación)
+Entrar al Studio → elegir en la barra lateral la sección (Portada, Nosotros, Servicios…) → editar → **Publish**. La web toma los cambios publicados en segundos (los borradores no se ven en la web).
 
 ## Despliegue
 

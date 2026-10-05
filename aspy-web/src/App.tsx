@@ -16,7 +16,7 @@ import PrivateRoute from "@components/PrivateRoute";
 
 // Mapeo de rutas y títulos
 const routeTitles: { [key: string]: string } = {
-  "/": "Inicio",
+  "/": "Fundación Aspy Ecuador · Todo es posible",
   "/profesionales": "Profesionales",
   "/pacientes": "Pacientes",
   "/citas": "Citas",

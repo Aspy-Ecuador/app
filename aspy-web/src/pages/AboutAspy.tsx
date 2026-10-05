@@ -1,26 +1,42 @@
-// aspy-web/src/page/AboutAspy.tsx
+// aspy-web/src/pages/AboutAspy.tsx
+// Versión de la landing para usuarios con sesión iniciada (sin botones de ingreso ni de agenda).
 import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
-import { C } from "@components/landing/constants";
-import Navbar          from "@components/landing/Navbar";
-import HeroSection     from "@components/landing/HeroSection";
-import MissionSection  from "@components/landing/MissionSection";
+import { C, largeScreenZoom } from "@components/landing/constants";
+import Navbar from "@components/landing/Navbar";
+import HeroSection from "@components/landing/HeroSection";
+import ImpactSection from "@components/landing/ImpactSection";
+import MissionSection from "@components/landing/MissionSection";
 import ServicesSection from "@components/landing/ServicesSection";
+import TestimonialsSection from "@components/landing/TestimonialsSection";
 import AspyBandSection from "@components/landing/AspyBandSection";
-import FooterCTA       from "@components/landing/FooterCTA";
+import SupportSection from "@components/landing/SupportSection";
+import Footer from "@components/landing/Footer";
+import { useLandingContent } from "@/content/landing/useLandingContent";
 
 export default function AboutAspy() {
+  const content = useLandingContent();
+
   return (
-    <Box sx={{ background: C.offWhite, minHeight: "100vh", overflowX: "hidden" }}>
-      {/* showAuthButton=false oculta el chip/botón de login */}
-      <Navbar showAuthButton={false} />
-      <HeroSection showLoginCTA={false} />
-      <MissionSection />
-      <Divider sx={{ borderColor: C.border, mx: { xs: 3, md: 8 } }} />
-      <ServicesSection />
-      <Divider sx={{ borderColor: C.border, mx: { xs: 3, md: 8 } }} />
-      <AspyBandSection />
-      <FooterCTA showLoginCTA={false} />
+    <Box sx={{ bgcolor: C.offWhite, minHeight: "100vh", overflowX: "hidden", ...largeScreenZoom }}>
+      <Navbar navigation={content.navigation} logo={content.site.logo} showAuthButton={false} />
+      <Box component="main">
+        <HeroSection content={content.hero} social={content.social} showCtas={false} />
+        <ImpactSection content={content.impact} />
+        <MissionSection content={content.mission} />
+        <ServicesSection content={content.services} />
+        <TestimonialsSection content={content.testimonials} />
+        <AspyBandSection content={content.band} />
+        <SupportSection content={content.support} />
+      </Box>
+      <Footer
+        contact={content.contact}
+        social={content.social}
+        footer={content.footer}
+        navigation={content.navigation}
+        logo={content.site.logo}
+        ctaLabel={content.hero.primaryCtaLabel}
+        showCtas={false}
+      />
     </Box>
   );
 }

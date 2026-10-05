@@ -1,0 +1,28 @@
+{
+  "name": "aspy-studio",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Panel de contenido (Sanity Studio) de la landing de Fundación Aspy",
+  "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build",
+    "deploy": "sanity deploy",
+    "seed": "sanity dataset import seed/secciones.ndjson --dataset production --replace"
+  },
+  "engines": {
+    "node": ">=22.12"
+  },
+  "dependencies": {
+    "@sanity/icons": "^5.2.3",
+    "@sanity/vision": "^6.17.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "sanity": "^6.17.0",
+    "styled-components": "^6.5.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.2.14",
+    "typescript": "~5.9.3"
+  }
+}
