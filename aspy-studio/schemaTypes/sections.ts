@@ -337,7 +337,13 @@ export const bandSection = section("bandSection", "ASPY Band", PlayIcon, [
   text("title", "Título"),
   text("highlight", "Palabra destacada", "Parte del título que va en rosado", false),
   text("description", "Descripción", undefined, true, 4, 450),
-  image("image", "Foto"),
+  imageList(
+    "images",
+    "Fotos de la banda",
+    "Se muestran en un carrusel que avanza solo. Sube entre 1 y 10 fotos; se recortan al centro, así que funcionan mejor cuadradas o con las personas al centro. Puedes reordenarlas arrastrándolas.",
+    1,
+    10,
+  ),
   defineField({
     name: "link",
     title: "Botón",

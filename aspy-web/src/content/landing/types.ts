@@ -109,7 +109,8 @@ export interface LandingContent {
     title: string;
     highlight: string;
     description: string;
-    image: LandingImage;
+    /** Fotos del carrusel de la banda (con 1 foto se muestra fija). */
+    images: LandingImage[];
     link: LandingLink;
   };
   support: {

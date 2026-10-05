@@ -6,6 +6,7 @@ import MusicNoteRoundedIcon from "@mui/icons-material/MusicNoteRounded";
 import type { LandingContent } from "@/content/landing/types";
 import { C, DISPLAY_FONT, focusRing } from "./constants";
 import { Reveal, Section } from "./shared";
+import PhotoCarousel from "./PhotoCarousel";
 
 export default function AspyBandSection({ content }: { content: LandingContent["band"] }) {
   const i = content.highlight ? content.title.lastIndexOf(content.highlight) : -1;
@@ -35,11 +36,9 @@ export default function AspyBandSection({ content }: { content: LandingContent["
               overflow: "hidden",
               boxShadow: "0 24px 50px rgba(0,0,0,0.4)",
               aspectRatio: { xs: "4 / 3", md: "1 / 1" },
-              "& img": { width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 0.6s ease" },
-              "&:hover img": { transform: "scale(1.05)" },
             }}
           >
-            <img src={content.image.src} alt={content.image.alt} loading="lazy" decoding="async" />
+            <PhotoCarousel images={content.images} label="Fotos de ASPY Band" accent={C.pink} />
           </Box>
 
           <Box>

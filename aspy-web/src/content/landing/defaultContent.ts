@@ -147,7 +147,7 @@ export const defaultLandingContent: LandingContent = {
     highlight: "Band",
     description:
       "Un grupo musical formado íntegramente por jóvenes con Síndrome de Asperger. La música se convierte en terapia, en lenguaje común y en puente hacia la inclusión social. ASPY Band no solo toca — demuestra que el talento no tiene límites.",
-    image: { src: bandaImg, alt: "ASPY Band ensayando" },
+    images: [{ src: bandaImg, alt: "ASPY Band ensayando" }],
     link: { label: "Seguir a ASPY Band", href: "https://www.instagram.com/aspy_band/" },
   },
 
