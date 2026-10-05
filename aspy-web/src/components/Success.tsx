@@ -8,6 +8,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import logo from "@assets/visto.png";
 import schedule from "@assets/cita.png";
 import errorImg from "@assets/error.png";
+import { paletteVar } from "@shared-theme/themePrimitives";
 
 interface SuccessDialogProps {
   open: boolean;
@@ -45,7 +46,7 @@ export default function Success({
       slotProps={{
         backdrop: {
           sx: {
-            backgroundColor: "#fffffff4",
+            backgroundColor: `color-mix(in srgb, ${paletteVar("background.default")} 96%, transparent)`,
           },
         },
       }}

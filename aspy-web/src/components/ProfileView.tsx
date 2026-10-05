@@ -19,6 +19,7 @@ import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import MedicalServicesRoundedIcon from "@mui/icons-material/MedicalServicesRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
+import { aspy, tone } from "@shared-theme/themePrimitives";
 
 type ProfileProps = {
   user: Person | UserLogin;
@@ -29,12 +30,12 @@ type ProfileProps = {
 const C = {
   blue: "#5BB8D4",
   blueDark: "#3A9AB8",
-  blueLight: "#D6F0F8",
+  blueLight: aspy.blueLight,
   pink: "#E8A0B0",
-  pinkLight: "#FCE8ED",
+  pinkLight: aspy.pinkLight,
   yellow: "#F0C84A",
-  black: "#1A1A2E",
-  muted: "#6B7A83",
+  black: aspy.text,
+  muted: aspy.muted,
 };
 
 // ─── Subcomponentes ───────────────────────────────────────────────
@@ -77,7 +78,7 @@ const InfoRow = ({
       >
         {label}
       </Typography>
-      <Typography sx={{ fontSize: 13, fontWeight: 500, color: C.black }}>
+      <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.primary" }}>
         {value ?? "—"}
       </Typography>
     </Box>
@@ -95,7 +96,7 @@ const SectionPanel = ({
     elevation={0}
     sx={{
       border: "1px solid",
-      borderColor: "#E2EBF0",
+      borderColor: aspy.border,
       borderRadius: 3,
       overflow: "hidden",
       boxShadow: "0 2px 16px rgba(0,0,0,0.06)",
@@ -105,7 +106,7 @@ const SectionPanel = ({
       sx={{
         px: 1.75,
         py: 1.25,
-        borderBottom: "1px solid #E2EBF0",
+        borderBottom: `1px solid ${aspy.border}`,
         background: `linear-gradient(135deg, ${C.blue}22, ${C.blueLight})`,
       }}
     >
@@ -167,7 +168,7 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
       <Paper
         elevation={0}
         sx={{
-          border: "1px solid #E2EBF0",
+          border: `1px solid ${aspy.border}`,
           borderRadius: 3,
           overflow: "hidden",
           boxShadow: "0 2px 16px rgba(0,0,0,0.06)",
@@ -212,7 +213,7 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
                 width: 80,
                 height: 80,
                 borderRadius: "50%",
-                background: "linear-gradient(135deg, #E1F5EE, #B5D4F4)",
+                background: `linear-gradient(135deg, ${tone.green.bg}, ${tone.blue.border})`,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -234,8 +235,8 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
                 right: 0,
                 width: 24,
                 height: 24,
-                bgcolor: "#fff",
-                border: "0.5px solid #E2EBF0",
+                bgcolor: "background.paper",
+                border: `0.5px solid ${aspy.border}`,
                 "&:hover": { bgcolor: C.blueLight },
               }}
             >
@@ -264,7 +265,7 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
               py: 0.25,
               borderRadius: "20px",
               bgcolor: C.yellow,
-              color: C.black,
+              color: "text.primary",
             }}
           >
             {translateRol(roleName)}

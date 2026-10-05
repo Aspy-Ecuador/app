@@ -13,17 +13,18 @@ import WcRoundedIcon from "@mui/icons-material/WcRounded";
 import WorkRoundedIcon from "@mui/icons-material/WorkRounded";
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import type { Person } from "@/typesResponse/Person";
+import { aspy } from "@shared-theme/themePrimitives";
 
 // ─── Paleta del logo ASPY ─────────────────────────────────────────
 const C = {
   blue: "#5BB8D4",
   blueDark: "#3A9AB8",
-  blueLight: "#D6F0F8",
+  blueLight: aspy.blueLight,
   pink: "#E8A0B0",
-  pinkLight: "#FCE8ED",
+  pinkLight: aspy.pinkLight,
   yellow: "#F0C84A",
-  black: "#1A1A2E",
-  muted: "#6B7A83",
+  black: aspy.text,
+  muted: aspy.muted,
 };
 
 interface OverviewPersonaProps {
@@ -69,7 +70,7 @@ const InfoRow = ({
       >
         {label}
       </Typography>
-      <Typography variant="body2" sx={{ fontWeight: 500, color: C.black }}>
+      <Typography variant="body2" sx={{ fontWeight: 500, color: "text.primary" }}>
         {value ?? "—"}
       </Typography>
     </Box>
@@ -87,10 +88,10 @@ export default function OverviewPersona({
     <Box
       sx={{
         border: "1px solid",
-        borderColor: "#E2EBF0",
+        borderColor: aspy.border,
         borderRadius: 3,
         overflow: "hidden",
-        backgroundColor: "#fff",
+        bgcolor: "background.paper",
         boxShadow: "0 2px 16px rgba(0,0,0,0.06)",
       }}
     >
@@ -169,7 +170,7 @@ export default function OverviewPersona({
               fontSize: "0.67rem",
               fontWeight: 700,
               bgcolor: C.yellow,
-              color: C.black,
+              color: "text.primary",
               border: "none",
               "& .MuiChip-label": { px: 1.2 },
             }}

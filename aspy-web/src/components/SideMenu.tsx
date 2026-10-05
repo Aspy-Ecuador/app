@@ -8,25 +8,25 @@ import IconButton from "@mui/material/IconButton";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import MenuContent from "./MenuContent";
 import OptionsMenu from "./OptionsMenu";
+import ColorModeToggle from "../shared-theme/ColorModeToggle";
 import {
   getAuthenticatedUserName,
   getAuthenticatedUserEmail,
 } from "@/utils/store";
 
-const ASPY_DARK = "#1D2D44";
 const drawerWidth = 224;
 
-const PermanentDrawer = styled(MuiDrawer)({
+const PermanentDrawer = styled(MuiDrawer)(({ theme }) => ({
   width: drawerWidth,
   flexShrink: 0,
   boxSizing: "border-box",
   [`& .${drawerClasses.paper}`]: {
     width: drawerWidth,
     boxSizing: "border-box",
-    backgroundColor: ASPY_DARK,
-    borderRight: "none",
+    backgroundColor: theme.palette.mode === "dark" ? "hsl(220, 10%, 6%)" : "#1D2D44",
+    borderRight: theme.palette.mode === "dark" ? "1px solid rgba(255,255,255,0.05)" : "none",
   },
-});
+}));
 
 const initials = (name: string) =>
   name
@@ -44,7 +44,7 @@ interface DrawerContentProps {
 
 const DrawerContent = ({ name, email, onNavigate }: DrawerContentProps) => (
   <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-    {/* Logo */}
+    {/* Logo y Botón de Modo */}
     <Box
       sx={{
         display: "flex",
@@ -73,7 +73,7 @@ const DrawerContent = ({ name, email, onNavigate }: DrawerContentProps) => (
       >
         A
       </Box>
-      <Box>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography
           sx={{ fontSize: 13, fontWeight: 600, color: "#fff", lineHeight: 1.1 }}
         >
@@ -90,6 +90,7 @@ const DrawerContent = ({ name, email, onNavigate }: DrawerContentProps) => (
           Ecuador
         </Typography>
       </Box>
+      <ColorModeToggle sx={{ color: "#fff", "&:hover": { bgcolor: "rgba(255,255,255,0.1)" } }} />
     </Box>
 
     {/* Nav — ocupa el espacio restante */}
@@ -107,7 +108,7 @@ const DrawerContent = ({ name, email, onNavigate }: DrawerContentProps) => (
       ))}
     </Box>
 
-    {/* User footer */}
+    {/* User footer (Restaurado para que no se vea aplastado) */}
     <Stack
       direction="row"
       alignItems="center"
@@ -189,10 +190,10 @@ export default function SideMenu() {
             width: 36,
             height: 36,
             borderRadius: "10px",
-            bgcolor: ASPY_DARK,
+            bgcolor: (theme) => theme.palette.mode === "dark" ? "hsl(220, 10%, 6%)" : "#1D2D44",
             color: "#fff",
             boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-            "&:hover": { bgcolor: "#243550" },
+            "&:hover": { bgcolor: (theme) => theme.palette.mode === "dark" ? "hsl(220, 10%, 10%)" : "#243550" },
           }}
         >
           <MenuRoundedIcon sx={{ fontSize: 18 }} />
@@ -209,8 +210,8 @@ export default function SideMenu() {
           display: { xs: "block", md: "none" },
           [`& .${drawerClasses.paper}`]: {
             width: drawerWidth,
-            backgroundColor: ASPY_DARK,
-            border: "none",
+            backgroundColor: (theme) => theme.palette.mode === "dark" ? "hsl(220, 10%, 6%)" : "#1D2D44",
+            borderRight: (theme) => theme.palette.mode === "dark" ? "1px solid rgba(255,255,255,0.05)" : "none",
           },
         }}
       >

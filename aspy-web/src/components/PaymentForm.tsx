@@ -207,7 +207,7 @@ export default function PaymentForm({
           sx={{
             height: 40,
             borderRadius: 2,
-            backgroundColor: "white",
+            backgroundColor: "background.paper",
             px: 1,
           }}
         />
@@ -298,7 +298,7 @@ export default function PaymentForm({
               accept="image/*,application/pdf"
               label="Subir comprobante"
               icon={<UploadFile fontSize="small" />}
-              buttonClassName="bg-white text-blue-700 font-semibold border-2 border-blue-500 hover:bg-blue-50 rounded-xl px-4 py-2 transition-all"
+              buttonClassName="bg-white text-blue-700 font-semibold border-2 border-blue-500 hover:bg-blue-50 rounded-xl px-4 py-2 transition-all dark:bg-transparent dark:text-blue-300 dark:hover:bg-blue-500/15"
               onFileSelected={(fileData) => setSignature(fileData)}
             />
           </Box>

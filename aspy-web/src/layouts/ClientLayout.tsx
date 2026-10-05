@@ -13,10 +13,10 @@ const ClientLayout = () => (
       component="main"
       sx={{
         flex: 1,
-        minWidth: 0, // evita overflow en flex
+        minWidth: 0,
         overflow: "auto",
-        bgcolor: (theme) =>
-          theme.palette.mode === "dark" ? "background.default" : "#F4F6F8", // gris muy suave, distinto al blanco del sidebar
+        bgcolor: "background.default",
+        pt: { xs: "56px", md: 0 },
       }}
     >
       <Outlet />

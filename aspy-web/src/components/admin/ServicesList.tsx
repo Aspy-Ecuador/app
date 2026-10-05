@@ -23,6 +23,7 @@ import AssignmentTurnedInRoundedIcon from "@mui/icons-material/AssignmentTurnedI
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import { tone } from "@shared-theme/themePrimitives";
 
 export default function ServicesList() {
   const { data, loading, refreshProServices, refreshServices } = useRoleData();
@@ -112,7 +113,7 @@ export default function ServicesList() {
       resizable: false,
       renderCell: (params) => (
         <Box display="flex" alignItems="center" height="100%">
-          <Typography variant="body1" sx={{ color: "#0F6E56" }}>
+          <Typography variant="body1" sx={{ color: tone.green.fg }}>
             ${Number(params.value).toFixed(2)}
           </Typography>
         </Box>
@@ -169,10 +170,10 @@ export default function ServicesList() {
                   borderColor: "divider",
                 },
                 "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#9FE1CB",
+                  borderColor: tone.green.border,
                 },
                 "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0F6E56",
+                  borderColor: tone.green.fg,
                 },
               }}
             >
@@ -192,7 +193,7 @@ export default function ServicesList() {
               ))}
             </Select>
             {isSaving && (
-              <CircularProgress size={14} sx={{ color: "#0F6E56" }} />
+              <CircularProgress size={14} sx={{ color: tone.green.fg }} />
             )}
           </Box>
         );
@@ -222,14 +223,14 @@ export default function ServicesList() {
             height="100%"
           >
             {isToggling ? (
-              <CircularProgress size={14} sx={{ color: "#0F6E56" }} />
+              <CircularProgress size={14} sx={{ color: tone.green.fg }} />
             ) : (
               <Switch
                 size="small"
                 checked={isAvailable}
                 onChange={() => handleToggleAvailable(serviceId, isAvailable)}
                 sx={{
-                  "& .MuiSwitch-switchBase.Mui-checked": { color: "#1D9E75" },
+                  "& .MuiSwitch-switchBase.Mui-checked": { color: tone.green.main },
                   "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
                     bgcolor: "#1D9E75",
                   },
@@ -264,9 +265,9 @@ export default function ServicesList() {
               bgcolor: "action.hover",
               borderRadius: 1.5,
               "&:hover": {
-                borderColor: "#9FE1CB",
-                color: "#0F6E56",
-                bgcolor: "#E1F5EE",
+                borderColor: tone.green.border,
+                color: tone.green.fg,
+                bgcolor: tone.green.bg,
               },
             }}
           >
@@ -307,8 +308,8 @@ export default function ServicesList() {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              bgcolor: "#EEEDFE",
-              color: "#534AB7",
+              bgcolor: tone.purple.bg,
+              color: tone.purple.fg,
               "& svg": { fontSize: 16 },
             }}
           >
@@ -341,15 +342,15 @@ export default function ServicesList() {
           sx={{
             fontSize: 12,
             fontWeight: 500,
-            bgcolor: "#E1F5EE",
-            color: "#0F6E56",
-            border: "0.5px solid #9FE1CB",
+            bgcolor: tone.green.bg,
+            color: tone.green.fg,
+            border: `0.5px solid ${tone.green.border}`,
             borderRadius: 3,
             px: 1.75,
             py: 1.25,
             height: "auto",
             textTransform: "none",
-            "&:hover": { bgcolor: "#9FE1CB" },
+            "&:hover": { bgcolor: tone.green.border },
           }}
         >
           Agregar servicio
@@ -368,15 +369,15 @@ export default function ServicesList() {
           sx={{
             fontSize: 12,
             fontWeight: 500,
-            bgcolor: "#FEE2E2",
-            color: "#991B1B",
-            border: "0.5px solid #FCA5A5",
+            bgcolor: tone.red.bg,
+            color: tone.red.fg,
+            border: `0.5px solid ${tone.red.border}`,
             borderRadius: 3,
             px: 1.75,
             py: 1.25,
             height: "auto",
             textTransform: "none",
-            "&:hover": { bgcolor: "#FCA5A5" },
+            "&:hover": { bgcolor: tone.red.border },
           }}
         >
           PDF
@@ -393,15 +394,15 @@ export default function ServicesList() {
           sx={{
             fontSize: 12,
             fontWeight: 500,
-            bgcolor: "#F0FDF4",
-            color: "#166534",
-            border: "0.5px solid #86EFAC",
+            bgcolor: tone.green.bg,
+            color: tone.green.fg,
+            border: `0.5px solid ${tone.green.border}`,
             borderRadius: 3,
             px: 1.75,
             py: 1.25,
             height: "auto",
             textTransform: "none",
-            "&:hover": { bgcolor: "#86EFAC" },
+            "&:hover": { bgcolor: tone.green.border },
           }}
         >
           Excel

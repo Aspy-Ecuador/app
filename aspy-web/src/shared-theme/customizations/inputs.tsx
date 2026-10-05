@@ -69,19 +69,20 @@ export const inputsCustomizations: Components<Theme> = {
               '&:active': {
                 backgroundColor: gray[800],
               },
+              // En oscuro se mantiene texto blanco: muchas pantallas ponen su propio
+              // degradado de color en el sx y esperan texto claro encima.
               ...theme.applyStyles('dark', {
-                color: 'black',
-                backgroundColor: gray[50],
-                backgroundImage: `linear-gradient(to bottom, ${gray[100]}, ${gray[50]})`,
-                boxShadow: 'inset 0 -1px 0  hsl(220, 30%, 80%)',
-                border: `1px solid ${gray[50]}`,
+                backgroundColor: gray[700],
+                backgroundImage: `linear-gradient(to bottom, ${gray[600]}, ${gray[700]})`,
+                boxShadow: `inset 0 1px 0 ${alpha(gray[400], 0.4)}`,
+                border: `1px solid ${gray[600]}`,
                 '&:hover': {
                   backgroundImage: 'none',
-                  backgroundColor: gray[300],
+                  backgroundColor: gray[600],
                   boxShadow: 'none',
                 },
                 '&:active': {
-                  backgroundColor: gray[400],
+                  backgroundColor: gray[700],
                 },
               }),
             },
@@ -124,15 +125,15 @@ export const inputsCustomizations: Components<Theme> = {
                 backgroundColor: gray[200],
               },
               ...theme.applyStyles('dark', {
-                backgroundColor: gray[800],
-                borderColor: gray[700],
+                backgroundColor: alpha(gray[50], 0.04),
+                borderColor: alpha(gray[50], 0.12),
 
                 '&:hover': {
-                  backgroundColor: gray[900],
-                  borderColor: gray[600],
+                  backgroundColor: alpha(gray[50], 0.08),
+                  borderColor: alpha(gray[50], 0.2),
                 },
                 '&:active': {
-                  backgroundColor: gray[900],
+                  backgroundColor: alpha(gray[50], 0.12),
                 },
               }),
             },
@@ -240,14 +241,14 @@ export const inputsCustomizations: Components<Theme> = {
           backgroundColor: gray[200],
         },
         ...theme.applyStyles('dark', {
-          backgroundColor: gray[800],
-          borderColor: gray[700],
+          backgroundColor: alpha(gray[50], 0.04),
+          borderColor: alpha(gray[50], 0.12),
           '&:hover': {
-            backgroundColor: gray[900],
-            borderColor: gray[600],
+            backgroundColor: alpha(gray[50], 0.08),
+            borderColor: alpha(gray[50], 0.2),
           },
           '&:active': {
-            backgroundColor: gray[900],
+            backgroundColor: alpha(gray[50], 0.12),
           },
         }),
         variants: [

@@ -6,7 +6,8 @@ import { dataDisplayCustomizations } from './customizations/dataDisplay';
 import { feedbackCustomizations } from './customizations/feedback';
 import { navigationCustomizations } from './customizations/navigation';
 import { surfacesCustomizations } from './customizations/surfaces';
-import { colorSchemes, typography, shadows, shape } from './themePrimitives';
+import { liftDarkStyles } from './liftDarkStyles';
+import { colorSchemes, typography, shadows, shape, CSS_VAR_PREFIX } from './themePrimitives';
 
 interface AppThemeProps {
   children: React.ReactNode;
@@ -26,27 +27,29 @@ export default function AppTheme(props: AppThemeProps) {
           // For more details about CSS variables configuration, see https://mui.com/material-ui/customization/css-theme-variables/configuration/
           cssVariables: {
             colorSchemeSelector: 'data-mui-color-scheme',
-            cssVarPrefix: 'template',
+            cssVarPrefix: CSS_VAR_PREFIX,
           },
           colorSchemes, // Recently added in v6 for building light & dark mode app, see https://mui.com/material-ui/customization/palette/#color-schemes
           typography,
           shadows,
           shape,
-          components: {
+          components: liftDarkStyles({
             ...inputsCustomizations,
             ...dataDisplayCustomizations,
             ...feedbackCustomizations,
             ...navigationCustomizations,
             ...surfacesCustomizations,
             ...themeComponents,
-          },
+          }),
         });
   }, [disableCustomTheme, themeComponents]);
   if (disableCustomTheme) {
     return <React.Fragment>{children}</React.Fragment>;
   }
   return (
-    <ThemeProvider theme={theme} disableTransitionOnChange>
+    // forceThemeRerender: sin esto, con variables CSS `theme.palette` queda fijo en la
+    // paleta clara y los checks `theme.palette.mode === "dark"` nunca se cumplen.
+    <ThemeProvider theme={theme} disableTransitionOnChange forceThemeRerender>
       {children}
     </ThemeProvider>
   );

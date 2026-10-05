@@ -2,6 +2,7 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
+import { tone } from "@shared-theme/themePrimitives";
 interface SimpleHeaderProps {
   text: string;
   chip: string;
@@ -51,8 +52,8 @@ export default function SimpleHeader({ text, chip }: SimpleHeaderProps) {
         size="medium"
          sx={{
       ml: "auto",
-      bgcolor: "#FAEEDA",
-      color: "#854F0B",
+      bgcolor: tone.amber.bg,
+      color: tone.amber.fg,
 
       maxWidth: {
         xs: 110,

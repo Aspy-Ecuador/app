@@ -17,6 +17,7 @@ import Switch from "@mui/material/Switch";
 import CircularProgress from "@mui/material/CircularProgress";
 import personAPI from "@API/personAPI";
 import type { Person } from "@/typesResponse/Person";
+import { tone } from "@shared-theme/themePrimitives";
 
 export default function ClientsList() {
   const [selectedId, setSelectedId] = useState<GridRowId | null>(null);
@@ -141,14 +142,14 @@ export default function ClientsList() {
             height="100%"
           >
             {isToggling ? (
-              <CircularProgress size={14} sx={{ color: "#0F6E56" }} />
+              <CircularProgress size={14} sx={{ color: tone.green.fg }} />
             ) : (
               <Switch
                 size="small"
                 checked={isAvailable}
                 onChange={() => handleToggleAvailable(personId, isAvailable)}
                 sx={{
-                  "& .MuiSwitch-switchBase.Mui-checked": { color: "#1D9E75" },
+                  "& .MuiSwitch-switchBase.Mui-checked": { color: tone.green.main },
                   "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
                     bgcolor: "#1D9E75",
                   },

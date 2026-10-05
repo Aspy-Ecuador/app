@@ -19,28 +19,29 @@ import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import { aspy, tone } from "@shared-theme/themePrimitives";
 
 // ─── Paleta del logo ASPY ────────────────────────────────────────
 const C = {
   blue: "#5BB8D4",
   blueDark: "#3A9AB8",
-  blueLight: "#D6F0F8",
+  blueLight: aspy.blueLight,
   pink: "#E8A0B0",
-  pinkLight: "#FCE8ED",
+  pinkLight: aspy.pinkLight,
   yellow: "#F0C84A",
-  yellowLight: "#FDF4D0",
-  black: "#1A1A2E",
-  muted: "#6B7A83",
-  border: "#E2EBF0",
+  yellowLight: aspy.yellowLight,
+  black: aspy.text,
+  muted: aspy.muted,
+  border: aspy.border,
 };
 
 // Colores del dot según el estado de la cita
 function getDotColor(statusName: string): { bg: string; border: string } {
   const s = statusName?.toLowerCase() ?? "";
   if (s.includes("complet") || s.includes("asist"))
-    return { bg: "#D1FAE5", border: "#34D399" };
+    return { bg: tone.green.bg, border: tone.green.main };
   if (s.includes("cancel") || s.includes("no asist"))
-    return { bg: "#FEE2E2", border: "#F87171" };
+    return { bg: tone.red.bg, border: tone.red.main };
   if (s.includes("pend")) return { bg: C.yellowLight, border: C.yellow };
   return { bg: C.blueLight, border: C.blue };
 }
@@ -50,22 +51,22 @@ function getStatusChip(statusName: string) {
   if (s.includes("complet") || s.includes("asist"))
     return {
       label: statusName,
-      bgcolor: "#D1FAE5",
-      color: "#065F46",
-      border: "#6EE7B7",
+      bgcolor: tone.green.bg,
+      color: tone.green.fg,
+      border: tone.green.border,
     };
   if (s.includes("cancel") || s.includes("no asist"))
     return {
       label: statusName,
-      bgcolor: "#FEE2E2",
-      color: "#991B1B",
-      border: "#FCA5A5",
+      bgcolor: tone.red.bg,
+      color: tone.red.fg,
+      border: tone.red.border,
     };
   if (s.includes("pend"))
     return {
       label: statusName,
       bgcolor: C.yellowLight,
-      color: "#92400E",
+      color: tone.amber.fg,
       border: C.yellow,
     };
   return {
@@ -106,7 +107,7 @@ export default function TimeLinePatients({ patient }: TimeLinePatientsProps) {
           p: 5,
           textAlign: "center",
           color: C.muted,
-          backgroundColor: "#fff",
+          bgcolor: "background.paper",
         }}
       >
         <Typography variant="body2">
@@ -155,7 +156,7 @@ export default function TimeLinePatients({ patient }: TimeLinePatientsProps) {
                 sx={{
                   border: `1px solid ${C.border}`,
                   borderRadius: 2.5,
-                  bgcolor: "#fff",
+                  bgcolor: "background.paper",
                   overflow: "hidden",
                   boxShadow: "0 1px 8px rgba(0,0,0,0.05)",
                   transition: "box-shadow 0.2s, border-color 0.2s",
@@ -190,7 +191,7 @@ export default function TimeLinePatients({ patient }: TimeLinePatientsProps) {
                         sx={{
                           fontSize: "0.82rem",
                           fontWeight: 700,
-                          color: C.black,
+                          color: "text.primary",
                         }}
                       >
                         {report.worker_schedule.schedule.date.split("T")[0]}
@@ -265,7 +266,7 @@ export default function TimeLinePatients({ patient }: TimeLinePatientsProps) {
                       color: C.blueDark,
                       bgcolor: C.blueLight,
                       border: `1px solid ${C.blue}55`,
-                      "&:hover": { bgcolor: "#BEE3F0", borderColor: C.blue },
+                      "&:hover": { bgcolor: `${C.blue}59`, borderColor: C.blue },
                     }}
                   >
                     Ver detalles

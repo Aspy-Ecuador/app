@@ -8,6 +8,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Table from "@components/Table";
 import SimpleHeader from "@components/SimpleHeader";
+import { tone } from "@shared-theme/themePrimitives";
 
 export default function ServicesList() {
   const { data } = useRoleData();
@@ -40,7 +41,7 @@ export default function ServicesList() {
             <Typography
               variant="body1"
               sx={{
-                color: "#0F6E56",
+                color: tone.green.fg,
               }}
             >
               ${Number(params.value).toFixed(2)}

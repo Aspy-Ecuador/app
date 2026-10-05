@@ -9,6 +9,7 @@ import PDFViewer from "@components/PDFViewer";
 import Progress from "@components/Progress"; // <-- Importamos Progress
 import { useRoleData } from "@/observer/RoleDataContext";
 import type { Payment } from "@/typesResponse/Payment";
+import { tone } from "@shared-theme/themePrimitives";
 
 export default function PaymentDetails() {
   const { id } = useParams();
@@ -37,7 +38,7 @@ export default function PaymentDetails() {
       sx={{ 
         padding: 2,
         "& .texto-dinero": {
-          color: "#0F6E56 !important",
+          color: `${tone.green.fg} !important`,
           fontWeight: "600 !important",
         }
       }}

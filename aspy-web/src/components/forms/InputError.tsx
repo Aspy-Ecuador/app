@@ -12,7 +12,7 @@ function InputError({ message }: { message: string }) {
 
   return (
     <motion.p
-      className="flex items-center gap-1 px-2 font-semibold text-red-500 bg-red-100 rounded-md"
+      className="flex items-center gap-1 px-2 font-semibold text-red-500 bg-red-100 rounded-md dark:text-red-300 dark:bg-red-500/15"
       {...framer_error}
     >
       <MdError />

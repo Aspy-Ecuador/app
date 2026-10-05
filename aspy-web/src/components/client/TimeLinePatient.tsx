@@ -10,6 +10,7 @@ import { getReportsUser } from "@/utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Progress from "@components/Progress";
 import ArticleRoundedIcon from "@mui/icons-material/ArticleRounded";
+import { tone } from "@shared-theme/themePrimitives";
 
 interface TimeLinePatientsProps {
   patient_id: number;
@@ -19,16 +20,16 @@ interface TimeLinePatientsProps {
 
 const getStatusStyle = (statusId: number) => {
   if (statusId === 1)
-    return { bg: "#FAEEDA", color: "#854F0B", accent: "#BA7517" };
+    return { bg: tone.amber.bg, color: tone.amber.fg, accent: tone.amber.main };
   if (statusId === 2)
-    return { bg: "#E1F5EE", color: "#0F6E56", accent: "#1D9E75" };
+    return { bg: tone.green.bg, color: tone.green.fg, accent: tone.green.main };
   if (statusId === 3)
-    return { bg: "#E6F1FB", color: "#185FA5", accent: "#378ADD" };
+    return { bg: tone.blue.bg, color: tone.blue.fg, accent: tone.blue.main };
   if (statusId === 4)
-    return { bg: "#FCEBEB", color: "#A32D2D", accent: "#E24B4A" };
+    return { bg: tone.red.bg, color: tone.red.fg, accent: tone.red.main };
   if (statusId === 5)
-    return { bg: "#F3F0F9", color: "#4B3080", accent: "#7C5CBF" };
-  return { bg: "#F5F5F5", color: "#616161", accent: "#9E9E9E" };
+    return { bg: tone.purple.bg, color: tone.purple.fg, accent: tone.purple.main };
+  return { bg: tone.gray.bg, color: tone.gray.fg, accent: tone.gray.main };
 };
 
 export default function TimeLinePatients({
@@ -165,11 +166,11 @@ export default function TimeLinePatients({
                   sx={{
                     flex: 1,
                     border: "0.5px solid",
-                    borderColor: isActive ? "#378ADD" : "divider",
+                    borderColor: isActive ? tone.blue.main : "divider",
                     borderRadius: 2,
                     overflow: "hidden",
                     bgcolor: "background.default",
-                    boxShadow: isActive ? "0 0 0 2px #E6F1FB" : "none",
+                    boxShadow: isActive ? `0 0 0 2px ${tone.blue.bg}` : "none",
                     cursor: report.report ? "pointer" : "default",
                     transition: "border-color 0.15s",
                     "&:hover": report.report
@@ -236,7 +237,7 @@ export default function TimeLinePatients({
                           gap: 0.5,
                           fontSize: 11,
                           fontWeight: 500,
-                          color: "#185FA5",
+                          color: tone.blue.fg,
                         }}
                       >
                         <ArticleRoundedIcon sx={{ fontSize: 13 }} />
@@ -244,7 +245,7 @@ export default function TimeLinePatients({
                           sx={{
                             fontSize: 11,
                             fontWeight: 500,
-                            color: "#185FA5",
+                            color: tone.blue.fg,
                           }}
                         >
                           Ver reporte

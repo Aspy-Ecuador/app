@@ -7,7 +7,7 @@ import { C, services, fadeUp } from "./constants";
 
 // ─── Styled ──────────────────────────────────────────────────────
 const ServiceCard = styled(Box)(({ theme }) => ({
-  background: "#fff",
+  background: C.card,
   borderRadius: 20,
   padding: theme.spacing(3, 3.5),
   border: `1px solid ${C.border}`,

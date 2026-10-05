@@ -18,6 +18,7 @@ import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
 import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
 import type { AppointmentWithReports } from "@/types/AppointmentWithReports";
+import { tone } from "@shared-theme/themePrimitives";
 
 export default function AppointmentDetail() {
   const { data, loading } = useRoleData();
@@ -82,8 +83,8 @@ export default function AppointmentDetail() {
             label={`#${appointment?.appointment_id}`}
             size="small"
             sx={{
-              bgcolor: "#E6F1FB",
-              color: "#185FA5",
+              bgcolor: tone.blue.bg,
+              color: tone.blue.fg,
               fontWeight: 500,
               fontSize: 11,
               height: 22,
@@ -186,13 +187,13 @@ export default function AppointmentDetail() {
                       width: 36,
                       height: 36,
                       borderRadius: "50%",
-                      bgcolor: "#E6F1FB",
+                      bgcolor: tone.blue.bg,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       fontSize: 12,
                       fontWeight: 600,
-                      color: "#185FA5",
+                      color: tone.blue.fg,
                       flexShrink: 0,
                     }}
                   >
@@ -233,13 +234,13 @@ export default function AppointmentDetail() {
                       width: 36,
                       height: 36,
                       borderRadius: "50%",
-                      bgcolor: "#EAF3DE",
+                      bgcolor: tone.green.bg,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       fontSize: 12,
                       fontWeight: 600,
-                      color: "#3B6D11",
+                      color: tone.green.fg,
                       flexShrink: 0,
                     }}
                   >

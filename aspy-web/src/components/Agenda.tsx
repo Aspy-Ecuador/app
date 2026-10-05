@@ -22,6 +22,7 @@ import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import { useTheme } from "@mui/material/styles";
 import type { Appointment } from "@/typesResponse/Appointment";
 import appointmentAPI from "@/API/appointmentAPI";
+import { paletteVar, tone } from "@shared-theme/themePrimitives";
 import { useRoleData } from "@/observer/RoleDataContext"; // ← NUEVO
 import Success from "@components/Success"; // ← NUEVO
 import Progress from "@components/Progress"; // ← NUEVO
@@ -58,59 +59,59 @@ const STATUS_MAP: Record<
 > = {
   1: {
     label: "Guardada",
-    bg: "#FAEEDA",
-    border: "#BA7517",
-    text: "#854F0B",
-    accent: "#BA7517",
-    chipBg: "#FAEEDA",
-    chipColor: "#854F0B",
+    bg: tone.amber.bg,
+    border: tone.amber.main,
+    text: tone.amber.fg,
+    accent: tone.amber.main,
+    chipBg: tone.amber.bg,
+    chipColor: tone.amber.fg,
   },
   2: {
     label: "Agendada",
-    bg: "#E1F5EE",
-    border: "#1D9E75",
-    text: "#0F6E56",
-    accent: "#1D9E75",
-    chipBg: "#E1F5EE",
-    chipColor: "#0F6E56",
+    bg: tone.green.bg,
+    border: tone.green.main,
+    text: tone.green.fg,
+    accent: tone.green.main,
+    chipBg: tone.green.bg,
+    chipColor: tone.green.fg,
   },
   3: {
     label: "Asistió",
-    bg: "#E6F1FB",
-    border: "#378ADD",
-    text: "#185FA5",
-    accent: "#378ADD",
-    chipBg: "#E6F1FB",
-    chipColor: "#185FA5",
+    bg: tone.blue.bg,
+    border: tone.blue.main,
+    text: tone.blue.fg,
+    accent: tone.blue.main,
+    chipBg: tone.blue.bg,
+    chipColor: tone.blue.fg,
   },
   4: {
     label: "No Asistió",
-    bg: "#FCEBEB",
-    border: "#E24B4A",
-    text: "#A32D2D",
-    accent: "#E24B4A",
-    chipBg: "#FCEBEB",
-    chipColor: "#A32D2D",
+    bg: tone.red.bg,
+    border: tone.red.main,
+    text: tone.red.fg,
+    accent: tone.red.main,
+    chipBg: tone.red.bg,
+    chipColor: tone.red.fg,
   },
   5: {
     label: "Cancelada",
-    bg: "#F3F0F9",
-    border: "#7C5CBF",
-    text: "#4B3080",
-    accent: "#7C5CBF",
-    chipBg: "#F3F0F9",
-    chipColor: "#4B3080",
+    bg: tone.purple.bg,
+    border: tone.purple.main,
+    text: tone.purple.fg,
+    accent: tone.purple.main,
+    chipBg: tone.purple.bg,
+    chipColor: tone.purple.fg,
   },
 };
 
 const DEFAULT_STATUS = {
   label: "Desconocido",
-  bg: "#F5F5F5",
-  border: "#9E9E9E",
-  text: "#616161",
-  accent: "#9E9E9E",
-  chipBg: "#F5F5F5",
-  chipColor: "#616161",
+  bg: tone.gray.bg,
+  border: tone.gray.main,
+  text: tone.gray.fg,
+  accent: tone.gray.main,
+  chipBg: tone.gray.bg,
+  chipColor: tone.gray.fg,
 };
 
 const statusStyle = (statusId: number) =>
@@ -424,17 +425,17 @@ const DetailPopover = ({
                 sx={{
                   fontSize: 11,
                   fontWeight: 600,
-                  borderColor: "#E24B4A",
-                  color: "#A32D2D",
+                  borderColor: tone.red.main,
+                  color: tone.red.fg,
                   borderRadius: "8px",
                   textTransform: "none",
                   py: 0.5,
-                  "&:hover": { bgcolor: "#FCEBEB", borderColor: "#E24B4A" },
+                  "&:hover": { bgcolor: tone.red.bg, borderColor: tone.red.main },
                   "&.Mui-disabled": { opacity: 0.6 },
                 }}
               >
                 {cancelling ? (
-                  <CircularProgress size={14} sx={{ color: "#E24B4A" }} />
+                  <CircularProgress size={14} sx={{ color: tone.red.main }} />
                 ) : (
                   "Cancelar cita"
                 )}
@@ -536,6 +537,10 @@ export default function Agenda({
           borderRadius: 3,
           overflow: "hidden",
           bgcolor: "background.paper",
+          // Variables propias de FullCalendar (por defecto blancas: encabezado fijo, celdas)
+          "--fc-page-bg-color": paletteVar("background.paper"),
+          "--fc-neutral-bg-color": paletteVar("action.hover"),
+          "--fc-border-color": paletteVar("divider"),
           "& .fc": { fontFamily: "inherit" },
           "& .fc-toolbar": {
             px: 2,
@@ -550,11 +555,11 @@ export default function Agenda({
             fontWeight: "500 !important",
           },
           "& .fc-button": {
-            bgcolor: "action.hover !important",
+            bgcolor: `${paletteVar("action.hover")} !important`,
             border: "0.5px solid !important",
-            borderColor: "divider !important",
+            borderColor: `${paletteVar("divider")} !important`,
             borderRadius: "8px !important",
-            color: "text.secondary !important",
+            color: `${paletteVar("text.secondary")} !important`,
             fontSize: "11px !important",
             fontWeight: "500 !important",
             textTransform: "none !important",
@@ -564,14 +569,14 @@ export default function Agenda({
           },
           "& .fc-button-active, & .fc-button-primary:not(:disabled).fc-button-active":
             {
-              bgcolor: "#E6F1FB !important",
-              borderColor: "#B5D4F4 !important",
-              color: "#185FA5 !important",
+              bgcolor: `${tone.blue.bg} !important`,
+              borderColor: `${tone.blue.border} !important`,
+              color: `${tone.blue.fg} !important`,
             },
           "& .fc-today-button": {
-            bgcolor: "#E1F5EE !important",
-            borderColor: "#A8DEC9 !important",
-            color: "#0F6E56 !important",
+            bgcolor: `${tone.green.bg} !important`,
+            borderColor: `${tone.green.border} !important`,
+            color: `${tone.green.fg} !important`,
             "&:disabled": { opacity: "0.5 !important" },
           },
           "& .fc-col-header-cell": {
@@ -589,7 +594,7 @@ export default function Agenda({
             bgcolor: `${isDark ? "rgba(75,163,211,0.06)" : "rgba(75,163,211,0.03)"} !important`,
           },
           "& .fc-day-today .fc-col-header-cell-cushion": {
-            color: "#185FA5 !important",
+            color: `${tone.blue.fg} !important`,
           },
           "& .fc-timegrid-slot": { height: "54px !important" },
           "& .fc-timegrid-slot-label": {
@@ -604,12 +609,12 @@ export default function Agenda({
             borderColor: `${isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)"} !important`,
           },
           "& .fc-timegrid-now-indicator-line": {
-            borderColor: "#1D9E75 !important",
+            borderColor: `${tone.green.main} !important`,
             borderWidth: "1.5px !important",
           },
           "& .fc-timegrid-now-indicator-arrow": {
-            borderTopColor: "#1D9E75 !important",
-            borderBottomColor: "#1D9E75 !important",
+            borderTopColor: `${tone.green.main} !important`,
+            borderBottomColor: `${tone.green.main} !important`,
           },
           "& .fc-event": {
             border: "none !important",
@@ -625,7 +630,7 @@ export default function Agenda({
             fontWeight: "500",
           },
           "& .fc-daygrid-day.fc-day-today .fc-daygrid-day-number": {
-            color: "#185FA5 !important",
+            color: `${tone.blue.fg} !important`,
             fontWeight: "700 !important",
           },
         }}

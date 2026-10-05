@@ -8,6 +8,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import ButtonBase from "@mui/material/ButtonBase";
 import type { WorkerProfessional } from "@/typesResponse/WorkerProfessional";
+import { tone } from "@shared-theme/themePrimitives";
 
 interface DateCalendarValueProps {
   availableSchedules: WorkerProfessional[];
@@ -77,9 +78,9 @@ export default function DateCalendarValue({
               "&:hover": { bgcolor: "#0F6E56" },
             },
             "& .MuiPickersDay-root:not(.Mui-disabled):not(.Mui-selected)": {
-              bgcolor: "#E1F5EE",
-              color: "#0F6E56",
-              "&:hover": { bgcolor: "#9FE1CB" },
+              bgcolor: tone.green.bg,
+              color: tone.green.fg,
+              "&:hover": { bgcolor: tone.green.border },
             },
             "& .MuiDayCalendar-weekDayLabel": {
               fontSize: 10,
@@ -130,17 +131,17 @@ export default function DateCalendarValue({
                       py: 0.75,
                       borderRadius: 2,
                       border: "0.5px solid",
-                      borderColor: isSelected ? "#1D9E75" : "divider",
-                      bgcolor: isSelected ? "#E1F5EE" : "action.hover",
-                      color: isSelected ? "#0F6E56" : "text.secondary",
+                      borderColor: isSelected ? tone.green.main : "divider",
+                      bgcolor: isSelected ? tone.green.bg : "action.hover",
+                      color: isSelected ? tone.green.fg : "text.secondary",
                       fontSize: 11,
                       fontWeight: 500,
                       fontFamily: "monospace",
                       transition: "all 0.15s",
                       "&:hover": {
-                        borderColor: "#9FE1CB",
-                        color: "#0F6E56",
-                        bgcolor: "#E1F5EE",
+                        borderColor: tone.green.border,
+                        color: tone.green.fg,
+                        bgcolor: tone.green.bg,
                       },
                     }}
                   >

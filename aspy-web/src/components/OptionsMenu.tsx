@@ -11,6 +11,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import { useNavigate } from "react-router-dom";
 import { logout } from "@store";
+import { tone } from "@shared-theme/themePrimitives";
 
 const menuItemSx = {
   borderRadius: 1.5,
@@ -97,15 +98,15 @@ export default function OptionsMenu() {
           }}
           sx={{
             ...menuItemSx,
-            color: "#A32D2D",
-            "& .MuiListItemIcon-root": { minWidth: 28, color: "#A32D2D" },
+            color: tone.red.fg,
+            "& .MuiListItemIcon-root": { minWidth: 28, color: tone.red.fg },
           }}
         >
           <ListItemIcon>
             <LogoutRoundedIcon sx={{ fontSize: 15 }} />
           </ListItemIcon>
           <ListItemText>
-            <Typography sx={{ fontSize: 12, color: "#A32D2D" }}>
+            <Typography sx={{ fontSize: 12, color: tone.red.fg }}>
               Cerrar sesión
             </Typography>
           </ListItemText>

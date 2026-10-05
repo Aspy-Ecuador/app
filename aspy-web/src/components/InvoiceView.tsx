@@ -6,6 +6,7 @@ import CreditCardRoundedIcon from "@mui/icons-material/CreditCardRounded";
 import Progress from "./Progress";
 import { useRoleData } from "@/observer/RoleDataContext";
 import type { Person } from "@/typesResponse/Person";
+import { tone } from "@shared-theme/themePrimitives";
 
 interface InvoiceViewProps {
   id: number;
@@ -147,7 +148,7 @@ export default function InvoiceView({
               sx={{
                 fontSize: 15,
                 fontWeight: 600, // Aumentado para mayor impacto visual
-                color: "#0F6E56",
+                color: tone.green.fg,
                 fontFamily: "monospace",
               }}
             >
@@ -194,8 +195,8 @@ export default function InvoiceView({
                 width: 24,
                 height: 24,
                 borderRadius: "6px",
-                bgcolor: "#E1F5EE",
-                color: "#0F6E56",
+                bgcolor: tone.green.bg,
+                color: tone.green.fg,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",

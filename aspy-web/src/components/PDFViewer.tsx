@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRounded";
+import { tone } from "@shared-theme/themePrimitives";
 
 interface PDFViewerProps {
   url: string;
@@ -74,8 +75,8 @@ export default function PDFViewer({ url }: PDFViewerProps) {
                 width: 36,
                 height: 36,
                 borderRadius: 2,
-                bgcolor: "#FCEBEB",
-                color: "#A32D2D",
+                bgcolor: tone.red.bg,
+                color: tone.red.fg,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",

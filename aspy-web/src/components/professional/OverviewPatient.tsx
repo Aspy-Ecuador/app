@@ -16,19 +16,20 @@ import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import BadgeRoundedIcon from "@mui/icons-material/BadgeRounded";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import DateRangeIcon from "@mui/icons-material/DateRange";
+import { aspy } from "@shared-theme/themePrimitives";
 
 // ─── Paleta del logo ASPY ────────────────────────────────────────
 const C = {
   blue: "#5BB8D4",
   blueDark: "#3A9AB8",
-  blueLight: "#D6F0F8",
+  blueLight: aspy.blueLight,
   pink: "#E8A0B0",
-  pinkLight: "#FCE8ED",
+  pinkLight: aspy.pinkLight,
   yellow: "#F0C84A",
-  yellowLight: "#FDF4D0",
-  black: "#1A1A2E",
-  muted: "#6B7A83",
-  border: "#E2EBF0",
+  yellowLight: aspy.yellowLight,
+  black: aspy.text,
+  muted: aspy.muted,
+  border: aspy.border,
 };
 
 interface OverviewPacienteProps {
@@ -80,7 +81,7 @@ const InfoRow = ({
         variant="body2"
         sx={{
           fontWeight: 500,
-          color: C.black,
+          color: "text.primary",
           whiteSpace: "nowrap",
           overflow: "hidden",
           textOverflow: "ellipsis",
@@ -118,7 +119,7 @@ export default function OverviewPatient({ patient }: OverviewPacienteProps) {
         border: `1px solid ${C.border}`,
         borderRadius: 3,
         overflow: "hidden",
-        backgroundColor: "#fff",
+        bgcolor: "background.paper",
         boxShadow: "0 2px 16px rgba(0,0,0,0.06)",
         position: "sticky",
         top: 16,
@@ -193,7 +194,7 @@ export default function OverviewPatient({ patient }: OverviewPacienteProps) {
               fontSize: "0.66rem",
               fontWeight: 700,
               bgcolor: C.yellow,
-              color: C.black,
+              color: "text.primary",
               "& .MuiChip-label": { px: 1.2 },
             }}
           />

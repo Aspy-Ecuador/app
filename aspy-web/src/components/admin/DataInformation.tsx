@@ -2,15 +2,16 @@
 import type { CardAdmin } from "@/types/CardAdmin";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { tone } from "@shared-theme/themePrimitives";
 
 interface DataInformationProps {
   buttonsData: CardAdmin[];
 }
 
 const iconColors: Record<number, { bg: string; color: string }> = {
-  0: { bg: "#E6F1FB", color: "#185FA5" },
-  1: { bg: "#E1F5EE", color: "#0F6E56" },
-  2: { bg: "#EEEDFE", color: "#534AB7" },
+  0: { bg: tone.blue.bg, color: tone.blue.fg },
+  1: { bg: tone.green.bg, color: tone.green.fg },
+  2: { bg: tone.purple.bg, color: tone.purple.fg },
 };
 
 export default function DataInformation({ buttonsData }: DataInformationProps) {

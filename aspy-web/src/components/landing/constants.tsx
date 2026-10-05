@@ -1,5 +1,6 @@
 // aspy-web/src/components/landing/constants.tsx
 import { keyframes } from "@mui/material/styles";
+import { aspy } from "@shared-theme/themePrimitives";
 import AccessibilityNewRoundedIcon from "@mui/icons-material/AccessibilityNewRounded";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
@@ -8,21 +9,26 @@ import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 import MusicNoteRoundedIcon from "@mui/icons-material/MusicNoteRounded";
 
 // ─── Paleta ───────────────────────────────────────────────────────
+// Los acentos (blue, pink, yellow…) son hex fijos porque se combinan con
+// sufijos de opacidad (`${C.blue}55`). Los neutros y tintes claros vienen
+// del tema y cambian solos en modo oscuro.
 export const C = {
   blue: "#5BB8D4",
   blueDark: "#3A9AB8",
-  blueLight: "#D6F0F8",
+  blueLight: aspy.blueLight,
   pink: "#E8A0B0",
   pinkDark: "#C9728A",
-  pinkLight: "#FCE8ED",
+  pinkLight: aspy.pinkLight,
   yellow: "#F0C84A",
   yellowDark: "#C9A020",
-  yellowLight: "#FDF4D0",
-  black: "#1A1A2E",
+  yellowLight: aspy.yellowLight,
+  black: aspy.text,
   darkBg: "#12263A",
-  offWhite: "#FAFBFC",
-  muted: "#5E6E7A",
-  border: "#E2EBF0",
+  offWhite: aspy.surface,
+  muted: aspy.muted,
+  border: aspy.border,
+  card: aspy.card,
+  navBg: aspy.navBg,
 };
 
 // ─── Animaciones ─────────────────────────────────────────────────

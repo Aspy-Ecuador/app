@@ -21,6 +21,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
+import { tone } from "@shared-theme/themePrimitives";
 
 interface FormRegisterProps {
   start: number;
@@ -182,7 +183,7 @@ export default function FormRegister({
 
         {/* COMPONENTE DE POLÍTICA DE PRIVACIDAD */}
         {isLast && (
-          <Box sx={{ mb: 3, p: 2, bgcolor: "rgba(15, 110, 86, 0.04)", borderRadius: 2, border: "1px solid #E1F5EE" }}>
+          <Box sx={{ mb: 3, p: 2, bgcolor: "rgba(15, 110, 86, 0.04)", borderRadius: 2, border: `1px solid ${tone.green.bg}` }}>
             <FormControlLabel
               // Evita que un clic en el <label> dispare el toggle nativo del input;
               // el único manejador válido es handleCheckboxClick sobre el propio Checkbox.
@@ -195,8 +196,8 @@ export default function FormRegister({
                   // para que ningún toggle nativo pueda "ganarle" a la validación.
                   onChange={() => {}}
                   sx={{
-                    color: "rgba(0, 0, 0, 0.45)",
-                    "&.Mui-checked": { color: "#0F6E56" },
+                    color: "text.secondary",
+                    "&.Mui-checked": { color: tone.green.fg },
                     "& .MuiSvgIcon-root": { fontSize: 26 },
                     p: "6px",
                   }}
@@ -210,8 +211,8 @@ export default function FormRegister({
                     type="button"
                     onClick={handleOpenPolicy}
                     sx={{
-                      fontWeight: 600, color: "#0F6E56", textDecoration: "underline", textUnderlineOffset: 2,
-                      "&:hover": { color: "#0a4d3c" },
+                      fontWeight: 600, color: tone.green.fg, textDecoration: "underline", textUnderlineOffset: 2,
+                      "&:hover": { color: tone.green.fg },
                     }}
                   >
                     Política de Privacidad y el Tratamiento de Datos Personales
@@ -272,7 +273,7 @@ export default function FormRegister({
               fontSize: "0.92rem",
               minWidth: 140,
               background: isLast
-                ? "linear-gradient(135deg, #0F6E56 0%, #1B8C6E 100%)"
+                ? `linear-gradient(135deg, ${tone.green.fg} 0%, ${tone.green.main} 100%)`
                 : "linear-gradient(135deg, #1565C0 0%, #1976D2 100%)",
               boxShadow: isLast
                 ? "0 4px 14px rgba(15,110,86,0.35)"
@@ -316,7 +317,7 @@ export default function FormRegister({
           onEntered: checkContentFit,
         }}
       >
-        <DialogTitle sx={{ fontWeight: 800, color: "#111827", pb: 1 }}>
+        <DialogTitle sx={{ fontWeight: 800, color: "text.primary", pb: 1 }}>
           Política de Privacidad y Tratamiento de Datos Personales
           <Typography variant="caption" display="block" color="text.secondary">
             Última actualización: Julio de 2026
@@ -397,20 +398,21 @@ export default function FormRegister({
               setOpenPolicy(false);
             }}
             variant="contained"
-            // Empieza en negro (#111827) y al llegar abajo cambia suavemente a Verde (#0F6E56)
+            // Empieza en el color de texto (negro / blanco en modo oscuro) y al llegar abajo cambia suavemente a Verde (#0F6E56)
             sx={{
-              bgcolor: isScrolledToBottom ? "#0F6E56" : "#111827",
-              color: isScrolledToBottom ? "#ffffff" : "rgba(255, 255, 255, 0.6)",
+              bgcolor: isScrolledToBottom ? "#0F6E56" : "text.primary",
+              color: isScrolledToBottom ? "#ffffff" : "background.paper",
               borderRadius: 2,
               textTransform: "none",
               fontWeight: 600,
               transition: "all 0.4s ease",
               "&:hover": {
-                bgcolor: isScrolledToBottom ? "#0a4d3c" : "#111827"
+                bgcolor: isScrolledToBottom ? "#0F6E56" : "text.primary"
               },
               "&:disabled": {
-                bgcolor: "#111827",
-                color: "rgba(255, 255, 255, 0.5)"
+                bgcolor: "text.primary",
+                color: "background.paper",
+                opacity: 0.6
               }
             }}
           >

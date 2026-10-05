@@ -83,7 +83,7 @@ export default function Navbar({ showAuthButton = true }: NavbarProps) {
           right: 0,
           zIndex: 1000,
           transition: "all 0.3s ease",
-          bgcolor: scrolled ? "rgba(255,255,255,0.96)" : "transparent",
+          bgcolor: scrolled ? C.navBg : "transparent",
           backdropFilter: scrolled ? "blur(12px)" : "none",
           boxShadow: scrolled ? "0 1px 24px rgba(0,0,0,0.08)" : "none",
           borderBottom: scrolled ? `1px solid ${C.border}` : "none",
@@ -159,7 +159,7 @@ export default function Navbar({ showAuthButton = true }: NavbarProps) {
                     "&:hover": {
                       color: scrolled ? C.black : "#fff",
                       bgcolor: scrolled
-                        ? "rgba(0,0,0,0.05)"
+                        ? `${C.blue}1A`
                         : "rgba(255,255,255,0.12)",
                     },
                   }}

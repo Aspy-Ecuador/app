@@ -5,13 +5,15 @@ import IconButton from '@mui/material/IconButton';
 import { useColorScheme } from '@mui/material/styles';
 
 export default function ColorModeToggle(props: React.ComponentProps<typeof IconButton>) {
-  const { mode, setMode } = useColorScheme();
+  const { mode, systemMode, setMode } = useColorScheme();
+  // Con modo "system" hay que mirar el modo real del SO; si no, el primer clic no hace nada
+  const resolvedMode = (mode === 'system' ? systemMode : mode) ?? 'light';
 
   const toggleMode = () => {
-    setMode(mode === 'light' ? 'dark' : 'light');
+    setMode(resolvedMode === 'light' ? 'dark' : 'light');
   };
 
-  const icon = mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />;
+  const icon = resolvedMode === 'light' ? <DarkModeIcon /> : <LightModeIcon />;
 
   return (
     <IconButton

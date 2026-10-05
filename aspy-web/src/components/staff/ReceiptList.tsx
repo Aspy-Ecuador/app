@@ -17,17 +17,18 @@ import Progress from "@components/Progress";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import type { FlattenedReceipt } from "@/types/FlattenedReceipt";
 import type { Payment } from "@/typesResponse/Payment";
+import { tone } from "@shared-theme/themePrimitives";
 
 // Función de estilos para los chips de estado
 const statusChipSx = (status: string) => {
   const s = status?.toLowerCase();
   if (s === "pagado" || s === "paid")
-    return { bgcolor: "#E1F5EE", color: "#0F6E56", border: "0.5px solid #9FE1CB" };
+    return { bgcolor: tone.green.bg, color: tone.green.fg, border: `0.5px solid ${tone.green.border}` };
   if (s === "pendiente" || s === "pending")
-    return { bgcolor: "#fafbe6", color: "#b9b716", border: "0.5px solid #e5e77a" };
+    return { bgcolor: tone.yellow.bg, color: tone.yellow.fg, border: `0.5px solid ${tone.yellow.border}` };
   if (s === "anulado" || s === "cancelled")
-    return { bgcolor: "#FEE2E2", color: "#991B1B", border: "0.5px solid #FCA5A5" };
-  return { bgcolor: "#EEEDFE", color: "#534AB7", border: "0.5px solid #AFA9EC" };
+    return { bgcolor: tone.red.bg, color: tone.red.fg, border: `0.5px solid ${tone.red.border}` };
+  return { bgcolor: tone.purple.bg, color: tone.purple.fg, border: `0.5px solid ${tone.purple.border}` };
 };
 
 const columns: GridColDef[] = [
@@ -81,7 +82,7 @@ const columns: GridColDef[] = [
     resizable: false,
     renderCell: (params) => (
       <Box display="flex" alignItems="center" height="100%">
-        <Typography variant="body1" sx={{ color: "#0F6E56", fontWeight: 600 }}>
+        <Typography variant="body1" sx={{ color: tone.green.fg, fontWeight: 600 }}>
           ${Number(params.row.price).toFixed(2)}
         </Typography>
       </Box>
@@ -134,7 +135,7 @@ const columns: GridColDef[] = [
           minWidth: 0,
           p: 0.75,
           borderRadius: 2,
-          "&:hover": { bgcolor: "#E6F1FB" },
+          "&:hover": { bgcolor: tone.blue.bg },
         }}
       >
         <DownloadRoundedIcon fontSize="small" />

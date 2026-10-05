@@ -14,8 +14,7 @@ const AdminLayout = () => (
         flex: 1,
         minWidth: 0,
         overflow: "auto",
-        bgcolor: "#F4F6F8",
-        // En móvil, deja espacio para el botón hamburguesa
+        bgcolor: "background.default",
         pt: { xs: "56px", md: 0 },
       }}
     >

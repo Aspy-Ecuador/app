@@ -96,7 +96,7 @@ export default function FooterCTA({ showLoginCTA = true }: FooterCTAProps) {
           sx={{
             color: C.blueDark,
             borderColor: C.blue,
-            background: "#fff",
+            background: C.card,
             "&:hover": { background: C.blueLight, borderColor: C.blueDark },
           }}
         >
@@ -109,7 +109,7 @@ export default function FooterCTA({ showLoginCTA = true }: FooterCTAProps) {
           sx={{
             color: C.pinkDark,
             borderColor: C.pink,
-            background: "#fff",
+            background: C.card,
             "&:hover": { background: C.pinkLight, borderColor: C.pinkDark },
           }}
         >

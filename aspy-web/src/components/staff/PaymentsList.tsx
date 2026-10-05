@@ -18,6 +18,7 @@ import CancelRoundedIcon from "@mui/icons-material/CancelRounded";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Progress from "../Progress";
 import type { Payment } from "@/typesResponse/Payment";
+import { tone } from "@shared-theme/themePrimitives";
 
 export default function PaymentsList() {
   const { data, loading } = useRoleData();
@@ -95,7 +96,7 @@ export default function PaymentsList() {
         return (
           <Box display="flex" alignItems="center" height="100%">
             {/* Manteniendo la consistencia financiera visual de los comprobantes */}
-            <Typography variant="body1" sx={{ color: "#0F6E56", fontWeight: 600 }}>
+            <Typography variant="body1" sx={{ color: tone.green.fg, fontWeight: 600 }}>
               ${Number(params.row.service.price).toFixed(2)}
             </Typography>
           </Box>
@@ -122,7 +123,7 @@ export default function PaymentsList() {
             minWidth: 0,
             p: 0.75,
             borderRadius: 2,
-            "&:hover": { bgcolor: "#E6F1FB" }, // Hover premium coordinado
+            "&:hover": { bgcolor: tone.blue.bg }, // Hover premium coordinado
           }}
         >
           <VisibilityRoundedIcon fontSize="small" />
@@ -185,19 +186,19 @@ const getStatusIcon = (status: number) => {
     case 1:
       return (
         <Tooltip title="Aprobado" arrow>
-          <CheckCircleRoundedIcon sx={{ color: "#0F6E56" }} />
+          <CheckCircleRoundedIcon sx={{ color: tone.green.fg }} />
         </Tooltip>
       );
     case 2:
       return (
         <Tooltip title="Pendiente" arrow>
-          <AccessTimeFilledRoundedIcon sx={{ color: "#b9b716" }} />
+          <AccessTimeFilledRoundedIcon sx={{ color: tone.yellow.fg }} />
         </Tooltip>
       );
     case 3:
       return (
         <Tooltip title="Rechazado/Anulado" arrow>
-          <CancelRoundedIcon sx={{ color: "#991B1B" }} />
+          <CancelRoundedIcon sx={{ color: tone.red.fg }} />
         </Tooltip>
       );
     default:

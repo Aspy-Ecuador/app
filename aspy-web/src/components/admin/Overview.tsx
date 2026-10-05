@@ -10,15 +10,16 @@ import EmojiPeopleIcon from "@mui/icons-material/EmojiPeople";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import AccessibilityNewIcon from "@mui/icons-material/AccessibilityNew";
+import { tone } from "@shared-theme/themePrimitives";
 
 const ICON_MAP: Record<
   number,
   { icon: React.ReactNode; bg: string; color: string }
 > = {
-  0: { icon: <EmojiPeopleIcon />, bg: "#E1F5EE", color: "#0F6E56" },
-  1: { icon: <CalendarMonthOutlinedIcon />, bg: "#E6F1FB", color: "#185FA5" },
-  2: { icon: <PeopleOutlinedIcon />, bg: "#EEEDFE", color: "#534AB7" },
-  3: { icon: <AccessibilityNewIcon />, bg: "#FAEEDA", color: "#854F0B" },
+  0: { icon: <EmojiPeopleIcon />, bg: tone.green.bg, color: tone.green.fg },
+  1: { icon: <CalendarMonthOutlinedIcon />, bg: tone.blue.bg, color: tone.blue.fg },
+  2: { icon: <PeopleOutlinedIcon />, bg: tone.purple.bg, color: tone.purple.fg },
+  3: { icon: <AccessibilityNewIcon />, bg: tone.amber.bg, color: tone.amber.fg },
 };
 
 export default function Overview() {

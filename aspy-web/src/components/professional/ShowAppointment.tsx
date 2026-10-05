@@ -17,6 +17,7 @@ import { useRoleData } from "@/observer/RoleDataContext";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import { tone } from "@shared-theme/themePrimitives";
 
 interface ShowAppointmentProps {
   unmarkedAppointmentsProp: Appointment[];
@@ -181,21 +182,22 @@ export default function ShowAppointment({
                         textTransform: "none",
                         fontWeight: 600,
                         minHeight: 34,
-                        bgcolor: "#D1FAE5",
-                        color: "#065F46",
-                        border: "1px solid #6EE7B7",
+                        bgcolor: tone.green.bg,
+                        color: tone.green.fg,
+                        border: `1px solid ${tone.green.border}`,
                         "&:hover": {
-                          bgcolor: "#A7F3D0",
-                          borderColor: "#34D399",
+                          bgcolor: tone.green.border,
+                          borderColor: tone.green.main,
                         },
                         "&:disabled": {
-                          bgcolor: "#D1FAE588",
-                          color: "#065F4688",
+                          bgcolor: tone.green.bg,
+                          color: tone.green.fg,
+                          opacity: 0.55,
                         },
                       }}
                     >
                       {isLoading(cita.appointment_id, "complete") ? (
-                        <CircularProgress size={16} sx={{ color: "#065F46" }} />
+                        <CircularProgress size={16} sx={{ color: tone.green.fg }} />
                       ) : (
                         "Asistió"
                       )}
@@ -217,21 +219,22 @@ export default function ShowAppointment({
                         textTransform: "none",
                         fontWeight: 600,
                         minHeight: 34,
-                        bgcolor: "#FEE2E2",
-                        color: "#991B1B",
-                        border: "1px solid #FCA5A5",
+                        bgcolor: tone.red.bg,
+                        color: tone.red.fg,
+                        border: `1px solid ${tone.red.border}`,
                         "&:hover": {
-                          bgcolor: "#FECACA",
-                          borderColor: "#F87171",
+                          bgcolor: tone.red.border,
+                          borderColor: tone.red.main,
                         },
                         "&:disabled": {
-                          bgcolor: "#FEE2E288",
-                          color: "#991B1B88",
+                          bgcolor: tone.red.bg,
+                          color: tone.red.fg,
+                          opacity: 0.55,
                         },
                       }}
                     >
                       {isLoading(cita.appointment_id, "missed") ? (
-                        <CircularProgress size={16} sx={{ color: "#991B1B" }} />
+                        <CircularProgress size={16} sx={{ color: tone.red.fg }} />
                       ) : (
                         "No asistió"
                       )}
@@ -323,12 +326,12 @@ export default function ShowAppointment({
                         textTransform: "none",
                         fontWeight: 600,
                         minHeight: 34,
-                        bgcolor: "#DBEAFE",
-                        color: "#1E40AF",
-                        border: "1px solid #93C5FD",
+                        bgcolor: tone.blue.bg,
+                        color: tone.blue.fg,
+                        border: `1px solid ${tone.blue.border}`,
                         "&:hover": {
-                          bgcolor: "#BFDBFE",
-                          borderColor: "#60A5FA",
+                          bgcolor: tone.blue.border,
+                          borderColor: tone.blue.main,
                         },
                       }}
                     >

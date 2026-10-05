@@ -134,7 +134,7 @@ export default function UserFormUser({
     if (selectedStateId) {
       methods.setValue("address.city_id", 0);
     }
-  }, [selectedStateId]);
+  }, [selectedStateId, methods]);
 
   const list_inputs = lockedInputConfig.slice(start, end).map((input) => (
     <UserInput

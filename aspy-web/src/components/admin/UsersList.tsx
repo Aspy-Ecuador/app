@@ -27,12 +27,13 @@ import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import Switch from "@mui/material/Switch";
 import CircularProgress from "@mui/material/CircularProgress";
 import type { Person } from "@/typesResponse/Person";
+import { tone } from "@shared-theme/themePrimitives";
 
 const roleChipSx = (role: string) => {
-  if (role === "Admin") return { bgcolor: "#fafbe6", color: "#b9b716" };
-  if (role === "Professional") return { bgcolor: "#E1F5EE", color: "#0F6E56" };
-  if (role === "Client") return { bgcolor: "#E6F1FB", color: "#185FA5" };
-  return { bgcolor: "#EEEDFE", color: "#534AB7" };
+  if (role === "Admin") return { bgcolor: tone.yellow.bg, color: tone.yellow.fg };
+  if (role === "Professional") return { bgcolor: tone.green.bg, color: tone.green.fg };
+  if (role === "Client") return { bgcolor: tone.blue.bg, color: tone.blue.fg };
+  return { bgcolor: tone.purple.bg, color: tone.purple.fg };
 };
 
 export default function UsersList() {
@@ -177,14 +178,14 @@ export default function UsersList() {
             height="100%"
           >
             {isToggling ? (
-              <CircularProgress size={14} sx={{ color: "#0F6E56" }} />
+              <CircularProgress size={14} sx={{ color: tone.green.fg }} />
             ) : (
               <Switch
                 size="small"
                 checked={isAvailable}
                 onChange={() => handleToggleAvailable(personId, isAvailable)}
                 sx={{
-                  "& .MuiSwitch-switchBase.Mui-checked": { color: "#1D9E75" },
+                  "& .MuiSwitch-switchBase.Mui-checked": { color: tone.green.main },
                   "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
                     bgcolor: "#1D9E75",
                   },
@@ -222,15 +223,15 @@ export default function UsersList() {
           sx={{
             fontSize: 12,
             fontWeight: 500,
-            bgcolor: "#E1F5EE",
-            color: "#0F6E56",
-            border: "0.5px solid #9FE1CB",
+            bgcolor: tone.green.bg,
+            color: tone.green.fg,
+            border: `0.5px solid ${tone.green.border}`,
             borderRadius: 3,
             px: 1.75,
             py: 1.25,
             height: "auto",
             textTransform: "none",
-            "&:hover": { bgcolor: "#9FE1CB" },
+            "&:hover": { bgcolor: tone.green.border },
           }}
         >
           Agregar usuario
@@ -246,15 +247,15 @@ export default function UsersList() {
           sx={{
             fontSize: 12,
             fontWeight: 500,
-            bgcolor: "#FEE2E2",
-            color: "#991B1B",
-            border: "0.5px solid #FCA5A5",
+            bgcolor: tone.red.bg,
+            color: tone.red.fg,
+            border: `0.5px solid ${tone.red.border}`,
             borderRadius: 3,
             px: 1.75,
             py: 1.25,
             height: "auto",
             textTransform: "none",
-            "&:hover": { bgcolor: "#FCA5A5" },
+            "&:hover": { bgcolor: tone.red.border },
           }}
         >
           PDF
@@ -268,15 +269,15 @@ export default function UsersList() {
           sx={{
             fontSize: 12,
             fontWeight: 500,
-            bgcolor: "#F0FDF4",
-            color: "#166534",
-            border: "0.5px solid #86EFAC",
+            bgcolor: tone.green.bg,
+            color: tone.green.fg,
+            border: `0.5px solid ${tone.green.border}`,
             borderRadius: 3,
             px: 1.75,
             py: 1.25,
             height: "auto",
             textTransform: "none",
-            "&:hover": { bgcolor: "#86EFAC" },
+            "&:hover": { bgcolor: tone.green.border },
           }}
         >
           Excel

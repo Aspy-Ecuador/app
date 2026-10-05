@@ -7,6 +7,7 @@ import Grid from "@mui/material/Grid";
 import ServiceForm from "@forms/ServiceForm";
 import Header from "@components/Header";
 import AssignmentTurnedInRoundedIcon from "@mui/icons-material/AssignmentTurnedInRounded";
+import { tone } from "@shared-theme/themePrimitives";
 
 export default function CreateService() {
   const navigate = useNavigate();
@@ -51,8 +52,8 @@ export default function CreateService() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  bgcolor: "#EEEDFE",
-                  color: "#534AB7",
+                  bgcolor: tone.purple.bg,
+                  color: tone.purple.fg,
                   "& svg": { fontSize: 15 },
                 }}
               >

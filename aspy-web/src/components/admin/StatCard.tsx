@@ -2,6 +2,7 @@
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
+import { tone } from "@shared-theme/themePrimitives";
 
 export type StatCardProps = {
   title: string;
@@ -100,10 +101,10 @@ export default function StatCard({
             px: 0.875,
             py: 0.25,
             borderRadius: "20px",
-            bgcolor: "#E1F5EE",
+            bgcolor: tone.green.bg,
           }}
         >
-          <Typography sx={{ fontSize: 10, fontWeight: 500, color: "#0F6E56" }}>
+          <Typography sx={{ fontSize: 10, fontWeight: 500, color: tone.green.fg }}>
             {trend}
           </Typography>
         </Box>

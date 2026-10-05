@@ -149,7 +149,7 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
                   border: "1px solid",
                   borderColor: "divider",
                   p: { xs: 2.5, sm: 4 },
-                  backgroundColor: "white",
+                  backgroundColor: "background.paper",
                   boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
                 }}
               >

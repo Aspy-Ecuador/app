@@ -4,6 +4,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import FileDownloadRoundedIcon from "@mui/icons-material/FileDownloadRounded";
 import Button from "@mui/material/Button";
+import { tone } from "@shared-theme/themePrimitives";
 
 interface ReceiptRevisionProps {
   receiptData: Payment;
@@ -92,13 +93,13 @@ export default function ReceiptRevision({ receiptData }: ReceiptRevisionProps) {
           sx={{
             fontSize: 11,
             fontWeight: 500,
-            color: "#185FA5",
-            bgcolor: "#E6F1FB",
-            border: "0.5px solid #B5D4F4",
+            color: tone.blue.fg,
+            bgcolor: tone.blue.bg,
+            border: `0.5px solid ${tone.blue.border}`,
             borderRadius: 1.5,
             px: 1.25,
             minWidth: 0,
-            "&:hover": { bgcolor: "#B5D4F4" },
+            "&:hover": { bgcolor: tone.blue.border },
           }}
         >
           Descargar

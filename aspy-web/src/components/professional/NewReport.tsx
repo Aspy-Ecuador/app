@@ -12,6 +12,7 @@ import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
 import { useNavigate } from "react-router-dom";
 import AddReport from "@professional/AddReport";
+import { tone } from "@shared-theme/themePrimitives";
 
 export default function NewReport() {
   const [report, setReport] = useState<FileData | null>(null);
@@ -55,8 +56,8 @@ export default function NewReport() {
           size="small"
           sx={{
             ml: "auto",
-            bgcolor: "#FAEEDA",
-            color: "#854F0B",
+            bgcolor: tone.amber.bg,
+            color: tone.amber.fg,
             fontWeight: 500,
             fontSize: 11,
             height: 22,

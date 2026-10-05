@@ -21,6 +21,7 @@ import workerScheduleAPI from "@/API/workerScheduleAPI";
 import professionalAPI from "@/API/professionalAPI";
 import type { WorkerProfessional } from "@/typesResponse/WorkerProfessional";
 import type { Schedule } from "@/typesResponse/Schedule";
+import { paletteVar, tone } from "@shared-theme/themePrimitives";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -101,11 +102,11 @@ const fieldSx = {
     fontSize: 13,
     bgcolor: "action.hover",
     "& fieldset": { borderColor: "divider" },
-    "&:hover fieldset": { borderColor: "#1D9E75" },
-    "&.Mui-focused fieldset": { borderColor: "#1D9E75" },
+    "&:hover fieldset": { borderColor: tone.green.main },
+    "&.Mui-focused fieldset": { borderColor: tone.green.main },
   },
   "& .MuiInputLabel-root": { fontSize: 13 },
-  "& .MuiInputLabel-root.Mui-focused": { color: "#1D9E75" },
+  "& .MuiInputLabel-root.Mui-focused": { color: tone.green.main },
   // Garantizamos que el icono del reloj del navegador se vea y sea cliqueable para el scroll
   "& input[type='time']::-webkit-calendar-picker-indicator": {
     cursor: "pointer",
@@ -336,16 +337,16 @@ export default function HorarioProfessional() {
                   gap: 1,
                   px: 1.5,
                   py: 1,
-                  bgcolor: "#F0FAF6",
-                  border: "0.5px solid #A8DEC9",
+                  bgcolor: tone.green.bg,
+                  border: `0.5px solid ${tone.green.border}`,
                   borderRadius: 2,
                 }}
               >
                 <AccessTimeRoundedIcon
-                  sx={{ fontSize: 13, color: "#1D9E75", flexShrink: 0 }}
+                  sx={{ fontSize: 13, color: tone.green.main, flexShrink: 0 }}
                 />
                 <Typography
-                  sx={{ fontSize: 12, color: "#1D9E75", fontWeight: 500 }}
+                  sx={{ fontSize: 12, color: tone.green.main, fontWeight: 500 }}
                 >
                   {formatDate(date)} · {fmt(startTime + ":00")} –{" "}
                   {fmt(endTime + ":00")}
@@ -366,7 +367,7 @@ export default function HorarioProfessional() {
                 py: 1,
                 textTransform: "none",
                 "&:hover": { bgcolor: "#0F6E56" },
-                "&.Mui-disabled": { bgcolor: "#A8DEC9", color: "#fff" },
+                "&.Mui-disabled": { bgcolor: tone.green.border, color: "#fff" },
               }}
             >
               {submitting ? "Guardando…" : "Guardar horario"}
@@ -470,14 +471,14 @@ export default function HorarioProfessional() {
                             px: 0.875,
                             py: 0.25,
                             borderRadius: "20px",
-                            bgcolor: "#E6F1FB",
+                            bgcolor: tone.blue.bg,
                           }}
                         >
                           <Typography
                             sx={{
                               fontSize: 9,
                               fontWeight: 600,
-                              color: "#185FA5",
+                              color: tone.blue.fg,
                             }}
                           >
                             Hoy
@@ -522,9 +523,9 @@ export default function HorarioProfessional() {
                                 px: 1.5,
                                 py: 1,
                                 border: "0.5px solid",
-                                borderColor: available ? "#A8DEC9" : "divider",
+                                borderColor: available ? tone.green.border : "divider",
                                 borderRadius: 2,
-                                bgcolor: available ? "#F0FAF6" : "action.hover",
+                                bgcolor: available ? tone.green.bg : "action.hover",
                                 transition: "background 0.15s",
                               }}
                             >
@@ -539,7 +540,7 @@ export default function HorarioProfessional() {
                                   borderRadius: 1.5,
                                   flexShrink: 0,
                                   bgcolor: available
-                                    ? "#1D9E75"
+                                    ? tone.green.main
                                     : "rgba(0,0,0,0.12)",
                                 }}
                               >
@@ -580,14 +581,14 @@ export default function HorarioProfessional() {
                                     <CheckCircleRoundedIcon
                                       sx={{
                                         fontSize: "11px !important",
-                                        color: "#1D9E75 !important",
+                                        color: `${tone.green.main} !important`,
                                       }}
                                     />
                                   ) : (
                                     <EventBusyRoundedIcon
                                       sx={{
                                         fontSize: "11px !important",
-                                        color: "text.disabled !important",
+                                        color: `${paletteVar("text.disabled")} !important`,
                                       }}
                                     />
                                   )
@@ -600,11 +601,11 @@ export default function HorarioProfessional() {
                                   fontWeight: 600,
                                   bgcolor: "transparent",
                                   color: available
-                                    ? "#1D9E75"
+                                    ? tone.green.main
                                     : "text.disabled",
                                   border: "0.5px solid",
                                   borderColor: available
-                                    ? "#A8DEC9"
+                                    ? tone.green.border
                                     : "divider",
                                   "& .MuiChip-label": { px: 0.875 },
                                 }}
@@ -627,9 +628,9 @@ export default function HorarioProfessional() {
                                     borderRadius: 1.5,
                                     flexShrink: 0,
                                     "&:hover": {
-                                      borderColor: "#FCA5A5",
-                                      color: "#991B1B",
-                                      bgcolor: "#FEE2E2",
+                                      borderColor: tone.red.border,
+                                      color: tone.red.fg,
+                                      bgcolor: tone.red.bg,
                                     },
                                     "&.Mui-disabled": { opacity: 0.5 },
                                   }}
@@ -637,7 +638,7 @@ export default function HorarioProfessional() {
                                   {deletingMap[ws.worker_schedule_id] ? (
                                     <CircularProgress
                                       size={12}
-                                      sx={{ color: "#E24B4A" }}
+                                      sx={{ color: tone.red.main }}
                                     />
                                   ) : (
                                     <DeleteOutlineRoundedIcon

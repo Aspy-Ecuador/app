@@ -6,6 +6,7 @@ import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import { tone } from "@shared-theme/themePrimitives";
 
 interface ShowAppointmentProps {
   appointments: Appointment[];
@@ -14,12 +15,12 @@ interface ShowAppointmentProps {
 const getStatusStyle = (statusName: string) => {
   const name = statusName.toLowerCase();
   if (name.includes("guardada"))
-    return { bg: "#E1F5EE", color: "#0F6E56", accent: "#1D9E75" };
+    return { bg: tone.green.bg, color: tone.green.fg, accent: tone.green.main };
   if (name.includes("perdida"))
-    return { bg: "#FCEBEB", color: "#A32D2D", accent: "#E24B4A" };
+    return { bg: tone.red.bg, color: tone.red.fg, accent: tone.red.main };
   if (name.includes("completada"))
-    return { bg: "#E6F1FB", color: "#185FA5", accent: "#3B82F6" };
-  return { bg: "#FAEEDA", color: "#854F0B", accent: "#EF9F27" };
+    return { bg: tone.blue.bg, color: tone.blue.fg, accent: "#3B82F6" };
+  return { bg: tone.amber.bg, color: tone.amber.fg, accent: tone.amber.main };
 };
 
 const getInitials = (first: string, last: string) =>
@@ -77,15 +78,15 @@ export default function ShowAppointment({
                       label: "Paciente",
                       first: client.first_name,
                       last: client.last_name,
-                      avatarBg: "#E6F1FB",
-                      avatarColor: "#185FA5",
+                      avatarBg: tone.blue.bg,
+                      avatarColor: tone.blue.fg,
                     },
                     {
                       label: "Profesional",
                       first: professional.first_name,
                       last: professional.last_name,
-                      avatarBg: "#E1F5EE",
-                      avatarColor: "#0F6E56",
+                      avatarBg: tone.green.bg,
+                      avatarColor: tone.green.fg,
                     },
                   ].map(({ label, first, last, avatarBg, avatarColor }) => (
                     <Box

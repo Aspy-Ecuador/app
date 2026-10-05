@@ -1,5 +1,5 @@
 // FINAL
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -18,6 +18,7 @@ import { useRoleData } from "@/observer/RoleDataContext";
 import appointmentAPI from "@/API/appointmentAPI";
 import type { Payment } from "@/typesResponse/Payment";
 import type { Appointment } from "@/typesResponse/Appointment";
+import { tone } from "@shared-theme/themePrimitives";
 
 interface ReceiptDetailsProps {
   receiptData: Payment;
@@ -45,15 +46,14 @@ export default function ReceiptDetails({ receiptData }: ReceiptDetailsProps) {
   const [isFail, setIsFail] = useState(false);
 
   // Guarda la última acción para que el diálogo no cambie de texto durante la animación de cierre
-  const lastActionRef = useRef<PendingAction>(null);
+  const [lastAction, setLastAction] = useState<PendingAction>(null);
 
   const requestAction = (action: PendingAction) => {
-    if (action !== null) lastActionRef.current = action;
+    if (action !== null) setLastAction(action);
     setPendingAction(action);
   };
 
-  // isApproving lee del ref — no cambia cuando pendingAction se vuelve null
-  const isApproving = lastActionRef.current === "approve";
+  const isApproving = lastAction === "approve";
 
   const findAppointment = () => {
     const appointments: Appointment[] = data?.appointments || [];
@@ -182,24 +182,25 @@ export default function ReceiptDetails({ receiptData }: ReceiptDetailsProps) {
               onClick={() => requestAction("reject")}
               disabled={isLoading}
               sx={{
-                bgcolor: "#FCEBEB",
-                color: "#A32D2D",
+                bgcolor: tone.red.bg,
+                color: tone.red.fg,
                 fontSize: 12,
                 fontWeight: 500,
                 borderRadius: 2,
                 py: 1,
                 minHeight: 36,
-                border: "0.5px solid #F09595",
+                border: `0.5px solid ${tone.red.border}`,
                 textTransform: "none",
-                "&:hover": { bgcolor: "#F7C1C1" },
+                "&:hover": { bgcolor: tone.red.border },
                 "&:disabled": {
-                  bgcolor: "#FCEBEB88",
-                  borderColor: "#F0959588",
+                  bgcolor: tone.red.bg,
+                  borderColor: tone.red.border,
+                  opacity: 0.55,
                 },
               }}
             >
               {actionState === "rejecting" ? (
-                <CircularProgress size={16} sx={{ color: "#A32D2D" }} />
+                <CircularProgress size={16} sx={{ color: tone.red.fg }} />
               ) : (
                 "No aprobar"
               )}
@@ -225,9 +226,9 @@ export default function ReceiptDetails({ receiptData }: ReceiptDetailsProps) {
         <DialogTitle sx={{ pb: 0.5, pt: 2.5, px: 2.5 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {isApproving ? (
-              <CheckCircleOutlineRoundedIcon sx={{ fontSize: 20, color: "#0F6E56" }} />
+              <CheckCircleOutlineRoundedIcon sx={{ fontSize: 20, color: tone.green.fg }} />
             ) : (
-              <CancelOutlinedIcon sx={{ fontSize: 20, color: "#A32D2D" }} />
+              <CancelOutlinedIcon sx={{ fontSize: 20, color: tone.red.fg }} />
             )}
             <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
               {isApproving ? "Aprobar comprobante" : "Rechazar comprobante"}

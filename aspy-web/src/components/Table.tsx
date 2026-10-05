@@ -6,6 +6,7 @@ import type {
   GridRowSelectionModel,
   GridRowId,
 } from "@mui/x-data-grid";
+import { tone } from "@shared-theme/themePrimitives";
 
 export type TableProps<T> = {
   columns: GridColDef[];
@@ -89,9 +90,11 @@ export default function Table<T>({
             "&:last-child": { borderBottom: "none" },
           },
           "& .MuiDataGrid-row.Mui-selected": {
-            bgcolor: "#E6F1FB",
-            "&:hover": { bgcolor: "#daeaf8" },
-            "& .MuiDataGrid-cell": { color: "#185FA5" },
+            bgcolor: tone.blue.bg,
+            "&:hover": {
+              bgcolor: `color-mix(in srgb, ${tone.blue.bg} 70%, ${tone.blue.border})`,
+            },
+            "& .MuiDataGrid-cell": { color: tone.blue.fg },
           },
           "& .MuiDataGrid-cell": {
             borderBottom: "none",

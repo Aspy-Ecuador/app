@@ -51,7 +51,7 @@ export default function Input({
         <select
           id={id}
           {...register(id, validation)}
-          className="border border-gray-300 rounded-md p-2 w-full"
+          className="border border-gray-300 rounded-md p-2 w-full bg-transparent dark:border-white/20"
           disabled={label === "Rol"}
         >
           <option value="">Seleccione una opción</option>
@@ -68,7 +68,7 @@ export default function Input({
           type={type}
           variant="outlined"
           size="small"
-          className="w-full md:w-[300px]"
+          className="w-full md:max-w-[300px]"
           sx={{
             "& input::-webkit-outer-spin-button": {
               WebkitAppearance: "none",

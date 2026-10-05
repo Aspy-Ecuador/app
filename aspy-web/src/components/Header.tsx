@@ -4,6 +4,7 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import { tone } from "@shared-theme/themePrimitives";
 
 interface HeaderProps {
   textHeader: string;
@@ -62,13 +63,13 @@ export default function Header({
             size="large"
             startIcon={<AddRoundedIcon />}
             sx={{
-              bgcolor: "#E1F5EE",
-              color: "#0F6E56",
-              border: "0.5px solid #9FE1CB",
+              bgcolor: tone.green.bg,
+              color: tone.green.fg,
+              border: `0.5px solid ${tone.green.border}`,
               borderRadius: 1.5,
               px: 1.5,
               height: 26,
-              "&:hover": { bgcolor: "#9FE1CB" },
+              "&:hover": { bgcolor: tone.green.border },
             }}
           >
             {textIcon}

@@ -7,6 +7,7 @@ import Grid from "@mui/material/Grid";
 import ServiceForm from "@forms/ServiceForm";
 import Header from "@components/Header";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import { tone } from "@shared-theme/themePrimitives";
 import Progress from "@components/Progress"; // <-- Importamos el spinner
 import { useRoleData } from "@/observer/RoleDataContext"; // <-- Importamos el contexto
 
@@ -66,8 +67,8 @@ export default function EditService() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  bgcolor: "#E6F1FB", 
-                  color: "#185FA5",
+                  bgcolor: tone.blue.bg, 
+                  color: tone.blue.fg,
                   "& svg": { fontSize: 15 },
                 }}
               >

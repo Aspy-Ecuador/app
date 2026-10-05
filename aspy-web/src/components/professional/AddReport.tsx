@@ -19,6 +19,7 @@ import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutl
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
+import { tone } from "@shared-theme/themePrimitives";
 
 interface AddReportProps {
   setReport: (file: FileData | null) => void;
@@ -107,7 +108,7 @@ export default function AddReport({ setReport }: AddReportProps) {
               borderRadius: 2,
               border: "0.5px solid",
               borderColor: "success.light",
-              bgcolor: "#EAF3DE",
+              bgcolor: tone.green.bg,
             }}
           >
             <CheckCircleOutlineRoundedIcon
@@ -126,7 +127,7 @@ export default function AddReport({ setReport }: AddReportProps) {
                 fontWeight={500}
                 noWrap
                 title={reporte.name}
-                sx={{ color: "#3B6D11" }}
+                sx={{ color: tone.green.fg }}
               >
                 {reporte.name}
               </Typography>
@@ -174,13 +175,13 @@ export default function AddReport({ setReport }: AddReportProps) {
                 width: 36,
                 height: 36,
                 borderRadius: "50%",
-                bgcolor: "#E6F1FB",
+                bgcolor: tone.blue.bg,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <UploadFileRoundedIcon sx={{ fontSize: 18, color: "#185FA5" }} />
+              <UploadFileRoundedIcon sx={{ fontSize: 18, color: tone.blue.fg }} />
             </Box>
             <Box textAlign="center">
               <Typography variant="body2" fontWeight={500}>

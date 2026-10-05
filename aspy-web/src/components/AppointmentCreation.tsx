@@ -17,6 +17,7 @@ import type { ProfessionalService } from "@/typesResponse/ProfessionalService";
 import type { WorkerProfessional } from "@/typesResponse/WorkerProfessional";
 import type { Person } from "@/typesResponse/Person";
 import type { Service } from "@/typesResponse/Service";
+import { tone } from "@shared-theme/themePrimitives";
 
 interface AppointmentCreationProp {
   isClient: boolean;
@@ -244,15 +245,15 @@ export default function AppointmentCreation({
                 alignItems: "center",
                 gap: 0.75,
                 p: 1.25,
-                bgcolor: "#FCEBEB",
-                border: "0.5px solid #F7C1C1",
+                bgcolor: tone.red.bg,
+                border: `0.5px solid ${tone.red.border}`,
                 borderRadius: 2,
               }}
             >
               <ErrorOutlineRoundedIcon
-                sx={{ fontSize: 14, color: "#A32D2D", flexShrink: 0 }}
+                sx={{ fontSize: 14, color: tone.red.fg, flexShrink: 0 }}
               />
-              <Typography sx={{ fontSize: 11, color: "#A32D2D" }}>
+              <Typography sx={{ fontSize: 11, color: tone.red.fg }}>
                 {errorMessage}
               </Typography>
             </Box>
