@@ -24,6 +24,23 @@ const AUTORES = [
     .map((a) => `<span class="correo">${a.correo}</span> <button type="button" class="copiar no-imprimir" data-correo="${a.correo}">Copiar</button>`)
     .join(" · ");
 
+  // Tablas: van dentro de un recuadro que se desliza hacia los lados, para que en celular
+  // una tabla ancha no ensanche toda la página.
+  document.querySelectorAll("table.tabla").forEach((tabla) => {
+    const caja = document.createElement("div");
+    caja.className = "tabla-desliza";
+    caja.tabIndex = 0;
+    caja.setAttribute("role", "region");
+    caja.setAttribute("aria-label", "Tabla (se desliza hacia los lados si no cabe)");
+    tabla.parentNode.insertBefore(caja, tabla);
+    caja.appendChild(tabla);
+    // En celular cada fila se muestra como una ficha: cada dato lleva el nombre de su columna
+    const columnas = [...tabla.querySelectorAll("thead th")].map((th) => th.textContent.trim());
+    tabla.querySelectorAll("tbody tr").forEach((fila) => {
+      [...fila.children].forEach((celda, i) => { if (columnas[i]) celda.dataset.col = columnas[i]; });
+    });
+  });
+
   // 1. Créditos al final de cada capítulo
   document.querySelectorAll(".capitulo").forEach((cap) => {
     const div = document.createElement("div");

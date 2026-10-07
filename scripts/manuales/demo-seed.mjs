@@ -16,6 +16,9 @@ async function call(method, path, token, body) {
 }
 async function login(email, password = PASS) {
   const r = await call("POST", "/login", null, { email, password });
+  // Las personas de demo ya aceptaron la política de privacidad; si no, en cada captura saldría
+  // la ventana del primer ingreso (las cuentas creadas desde el panel no la tienen aceptada).
+  await call("POST", "/consentimiento", r.data.access_token, { accepted_privacy_policy: true, policy_version: "1.0" });
   const me = await call("GET", "/user", r.data.access_token);
   return { token: r.data.access_token, personId: me.data.person?.person_id };
 }

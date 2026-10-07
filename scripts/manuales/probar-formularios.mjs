@@ -212,6 +212,28 @@ try {
     comprobarPersona("Secretaría · registrar paciente: se guardó lo escrito", guardada, v, 3);
     ok("Secretaría · registrar paciente: puede entrar con su contraseña", (await token(v.email, v.password)).status === 200);
 
+    // Primer ingreso de esa cuenta: nadie aceptó la política por ella, así que se le muestra y no puede seguir sin aceptarla
+    {
+      const c2 = await context(b);
+      const p2 = await c2.newPage();
+      await login(p2, v.email, v.password); await settle(p2, 800);
+      const ventana = p2.getByRole("dialog");
+      await ventana.waitFor({ timeout: 15000 });
+      ok("Primer ingreso · aparece la política y no se puede aceptar sin leerla", await ventana.getByRole("button", { name: /Desliza para aceptar/ }).isDisabled());
+      await p2.keyboard.press("Escape"); await p2.waitForTimeout(400);
+      ok("Primer ingreso · no se cierra con Escape", await ventana.isVisible());
+      await ventana.locator(".MuiDialogContent-root").evaluate((el) => el.scrollTo(0, el.scrollHeight)); await p2.waitForTimeout(500);
+      await p2.screenshot({ path: path.join(OUT, "primer-ingreso-politica.jpg"), type: "jpeg", quality: 70 });
+      await ventana.getByRole("button", { name: "Entendido y Acepto" }).click();
+      await ventana.waitFor({ state: "hidden", timeout: 15000 });
+      const t = (await token(v.email, v.password)).token;
+      const estado = await (await fetch(API + "/consentimiento", { headers: { Authorization: `Bearer ${t}`, Accept: "application/json" } })).json();
+      ok("Primer ingreso · la aceptación quedó registrada", estado.pendiente === false, JSON.stringify(estado));
+      await p2.reload(); await settle(p2, 1500);
+      ok("Primer ingreso · no vuelve a pedirla", !(await p2.getByRole("dialog").isVisible().catch(() => false)));
+      await c2.close();
+    }
+
     const servicio = "Servicio staff " + sufijo;
     await go(p, "/crear-servicio");
     await llenarPaso(p, { name: servicio, price: "20" });

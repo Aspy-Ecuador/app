@@ -67,7 +67,7 @@ WEB=http://localhost:5173 node probar-formularios.mjs
 bash reset.sh                 # deja la BD de demo limpia otra vez (la prueba crea usuarios y servicios)
 ```
 
-Llena y envía, como lo haría una persona, los formularios del panel (crear y editar usuario, servicios, datos bancarios, horario, perfil propio, filtro de citas) y compara en el API lo guardado con lo escrito. Termina con código 1 si algo falla y deja capturas en `out/formularios/`. Solo corre contra servidores locales. Córrela después de tocar cualquier formulario (la lista de formularios y calendarios está en el "Mapa de pantallas" de `CLAUDE.md`).
+Llena y envía, como lo haría una persona, los formularios del panel (crear y editar usuario, servicios, datos bancarios, horario, perfil propio, filtro de citas, y la política de privacidad en el primer ingreso de una cuenta creada desde el panel) y compara en el API lo guardado con lo escrito. Termina con código 1 si algo falla y deja capturas en `out/formularios/`. Solo corre contra servidores locales. Córrela después de tocar cualquier formulario (la lista de formularios y calendarios está en el "Mapa de pantallas" de `CLAUDE.md`).
 
 ## Después de cambiar un manual
 

@@ -137,6 +137,36 @@ try {
   await ctx.close();
 }
 
+// ── Primer ingreso de una cuenta que creó la fundación: pide aceptar la política ──
+{
+  const API = "http://127.0.0.1:8002/api";
+  const J = { "Content-Type": "application/json", Accept: "application/json" };
+  const c2 = await context(b);
+  const p2 = await c2.newPage();
+  try {
+    await step("primer-ingreso", async () => {
+      const admin = (await (await fetch(API + "/login", { method: "POST", headers: J, body: JSON.stringify({ email: "admin@aspy.com", password: "ADMIN" }) })).json()).access_token;
+      const r = await fetch(API + "/user-account/crear", {
+        method: "POST", headers: { ...J, Authorization: "Bearer " + admin },
+        body: JSON.stringify({
+          email: "rosa.paz@gmail.com", password: "Aspy2026", password_confirmation: "Aspy2026", role_id: 3, role: "client",
+          first_name: "Rosa", last_name: "Paz", birthdate: "1992-11-03", gender_id: 2, occupation_id: 5, marital_status_id: 1, education_id: 5,
+          phone: { number: "0998877665", type: "movil" }, identification: { type: "cedula", number: "0956781234" },
+          address: { type: "casa", country_id: 1, state_id: 10, city_id: 46, primary_address: "Cdla. Alborada", secondary_address: "Mz. 5 Villa 2" },
+        }),
+      });
+      if (r.status !== 201 && r.status !== 422) throw new Error("no se pudo crear la cuenta de demo: " + r.status);
+      await login(p2, "rosa.paz@gmail.com", "Aspy2026"); await settle(p2, 1200);
+      await p2.getByRole("dialog").waitFor({ timeout: 15000 });
+      await mark(p2, p2.getByRole("button", { name: /Desliza para aceptar|Entendido y Acepto/ }), "1");
+      await mark(p2, p2.getByRole("button", { name: "Cerrar sesión" }), "2");
+      await rawShot(p2, D + "34-politica-primer-ingreso");
+    });
+  } finally {
+    await c2.close();
+  }
+}
+
 // ── En el celular ──
 const m = await context(b, { width: 390, height: 844, mobile: true });
 const mp = await m.newPage();
