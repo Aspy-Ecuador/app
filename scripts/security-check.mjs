@@ -306,6 +306,22 @@ r = await call("POST", "/user-account/registro", null, sinPolitica(e("sinpolitic
 check("Registro público sin aceptar la política se rechaza", r.status === 422 && !!r.data?.errors?.accepted_privacy_policy, r.status);
 r = await call("POST", "/user-account/crear", S.token, sinPolitica(e("altapanel")));
 check("Alta desde el panel no exige la política", r.status === 201, `${r.status} ${JSON.stringify(r.data)}`);
+// …pero esa persona la acepta ella misma en su primer ingreso (aplica a todos los roles)
+const altaPanel = await login(e("altapanel"));
+r = await call("GET", "/consentimiento", null);
+check("Consultar el consentimiento exige sesión", r.status === 401, r.status);
+r = await call("GET", "/consentimiento", altaPanel.token);
+check("Cuenta creada desde el panel: política pendiente", r.status === 200 && r.data?.pendiente === true, JSON.stringify(r.data));
+r = await call("GET", "/consentimiento", A.token);
+check("Quien se registró por su cuenta ya la tiene aceptada", r.data?.pendiente === false, JSON.stringify(r.data));
+r = await call("POST", "/consentimiento", altaPanel.token, { accepted_privacy_policy: false, policy_version: "1.0" });
+check("No se registra un consentimiento sin aceptar", r.status === 422, r.status);
+r = await call("POST", "/consentimiento", altaPanel.token, { accepted_privacy_policy: true, policy_version: "9.9" });
+check("No se acepta una versión que no es la vigente", r.status === 422, r.status);
+r = await call("POST", "/consentimiento", altaPanel.token, { accepted_privacy_policy: true, policy_version: "1.0", user_id: 1, user_account_id: 1 });
+const consPropio = (await call("GET", "/consentimiento", altaPanel.token)).data;
+const consAjeno = (await call("GET", "/consentimiento", S.token)).data;
+check("Cada quien acepta solo por su propia cuenta", r.status === 201 && consPropio?.pendiente === false && consAjeno?.pendiente === true, `${r.status} ${JSON.stringify(consPropio)} ${JSON.stringify(consAjeno)}`);
 
 // ───────── Cuentas deshabilitadas ─────────
 console.log("\nCuentas deshabilitadas");

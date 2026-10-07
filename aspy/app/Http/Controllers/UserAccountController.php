@@ -166,7 +166,7 @@ class UserAccountController extends Controller
             'password'                  => 'required|string|min:8|confirmed', // espera password_confirmation
             'role_id'                   => 'required|integer|exists:role,role_id',
             'accepted_privacy_policy'   => $registroPublico ? 'required|accepted' : 'nullable',
-            'policy_version'            => $registroPublico ? 'required|string|max:10' : 'nullable|string|max:10',
+            'policy_version'            => $registroPublico ? 'required|string|in:'.ConsentimientoController::VERSION : 'nullable|string|max:10',
 
             // ── Datos base de Person ──────────────────────────
             'gender_id'                 => 'required|integer|exists:gender,gender_id',

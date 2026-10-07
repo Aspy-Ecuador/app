@@ -4,6 +4,7 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AppointmentReportController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BankAccountController;
+use App\Http\Controllers\ConsentimientoController;
 use App\Http\Controllers\ManualController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PersonController;
@@ -40,6 +41,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/bank-account', [BankAccountController::class, 'update'])->middleware('role:admin');
     // Manuales de uso: pase temporal con los manuales que puede ver el rol (ver ManualController)
     Route::get('/manuales/acceso', [ManualController::class, 'acceso']);
+    // Política de privacidad: cada quien consulta y acepta la suya (primer ingreso de cuentas creadas desde el panel)
+    Route::get('/consentimiento', [ConsentimientoController::class, 'show']);
+    Route::post('/consentimiento', [ConsentimientoController::class, 'store']);
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 });
