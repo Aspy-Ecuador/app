@@ -93,7 +93,7 @@ La seguridad vive en el **backend**. Las rutas del frontend por rol son solo com
      - El cliente ve lo suyo; de los profesionales solo recibe nombre, especialidad y si están disponibles.
    - Los reportes clínicos los ven solo el cliente dueño, el profesional que atendió y el Admin. **No el Staff**.
    - El registro público (`/user-account/registro`) **siempre crea un Cliente**. Solo un Admin crea o edita Admins. Nadie se cambia su propio rol.
-   - **Política de privacidad:** el registro público exige `accepted_privacy_policy` y `policy_version` y guarda un `UserConsent`. El alta desde el panel (`/user-account/crear`, con sesión) **no** los pide ni guarda consentimiento: nadie acepta la política por otra persona.
+   - **Política de privacidad (`ConsentimientoController`):** el registro público exige `accepted_privacy_policy` y `policy_version` y guarda un `UserConsent`. El alta desde el panel (`/user-account/crear`, con sesión) **no** los pide: nadie acepta la política por otra persona. Esa persona la acepta ella misma en su **primer ingreso**: `GET /api/consentimiento` dice si le falta (`pendiente`) y `POST /api/consentimiento` la registra, siempre sobre la cuenta de la sesión (no recibe ningún id). **Aplica a todos los roles** (decisión del dueño, 2026-10-07). En la web, `ConsentimientoPendiente` (dentro de `PrivateRoute`) muestra la política en una ventana que no se cierra con Escape ni tocando fuera: solo aceptando (después de leerla hasta el final) o con *Cerrar sesión*. Es un aviso obligatorio de la interfaz, **no un control de acceso**: el API no bloquea a quien no aceptó. La versión vigente está en `ConsentimientoController::VERSION` y `config/politica.ts`; si cambia el texto (`components/privacidad/DialogoPolitica.tsx`), sube las dos y todos deberán aceptarla de nuevo.
    - El cliente solo agenda para sí mismo y en un horario libre del profesional que ofrece ese servicio (`lockForUpdate` evita la doble reserva). Solo cancela citas en estado 1 o 2 y con más de 24 h de anticipación.
    - Marcar asistencia y crear reportes: solo el profesional de esa cita.
 3. Límites de intentos: el login tiene `throttle:login` (10/min por email + IP, definido en `AppServiceProvider`); el registro, `throttle:5,1`.
@@ -108,7 +108,7 @@ La seguridad vive en el **backend**. Las rutas del frontend por rol son solo com
 
 **Al agregar un endpoint:** pon el `role:` en la ruta **y** valida el dueño en el controlador. Luego agrega un caso a `scripts/security-check.mjs`.
 
-**Pruebas de seguridad:** `scripts/security-check.mjs` (92 casos: escalada de privilegios, acceso a datos ajenos, acciones prohibidas, flujos normales, manuales, cuentas deshabilitadas, datos bancarios, registro, asistencia y montos; la última corrida, el 2026-10-07, pasó 92/92. La sección "Registro" espera 61 s entre intentos por el límite de 5/min, así que tarda unos minutos). Crea datos, así que solo corre contra un backend local con SQLite; el script se niega si `API_URL` no es localhost. Las instrucciones están en su cabecera. **Nunca lo apuntes a Railway.**
+**Pruebas de seguridad:** `scripts/security-check.mjs` (98 casos: escalada de privilegios, acceso a datos ajenos, acciones prohibidas, flujos normales, manuales, cuentas deshabilitadas, datos bancarios, registro, asistencia y montos; la última corrida, el 2026-10-07, pasó 98/98. La sección "Registro" espera 61 s entre intentos por el límite de 5/min, así que tarda unos minutos). Crea datos, así que solo corre contra un backend local con SQLite; el script se niega si `API_URL` no es localhost. Las instrucciones están en su cabecera. **Nunca lo apuntes a Railway.**
 
 ## Tema y modo oscuro (frontend)
 
@@ -123,7 +123,7 @@ La seguridad vive en el **backend**. Las rutas del frontend por rol son solo com
   - `paletteVar("ruta.del.palette")` cuando necesites la variable CSS dentro de un string (p. ej. con `!important`).
 - Excepción: **los gráficos de MUI X y los PDFs necesitan hex reales**, no `var(...)`. Los botones sólidos (verde `#1D9E75` con texto blanco) se ven bien en ambos modos y pueden quedar en hex.
 - Tailwind: la variante `dark:` está ligada a `[data-mui-color-scheme="dark"]` (en `index.css`).
-- El botón de modo (`ColorModeToggle`) está en el `SideMenu` del panel (en celular y tablet, donde el menú se esconde, queda fijo arriba a la derecha, frente al botón ☰) y, en la landing, flotando abajo a la izquierda (`FloatingModeToggle.tsx`; WhatsApp va abajo a la derecha). En el login y el registro va arriba a la derecha (dentro de `AuthShell`). No va en el navbar ni en "Sobre ASPY" (que usa el layout del panel). El sol y la luna giran y el modo nuevo se expande en círculo desde el botón (View Transitions API). Sin soporte del navegador o con "reducir movimiento", el cambio es instantáneo. **Dentro de `startViewTransition` no uses `requestAnimationFrame`**: el navegador pausa el dibujado y la transición queda trabada; por eso `waitForScheme` usa `setTimeout`.
+- El botón de modo (`ColorModeToggle`) está en el `SideMenu` del panel (en celular y tablet, donde el menú se esconde, queda fijo arriba a la derecha, frente al botón ☰; con el menú abierto los dos botones fijos se ocultan, porque el menú ya trae el suyo y se verían dos) y, en la landing, flotando abajo a la izquierda (`FloatingModeToggle.tsx`; WhatsApp va abajo a la derecha). En el login y el registro va arriba a la derecha (dentro de `AuthShell`). No va en el navbar ni en "Sobre ASPY" (que usa el layout del panel). El sol y la luna giran y el modo nuevo se expande en círculo desde el botón (View Transitions API). Sin soporte del navegador o con "reducir movimiento", el cambio es instantáneo. **Dentro de `startViewTransition` no uses `requestAnimationFrame`**: el navegador pausa el dibujado y la transición queda trabada; por eso `waitForScheme` usa `setTimeout`.
 - Verificado con capturas de todas las pantallas de los 4 roles, en claro y oscuro.
 
 ## Diseño responsivo (regla del dueño)
@@ -193,13 +193,13 @@ Hay **tres** tipos. Los dos de MUI X comparten aspecto en **`components/forms/es
 - **Errores:** cada campo muestra el suyo debajo (`findInputError` usa `get` de react-hook-form, que entiende nombres anidados como `address.city_id`). Si el servidor rechaza el envío, `FormViewAdmin` / `FormViewUser` muestran un aviso arriba con `utils/mensajeErrorUsuario.ts`; el registro público usa `mensajeDeError` de `RegisterView`.
 - **Provincia → ciudad:** al cambiar de provincia se borra la ciudad, salvo que ya pertenezca a ella (`ciudadEsDeProvincia`), para no perder la ciudad guardada al abrir una edición.
 - **Título y especialidad** solo se piden a profesionales (rol 2): por eso el paso 2 tiene 10 campos para ellos y 8 para los demás (`getStepsFields` / `pasosDe`).
-- **Prueba de envío de todos los formularios:** `scripts/manuales/probar-formularios.mjs` los llena como una persona, los envía y compara en el API lo guardado con lo escrito (32 comprobaciones; solo contra la BD de demo). **Córrela después de tocar cualquier formulario.**
+- **Prueba de envío de todos los formularios:** `scripts/manuales/probar-formularios.mjs` los llena como una persona, los envía y compara en el API lo guardado con lo escrito (36 comprobaciones, incluido el primer ingreso con la política de privacidad; solo contra la BD de demo). **Córrela después de tocar cualquier formulario.**
 
 ### Otras piezas repetidas
 
 - **Tablas** (`components/Table.tsx`, DataGrid en español): `/usuarios`, `/servicios` (Admin, Secretaría y `/consultarServicios` de Cliente), `/pacientes` (Profesional y Secretaría), `/profesionales`, `/pagos`, `/recibos` (Cliente y Secretaría).
 - **Encabezado de pantalla:** `SimpleHeader` (título + chip; en celular el título va a la izquierda y puede ocupar dos líneas).
-- **Diálogos:** `Success` (confirmación tras guardar), `professional/ConfirmDialog` (asistencia), `ShowAppointment`, `staff/ReceiptDetails`, política de privacidad en `FormRegister`.
+- **Diálogos:** `Success` (confirmación tras guardar), `professional/ConfirmDialog` (asistencia), `ShowAppointment`, `staff/ReceiptDetails` y la política de privacidad (`privacidad/DialogoPolitica`, que usan `FormRegister` en el registro y `ConsentimientoPendiente` en el primer ingreso).
 - **Gráficos** (MUI X Charts, colores en hex): `admin/PageViewsBarChart`, `admin/SessionsChart` (`/dashboard` de Admin).
 - **Menú lateral y barra del celular:** `SideMenu` + `MenuContent` + `OptionsMenu` (⋮).
 
@@ -207,11 +207,11 @@ Hay **tres** tipos. Los dos de MUI X comparten aspecto en **`components/forms/es
 
 - `database/migrations/2025_05_31_000000_create_all_tables.php` crea casi todo el esquema.
 - `2026_10_05_000000_add_is_available_columns.php` agrega `user_account.is_available`, `service.is_available` y el estado 5 "Cancelada" **solo si faltan** (es idempotente). En producción ya existían; correr `php artisan migrate` allí solo registra la migración.
-- Producción (Railway) tiene la tabla `migrations` al día hasta `2026_09_13_..._user_consents`. **Pendientes de correr en producción** (con `php artisan migrate --force`, después de desplegar el backend): `2026_10_05_000000_add_is_available_columns` (solo registra), `2026_10_06_000000_add_payment_amount_and_bank_account` y `2026_10_06_000001_add_occupation_other`. Las tres son idempotentes.
+- **Las migraciones se aplican solas en cada despliegue:** el contenedor arranca con `aspy/migrar-al-arrancar.sh` (ver `Dockerfile`), que corre `php artisan migrate --force` y, si falla porque la base no tiene registradas las migraciones iniciales (que no se pueden repetir), aplica solo las repetibles. Nunca impide que el sitio arranque. **Si agregas una migración, hazla repetible (que revise qué falta antes de crear) y súmala a la lista de ese script.** En producción quedaron aplicadas el 2026-10-07: `payment.amount`, `bank_account` y `occupation_other`.
 - `2026_10_06_000000`: `payment.amount` (monto cobrado; los pagos viejos se completan con el precio actual de su servicio) y la tabla `bank_account` (una fila).
 - `2026_10_06_000001`: `person.occupation_other` y la ocupación id 10 "Otra" (el seeder también la crea).
 - El seeder crea los catálogos (roles, estados, géneros, ocupaciones, provincias y ciudades de Ecuador) y el usuario `admin@aspy.com` (contraseña en el seeder; cámbiala en cualquier entorno real).
-- ⚠️ El `.env` local apunta a la BD **de producción** en Railway. Para probar cosas que escriben datos usa SQLite: `DB_CONNECTION=sqlite DB_DATABASE=/ruta/test.sqlite php artisan ...`. Las variables de entorno tienen prioridad sobre `.env`; verifícalo antes con `php artisan config:show database.default`.
+- ⚠️ **El `.env` local apunta a una base de Railway (`switchback.proxy.rlwy.net`) que NO es la del sitio en producción.** Se descubrió el 2026-10-07: el API de producción mostraba 10 personas y 8 pagos y esa base tenía 8 y 7. El backend de producción toma su conexión de las variables configuradas en Railway, que no están en el repo. Consecuencias: (1) correr `php artisan migrate` desde aquí **no** migra producción (ese día se aplicaron ahí dos migraciones por error; solo agregaron columnas y una tabla); (2) esa otra base tiene datos de personas igual, así que **no la uses para pruebas**: usa SQLite (`DB_CONNECTION=sqlite DB_DATABASE=/ruta/test.sqlite php artisan ...`; las variables de entorno tienen prioridad sobre `.env`, verifícalo con `php artisan config:show database.default`). Para ver el estado real de producción, consulta su API.
 
 ## Historial de cambios importantes (2026-10-05)
 
@@ -292,6 +292,7 @@ Hay **tres** tipos. Los dos de MUI X comparten aspecto en **`components/forms/es
   - Casos en `scripts/security-check.mjs` (sección "Manuales de uso").
 - **Dentro del sistema:** menú **⋮ → Manual de uso** (ruta compartida `/manual`, `src/pages/Manuales.tsx` + `API/manualAPI.ts`). Pide el pase, muestra el manual en un iframe con `?embebido` (oculta el acceso a la portada) y abre primero el del propio rol.
 - Estilos y lógica comunes en `assets/manual.css` y `assets/manual.js` (colores ASPY, índice, visor de imágenes, créditos).
+- **Los manuales son responsivos** (pedido del dueño, 2026-10-07), abiertos solos o dentro del sistema: en celular nada ensancha la página (`.layout` usa `minmax(0, 1fr)`; los enlaces largos se parten) y **las tablas se leen como fichas**, una por fila, con el nombre de la columna sobre cada dato (`manual.js` lo copia del encabezado a `data-col` y envuelve cada tabla en `.tabla-desliza`). En televisores se agrandan con los mismos cortes y factores del sistema (`zoom` en `html`; dentro del sistema van en un iframe que ya viene agrandado y no llegan a esos anchos). La pantalla `/manual` (`pages/Manuales.tsx`) ocupa justo el alto visible: en celular y tablet las pestañas van en una fila que se desliza y *Abrir en otra pestaña* queda como ícono, para que solo se desplace el manual.
 - **Regla del dueño: los manuales se mantienen al día.** Cada cambio en el sistema, la landing o el Studio que altere lo que ve o hace un usuario debe reflejarse en el manual correspondiente, en el mismo trabajo: actualizar el texto, rehacer las capturas afectadas, regenerar los PDF y republicar los artifacts (mismos enlaces).
 - **Créditos:** cada capítulo termina con “Desarrollado por Carlos Salazar Valverde y Carlos Flores Gonzales” y sus correos de ESPOL (carasala@espol.edu.ec, carfgonz@espol.edu.ec), generados desde la lista `AUTORES` al inicio de `assets/manual.js`. Para cambiar un correo, edita esa lista.
 - El logo de los manuales es siempre el oficial (`assets/logo-aspy.webp`). **No uses el isotipo de anillos** en los manuales.
@@ -302,24 +303,25 @@ Hay **tres** tipos. Los dos de MUI X comparten aspecto en **`components/forms/es
 
 ## Estado actual y punto de retoma (2026-10-07)
 
-**Todo lo de esta tanda está en commits y con push a `fix-version3-aspy`** (2026-10-07, pedido por el dueño): el frontend ya salió a Vercel. **El backend de Railway sigue con la versión anterior** (el 2026-10-07 respondía 404 en `/api/bank-account`, `/api/sesion` y `/api/manuales/acceso`).
+**Todo está en commits y con push a `fix-version3-aspy`** (2026-10-07, pedido por el dueño): la web salió a Vercel y el backend a Railway, **con las migraciones aplicadas en la base real**.
 
 Qué incluye:
-- Manuales de uso (5 + portada) protegidos dentro del sistema, cuentas deshabilitadas, favicon con el logo oficial, sin isotipo.
+- Manuales de uso (5 + portada) protegidos dentro del sistema y responsivos, cuentas deshabilitadas, favicon con el logo oficial, sin isotipo.
 - Datos bancarios editables solo por el Admin, monto guardado en cada pago, reglas de asistencia, contraseña opcional al editar, "¿Olvidaste tu contraseña?", saludos con el nombre, todo en español, Studio en español.
-- Login, registro y **todos los formularios del panel** rediseñados; **un solo calendario** para todas las fechas; botón de modo claro/oscuro también en celular; toda la app escalada para televisores.
+- Login, registro y **todos los formularios del panel** rediseñados; **un solo calendario** para todas las fechas; botón de modo claro/oscuro también en celular (uno solo a la vez); toda la app escalada para televisores.
+- **Política de privacidad en el primer ingreso** de las cuentas que crea la fundación (todos los roles).
 - Imágenes de muestra en los servicios de Sanity; mapa de contacto por la ficha de Google.
-- Verificado el 2026-10-07: `npm run build` OK; `probar-formularios.mjs` 32/32; `security-check.mjs` 92/92 contra SQLite; barrido responsivo sin desbordes. `npx eslint src` da 35 errores, **todos previos** (`any` en `utils.ts`, `RoleDataContext`, `ServicesList`, `gridData`, `HorarioProfessional`, y `ts-comment` en `shared-theme`); ninguno en archivos nuevos.
-- Manuales con texto, capturas y PDF al día y artifacts republicados (familias v10, profesional v6, secretaría v7, administración v7, página web v6).
+- Verificado el 2026-10-07: `npm run build` OK; `probar-formularios.mjs` 36/36; `security-check.mjs` 98/98 contra SQLite; barrido responsivo sin desbordes; los 6 manuales sin desbordes de 326 a 2560 px. `npx eslint src` da 35 errores, **todos previos** (`any` en `utils.ts`, `RoleDataContext`, `ServicesList`, `gridData`, `HorarioProfessional`, y `ts-comment` en `shared-theme`); ninguno en archivos nuevos.
+- Manuales con texto, capturas y PDF al día y artifacts republicados (portada v4, familias v11, profesional v7, secretaría v8, administración v8, página web v7).
 
 Pendiente (en orden):
-1. **Producción, backend** (con permiso del dueño): desplegar el backend en Railway → `php artisan migrate --force` (las 3 migraciones de **Base de datos y migraciones**) → el Admin carga los datos bancarios reales en *Datos bancarios*. **Mientras el backend no salga, en producción no funcionan**: el pago en línea (y por lo tanto agendar), *Datos bancarios*, *Manual de uso*, crear usuarios desde el panel, la ocupación "Otra" y el corte de sesión de cuentas deshabilitadas. Si Railway despliega solo con el push, **las migraciones siguen siendo obligatorias** (sin ellas fallan el registro y el agendamiento).
-2. **Decisión del dueño:** las cuentas creadas desde el panel no tienen consentimiento de la política de privacidad registrado (ver **Modelo de seguridad**). Si la fundación lo necesita, se puede pedir la aceptación en el primer ingreso.
-3. Del lado del dueño: `APP_DEBUG=false` en Railway; cambiar las contraseñas de las cuentas reales si siguen siendo las de prueba (el Admin del seeder usa `ADMIN`); decidir qué hacer con el testimonio publicado en Sanity ("¡Son un gran equipo!", parece de prueba); reemplazar las imágenes de muestra de Servicios; invitar a la fundación como Editor en Sanity; revisar que Google publique la dirección corregida (el 2026-10-07 la ficha aún decía "Av.Miguel H Alcivar, y y Alberto Borges Najera"); `git remote set-url origin https://github.com/Aspy-Ecuador/app.git`.
+1. **Datos bancarios reales:** el Admin debe cargarlos en *Datos bancarios*. En producción la tabla está vacía, así que **nadie puede pagar en línea (ni agendar) hasta que se carguen**; la pantalla de pago muestra el aviso y no deja continuar. (Ojo: sin cuenta guardada el API responde `{}`, no `null`; `bankAccountAPI.get` lo trata como "sin cuenta".)
+2. **Aviso a quienes ya tienen cuenta:** en producción 3 de las 4 cuentas de cliente, y las de profesionales, secretaría y admin, no tienen la política aceptada: verán la ventana en su próximo ingreso.
+3. Del lado del dueño: `APP_DEBUG=false` en Railway (hoy los errores 500 muestran el SQL); cambiar las contraseñas de las cuentas reales si siguen siendo las de prueba (el Admin del seeder usa `ADMIN`); decidir qué hacer con el testimonio publicado en Sanity ("¡Son un gran equipo!", parece de prueba); reemplazar las imágenes de muestra de Servicios; invitar a la fundación como Editor en Sanity; revisar que Google publique la dirección corregida (el 2026-10-07 la ficha aún decía "Av.Miguel H Alcivar, y y Alberto Borges Najera"); `git remote set-url origin https://github.com/Aspy-Ecuador/app.git`; revisar qué es la otra base de Railway a la que apunta el `.env` local y si se puede borrar (ver **Base de datos y migraciones**).
 4. Mejoras conocidas: ver **Pendientes y recomendaciones conocidas** (Cloudinary firmado, `.dockerignore`, CSP, endpoints rotos, `React.lazy`, `any`).
 
 Notas para retomar:
-- Los servidores de desarrollo no quedan corriendo. Para el sistema con datos de demo, ver `scripts/manuales/README.md` (backend :8002 con SQLite, web :5180). **Nunca levantes el backend sin `DB_CONNECTION=sqlite`** para pruebas que escriben datos.
+- Los servidores de desarrollo no quedan corriendo. Para el sistema con datos de demo, ver `scripts/manuales/README.md` (backend :8002 con SQLite, web :5180). **Nunca levantes el backend sin `DB_CONNECTION=sqlite`**: sin eso usa la otra base de Railway del `.env`, que tiene datos de personas.
 - Para ver la landing con el contenido real de Sanity, la web debe correr en el puerto **5173** (único puerto local con CORS en Sanity): `VITE_API_URL=http://127.0.0.1:8002/api npx vite --port 5173 --strictPort`. Las capturas aceptan otro puerto con `WEB=http://localhost:5173 node cap-sanity.mjs`.
 - Para las pruebas de seguridad: backend local con SQLite fresco (`migrate:fresh --seed`) y `API_URL=http://127.0.0.1:<puerto>/api node scripts/security-check.mjs` desde la raíz.
 
@@ -332,8 +334,8 @@ Notas para retomar:
   - Haz commit o push solo cuando el dueño lo pida.
 - **Despliegue:**
   - La rama `fix-version3-aspy` está conectada a Vercel: un push actualiza el frontend en https://aspy-web.vercel.app.
-  - El backend corre en Railway (`https://app-production-caab7.up.railway.app/api`) y se despliega aparte.
-  - El Dockerfile no corre migraciones: si agregas una, ejecuta `php artisan migrate --force` contra producción.
+  - El backend corre en Railway (`https://app-production-caab7.up.railway.app/api`) y **se despliega solo con el mismo push** a `fix-version3-aspy` (comprobado el 2026-10-07: tarda de 1 a 3 minutos). Un push publica web y backend a la vez.
+  - Las migraciones se aplican al arrancar el contenedor (`aspy/migrar-al-arrancar.sh`; ver **Base de datos y migraciones**). Después de un push con cambios de backend, comprueba producción consultando su API.
 - Estilos: MUI `sx` con tokens del tema; Tailwind solo para layout o detalles. Layout responsive con breakpoints de MUI (`{ xs, md }`).
 - TypeScript: evitar `any`; usar tipos de `src/types*`.
 - Antes de dar algo por terminado:
