@@ -139,8 +139,20 @@ export default function DialogoPolitica({ open, onCerrar, onAceptar, textoCerrar
         )}
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, py: 2, bgcolor: "background.default", justifyContent: "space-between", gap: 1 }}>
-        <Button onClick={onCerrar} disabled={aceptando} sx={{ color: "text.secondary", textTransform: "none", fontWeight: 600 }}>
+      {/* En celular los botones van uno sobre otro (aceptar arriba), para que quepan en cualquier ancho */}
+      <DialogActions
+        sx={{
+          px: { xs: 2, sm: 3 },
+          py: 2,
+          bgcolor: "background.default",
+          justifyContent: "space-between",
+          flexDirection: { xs: "column-reverse", sm: "row" },
+          alignItems: { xs: "stretch", sm: "center" },
+          gap: 1,
+          "& > :not(style) ~ :not(style)": { ml: { xs: 0, sm: 1 } },
+        }}
+      >
+        <Button onClick={onCerrar} disabled={aceptando} sx={{ whiteSpace: "nowrap", color: "text.secondary", textTransform: "none", fontWeight: 600 }}>
           {textoCerrar}
         </Button>
         <Button
@@ -150,6 +162,8 @@ export default function DialogoPolitica({ open, onCerrar, onAceptar, textoCerrar
           // Empieza en el color del texto y, al llegar abajo, cambia suavemente a verde
           sx={{
             minWidth: 190,
+            minHeight: { xs: 44, sm: 36 },
+            whiteSpace: "nowrap",
             backgroundImage: "none", // el tema pinta los botones con un degradado que taparía el verde
             bgcolor: leida ? "#0F6E56" : "text.primary",
             color: leida ? "#ffffff" : "background.paper",
