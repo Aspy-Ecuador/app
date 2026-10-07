@@ -1,7 +1,8 @@
 // aspy-web/src/pages/AboutAspy.tsx
 // Versión de la landing para usuarios con sesión iniciada (sin botones de ingreso ni de agenda).
 import Box from "@mui/material/Box";
-import { C, largeScreenZoom } from "@components/landing/constants";
+import { C } from "@components/landing/constants";
+import { vh } from "@shared-theme/pantallaGrande";
 import Navbar from "@components/landing/Navbar";
 import HeroSection from "@components/landing/HeroSection";
 import ImpactSection from "@components/landing/ImpactSection";
@@ -18,7 +19,7 @@ export default function AboutAspy() {
   const content = useLandingContent();
 
   return (
-    <Box sx={{ bgcolor: C.offWhite, minHeight: "100vh", overflowX: "hidden", ...largeScreenZoom }}>
+    <Box sx={{ bgcolor: C.offWhite, minHeight: vh(100), overflowX: "hidden" }}>
       <Navbar navigation={content.navigation} logo={content.site.logo} showAuthButton={false} />
       <Box component="main">
         <HeroSection content={content.hero} social={content.social} showScrollHint={content.impact.stats.length === 0} showCtas={false} />

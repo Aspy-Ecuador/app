@@ -1,4 +1,5 @@
 // FINAL
+import { reglaIdentificacion, reglaTelefono } from "@/config/reglasContacto";
 export const inputRegisterUserConfig = [
   // ── STEP 1: Datos personales
   {
@@ -44,15 +45,16 @@ export const inputRegisterUserConfig = [
     key: "occupation_id",
     type: "select",
     options: [
-      { label: "Psicólogo", value: 1 },
+      { label: "Psicólogo/a", value: 1 },
       { label: "Psiquiatra", value: 2 },
       { label: "Terapeuta", value: 3 },
       { label: "Estudiante", value: 4 },
       { label: "Docente", value: 5 },
-      { label: "Ingeniero", value: 6 },
-      { label: "Médico", value: 7 },
-      { label: "Abogado", value: 8 },
-      { label: "Empresario", value: 9 },
+      { label: "Ingeniero/a", value: 6 },
+      { label: "Médico/a", value: 7 },
+      { label: "Abogado/a", value: 8 },
+      { label: "Empresario/a", value: 9 },
+      { label: "Otra (escribir cuál)", value: 10 },
     ],
     validation: { required: { value: true, message: "Campo requerido" } },
   },
@@ -61,10 +63,10 @@ export const inputRegisterUserConfig = [
     key: "marital_status_id",
     type: "select",
     options: [
-      { label: "Soltero", value: 1 },
-      { label: "Casado", value: 2 },
-      { label: "Divorciado", value: 3 },
-      { label: "Viudo", value: 4 },
+      { label: "Soltero/a", value: 1 },
+      { label: "Casado/a", value: 2 },
+      { label: "Divorciado/a", value: 3 },
+      { label: "Viudo/a", value: 4 },
       { label: "Unión libre", value: 5 },
     ],
     validation: { required: { value: true, message: "Campo requerido" } },
@@ -99,7 +101,7 @@ export const inputRegisterUserConfig = [
     label: "Número de identificación",
     key: "identification.number",
     type: "text",
-    validation: { required: { value: true, message: "Campo requerido" } },
+    validation: reglaIdentificacion,
   },
   // ── STEP 2: Datos generales (índices 5–10) ────────────────────────────────
   {
@@ -117,7 +119,7 @@ export const inputRegisterUserConfig = [
     label: "Número de teléfono",
     key: "phone.number",
     type: "text",
-    validation: { required: { value: true, message: "Campo requerido" } },
+    validation: reglaTelefono,
   },
   {
     label: "País",

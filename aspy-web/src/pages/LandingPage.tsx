@@ -12,6 +12,7 @@ import AspyBandSection from "@components/landing/AspyBandSection";
 import SupportSection from "@components/landing/SupportSection";
 import Footer from "@components/landing/Footer";
 import WhatsAppButton from "@components/landing/WhatsAppButton";
+import FloatingModeToggle from "@components/landing/FloatingModeToggle";
 import { useLandingContent } from "@/content/landing/useLandingContent";
 
 export default function LandingPage() {
@@ -41,6 +42,7 @@ export default function LandingPage() {
         ctaLabel={content.hero.primaryCtaLabel}
         primaryHref={scheduleHref}
       />
+      <FloatingModeToggle />
       <WhatsAppButton contact={content.contact} />
     </Box>
   );

@@ -111,6 +111,15 @@ export const getAuthenticatedUserName = (): string => {
   return `${user.person.first_name} ${user.person.last_name}`; // Devuelve el nombre del usuario autenticado
 };
 
+/** Solo el nombre (sin apellido): para saludar sin suponer género ni título. */
+export const getAuthenticatedFirstName = (): string => {
+  const user = getAuthenticatedUser();
+  if (!user || user === null || typeof user === "string") {
+    throw new Error("No authenticated user found");
+  }
+  return user.person.first_name;
+};
+
 // Función para obtener el correo del usuario autenticado
 export const getAuthenticatedUserEmail = (): string => {
   const user = getAuthenticatedUser();

@@ -8,8 +8,8 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import InputLabel from "@mui/material/InputLabel";
-import FormControl from "@mui/material/FormControl";
+import Campo from "@forms/Campo";
+import { campoSx } from "@forms/estilos";
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 import DateCalendarValue from "@components/DateCalendarValue";
 import Progress from "@components/Progress";
@@ -76,27 +76,24 @@ const StyledSelect = ({
   disabled?: boolean;
   children: React.ReactNode;
 }) => (
-  <FormControl fullWidth size="small" disabled={disabled}>
-    <InputLabel sx={{ fontSize: 12 }}>{label}</InputLabel>
+  <Campo etiqueta={label} idEtiqueta={`cita-${label.toLowerCase()}-etiqueta`}>
     <Select
+      fullWidth
+      displayEmpty
+      disabled={disabled}
+      labelId={`cita-${label.toLowerCase()}-etiqueta`}
       value={value}
-      label={label}
       onChange={(e) => onChange(e.target.value)}
-      sx={{
-        fontSize: 12,
-        borderRadius: 2,
-        bgcolor: "action.hover",
-        "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
-      }}
+      sx={campoSx}
     >
-      <MenuItem value="" sx={{ fontSize: 12 }}>
-        <Typography sx={{ fontSize: 12, color: "text.disabled" }}>
+      <MenuItem value="">
+        <Typography component="span" sx={{ color: "text.secondary" }}>
           Selecciona una opción
         </Typography>
       </MenuItem>
       {children}
     </Select>
-  </FormControl>
+  </Campo>
 );
 
 export default function AppointmentCreation({

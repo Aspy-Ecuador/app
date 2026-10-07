@@ -4,7 +4,9 @@ import { useNavigate } from "react-router-dom";
 import type { UserForm } from "@/typesRequest/UserForm";
 import { useRoleData } from "@/observer/RoleDataContext";
 import { crearUsuario } from "@/API/auth";
+import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
+import { mensajeErrorUsuario } from "@utils/mensajeErrorUsuario";
 import UserFormUser from "@staff/UserFormUser";
 import Steps from "@components/Steps";
 import Grid from "@mui/material/Grid";
@@ -39,6 +41,7 @@ function buildPayload(data: UserForm, role_id: number) {
     birthdate: data.birthdate,
     gender_id: Number(data.gender_id),
     occupation_id: Number(data.occupation_id),
+    occupation_other: Number(data.occupation_id) === 10 ? data.occupation_other ?? "" : null,
     marital_status_id: Number(data.marital_status_id),
     education_id: Number(data.education_id),
 
@@ -61,11 +64,11 @@ function buildPayload(data: UserForm, role_id: number) {
   };
 }
 
-const stepsFields = [
-  { start: 0, end: 10 },
-  { start: 10, end: 20 },
-  { start: 20, end: 24 },
-];
+// El paso 2 del profesional tiene dos campos más (título y especialidad)
+const pasosDe = (role_id: number) =>
+  role_id === 2
+    ? [{ start: 0, end: 10 }, { start: 10, end: 20 }, { start: 20, end: 24 }]
+    : [{ start: 0, end: 10 }, { start: 10, end: 18 }, { start: 18, end: 24 }];
 
 export default function FormViewProfessional({
   isEdit,
@@ -75,8 +78,10 @@ export default function FormViewProfessional({
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const totalSteps = 3;
+  const stepsFields = pasosDe(role_id);
   const [open, setOpen] = useState(false);
   const [load, setLoad] = useState(false);
+  const [errorEnvio, setErrorEnvio] = useState("");
   const [formData, setFormData] = useState<Partial<UserForm>>({});
 
   const { loading, refreshPersons } = useRoleData();
@@ -100,6 +105,7 @@ export default function FormViewProfessional({
     const payload = buildPayload(fullData, role_id); // ← pasa role_id
 
     setLoad(true);
+    setErrorEnvio("");
     try {
       if (isEdit && user_id) {
         await userAccountAPI.updateUserAccount(user_id, payload);
@@ -109,7 +115,8 @@ export default function FormViewProfessional({
       await refreshPersons();
       setOpen(true);
     } catch (error: unknown) {
-      console.log(error);
+      // Antes el error solo iba a la consola y el formulario parecía no hacer nada
+      setErrorEnvio(mensajeErrorUsuario(error));
     } finally {
       setLoad(false);
     }
@@ -123,6 +130,13 @@ export default function FormViewProfessional({
         <Grid size={12} className="contenedor-principal">
           <Steps activeStep={step} steps={stepsName} />
         </Grid>
+        {errorEnvio && (
+          <Grid size={12} sx={{ display: "flex", justifyContent: "center", px: { xs: 1.5, md: 3 } }}>
+            <Alert severity="error" onClose={() => setErrorEnvio("")} sx={{ width: "100%", maxWidth: 860, borderRadius: 3 }}>
+              {errorEnvio}
+            </Alert>
+          </Grid>
+        )}
         <Grid size={12}>
           <UserFormUser
             isEditMode={isEdit}

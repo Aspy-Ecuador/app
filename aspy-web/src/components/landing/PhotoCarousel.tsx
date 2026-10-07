@@ -6,6 +6,7 @@ import Box from "@mui/material/Box";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import type { LandingImage } from "@/content/landing/types";
+import { responsiveImg } from "@/content/landing/images";
 import { focusRing, reducedMotion } from "./constants";
 
 interface PhotoCarouselProps {
@@ -106,10 +107,10 @@ export default function PhotoCarousel({ images, label, intervalSeconds = 4.5, ac
           >
             <Box
               component="img"
-              src={img.src}
+              {...responsiveImg(img.src, "(min-width: 900px) 440px, 90vw")}
               alt={img.alt}
               draggable={false}
-              loading={i === 0 ? "eager" : "lazy"}
+              loading="lazy"
               decoding="async"
               sx={{ width: "100%", height: "100%", objectFit: "cover", display: "block", userSelect: "none" }}
             />

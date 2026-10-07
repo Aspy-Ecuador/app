@@ -1,6 +1,7 @@
 // FINAL
 import Paper from "@mui/material/Paper";
 import { DataGrid } from "@mui/x-data-grid";
+import { esES } from "@mui/x-data-grid/locales";
 import type {
   GridColDef,
   GridRowSelectionModel,
@@ -40,6 +41,8 @@ export default function Table<T>({
       }}
     >
       <DataGrid
+        // Textos de la tabla en español ("Filas por página", "1–4 de 4"…)
+        localeText={esES.components.MuiDataGrid.defaultProps.localeText}
         rows={rows}
         columns={columns}
         getRowId={getRowId}

@@ -23,6 +23,7 @@ import { useTheme } from "@mui/material/styles";
 import type { Appointment } from "@/typesResponse/Appointment";
 import appointmentAPI from "@/API/appointmentAPI";
 import { paletteVar, tone } from "@shared-theme/themePrimitives";
+import { zoomActual, zoomSoloEn } from "@shared-theme/pantallaGrande";
 import { useRoleData } from "@/observer/RoleDataContext"; // ← NUEVO
 import Success from "@components/Success"; // ← NUEVO
 import Progress from "@components/Progress"; // ← NUEVO
@@ -276,8 +277,10 @@ const DetailPopover = ({
   onCancelled: () => void;
 }) => {
   const st = statusStyle(detail.statusId);
-  const safeX = Math.min(detail.x + 12, window.innerWidth - 280);
-  const safeY = Math.min(detail.y - 8, window.innerHeight - 260);
+  // x, y vienen en píxeles de pantalla; dentro del panel con zoom (pantallas grandes) se dividen
+  const zoom = zoomActual();
+  const safeX = Math.min(detail.x / zoom + 12, window.innerWidth / zoom - 280);
+  const safeY = Math.min(detail.y / zoom - 8, window.innerHeight / zoom - 350);
   const [cancelling, setCancelling] = useState(false);
 
   const role = getAuthenticatedUserIdRole();
@@ -597,6 +600,12 @@ export default function Agenda({
             color: `${tone.blue.fg} !important`,
           },
           "& .fc-timegrid-slot": { height: "54px !important" },
+          // Pantallas grandes: FullCalendar mide en píxeles de pantalla y se descuadra con el zoom
+          // del panel; se anula aquí y se aplica solo a textos, botones y citas
+          ...zoomSoloEn(
+            "& .fc-toolbar-chunk, & .fc-col-header-cell-cushion, & .fc-timegrid-slot-label-cushion, & .fc-event-main > *, & .fc-daygrid-dot-event > *, & .fc-daygrid-day-number, & .fc-daygrid-more-link",
+            (zoom) => ({ "& .fc-timegrid-slot": { height: `${54 * zoom}px !important` } }),
+          ),
           "& .fc-timegrid-slot-label": {
             fontSize: "9px !important",
             fontWeight: "500 !important",

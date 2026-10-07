@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { styled } from "@mui/material/styles";
+import type { Theme } from "@mui/material/styles";
 import MuiDrawer, { drawerClasses } from "@mui/material/Drawer";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -167,6 +168,18 @@ const DrawerContent = ({ name, email, onNavigate }: DrawerContentProps) => (
   </Box>
 );
 
+// Botones fijos de la barra superior en celular (44 px: cómodos para el dedo)
+const botonMovilSx = {
+  width: 44,
+  height: 44,
+  borderRadius: "12px",
+  border: 0,
+  bgcolor: (theme: Theme) => (theme.palette.mode === "dark" ? "hsl(220, 10%, 6%)" : "#1D2D44"),
+  color: "#fff",
+  boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+  "&:hover": { bgcolor: (theme: Theme) => (theme.palette.mode === "dark" ? "hsl(220, 10%, 10%)" : "#243550") },
+};
+
 export default function SideMenu() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const name = getAuthenticatedUserName();
@@ -184,20 +197,14 @@ export default function SideMenu() {
           zIndex: 1300,
         }}
       >
-        <IconButton
-          onClick={() => setMobileOpen(true)}
-          sx={{
-            width: 36,
-            height: 36,
-            borderRadius: "10px",
-            bgcolor: (theme) => theme.palette.mode === "dark" ? "hsl(220, 10%, 6%)" : "#1D2D44",
-            color: "#fff",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-            "&:hover": { bgcolor: (theme) => theme.palette.mode === "dark" ? "hsl(220, 10%, 10%)" : "#243550" },
-          }}
-        >
-          <MenuRoundedIcon sx={{ fontSize: 18 }} />
+        <IconButton onClick={() => setMobileOpen(true)} aria-label="Abrir el menú" sx={botonMovilSx}>
+          <MenuRoundedIcon sx={{ fontSize: 20 }} />
         </IconButton>
+      </Box>
+
+      {/* Modo claro / oscuro — solo móvil, siempre a la vista (también está dentro del menú) */}
+      <Box sx={{ display: { xs: "flex", md: "none" }, position: "fixed", top: 12, right: 12, zIndex: 1100 }}>
+        <ColorModeToggle sx={botonMovilSx} />
       </Box>
 
       {/* Drawer temporal — móvil */}

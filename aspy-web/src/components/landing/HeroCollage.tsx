@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import type { LandingImage } from "@/content/landing/types";
+import { responsiveImg } from "@/content/landing/images";
 import { C, float, reducedMotion } from "./constants";
 
 const CHIP_COLORS = [C.blue, C.pink, C.yellow];
@@ -93,15 +94,21 @@ export default function HeroCollage({ images, chips, rotationSeconds }: HeroColl
           >
             {/* Todas las fotos apiladas: solo la que toca en este marco es visible (fundido) */}
             {images.map((img, i) => {
-              const visible = (offset + slot) % images.length === i;
+              const n = images.length;
+              const current = (offset + slot) % n;
+              const visible = current === i;
+              // Solo se montan la foto actual, la anterior (para el fundido) y la siguiente (precarga)
+              if (n > 3 && i !== current && i !== (current + 1) % n && i !== (current - 1 + n) % n) return null;
               return (
                 <Box
                   key={img.src + i}
                   component="img"
-                  src={img.src}
+                  {...responsiveImg(img.src, "(min-width: 900px) 380px, 75vw")}
                   alt={visible ? img.alt : ""}
                   aria-hidden={!visible}
                   loading={slot === 0 && i === 0 ? "eager" : "lazy"}
+                  // La primera foto es lo más grande de la portada: se pide con prioridad
+                  fetchPriority={slot === 0 && i === 0 ? "high" : "auto"}
                   decoding="async"
                   sx={{
                     position: "absolute",

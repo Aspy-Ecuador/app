@@ -1,5 +1,5 @@
 // FINAL
-import { getAuthenticatedUserID, getAuthenticatedUserName } from "@store";
+import { getAuthenticatedUserID, getAuthenticatedFirstName } from "@store";
 import type { Appointment } from "@/typesResponse/Appointment";
 import { useRoleData } from "@/observer/RoleDataContext";
 import {
@@ -32,7 +32,7 @@ export default function ControlPanel() {
     <Box className="box-panel-control" sx={{ padding: 2 }}>
       <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 1, md: 1 }}>
         <Grid size={12}>
-          <WelcomePanel user={"Dr. " + getAuthenticatedUserName()} />
+          <WelcomePanel user={getAuthenticatedFirstName()} />
         </Grid>
 
         <Grid size={12}>

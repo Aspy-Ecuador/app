@@ -1,57 +1,28 @@
 // FINAL
-import { useNavigate } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { login } from "@API/auth";
-import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import MuiCard from "@mui/material/Card";
-import Divider from "@mui/material/Divider";
-import FormLabel from "@mui/material/FormLabel";
-import FormControl from "@mui/material/FormControl";
 import Link from "@mui/material/Link";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import ThemedLogo from "@/shared-theme/ThemedLogo";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
 import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-const Card = styled(MuiCard)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  alignSelf: "center",
-  width: "100%",
-  padding: theme.spacing(4),
-  gap: theme.spacing(2.5),
-  borderRadius: 20,
-  border: "1px solid",
-  borderColor: theme.palette.divider,
-  boxShadow: "0 8px 40px rgba(0,0,0,0.08)",
-  [theme.breakpoints.up("sm")]: {
-    width: "420px",
-  },
-  ...theme.applyStyles("dark", {
-    boxShadow: "0 8px 40px rgba(0,0,0,0.4)",
-  }),
-}));
+import { aspy } from "@shared-theme/themePrimitives";
+import { AuthCard, AuthLogo } from "@components/auth/AuthShell";
+import { authButtonSx, authFieldSx, authLabelSx, authLinkSx } from "@components/auth/estilos";
+import { DISPLAY_FONT } from "@components/landing/constants";
 
-const StyledTextField = styled(TextField)(({ theme }) => ({
-  "& .MuiOutlinedInput-root": {
-    borderRadius: 10,
-    backgroundColor:
-      theme.palette.mode === "dark"
-        ? "rgba(255,255,255,0.04)"
-        : "rgba(0,0,0,0.02)",
-    "& fieldset": {
-      borderColor: theme.palette.divider,
-    },
-    "&:hover fieldset": {
-      borderColor: theme.palette.primary.main,
-    },
-  },
-}));
+// El campo no reserva espacio para la ayuda: aquí solo aparece cuando hay un error
+const campoSx = { ...authFieldSx, "& .MuiFormHelperText-root": { mx: 0.25, mt: 0.5, fontSize: "0.78rem", lineHeight: 1.35 } };
+
+const MENSAJE_DESHABILITADA =
+  "Tu cuenta está deshabilitada. Comunícate con el administrador de la fundación.";
 
 export default function SignInCard() {
   const [emailError, setEmailError] = useState(false);
@@ -60,21 +31,27 @@ export default function SignInCard() {
   const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loginError, setLoginError] = useState("");
+  // Si la cuenta se deshabilitó con la sesión abierta, el sistema vuelve aquí con ?motivo=deshabilitada
+  const [loginError, setLoginError] = useState(() =>
+    new URLSearchParams(window.location.search).get("motivo") === "deshabilitada" ? MENSAJE_DESHABILITADA : "",
+  );
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [olvido, setOlvido] = useState(false);
 
   const loginUser = async () => {
     try {
       setLoading(true);
       await login(email, password);
       navigate("/dashboard");
-    } catch (error: any) {
-      const status = error?.response?.status;
+    } catch (error) {
+      const status = (error as { response?: { status?: number } })?.response?.status;
       if (status === 403) {
-        setLoginError("Tu cuenta está inactiva. Contacta al administrador.");
+        setLoginError(MENSAJE_DESHABILITADA);
+      } else if (status === 429) {
+        setLoginError("Demasiados intentos seguidos. Espera un minuto e inténtalo de nuevo.");
       } else {
         setLoginError("Credenciales incorrectas. Por favor, intente de nuevo.");
       }
@@ -119,35 +96,28 @@ export default function SignInCard() {
   };
 
   return (
-    <Card variant="outlined">
-      {/* Logo (solo móvil) */}
-      <Box
-        sx={{ display: { xs: "flex", md: "none" }, justifyContent: "center" }}
-      >
-        <ThemedLogo />
+    <AuthCard maxWidth={440}>
+      {/* Logo (solo móvil; en pantallas grandes va al lado) */}
+      <Box sx={{ display: { xs: "flex", md: "none" }, justifyContent: "center" }}>
+        <AuthLogo height={92} />
       </Box>
 
       {/* Encabezado */}
-      <Box sx={{ mb: 0.5 }}>
+      <Box>
         <Typography
           component="h1"
-          variant="h5"
-          sx={{ fontWeight: 800, mb: 0.5 }}
+          sx={{ fontFamily: DISPLAY_FONT, fontWeight: 800, fontSize: "1.7rem", lineHeight: 1.15, letterSpacing: "-0.02em", color: aspy.text }}
         >
-          Bienvenido de nuevo
+          Inicia sesión
         </Typography>
-        <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          Ingresa tus credenciales para continuar
+        <Typography sx={{ mt: 0.75, fontSize: "0.95rem", lineHeight: 1.5, color: aspy.muted }}>
+          Ingresa con tu correo y tu contraseña.
         </Typography>
       </Box>
 
       {/* Error de login */}
       {loginError && (
-        <Alert
-          severity="error"
-          onClose={() => setLoginError("")}
-          sx={{ borderRadius: 2, fontSize: "0.82rem" }}
-        >
+        <Alert severity="error" onClose={() => setLoginError("")} sx={{ borderRadius: 3, fontSize: "0.88rem" }}>
           {loginError}
         </Alert>
       )}
@@ -157,16 +127,14 @@ export default function SignInCard() {
         component="form"
         onSubmit={handleSubmit}
         noValidate
-        sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+        sx={{ display: "flex", flexDirection: "column", gap: 2.25 }}
       >
-        <FormControl>
-          <FormLabel
-            htmlFor="email"
-            sx={{ fontWeight: 600, fontSize: "0.85rem", mb: 0.5 }}
-          >
+        <Box>
+          <Box component="label" htmlFor="email" sx={authLabelSx}>
             Correo electrónico
-          </FormLabel>
-          <StyledTextField
+          </Box>
+          <TextField
+            id="email"
             error={emailError}
             helperText={emailErrorMessage}
             value={email}
@@ -181,102 +149,76 @@ export default function SignInCard() {
             autoFocus
             required
             fullWidth
-            variant="outlined"
-            size="small"
-            color={emailError ? "error" : "primary"}
+            sx={campoSx}
           />
-        </FormControl>
+        </Box>
 
-        <FormControl>
-          <FormLabel
-            htmlFor="password"
-            sx={{ fontWeight: 600, fontSize: "0.85rem", mb: 0.5 }}
-          >
+        <Box sx={{ display: "flex", flexDirection: "column" }}>
+          <Box component="label" htmlFor="password" sx={authLabelSx}>
             Contraseña
-          </FormLabel>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <StyledTextField
-              error={passwordError}
-              helperText={passwordErrorMessage}
-              name="password"
-              placeholder="•••••••••"
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                if (loginError) setLoginError("");
-              }}
-              autoComplete="current-password"
-              required
-              fullWidth
-              variant="outlined"
-              size="small"
-              color={passwordError ? "error" : "primary"}
-            />
-
-            <IconButton
-              aria-label="cambiar visibilidad de contraseña"
-              onClick={() => setShowPassword(!showPassword)}
-              size="small"
-            >
-              {showPassword ? (
-                <VisibilityOff fontSize="small" />
-              ) : (
-                <Visibility fontSize="small" />
-              )}
-            </IconButton>
           </Box>
-        </FormControl>
+          <TextField
+            id="password"
+            error={passwordError}
+            helperText={passwordErrorMessage}
+            name="password"
+            placeholder="Tu contraseña"
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (loginError) setLoginError("");
+            }}
+            autoComplete="current-password"
+            required
+            fullWidth
+            sx={campoSx}
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                      size="small"
+                      sx={{ border: 0, bgcolor: "transparent", width: 32, height: 32 }}
+                    >
+                      {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
+          <Link
+            component="button"
+            type="button"
+            onClick={() => setOlvido((v) => !v)}
+            sx={{ ...authLinkSx, alignSelf: "flex-end", mt: 1, fontSize: "0.84rem", fontWeight: 600 }}
+          >
+            ¿Olvidaste tu contraseña?
+          </Link>
+        </Box>
 
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          disabled={loading}
-          sx={{
-            mt: 0.5,
-            py: 1.25,
-            borderRadius: 2.5,
-            fontWeight: 700,
-            fontSize: "0.95rem",
-            textTransform: "none",
-            background: "linear-gradient(135deg, #1565C0 0%, #1976D2 100%)",
-            boxShadow: "0 4px 14px rgba(25,118,210,0.35)",
-            "&:hover": {
-              boxShadow: "0 6px 20px rgba(25,118,210,0.45)",
-            },
-            "&:disabled": {
-              background: "rgba(0,0,0,0.12)",
-            },
-          }}
-        >
-          {loading ? (
-            <CircularProgress size={22} sx={{ color: "white" }} />
-          ) : (
-            "Iniciar sesión"
-          )}
+        {olvido && (
+          <Alert severity="info" onClose={() => setOlvido(false)} sx={{ borderRadius: 3, fontSize: "0.88rem" }}>
+            Por seguridad, la contraseña la restablece la fundación. Comunícate con la secretaría o la
+            administración de ASPY y te asignarán una nueva para que puedas ingresar.
+          </Alert>
+        )}
+
+        <Button type="submit" fullWidth variant="contained" disabled={loading} sx={{ ...authButtonSx(), mt: 0.5 }}>
+          {loading ? <CircularProgress size={22} sx={{ color: "white" }} /> : "Iniciar sesión"}
         </Button>
       </Box>
 
-      <Divider sx={{ fontSize: "0.78rem", color: "text.secondary" }}>o</Divider>
-
-      <Typography
-        variant="body2"
-        sx={{ textAlign: "center", color: "text.secondary" }}
-      >
+      <Typography sx={{ textAlign: "center", fontSize: "0.92rem", color: aspy.muted }}>
         ¿No tienes una cuenta?{" "}
-        <Link
-          onClick={() => navigate("/register")}
-          component="button"
-          sx={{
-            fontWeight: 600,
-            textDecoration: "none",
-            "&:hover": { textDecoration: "underline" },
-          }}
-        >
+        <Link component={RouterLink} to="/register" sx={authLinkSx}>
           Regístrate
         </Link>
       </Typography>
-    </Card>
+    </AuthCard>
   );
 }

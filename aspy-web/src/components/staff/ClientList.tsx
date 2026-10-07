@@ -12,12 +12,13 @@ import Header from "@components/Header";
 import Progress from "../Progress";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Typography from "@mui/material/Typography";
-import { getClient } from "@/utils/utils";
+import { getClient, ocupacionDe } from "@/utils/utils";
 import Switch from "@mui/material/Switch";
 import CircularProgress from "@mui/material/CircularProgress";
 import personAPI from "@API/personAPI";
 import type { Person } from "@/typesResponse/Person";
 import { tone } from "@shared-theme/themePrimitives";
+import { vh } from "@shared-theme/pantallaGrande";
 
 export default function ClientsList() {
   const [selectedId, setSelectedId] = useState<GridRowId | null>(null);
@@ -97,7 +98,7 @@ export default function ClientsList() {
         return (
           <Box display="flex" alignItems="center" height="100%">
             <Typography variant="body1">
-              {params.row.occupation.name}
+              {ocupacionDe(params.row)}
             </Typography>
           </Box>
         );
@@ -241,7 +242,7 @@ export default function ClientsList() {
               borderTopLeftRadius: 20,
               borderTopRightRadius: 20,
               p: 2,
-              maxHeight: "85vh",
+              maxHeight: vh(85),
               boxShadow: "0px -4px 20px rgba(0,0,0,0.1)",
             },
           }}

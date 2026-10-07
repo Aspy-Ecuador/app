@@ -6,7 +6,6 @@ import Typography from "@mui/material/Typography";
 import { useTheme } from "@mui/material/styles";
 import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
 import ArrowDownwardRoundedIcon from "@mui/icons-material/ArrowDownwardRounded";
-import isotipo from "@/assets/landing/isotipo-aspy.svg";
 import fondoAspy from "@/assets/fondoAspy.webp";
 import type { LandingContent } from "@/content/landing/types";
 import { C, DISPLAY_FONT, NAV_HEIGHT, fadeIn, fadeUp, float, focusRing, reducedMotion, scrollTo } from "./constants";
@@ -109,22 +108,6 @@ export default function HeroSection({ content, social, showCtas = true, primaryH
         alignItems: "center",
       }}
     >
-      {/* Isotipo gigante decorativo */}
-      <Box
-        component="img"
-        src={isotipo}
-        alt=""
-        aria-hidden
-        sx={{
-          position: "absolute",
-          width: { xs: 420, md: 720 },
-          right: { xs: -180, md: -160 },
-          top: { xs: -120, md: -140 },
-          opacity: 0.07,
-          pointerEvents: "none",
-        }}
-      />
-
       <Box
         sx={{
           position: "relative",

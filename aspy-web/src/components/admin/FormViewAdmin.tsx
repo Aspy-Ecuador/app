@@ -4,7 +4,9 @@ import { useNavigate } from "react-router-dom";
 import type { UserForm } from "@/typesRequest/UserForm";
 import { useRoleData } from "@/observer/RoleDataContext";
 import { crearUsuario } from "@/API/auth";
+import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
+import { mensajeErrorUsuario } from "@utils/mensajeErrorUsuario";
 import UserFormAdmin from "@admin/UserFormAdmin";
 import Steps from "@components/Steps";
 import Grid from "@mui/material/Grid";
@@ -48,6 +50,7 @@ function buildPayload(data: UserForm) {
     birthdate: data.birthdate,
     gender_id: Number(data.gender_id),
     occupation_id: Number(data.occupation_id),
+    occupation_other: Number(data.occupation_id) === 10 ? data.occupation_other ?? "" : null,
     marital_status_id: Number(data.marital_status_id),
     education_id: Number(data.education_id),
 
@@ -79,6 +82,7 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
   const [roleSelect, setRoleSelect] = useState<number>(0);
   const [open, setOpen] = useState(false);
   const [load, setLoad] = useState(false);
+  const [errorEnvio, setErrorEnvio] = useState("");
   const [formData, setFormData] = useState<Partial<UserForm>>({});
 
   const { loading, refreshPersons } = useRoleData();
@@ -106,6 +110,7 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
     const payload = buildPayload(fullData);
 
     setLoad(true);
+    setErrorEnvio("");
     try {
       if (isEdit && user_id) {
         await userAccountAPI.updateUserAccount(user_id, payload);
@@ -115,7 +120,8 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
       await refreshAll();
       setOpen(true);
     } catch (error: unknown) {
-      console.log(error);
+      // Antes el error solo iba a la consola y el formulario parecía no hacer nada
+      setErrorEnvio(mensajeErrorUsuario(error));
     } finally {
       setLoad(false);
     }
@@ -146,6 +152,13 @@ export default function FormViewAdmin({ isEdit, user_id }: FormViewProps) {
         <Grid size={12} className="contenedor-principal">
           <Steps activeStep={step} steps={stepsName} />
         </Grid>
+        {errorEnvio && (
+          <Grid size={12} sx={{ display: "flex", justifyContent: "center", px: { xs: 1.5, md: 3 } }}>
+            <Alert severity="error" onClose={() => setErrorEnvio("")} sx={{ width: "100%", maxWidth: 860, borderRadius: 3 }}>
+              {errorEnvio}
+            </Alert>
+          </Grid>
+        )}
         <Grid size={12}>
           <UserFormAdmin
             isEditMode={isEdit}

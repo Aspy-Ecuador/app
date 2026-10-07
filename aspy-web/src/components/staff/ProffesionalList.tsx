@@ -19,6 +19,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import personAPI from "@API/personAPI";
 import Typography from "@mui/material/Typography";
 import { tone } from "@shared-theme/themePrimitives";
+import { vh } from "@shared-theme/pantallaGrande";
 
 export default function ProffesionalList() {
   const [selectedId, setSelectedId] = useState<GridRowId | null>(null);
@@ -238,7 +239,7 @@ export default function ProffesionalList() {
               borderTopLeftRadius: 20,
               borderTopRightRadius: 20,
               p: 2,
-              maxHeight: "85vh",
+              maxHeight: vh(85),
               boxShadow: "0px -4px 20px rgba(0,0,0,0.1)",
             },
           }}

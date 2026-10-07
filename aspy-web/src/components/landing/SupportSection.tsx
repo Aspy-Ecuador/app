@@ -4,6 +4,7 @@ import Typography from "@mui/material/Typography";
 import HandshakeRoundedIcon from "@mui/icons-material/HandshakeRounded";
 import VolunteerActivismRoundedIcon from "@mui/icons-material/VolunteerActivismRounded";
 import type { LandingContent } from "@/content/landing/types";
+import { responsiveImg } from "@/content/landing/images";
 import { C, DISPLAY_FONT, focusRing } from "./constants";
 import { Reveal, Section, SectionHeader } from "./shared";
 
@@ -25,7 +26,7 @@ export default function SupportSection({ content }: { content: LandingContent["s
             const inner = hasLogo ? (
               <Box
                 component="img"
-                src={p.logo!.src}
+                {...responsiveImg(p.logo!.src, "160px", [320, 640])}
                 alt={p.logo!.alt || p.name}
                 loading="lazy"
                 decoding="async"

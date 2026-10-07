@@ -13,6 +13,7 @@ import Paper from "@mui/material/Paper";
 import { useNavigate } from "react-router-dom";
 import AddReport from "@professional/AddReport";
 import { tone } from "@shared-theme/themePrimitives";
+import { vh } from "@shared-theme/pantallaGrande";
 
 export default function NewReport() {
   const [report, setReport] = useState<FileData | null>(null);
@@ -77,7 +78,7 @@ export default function NewReport() {
               overflow: "hidden",
               display: "flex",
               flexDirection: "column",
-              minHeight: "78vh",
+              minHeight: vh(78),
             }}
           >
             <Box
@@ -101,7 +102,7 @@ export default function NewReport() {
               </Typography>
             </Box>
 
-            <Box sx={{ flex: 1, position: "relative", minHeight: "70vh" }}>
+            <Box sx={{ flex: 1, position: "relative", minHeight: vh(70) }}>
               {previewSrc ? (
                 <iframe
                   src={previewSrc}

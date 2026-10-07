@@ -1,7 +1,7 @@
 // FINAL
 import { useNavigate } from "react-router-dom";
 import { useState, useMemo } from "react";
-import { getAuthenticatedUserName } from "@store";
+import { getAuthenticatedFirstName } from "@store";
 import type { ButtonControl } from "@/types/ButtonControl";
 import type { Appointment } from "@/typesResponse/Appointment";
 import { getNextAppointments } from "@/utils/utils";
@@ -12,9 +12,9 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import TextField from "@mui/material/TextField";
+import Campo from "@forms/Campo";
+import CampoFecha from "@forms/CampoFecha";
+import { campoSx } from "@forms/estilos";
 import IconButton from "@mui/material/IconButton";
 import PersonAddAltRoundedIcon from "@mui/icons-material/PersonAddAltRounded";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
@@ -23,13 +23,6 @@ import Progress from "@components/Progress";
 import ButtonList from "@components/ButtonList";
 import ShowAppointment from "@staff/ShowAppointment";
 import WelcomePanel from "@components/WelcomePanel";
-
-const selectSx = {
-  fontSize: 12,
-  borderRadius: 2,
-  bgcolor: "action.hover",
-  "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
-};
 
 export default function ControlPanel() {
   const { data, loading } = useRoleData();
@@ -110,7 +103,7 @@ export default function ControlPanel() {
 
   return (
     <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2 }}>
-      <WelcomePanel user={"Secr. " + getAuthenticatedUserName()} />
+      <WelcomePanel user={getAuthenticatedFirstName()} />
 
       <Grid container spacing={2} alignItems="flex-start">
         {/* Sidebar — acciones rápidas + filtros */}
@@ -205,73 +198,53 @@ export default function ControlPanel() {
                   gap: 1.5,
                 }}
               >
-                <TextField
-                  type="date"
-                  size="small"
-                  label="Fecha"
-                  value={filterDate}
-                  onChange={(e) => setFilterDate(e.target.value)}
-                  slotProps={{ inputLabel: { shrink: true } }}
-                  sx={{
-                    "& .MuiInputLabel-root": { fontSize: 12 },
-                    "& .MuiOutlinedInput-root": {
-                      fontSize: 12,
-                      borderRadius: 2,
-                      bgcolor: "action.hover",
-                      "& fieldset": { borderColor: "divider" },
-                    },
-                  }}
-                />
+                <Campo etiqueta="Fecha" htmlFor="filtro-fecha">
+                  <CampoFecha id="filtro-fecha" titulo="Fecha de la cita" tipo="cualquiera" limpiable value={filterDate} onChange={setFilterDate} fieldSx={campoSx} />
+                </Campo>
 
-                <FormControl fullWidth size="small">
-                  <InputLabel sx={{ fontSize: 12 }}>Profesional</InputLabel>
+                <Campo etiqueta="Profesional" idEtiqueta="filtro-profesional-etiqueta">
                   <Select
+                    fullWidth
+                    displayEmpty
+                    labelId="filtro-profesional-etiqueta"
                     value={filterProfessional}
-                    label="Profesional"
                     onChange={(e) => setFilterProfessional(e.target.value)}
-                    sx={selectSx}
+                    sx={campoSx}
                   >
-                    <MenuItem value="" sx={{ fontSize: 12 }}>
-                      <Typography sx={{ fontSize: 12, color: "text.disabled" }}>
+                    <MenuItem value="">
+                      <Typography component="span" sx={{ color: "text.secondary" }}>
                         Todos
                       </Typography>
                     </MenuItem>
                     {professionals.map((p) => (
-                      <MenuItem
-                        key={p.person_id}
-                        value={String(p.person_id)}
-                        sx={{ fontSize: 12 }}
-                      >
+                      <MenuItem key={p.person_id} value={String(p.person_id)}>
                         {p.first_name} {p.last_name}
                       </MenuItem>
                     ))}
                   </Select>
-                </FormControl>
+                </Campo>
 
-                <FormControl fullWidth size="small">
-                  <InputLabel sx={{ fontSize: 12 }}>Servicio</InputLabel>
+                <Campo etiqueta="Servicio" idEtiqueta="filtro-servicio-etiqueta">
                   <Select
+                    fullWidth
+                    displayEmpty
+                    labelId="filtro-servicio-etiqueta"
                     value={filterService}
-                    label="Servicio"
                     onChange={(e) => setFilterService(e.target.value)}
-                    sx={selectSx}
+                    sx={campoSx}
                   >
-                    <MenuItem value="" sx={{ fontSize: 12 }}>
-                      <Typography sx={{ fontSize: 12, color: "text.disabled" }}>
+                    <MenuItem value="">
+                      <Typography component="span" sx={{ color: "text.secondary" }}>
                         Todos
                       </Typography>
                     </MenuItem>
                     {services.map((s) => (
-                      <MenuItem
-                        key={s.service_id}
-                        value={String(s.service_id)}
-                        sx={{ fontSize: 12 }}
-                      >
+                      <MenuItem key={s.service_id} value={String(s.service_id)}>
                         {s.name}
                       </MenuItem>
                     ))}
                   </Select>
-                </FormControl>
+                </Campo>
               </Box>
             </Paper>
           </Box>

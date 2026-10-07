@@ -8,6 +8,7 @@ import Typography from "@mui/material/Typography";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import { useNavigate } from "react-router-dom";
 import { logout } from "@store";
@@ -36,6 +37,11 @@ export default function OptionsMenu() {
       label: "Perfil",
       icon: <PersonOutlineRoundedIcon sx={{ fontSize: 15 }} />,
       action: () => navigate("/perfil"),
+    },
+    {
+      label: "Manual de uso",
+      icon: <MenuBookRoundedIcon sx={{ fontSize: 15 }} />,
+      action: () => navigate("/manual"),
     },
     {
       label: "Sobre ASPY",

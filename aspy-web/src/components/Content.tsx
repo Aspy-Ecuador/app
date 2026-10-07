@@ -1,32 +1,33 @@
 // FINAL
-import ThemedLogo from "@/shared-theme/ThemedLogo";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+// Saludo junto a la tarjeta de ingreso (solo en pantallas grandes; en el celular el logo va dentro de la tarjeta).
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
+import Typography from "@mui/material/Typography";
+import { aspy } from "@shared-theme/themePrimitives";
+import { AuthLogo } from "@components/auth/AuthShell";
+import { DISPLAY_FONT } from "@components/landing/constants";
 
 export default function Content() {
   return (
-    <Stack
+    <Box
       sx={{
+        display: { xs: "none", md: "flex" },
         flexDirection: "column",
-        alignSelf: "center",
-        gap: 4,
-        maxWidth: 450,
+        alignItems: "center",
+        textAlign: "center",
+        gap: 2,
+        maxWidth: 460,
       }}
     >
-      <Box sx={{ display: { xs: "none", md: "flex" } }}>
-        <Grid container>
-          <Grid size={12}>
-            <Typography textAlign="center" variant="h1">
-              Bienvenido a
-            </Typography>
-          </Grid>
-          <Grid size={12}>
-            <ThemedLogo />
-          </Grid>
-        </Grid>
-      </Box>
-    </Stack>
+      <Typography
+        component="p"
+        sx={{ fontFamily: DISPLAY_FONT, fontWeight: 800, fontSize: { md: "2.6rem", lg: "3rem" }, lineHeight: 1.1, letterSpacing: "-0.02em", color: aspy.text }}
+      >
+        Bienvenido a
+      </Typography>
+      <AuthLogo height={230} />
+      <Typography sx={{ fontSize: "1.05rem", lineHeight: 1.6, color: aspy.muted, maxWidth: 380 }}>
+        Citas, pagos y reportes de terapia en un solo lugar.
+      </Typography>
+    </Box>
   );
 }

@@ -76,15 +76,8 @@ export const float = keyframes`
   50%       { transform: translateY(-10px); }
 `;
 
-/**
- * Pantallas grandes (TV Full HD, 2K, 4K): agranda toda la landing de forma proporcional,
- * para que no quede una columna pequeña en el centro al presentarla en un televisor.
- */
-export const largeScreenZoom = {
-  "@media (min-width: 1800px)": { zoom: 1.15 },
-  "@media (min-width: 2400px)": { zoom: 1.5 },
-  "@media (min-width: 3200px)": { zoom: 2 },
-};
+/** Pantallas grandes (TV Full HD, 2K, 4K): ver shared-theme/pantallaGrande.ts. */
+export { largeScreenZoom } from "@shared-theme/pantallaGrande";
 
 /** Desactiva animaciones si el usuario pidió "reducir movimiento" en su sistema. */
 export const reducedMotion = {
@@ -98,19 +91,39 @@ export const reducedMotion = {
 /** Google Maps (formatos públicos, sin clave de API). */
 export const mapsSearchUrl = (query: string) =>
   `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
-/** Mapa embebido; con `near` ("lat,lng") se centra en ese punto y marca el lugar por su nombre. */
-export const mapsEmbedUrl = (query: string, near?: string) =>
-  `https://www.google.com/maps?q=${encodeURIComponent(query)}${near ? `&ll=${near}&z=17` : "&z=16"}&output=embed`;
+/** Ficha de Google Maps: nombre, coordenadas ("lat,lng") e identificador de la ficha, si el enlace lo trae. */
+export interface MapsPlace {
+  name: string;
+  near: string;
+  cid?: string;
+}
 
 /**
- * Lee el nombre y las coordenadas de un enlace de ficha de Google Maps
- * (https://www.google.com/maps/place/<Nombre>/@<lat>,<lng>,…). Los enlaces cortos no los traen.
+ * Mapa embebido. Con una ficha (`place`) marca ese lugar exacto: por su identificador (sigue a la ficha
+ * aunque cambien su nombre o su dirección) o, si no lo trae, por su nombre cerca de sus coordenadas.
  */
-export function placeFromMapsUrl(url: string): { name: string; near: string } | null {
+export const mapsEmbedUrl = (query: string, place?: MapsPlace | null) =>
+  place?.cid
+    ? `https://www.google.com/maps?cid=${place.cid}&z=17&output=embed`
+    : `https://www.google.com/maps?q=${encodeURIComponent(query)}${place ? `&ll=${place.near}&z=17` : "&z=16"}&output=embed`;
+
+/**
+ * Lee los datos de un enlace de ficha de Google Maps
+ * (https://www.google.com/maps/place/<Nombre>/@<lat>,<lng>,…/data=…). Los enlaces cortos no los traen.
+ */
+export function placeFromMapsUrl(url: string): MapsPlace | null {
   const m = url.match(/\/maps\/place\/([^/]+)\/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
   if (!m) return null;
   const name = decodeURIComponent(m[1].replace(/\+/g, " "));
-  return { name, near: `${m[2]},${m[3]}` };
+  // El "@lat,lng" es el centro de la vista (corrido cuando el panel lateral está abierto);
+  // el punto real de la ficha viene en "!3d<lat>!4d<lng>".
+  const pin = url.match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/);
+  const id = url.match(/!1s0x[0-9a-f]+(?::|%3A)0x([0-9a-f]+)/i);
+  return {
+    name,
+    near: pin ? `${pin[1]},${pin[2]}` : `${m[2]},${m[3]}`,
+    cid: id ? BigInt(`0x${id[1]}`).toString() : undefined,
+  };
 }
 
 /** Enlace que abre un chat de WhatsApp con el número y un mensaje ya escrito. */

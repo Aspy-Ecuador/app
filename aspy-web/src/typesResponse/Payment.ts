@@ -12,6 +12,8 @@ export interface Payment {
   service_id: number;
   payment_data_id: number;
   payment_status_id: number;
+  /** Monto cobrado en este pago (null en pagos antiguos: usar el precio del servicio). */
+  amount?: string | number | null;
 
   created_by: number | null;
   modified_by: number | null;

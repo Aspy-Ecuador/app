@@ -21,6 +21,7 @@ import Progress from "@components/Progress";
 import CircularProgress from "@mui/material/CircularProgress";
 import Paper from "@mui/material/Paper";
 import Header from "@components/Header";
+import { vh } from "@shared-theme/pantallaGrande";
 
 const steps = ["Detalles de Pago", "Revisar cita"];
 
@@ -110,7 +111,7 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        minHeight: vh(100),
         backgroundColor: "grey.50",
         py: { xs: 2, md: 4 },
         px: { xs: 2, md: 3 },
@@ -203,6 +204,13 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
                         "&:hover": {
                           boxShadow: "0 6px 20px rgba(25,118,210,0.45)",
                         },
+                        // Desactivado: gris claro con texto gris (antes quedaba negro sobre negro)
+                        "&.Mui-disabled": {
+                          background: "none",
+                          bgcolor: "action.disabledBackground",
+                          color: "text.disabled",
+                          boxShadow: "none",
+                        },
                         width: { xs: "100%", sm: "auto" },
                       }}
                     >
@@ -228,6 +236,13 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
                         boxShadow: "0 4px 14px rgba(25,118,210,0.35)",
                         "&:hover": {
                           boxShadow: "0 6px 20px rgba(25,118,210,0.45)",
+                        },
+                        // Desactivado: gris claro con texto gris (antes quedaba negro sobre negro)
+                        "&.Mui-disabled": {
+                          background: "none",
+                          bgcolor: "action.disabledBackground",
+                          color: "text.disabled",
+                          boxShadow: "none",
                         },
                         width: { xs: "100%", sm: "auto" },
                       }}

@@ -18,6 +18,11 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { tone } from "@shared-theme/themePrimitives";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 
 interface ShowAppointmentProps {
   unmarkedAppointmentsProp: Appointment[];
@@ -38,6 +43,8 @@ export default function ShowAppointment({
   const [successOpen, setSuccessOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [isFail, setIsFail] = useState(false);
+  // Marcar asistencia no se puede deshacer: se pide confirmación antes
+  const [confirmar, setConfirmar] = useState<{ cita: Appointment; action: "complete" | "missed" } | null>(null);
 
   const navigate = useNavigate();
   const {
@@ -176,7 +183,7 @@ export default function ShowAppointment({
                           <CheckCircleOutlineIcon fontSize="small" />
                         )
                       }
-                      onClick={() => handleAction(cita, "complete")}
+                      onClick={() => setConfirmar({ cita, action: "complete" })}
                       sx={{
                         borderRadius: 2,
                         textTransform: "none",
@@ -213,7 +220,7 @@ export default function ShowAppointment({
                           <CancelOutlinedIcon fontSize="small" />
                         )
                       }
-                      onClick={() => handleAction(cita, "missed")}
+                      onClick={() => setConfirmar({ cita, action: "missed" })}
                       sx={{
                         borderRadius: 2,
                         textTransform: "none",
@@ -350,6 +357,46 @@ export default function ShowAppointment({
           )}
         </Grid>
       </Grid>
+
+      <Dialog open={!!confirmar} onClose={() => setConfirmar(null)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>
+          {confirmar?.action === "complete" ? "¿Confirmas que asistió?" : "¿Confirmas que no asistió?"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {confirmar && (
+              <>
+                {confirmar.cita.client.first_name} {confirmar.cita.client.last_name} ·{" "}
+                {confirmar.cita.service.name} · {confirmar.cita.worker_schedule.schedule.date.split("T")[0]},{" "}
+                {confirmar.cita.worker_schedule.schedule.start_time.slice(0, 5)}
+              </>
+            )}
+          </DialogContentText>
+          <DialogContentText sx={{ mt: 1.5, fontSize: 13 }}>Esta acción no se puede deshacer.</DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setConfirmar(null)} sx={{ textTransform: "none" }}>
+            Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              if (confirmar) handleAction(confirmar.cita, confirmar.action);
+              setConfirmar(null);
+            }}
+            sx={{
+              textTransform: "none",
+              fontWeight: 700,
+              backgroundImage: "none", // el tema pone un degradado oscuro a los botones "contained"
+              bgcolor: confirmar?.action === "complete" ? "#1D9E75" : "#C0392B",
+              color: "#fff",
+              "&:hover": { bgcolor: confirmar?.action === "complete" ? "#0F6E56" : "#962D22" },
+            }}
+          >
+            {confirmar?.action === "complete" ? "Sí, asistió" : "Sí, no asistió"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Success
         open={successOpen}

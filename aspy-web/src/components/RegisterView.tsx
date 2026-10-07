@@ -3,7 +3,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { register } from "@/API/auth";
 import Box from "@mui/material/Box";
-import Steps from "@components/Steps";
+import Alert from "@mui/material/Alert";
+import PasosRegistro from "@components/auth/PasosRegistro";
 import Success from "@components/Success";
 import FormRegister from "@components/FormRegister";
 import type { UserForm } from "@/typesRequest/UserForm";
@@ -21,6 +22,7 @@ function buildPayload(data: UserForm, acceptedPrivacyPolicy: boolean) {
     birthdate: data.birthdate,
     gender_id: Number(data.gender_id),
     occupation_id: Number(data.occupation_id),
+    occupation_other: Number(data.occupation_id) === 10 ? data.occupation_other ?? "" : null,
     marital_status_id: Number(data.marital_status_id),
     education_id: Number(data.education_id),
     role: "client" as const,
@@ -38,6 +40,19 @@ function buildPayload(data: UserForm, acceptedPrivacyPolicy: boolean) {
   };
 }
 
+/** Explica por qué no se pudo crear la cuenta, con lo que responde el servidor. */
+function mensajeDeError(error: unknown): string {
+  const res = (error as { response?: { status?: number; data?: { errors?: Record<string, string[]> } } })?.response;
+  if (res?.status === 429) return "Demasiados intentos seguidos. Espera un minuto e inténtalo de nuevo.";
+  const errores = res?.data?.errors;
+  if (res?.status === 422 && errores) {
+    if (errores.email) return "Ese correo ya tiene una cuenta. Inicia sesión o usa otro correo.";
+    if (errores["identification.number"]) return "El número de identificación no es válido. Revísalo en el primer paso.";
+    return "Hay datos que no son válidos. Revisa los pasos anteriores e inténtalo de nuevo.";
+  }
+  return "No pudimos crear tu cuenta. Revisa tu conexión e inténtalo de nuevo.";
+}
+
 const stepsFields = [
   { start: 0, end: 10 },
   { start: 10, end: 18 },
@@ -51,6 +66,7 @@ export default function RegisterView() {
   const [open, setOpen] = useState(false);
   const [load, setLoad] = useState(false);
   const [formData, setFormData] = useState<Partial<UserForm>>({});
+  const [errorRegistro, setErrorRegistro] = useState("");
 
   const handleNext = (stepData: UserForm) => {
     setFormData((prev) => ({ ...prev, ...stepData }));
@@ -70,19 +86,26 @@ export default function RegisterView() {
     const fullData = { ...formData, ...stepData } as UserForm;
     const payload = buildPayload(fullData, acceptedPrivacyPolicy);
     setLoad(true);
+    setErrorRegistro("");
     try {
       await register(payload);
       setOpen(true);
     } catch (error) {
-      console.error("Register failed:", error);
+      setErrorRegistro(mensajeDeError(error));
     } finally {
       setLoad(false);
     }
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Steps activeStep={step} steps={stepsName} />
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 3.5 }}>
+      <PasosRegistro paso={step} pasos={stepsName} />
+
+      {errorRegistro && (
+        <Alert severity="error" onClose={() => setErrorRegistro("")} sx={{ borderRadius: 3, fontSize: "0.88rem" }}>
+          {errorRegistro}
+        </Alert>
+      )}
 
       <FormRegister
         start={stepsFields[step].start}

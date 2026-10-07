@@ -7,6 +7,13 @@
    (por defecto Tailwind sigue al sistema operativo, no al botón de la app) */
 @custom-variant dark (&:where([data-mui-color-scheme="dark"], [data-mui-color-scheme="dark"] *));
 
+/* Cambio de modo claro/oscuro: la animación circular la hace ColorModeToggle */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
 #root {
   width: 100%;
   height: 100%;
@@ -475,4 +482,26 @@ p {
 /*Registro*/
 .card-register {
   width: 60% !important;
+}
+
+/* ── Pantallas grandes (TV Full HD, 2K y 4K) ──────────────────────────────
+   Mismos cortes y factores que shared-theme/pantallaGrande.ts (si cambias uno, cambia ambos).
+   --vh: una centésima del alto de la pantalla dentro de un contenedor con zoom.
+   Ventanas flotantes de MUI: se agranda su CONTENIDO, no la ventana, porque MUI calcula la
+   posición en píxeles de pantalla; con zoom en la ventana misma saldría desplazada. */
+:root { --vh: 1vh; }
+@supports (height: 1dvh) {
+  :root { --vh: 1dvh; }
+}
+@media (min-width: 1800px) {
+  :root { --vh: calc(1vh / 1.15); }
+  .MuiPopover-paper > *, .MuiPopper-root > *, .MuiDialog-paper, .MuiSnackbar-root { zoom: 1.15; }
+}
+@media (min-width: 2400px) {
+  :root { --vh: calc(1vh / 1.5); }
+  .MuiPopover-paper > *, .MuiPopper-root > *, .MuiDialog-paper, .MuiSnackbar-root { zoom: 1.5; }
+}
+@media (min-width: 3200px) {
+  :root { --vh: calc(1vh / 2); }
+  .MuiPopover-paper > *, .MuiPopper-root > *, .MuiDialog-paper, .MuiSnackbar-root { zoom: 2; }
 }

@@ -13,9 +13,10 @@ import OverviewPersona from "@professional/OverviewPersona";
 import Table from "@components/Table";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Progress from "@components/Progress";
-import { getAge, getClients } from "@/utils/utils";
+import { getAge, getClients, ocupacionDe } from "@/utils/utils";
 import { getAuthenticatedUserID } from "@/utils/store";
 import type { Person } from "@/typesResponse/Person";
+import { vh } from "@shared-theme/pantallaGrande";
 
 const columns: GridColDef[] = [
   {
@@ -69,7 +70,7 @@ const columns: GridColDef[] = [
     resizable: false,
     renderCell: (params) => (
       <Box display="flex" alignItems="center" height="100%">
-        <Typography variant="body1">{params.row.occupation.name}</Typography>
+        <Typography variant="body1">{ocupacionDe(params.row)}</Typography>
       </Box>
     ),
   },
@@ -187,7 +188,7 @@ export default function PatientsList() {
               borderTopLeftRadius: 20,
               borderTopRightRadius: 20,
               p: 2,
-              maxHeight: "85vh",
+              maxHeight: vh(85),
               boxShadow: "0px -4px 20px rgba(0,0,0,0.1)",
             },
           }}

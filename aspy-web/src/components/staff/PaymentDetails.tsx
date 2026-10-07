@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { getPayment } from "@/utils/utils";
+import { getPayment, montoPago } from "@/utils/utils";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Header from "@components/Header";
@@ -89,8 +89,8 @@ export default function PaymentDetails() {
               date={payment.creation_date}
               client={`${payment.client.first_name} ${payment.client.last_name}`}
               service={payment.service.name}
-              price={Number(payment.service.price)}
-              total={Number(payment.service.price)}
+              price={montoPago(payment)}
+              total={montoPago(payment)}
               paymentMethod={payment.payment_data.type}
             />
           </Grid>

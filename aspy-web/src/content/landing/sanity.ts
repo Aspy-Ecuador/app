@@ -20,7 +20,7 @@ const QUERY = `{
   "hero": *[_id == "heroSection"][0]{ ..., images[]${IMG} },
   "impact": *[_id == "impactSection"][0],
   "mission": *[_id == "missionSection"][0]{ ..., images[]${IMG} },
-  "services": *[_id == "servicesSection"][0],
+  "services": *[_id == "servicesSection"][0]{ ..., items[]{ ..., image${IMG} } },
   "steps": *[_id == "stepsSection"][0],
   "testimonials": *[_id == "testimonialsSection"][0],
   "band": *[_id == "bandSection"][0]{ ..., images[]${IMG} },

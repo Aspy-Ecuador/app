@@ -1,7 +1,7 @@
 // FINAL
 import { useNavigate } from "react-router-dom";
 import type { ButtonControl } from "@/types/ButtonControl";
-import { getAuthenticatedUserName } from "@store";
+import { getAuthenticatedFirstName } from "@store";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
@@ -37,7 +37,7 @@ export default function ControlPanel() {
 
   return (
     <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.75 }}>
-      <WelcomePanel user={"Administrador " + getAuthenticatedUserName()} />
+      <WelcomePanel user={getAuthenticatedFirstName()} />
 
       <Grid container spacing={1.5} alignItems="flex-start">
         {/* Overview:

@@ -1,10 +1,15 @@
 // FINAL
 import { useEffect, useMemo } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
-import { inputCreateUserAdminConfig } from "@/config/userFormAdminConfig";
+import { campoContrasena, ciudadEsDeProvincia, inputCreateUserAdminConfig } from "@/config/userFormAdminConfig";
+import { OCUPACION_OTRA, reglaOcupacionOtra } from "@/config/reglasContacto";
 import { useRoleData } from "@/observer/RoleDataContext";
 import type { UserForm } from "@/typesRequest/UserForm";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Paper from "@mui/material/Paper";
+import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
+import { botonPrimarioSx, botonSecundarioSx } from "@forms/estilos";
 import UserInput from "@forms/UserInput";
 import Progress from "@components/Progress";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -55,6 +60,7 @@ export default function UserFormAdmin({
           password_confirmation: "",
           gender_id: user.gender_id,
           occupation_id: user.occupation_id,
+          occupation_other: user.occupation_other ?? "",
           marital_status_id: user.marital_status_id,
           education_id: user.education_id,
           role_id: user.user_account.role_id,
@@ -90,9 +96,10 @@ export default function UserFormAdmin({
         identification: { type: "", number: "" },
         address: {
           type: "",
-          country_id: 0,
-          state_id: 0,
-          city_id: 0,
+          // Vacío (no 0) para que las listas muestren "Seleccione una opción"
+          country_id: "" as unknown as number,
+          state_id: "" as unknown as number,
+          city_id: "" as unknown as number,
           primary_address: "",
           secondary_address: "",
         },
@@ -117,12 +124,13 @@ export default function UserFormAdmin({
     }
   }, [roleSelect, onRoleChange]);
 
-  // ← NUEVO: resetea la ciudad cuando cambia la provincia
+  // Al cambiar de provincia se borra la ciudad, salvo que ya sea de esa provincia (al abrir una
+  // edición la provincia "cambia" de vacía a la guardada, y antes eso dejaba la ciudad en blanco).
   useEffect(() => {
-    if (selectedStateId) {
-      methods.setValue("address.city_id", 0);
-    }
-  }, [selectedStateId]);
+    if (!selectedStateId) return;
+    const ciudad = Number(methods.getValues("address.city_id") ?? 0);
+    if (!ciudadEsDeProvincia(ciudad, selectedStateId)) methods.setValue("address.city_id", "" as unknown as number);
+  }, [selectedStateId, methods]);
 
   const filteredInputs = inputCreateUserAdminConfig.filter((input) => {
     const isProfessionalField = ["title", "specialty"].includes(input.key);
@@ -130,29 +138,34 @@ export default function UserFormAdmin({
   });
 
   // ← MODIFICADO: filtra ciudades según la provincia seleccionada
-  const list_inputs = filteredInputs.slice(start, end).map((input) => {
+
+  // Ocupación "Otra": campo para escribirla, justo después de la lista
+  const ocupacion = Number(useWatch({ control: methods.control, name: "occupation_id" }) ?? 0);
+  const conOtra = (input: { key: string }, nodo: React.ReactNode) =>
+    input.key === "occupation_id" && ocupacion === OCUPACION_OTRA
+      ? [
+          nodo,
+          <UserInput key="occupation_other" label="¿Cuál es su ocupación?" type="text" id="occupation_other" validation={reglaOcupacionOtra} />,
+        ]
+      : [nodo];
+
+  const list_inputs = filteredInputs.slice(start, end).flatMap((input) => {
     const resolvedOptions = input.dependsOn
       ? input.options?.filter((opt) => opt.state_id === selectedStateId)
       : input.options;
 
-    return (
+    const campo = campoContrasena(input, isEditMode, () => methods.getValues("password"));
+
+    return conOtra(
+      input,
       <UserInput
         key={input.key}
-        label={input.label}
+        label={campo.label}
         type={input.type}
         id={input.key}
-        validation={
-          input.key === "password_confirmation"
-            ? {
-                ...input.validation,
-                validate: (value: string) =>
-                  value === methods.getValues("password") ||
-                  "Las contraseñas no coinciden",
-              }
-            : input.validation
-        }
+        validation={campo.validation}
         options={resolvedOptions}
-      />
+      />,
     );
   });
 
@@ -173,40 +186,39 @@ export default function UserFormAdmin({
 
   return (
     <FormProvider {...methods}>
-      <form
-        onSubmit={(e) => e.preventDefault()}
+      <Box
+        component="form"
+        onSubmit={(e: React.FormEvent) => e.preventDefault()}
         noValidate
-        className="flex flex-col w-full h-full p-6"
+        sx={{ display: "flex", justifyContent: "center", p: { xs: 1.5, md: 3 } }}
       >
-        <div className="flex justify-center items-center">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <Paper elevation={0} sx={{ width: "100%", maxWidth: 860, p: { xs: 2.5, md: 4 }, border: "0.5px solid", borderColor: "divider", borderRadius: 3 }}>
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, columnGap: 3, rowGap: 2.25, "& > *": { minWidth: 0 } }}>
             {list_inputs}
-          </div>
-        </div>
-        <div className="gap-10 mt-4 flex flex-row items-center justify-center">
-          {start !== 0 && (
-            <Button
-              variant="outlined"
-              onClick={onBack}
-              className="md:w-[250px]"
-            >
-              Anterior
-            </Button>
-          )}
-          <Button
-            type="submit"
-            variant="contained"
-            onClick={onSubmit}
-            className="md:w-[250px]"
+          </Box>
+          <Box
+            sx={{
+              mt: 3.5,
+              pt: 2.5,
+              borderTop: "0.5px solid",
+              borderColor: "divider",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: start !== 0 ? "space-between" : "flex-end",
+              gap: 1.5,
+            }}
           >
-            {load ? (
-              <CircularProgress size={24} sx={{ color: "white" }} />
-            ) : (
-              getButtonLabel()
+            {start !== 0 && (
+              <Button onClick={onBack} startIcon={<ChevronLeftRoundedIcon />} sx={botonSecundarioSx}>
+                Anterior
+              </Button>
             )}
-          </Button>
-        </div>
-      </form>
+            <Button type="submit" variant="contained" onClick={onSubmit} disabled={!!load} sx={botonPrimarioSx}>
+              {load ? <CircularProgress size={22} sx={{ color: "white" }} /> : getButtonLabel()}
+            </Button>
+          </Box>
+        </Paper>
+      </Box>
     </FormProvider>
   );
 }

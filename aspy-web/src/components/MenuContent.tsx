@@ -15,6 +15,7 @@ import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
 import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
 import ReceiptLongRoundedIcon from "@mui/icons-material/ReceiptLongRounded";
 import ArticleRoundedIcon from "@mui/icons-material/ArticleRounded";
+import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
 
 interface MenuContentProps {
   onNavigate?: () => void;
@@ -27,6 +28,11 @@ const adminListItems: NavItem[] = [
   { text: "Usuarios", route: "/usuarios", icon: <GroupRoundedIcon /> },
   { text: "Servicios", route: "/servicios", icon: <AssignmentRoundedIcon /> },
   { text: "Citas", route: "/citas", icon: <CalendarMonthRoundedIcon /> },
+  {
+    text: "Datos bancarios",
+    route: "/datos-bancarios",
+    icon: <AccountBalanceRoundedIcon />,
+  },
 ];
 
 const staffListItems: NavItem[] = [

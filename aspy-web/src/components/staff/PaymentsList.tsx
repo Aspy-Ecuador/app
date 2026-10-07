@@ -5,6 +5,7 @@ import type { GridRowId, GridColDef } from "@mui/x-data-grid";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip"; // Añadido para mejor UX en los iconos
 import Table from "@components/Table";
+import { montoPago } from "@utils/utils";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -97,7 +98,7 @@ export default function PaymentsList() {
           <Box display="flex" alignItems="center" height="100%">
             {/* Manteniendo la consistencia financiera visual de los comprobantes */}
             <Typography variant="body1" sx={{ color: tone.green.fg, fontWeight: 600 }}>
-              ${Number(params.row.service.price).toFixed(2)}
+              ${montoPago(params.row).toFixed(2)}
             </Typography>
           </Box>
         );

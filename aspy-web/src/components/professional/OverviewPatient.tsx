@@ -4,7 +4,7 @@ import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
-import { getAge, translateRol } from "@/utils/utils";
+import { fechaLegible, getAge, ocupacionDe, translateRol } from "@/utils/utils";
 import type { Person } from "@/typesResponse/Person";
 import photo from "@assets/user.png";
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
@@ -234,7 +234,7 @@ export default function OverviewPatient({ patient }: OverviewPacienteProps) {
         <InfoRow
           icon={<DateRangeIcon sx={{ fontSize: 14 }} />}
           label="Cumpleaños"
-          value={patient.birthdate}
+          value={fechaLegible(patient.birthdate)}
           iconBg={C.yellowLight}
           iconColor="#C9A020"
         />
@@ -242,7 +242,7 @@ export default function OverviewPatient({ patient }: OverviewPacienteProps) {
         <InfoRow
           icon={<WorkRoundedIcon sx={{ fontSize: 14 }} />}
           label="Ocupación"
-          value={patient.occupation?.name}
+          value={ocupacionDe(patient)}
         />
         <Divider sx={{ borderColor: C.border }} />
         <InfoRow

@@ -17,6 +17,8 @@ export interface Person {
 
   gender_id: number;
   occupation_id: number;
+  /** Texto libre cuando la ocupación es "Otra" (id 10). */
+  occupation_other?: string | null;
   marital_status_id: number;
   education_id: number;
 

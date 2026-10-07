@@ -4,11 +4,15 @@ import type { Dayjs } from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+import { esES } from "@mui/x-date-pickers/locales";
+import "dayjs/locale/es";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import ButtonBase from "@mui/material/ButtonBase";
 import type { WorkerProfessional } from "@/typesResponse/WorkerProfessional";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { tone } from "@shared-theme/themePrimitives";
+import { interiorCalendario, medidasCalendario, seleccionVerde } from "@forms/estilosCalendario";
 
 interface DateCalendarValueProps {
   availableSchedules: WorkerProfessional[];
@@ -23,6 +27,10 @@ export default function DateCalendarValue({
   const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(
     null,
   );
+
+  // Igual que CampoFecha: botones más grandes cuando se usa con el dedo
+  const tactil = useMediaQuery("(pointer: coarse)");
+  const { alto } = medidasCalendario(tactil);
 
   const enabledDates = [
     ...new Set(availableSchedules.map((wp) => wp.schedule.date.split("T")[0])),
@@ -62,32 +70,29 @@ export default function DateCalendarValue({
         gap: 1.5,
       }}
     >
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
+      {/* Calendario en español: meses, días y botones */}
+      <LocalizationProvider
+        dateAdapter={AdapterDayjs}
+        adapterLocale="es"
+        localeText={esES.components.MuiLocalizationProvider.defaultProps.localeText}
+      >
         <DateCalendar
           value={selectedDate}
           onChange={handleDateChange}
           shouldDisableDate={shouldDisableDate}
           sx={{
+            ...interiorCalendario(tactil, seleccionVerde),
             width: "100%",
-            maxWidth: 300,
+            maxWidth: tactil ? 320 : 300,
+            height: alto,
+            maxHeight: "none",
             m: 0,
-            "& .MuiPickersDay-root": { fontSize: 12, borderRadius: "50%" },
-            "& .MuiPickersDay-root:not(.Mui-disabled)": { fontWeight: 500 },
-            "& .MuiPickersDay-root.Mui-selected": {
-              bgcolor: "#1D9E75",
-              "&:hover": { bgcolor: "#0F6E56" },
-            },
+            // Verde = día con horarios disponibles
             "& .MuiPickersDay-root:not(.Mui-disabled):not(.Mui-selected)": {
               bgcolor: tone.green.bg,
               color: tone.green.fg,
-              "&:hover": { bgcolor: tone.green.border },
-            },
-            "& .MuiDayCalendar-weekDayLabel": {
-              fontSize: 10,
               fontWeight: 600,
-              letterSpacing: "0.04em",
-              textTransform: "uppercase",
-              color: "text.disabled",
+              "&:hover": { bgcolor: tone.green.border },
             },
           }}
         />

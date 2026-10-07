@@ -58,7 +58,7 @@ const footerLink = {
 
 export default function Footer({ contact, social, footer, navigation, logo, ctaLabel, showCtas = true, primaryHref = "/register" }: FooterProps) {
   const items = contactItems(contact);
-  // Ubicación del mapa: la exacta de Sanity, si no la ficha de Google Maps (nombre + coordenadas), si no la dirección
+  // Ubicación del mapa: la exacta de Sanity, si no la ficha de Google Maps (su identificador o nombre + coordenadas), si no la dirección
   const place = contact.mapQuery ? null : placeFromMapsUrl(contact.mapUrl);
   const mapLocation = contact.showMap ? (contact.mapQuery || place?.name || contact.address).trim() : "";
   const external = (href?: string) => (href?.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {});
@@ -251,7 +251,7 @@ export default function Footer({ contact, social, footer, navigation, logo, ctaL
               <Box
                 component="iframe"
                 title={`Mapa: ${contact.address || mapLocation}`}
-                src={mapsEmbedUrl(mapLocation, place?.near)}
+                src={mapsEmbedUrl(mapLocation, place)}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 allowFullScreen

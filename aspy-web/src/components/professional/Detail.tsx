@@ -19,6 +19,7 @@ import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
 import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
 import type { AppointmentWithReports } from "@/types/AppointmentWithReports";
 import { tone } from "@shared-theme/themePrimitives";
+import { vh } from "@shared-theme/pantallaGrande";
 
 export default function AppointmentDetail() {
   const { data, loading } = useRoleData();
@@ -276,7 +277,7 @@ export default function AppointmentDetail() {
               overflow: "hidden",
               display: "flex",
               flexDirection: "column",
-              minHeight: "78vh",
+              minHeight: vh(78),
             }}
           >
             {/* Barra del visor */}
@@ -298,7 +299,7 @@ export default function AppointmentDetail() {
             </Box>
 
             {/* Cuerpo del visor */}
-            <Box sx={{ flex: 1, position: "relative", minHeight: "70vh" }}>
+            <Box sx={{ flex: 1, position: "relative", minHeight: vh(70) }}>
               {appointment?.report?.file ? (
                 <iframe
                   src={appointment.report.file}

@@ -1,134 +1,42 @@
 // FINAL
-import { styled } from "@mui/material/styles";
-import { useNavigate } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import Box from "@mui/material/Box";
-import CssBaseline from "@mui/material/CssBaseline";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
-import Stack from "@mui/material/Stack";
-import MuiCard from "@mui/material/Card";
-import Divider from "@mui/material/Divider";
-import AppTheme from "@shared-theme/AppTheme";
+import { aspy } from "@shared-theme/themePrimitives";
+import AuthShell, { AuthCard, AuthLogo } from "@components/auth/AuthShell";
+import { authLinkSx } from "@components/auth/estilos";
+import { DISPLAY_FONT } from "@components/landing/constants";
 import RegisterView from "@components/RegisterView";
 
-import fondoAspy from "../assets/fondoAspy.webp";
-
-const Card = styled(MuiCard)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  alignSelf: "center",
-  width: "100%",
-  padding: theme.spacing(4, 5),
-  gap: theme.spacing(2.5),
-  margin: "auto",
-  borderRadius: 20,
-  border: "1px solid",
-  borderColor: theme.palette.divider,
-  boxShadow: "0 8px 40px rgba(0,0,0,0.08)",
-
-  [theme.breakpoints.up("sm")]: {
-    width: "680px",
-  },
-
-  [theme.breakpoints.up("md")]: {
-    width: "760px",
-  },
-
-  ...theme.applyStyles("dark", {
-    boxShadow: "0 8px 40px rgba(0,0,0,0.4)",
-  }),
-}));
-
-const SignUpContainer = styled(Stack)(({ theme }) => ({
-  position: "relative",
-  minHeight: "100dvh",
-  padding: theme.spacing(2),
-  overflowY: "auto",
-  overflowX: "hidden",
-
-  [theme.breakpoints.up("sm")]: {
-    padding: theme.spacing(4),
-  },
-
-  "&::before": {
-    content: '""',
-    position: "absolute",
-    inset: 0,
-    zIndex: 0,
-
-    backgroundImage: `url(${fondoAspy})`,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-
-    ...theme.applyStyles("dark", {
-      backgroundImage: `
-        linear-gradient(
-          rgba(0, 0, 0, 0.6),
-          rgba(0, 0, 0, 0.6)
-        ),
-        url(${fondoAspy})
-      `,
-    }),
-  },
-}));
-
 export default function SignUp(props: { disableCustomTheme?: boolean }) {
-  const navigate = useNavigate();
-
   return (
-    <AppTheme {...props}>
-      <CssBaseline enableColorScheme />
-
-      <SignUpContainer direction="column" justifyContent="center">
-        <Card
-          variant="outlined"
-          sx={{
-            position: "relative",
-            zIndex: 1,
-          }}
-        >
-          {/* Encabezado */}
-          <Box sx={{ textAlign: "center", mb: 0.5 }}>
-            <Typography
-              component="h1"
-              variant="h5"
-              sx={{ fontWeight: 800, mb: 0.5 }}
-            >
-              Crear cuenta en ASPY
-            </Typography>
-
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              Completa los pasos para registrarte como cliente
-            </Typography>
-          </Box>
-
-          {/* Formulario multi-paso */}
-          <RegisterView />
-
-          <Divider sx={{ fontSize: "0.78rem", color: "text.secondary" }}>
-            o
-          </Divider>
-
+    <AuthShell {...props}>
+      <AuthCard maxWidth={780}>
+        {/* Encabezado */}
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 1 }}>
+          <AuthLogo height={72} />
           <Typography
-            variant="body2"
-            sx={{ textAlign: "center", color: "text.secondary" }}
+            component="h1"
+            sx={{ fontFamily: DISPLAY_FONT, fontWeight: 800, fontSize: { xs: "1.6rem", sm: "1.9rem" }, lineHeight: 1.15, letterSpacing: "-0.02em", color: aspy.text }}
           >
-            ¿Ya tienes una cuenta?{" "}
-            <Link
-              onClick={() => navigate("/login")}
-              component="button"
-              sx={{
-                fontWeight: 600,
-                textDecoration: "none",
-                "&:hover": { textDecoration: "underline" },
-              }}
-            >
-              Iniciar sesión
-            </Link>
+            Crea tu cuenta
           </Typography>
-        </Card>
-      </SignUpContainer>
-    </AppTheme>
+          <Typography sx={{ fontSize: "0.95rem", lineHeight: 1.5, color: aspy.muted }}>
+            Tres pasos cortos para agendar tus citas en la fundación.
+          </Typography>
+        </Box>
+
+        {/* Formulario multi-paso */}
+        <RegisterView />
+
+        <Typography sx={{ textAlign: "center", fontSize: "0.92rem", color: aspy.muted }}>
+          ¿Ya tienes una cuenta?{" "}
+          <Link component={RouterLink} to="/login" sx={authLinkSx}>
+            Iniciar sesión
+          </Link>
+        </Typography>
+      </AuthCard>
+    </AuthShell>
   );
 }

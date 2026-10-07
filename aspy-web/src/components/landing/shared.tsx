@@ -10,6 +10,7 @@ import YouTubeIcon from "@mui/icons-material/YouTube";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import { FaTiktok } from "react-icons/fa";
 import type { LandingImage, SocialNetwork } from "@/content/landing/types";
+import { responsiveImg } from "@/content/landing/images";
 import { C, DISPLAY_FONT, NAV_HEIGHT } from "./constants";
 
 export function SocialIcon({ network, size = 18 }: { network: SocialNetwork; size?: number }) {
@@ -29,7 +30,7 @@ export function BrandMark({ logo, height = 48 }: { logo: LandingImage; height?: 
   return (
     <Box
       component="img"
-      src={logo.src}
+      {...responsiveImg(logo.src, `${Math.round(height * 1.6)}px`, [960])}
       alt={logo.alt}
       sx={{ display: "block", height, width: "auto" }}
     />

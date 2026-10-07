@@ -1,10 +1,11 @@
 import SideMenu from "@components/SideMenu";
 import { Outlet } from "react-router-dom";
 import Box from "@mui/material/Box";
+import { largeScreenZoom, vh } from "@shared-theme/pantallaGrande";
 
 const AdminLayout = () => (
   <Box
-    sx={{ display: "flex", minHeight: "100dvh", bgcolor: "background.default" }}
+    sx={{ display: "flex", minHeight: vh(100), bgcolor: "background.default", ...largeScreenZoom }}
   >
     <SideMenu />
 

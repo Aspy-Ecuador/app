@@ -1,5 +1,4 @@
 // FINAL
-// FINAL
 import { useState, useEffect, useMemo } from "react";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
@@ -15,7 +14,6 @@ import Divider from "@mui/material/Divider";
 import { styled } from "@mui/material/styles";
 import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import BancoPacifico from "@assets/BP.jpeg";
 import type { FileData } from "@/types/FileData";
 import UploadButton from "@buttons/UploadButton";
 import {
@@ -25,6 +23,8 @@ import {
 } from "@mui/icons-material";
 import { useRoleData } from "@/observer/RoleDataContext";
 import type { Service } from "@typesResponse/Service";
+import bankAccountAPI, { type BankAccount } from "@API/bankAccountAPI";
+import CircularProgress from "@mui/material/CircularProgress";
 
 interface PaymentFormProps {
   setFile: (valid: FileData) => void;
@@ -88,6 +88,12 @@ export default function PaymentForm({
 }: PaymentFormProps) {
   const { data, loading } = useRoleData();
   const [signature, setSignature] = useState<FileData | null>(null);
+  // Datos bancarios que configura el Admin (undefined = cargando, null = sin configurar)
+  const [cuenta, setCuenta] = useState<BankAccount | null | undefined>(undefined);
+
+  useEffect(() => {
+    bankAccountAPI.get().then(setCuenta, () => setCuenta(null));
+  }, []);
 
   const service = useMemo(() => {
     if (!loading && data.services) {
@@ -97,10 +103,11 @@ export default function PaymentForm({
   }, [loading, data.services, service_id]);
 
   useEffect(() => {
-    const allFilled = !!signature;
+    // Sin cuenta configurada no se puede pagar, aunque se suba un archivo
+    const allFilled = !!signature && !!cuenta;
     if (allFilled) setFile(signature);
     setIsValid(allFilled);
-  }, [signature, setFile, setIsValid]);
+  }, [signature, cuenta, setFile, setIsValid]);
 
   return (
     <Stack spacing={3} useFlexGap>
@@ -163,9 +170,10 @@ export default function PaymentForm({
                     size="small"
                     sx={{
                       backgroundColor: "primary.main",
-                      color: "white",
                       fontWeight: 600,
                       fontSize: "0.7rem",
+                      // El tema pinta el texto de los chips con el color primario: aquí va blanco para que se lea
+                      "& .MuiChip-label": { color: "#fff" },
                     }}
                   />
                 </CardContent>
@@ -200,17 +208,7 @@ export default function PaymentForm({
             ${service?.price}
           </Typography>
         </Box>
-        <Box
-          component="img"
-          src={BancoPacifico}
-          alt="Banco Pacífico"
-          sx={{
-            height: 40,
-            borderRadius: 2,
-            backgroundColor: "background.paper",
-            px: 1,
-          }}
-        />
+        <AccountBalanceRoundedIcon sx={{ color: "rgba(255,255,255,0.85)", fontSize: 40 }} />
       </Box>
 
       {/* Datos de la cuenta */}
@@ -226,7 +224,7 @@ export default function PaymentForm({
           sx={{
             px: 2.5,
             py: 1.5,
-            backgroundColor: "grey.50",
+            backgroundColor: "action.hover",
             borderBottom: "1px solid",
             borderColor: "divider",
           }}
@@ -236,13 +234,28 @@ export default function PaymentForm({
           </Typography>
         </Box>
         <Box sx={{ px: 2.5, py: 1.5 }}>
-          <InfoRow label="Banco" value="Pacífico" />
-          <Divider />
-          <InfoRow label="Tipo" value="Cuenta Corriente" />
-          <Divider />
-          <InfoRow label="Número de cuenta" value="123456789" copyable />
-          <Divider />
-          <InfoRow label="C.I. / RUC" value="987654321" copyable />
+          {cuenta === undefined ? (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+              <CircularProgress size={22} />
+            </Box>
+          ) : cuenta === null ? (
+            <Alert severity="warning" sx={{ my: 1, borderRadius: 2 }}>
+              La fundación todavía no ha registrado sus datos bancarios, así que por ahora no se puede pagar
+              en línea. Comunícate con la fundación para agendar tu cita.
+            </Alert>
+          ) : (
+            <>
+              <InfoRow label="Banco" value={cuenta.bank_name} />
+              <Divider />
+              <InfoRow label="Tipo" value={`Cuenta ${cuenta.account_type}`} />
+              <Divider />
+              <InfoRow label="Número de cuenta" value={cuenta.account_number} copyable />
+              <Divider />
+              <InfoRow label="Titular" value={cuenta.holder_name} />
+              <Divider />
+              <InfoRow label="C.I. / RUC" value={cuenta.holder_id} copyable />
+            </>
+          )}
         </Box>
       </Box>
 

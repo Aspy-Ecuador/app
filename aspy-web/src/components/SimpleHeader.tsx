@@ -22,29 +22,26 @@ export default function SimpleHeader({ text, chip }: SimpleHeaderProps) {
       }}
     >
 
-      <Typography variant="h2"sx={{
-      position: "absolute",
-      left: "50%",
-      transform: "translateX(-50%)",
-
-      fontSize: {
-        xs: "1.05rem",
-        sm: "1.5rem",
-        md: "2rem",
-      },
-
-      maxWidth: {
-        xs: "45%",
-        sm: "60%",
-        md: "70%",
-      },
-
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      whiteSpace: "nowrap",
-
-      px: 1,
-    }}>{text}</Typography>
+      {/* En celular va a la izquierda y puede ocupar dos líneas; desde tablet, centrado en una línea */}
+      <Typography
+        variant="h2"
+        sx={{
+          position: { xs: "static", sm: "absolute" },
+          left: { sm: "50%" },
+          transform: { sm: "translateX(-50%)" },
+          flex: { xs: 1, sm: "none" },
+          minWidth: 0,
+          fontSize: { xs: "1.2rem", sm: "1.5rem", md: "2rem" },
+          lineHeight: 1.2,
+          maxWidth: { sm: "60%", md: "70%" },
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: { xs: "normal", sm: "nowrap" },
+          px: { xs: 0, sm: 1 },
+        }}
+      >
+        {text}
+      </Typography>
 
 
       <Chip

@@ -28,6 +28,8 @@ import Switch from "@mui/material/Switch";
 import CircularProgress from "@mui/material/CircularProgress";
 import type { Person } from "@/typesResponse/Person";
 import { tone } from "@shared-theme/themePrimitives";
+import { getAuthenticatedPersonID } from "@store";
+import { vh } from "@shared-theme/pantallaGrande";
 
 const roleChipSx = (role: string) => {
   if (role === "Admin") return { bgcolor: tone.yellow.bg, color: tone.yellow.fg };
@@ -183,6 +185,9 @@ export default function UsersList() {
               <Switch
                 size="small"
                 checked={isAvailable}
+                // Nadie se deshabilita a sí mismo (el backend también lo impide)
+                disabled={personId === getAuthenticatedPersonID()}
+                title={personId === getAuthenticatedPersonID() ? "No puedes deshabilitar tu propia cuenta" : undefined}
                 onChange={() => handleToggleAvailable(personId, isAvailable)}
                 sx={{
                   "& .MuiSwitch-switchBase.Mui-checked": { color: tone.green.main },
@@ -346,7 +351,7 @@ export default function UsersList() {
                   borderTopLeftRadius: 20,
                   borderTopRightRadius: 20,
                   p: 2,
-                  maxHeight: "85vh", // Evita que tape toda la pantalla
+                  maxHeight: vh(85), // Evita que tape toda la pantalla
                   boxShadow: "0px -4px 20px rgba(0,0,0,0.1)",
                 },
               }}

@@ -5,6 +5,9 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import Campo from "@forms/Campo";
+import CampoFecha from "@forms/CampoFecha";
+import { campoSx } from "@forms/estilos";
 import Chip from "@mui/material/Chip";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
@@ -97,16 +100,7 @@ const SectionPanel = ({
 );
 
 const fieldSx = {
-  "& .MuiOutlinedInput-root": {
-    borderRadius: 2,
-    fontSize: 13,
-    bgcolor: "action.hover",
-    "& fieldset": { borderColor: "divider" },
-    "&:hover fieldset": { borderColor: tone.green.main },
-    "&.Mui-focused fieldset": { borderColor: tone.green.main },
-  },
-  "& .MuiInputLabel-root": { fontSize: 13 },
-  "& .MuiInputLabel-root.Mui-focused": { color: tone.green.main },
+  ...campoSx,
   // Garantizamos que el icono del reloj del navegador se vea y sea cliqueable para el scroll
   "& input[type='time']::-webkit-calendar-picker-indicator": {
     cursor: "pointer",
@@ -249,17 +243,9 @@ export default function HorarioProfessional() {
         {/* ── Formulario ── */}
         <SectionPanel label="Nuevo horario">
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.75 }}>
-            <TextField
-              fullWidth
-              size="small"
-              type="date"
-              label="Fecha"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              InputLabelProps={{ shrink: true }}
-              inputProps={{ min: todayStr() }}
-              sx={fieldSx}
-            />
+            <Campo etiqueta="Fecha" htmlFor="horario-fecha">
+              <CampoFecha id="horario-fecha" titulo="Fecha del horario" tipo="futura" value={date} onChange={setDate} fieldSx={campoSx} />
+            </Campo>
 
             <Box
               sx={{
@@ -269,24 +255,26 @@ export default function HorarioProfessional() {
               }}
             >
               {/* Aquí están tus selectores de hora intactos */}
-              <TextField
-                size="small"
-                type="time"
-                label="Hora inicio"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                sx={fieldSx}
-              />
-              <TextField
-                size="small"
-                type="time"
-                label="Hora fin"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                sx={fieldSx}
-              />
+              <Campo etiqueta="Hora inicio" htmlFor="horario-inicio">
+                <TextField
+                  id="horario-inicio"
+                  fullWidth
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  sx={fieldSx}
+                />
+              </Campo>
+              <Campo etiqueta="Hora fin" htmlFor="horario-fin">
+                <TextField
+                  id="horario-fin"
+                  fullWidth
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  sx={fieldSx}
+                />
+              </Campo>
             </Box>
 
             {/* Turno detectado automáticamente */}

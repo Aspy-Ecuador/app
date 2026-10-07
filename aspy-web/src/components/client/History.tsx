@@ -11,6 +11,7 @@ import { getAuthenticatedPersonID } from "@/utils/store";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useState } from "react";
+import { vh } from "@shared-theme/pantallaGrande";
 
 export default function History() {
   const [selectedComments, setSelectedComments] = useState("");
@@ -40,7 +41,7 @@ export default function History() {
         </Typography>
       </Box>
 
-      <Box sx={{ height: { xs: "75vh", md: "80vh" } }}>
+      <Box sx={{ height: { xs: vh(75), md: vh(80) } }}>
         {selectedComments ? (
           <Box
             component="iframe"
@@ -150,7 +151,7 @@ export default function History() {
             sx: {
               borderTopLeftRadius: 20,
               borderTopRightRadius: 20,
-              maxHeight: "85vh",
+              maxHeight: vh(85),
               boxShadow: "0px -4px 20px rgba(0,0,0,0.1)",
               overflow: "hidden",
             },

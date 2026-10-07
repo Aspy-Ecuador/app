@@ -1,7 +1,7 @@
 // FINAL
 import { useState } from "react";
 import type { GridRowId, GridColDef } from "@mui/x-data-grid";
-import { getReceiptByUser, handleDownloadInvoice } from "@utils/utils";
+import { getReceiptByUser, handleDownloadInvoice, montoPago } from "@utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext";
 import { getAuthenticatedUserID } from "@/utils/store";
 import { useTheme } from "@mui/material/styles";
@@ -20,6 +20,7 @@ import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import type { FlattenedReceipt } from "@/types/FlattenedReceipt";
 import type { Payment } from "@/typesResponse/Payment";
 import { tone } from "@shared-theme/themePrimitives";
+import { vh } from "@shared-theme/pantallaGrande";
 
 const statusChipSx = (status: string) => {
   const s = status?.toLowerCase();
@@ -169,7 +170,7 @@ export default function ReceiptList() {
       client_id: r.client.person_id,
       client: `${r.client.first_name} ${r.client.last_name}`,
       service: r.service.name,
-      price: r.service.price,
+      price: montoPago(r),
       date: r.creation_date.split("T")[0],
       receipt: r.receipt,
     }));
@@ -180,8 +181,8 @@ export default function ReceiptList() {
       date={receipt.payment_data.creation_date}
       client={`${receipt.client.first_name} ${receipt.client.last_name}`}
       service={receipt.service.name}
-      price={receipt.service.price}
-      total={receipt.service.price}
+      price={montoPago(receipt)}
+      total={montoPago(receipt)}
       paymentMethod={receipt.payment_data.type}
       client_id={receipt.client_id}
     />
@@ -230,7 +231,7 @@ export default function ReceiptList() {
               borderTopLeftRadius: 20,
               borderTopRightRadius: 20,
               p: 2,
-              maxHeight: "85vh",
+              maxHeight: vh(85),
               boxShadow: "0px -4px 20px rgba(0,0,0,0.1)",
             },
           }}

@@ -18,16 +18,19 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Token vencido o inválido: se cierra la sesión local y se vuelve al login
+// Token vencido o inválido, o cuenta deshabilitada por el administrador:
+// se cierra la sesión local y se vuelve al login (con el motivo, si lo hay)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     const isLoginRequest = error.config?.url?.includes("/login");
-    if (error.response?.status === 401 && !isLoginRequest) {
+    const status = error.response?.status;
+    const deshabilitada = status === 403 && error.response?.data?.code === "cuenta_deshabilitada";
+    if ((status === 401 || deshabilitada) && !isLoginRequest) {
       localStorage.removeItem("token");
       localStorage.removeItem("authenticatedUser");
       if (window.location.pathname !== "/login") {
-        window.location.href = "/login";
+        window.location.href = deshabilitada ? "/login?motivo=deshabilitada" : "/login";
       }
     }
     return Promise.reject(error);

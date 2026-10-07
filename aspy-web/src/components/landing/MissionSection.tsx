@@ -2,6 +2,7 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type { LandingContent } from "@/content/landing/types";
+import { responsiveImg } from "@/content/landing/images";
 import { C } from "./constants";
 import { Reveal, Section, SectionHeader } from "./shared";
 
@@ -59,7 +60,12 @@ export default function MissionSection({ content }: { content: LandingContent["m
                     "&:hover img": { transform: "scale(1.05)" },
                   }}
                 >
-                  <img src={img.src} alt={img.alt} loading="lazy" decoding="async" />
+                  <img
+                    {...responsiveImg(img.src, "(min-width: 900px) 280px, 50vw")}
+                    alt={img.alt}
+                    loading="lazy"
+                    decoding="async"
+                  />
                 </Box>
               ))}
             </Box>

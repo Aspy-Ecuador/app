@@ -90,6 +90,8 @@ export interface LandingContent {
       accent: Accent;
       title: string;
       description: string;
+      /** Foto opcional que aparece arriba de la tarjeta. */
+      image?: LandingImage;
     }[];
   };
   steps: {

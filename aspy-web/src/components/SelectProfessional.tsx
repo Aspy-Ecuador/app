@@ -1,10 +1,10 @@
 // FINAL
 import { useState } from "react";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Progress from "./Progress";
-import FormControl from "@mui/material/FormControl";
+import Campo from "@forms/Campo";
+import { campoSx } from "@forms/estilos";
 import Select from "@mui/material/Select";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { MenuItem } from "@mui/material";
@@ -35,9 +35,8 @@ export default function SelectProfessional({
 
   return (
     <Box sx={{ minWidth: 120 }}>
-      <Typography variant="body1">Profesionales</Typography>
-      <FormControl fullWidth>
-        <Select value={selectedId} onChange={handleChange} displayEmpty>
+      <Campo etiqueta="Profesionales" idEtiqueta="citas-profesional-etiqueta">
+        <Select fullWidth labelId="citas-profesional-etiqueta" value={selectedId} onChange={handleChange} displayEmpty sx={campoSx}>
           <MenuItem key={0} value={0}>
             Seleccione una opción
           </MenuItem>
@@ -47,7 +46,7 @@ export default function SelectProfessional({
             </MenuItem>
           ))}
         </Select>
-      </FormControl>
+      </Campo>
     </Box>
   );
 }

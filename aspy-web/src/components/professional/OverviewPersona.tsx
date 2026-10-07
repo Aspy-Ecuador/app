@@ -1,5 +1,5 @@
 // FINAL
-import { getAge, translateRol } from "@/utils/utils";
+import { getAge, ocupacionDe, translateRol } from "@/utils/utils";
 import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
@@ -208,7 +208,7 @@ export default function OverviewPersona({
         <InfoRow
           icon={<WorkRoundedIcon sx={{ fontSize: 15 }} />}
           label="Ocupación"
-          value={selectedData.occupation?.name}
+          value={ocupacionDe(selectedData)}
         />
       </Box>
 

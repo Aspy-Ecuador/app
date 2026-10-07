@@ -6,22 +6,27 @@ import type { UserForm } from "@/typesRequest/UserForm";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-import Divider from "@mui/material/Divider";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
-import UserInput from "@forms/UserInput";
+import CampoRegistro from "@forms/CampoRegistro";
+import { OCUPACION_OTRA, reglaOcupacionOtra } from "@/config/reglasContacto";
+import ButtonBase from "@mui/material/ButtonBase";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import RadioButtonUncheckedRoundedIcon from "@mui/icons-material/RadioButtonUncheckedRounded";
+import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 
 // Imports para la Política de Privacidad
-import Checkbox from "@mui/material/Checkbox";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
-import { tone } from "@shared-theme/themePrimitives";
+import { aspy, tone } from "@shared-theme/themePrimitives";
+import { authButtonSx } from "@components/auth/estilos";
+import { DISPLAY_FONT } from "@components/landing/constants";
+import { vh } from "@shared-theme/pantallaGrande";
 
 interface FormRegisterProps {
   start: number;
@@ -67,14 +72,17 @@ export default function FormRegister({
       identification: { type: "", number: "" },
       address: {
         type: "",
-        country_id: 0,
-        state_id: 0,
-        city_id: 0,
+        country_id: 1, // Ecuador (única opción)
+        state_id: "" as unknown as number,
+        city_id: "" as unknown as number,
         primary_address: "",
         secondary_address: "",
       },
+      occupation_other: "",
     });
   }, [methods]);
+
+  const ocupacion = Number(useWatch({ control: methods.control, name: "occupation_id" }) ?? 0);
 
   // Observa la provincia seleccionada
   const selectedStateId = Number(
@@ -84,37 +92,79 @@ export default function FormRegister({
   // Resetea la ciudad cuando cambia la provincia
   useEffect(() => {
     if (selectedStateId) {
-      methods.setValue("address.city_id", 0);
+      methods.setValue("address.city_id", "" as unknown as number);
     }
   }, [selectedStateId]);
 
-  // Filtra ciudades según la provincia seleccionada
-  const list_inputs = inputRegisterUserConfig.slice(start, end).map((input) => {
-    const resolvedOptions = input.dependsOn
-      ? input.options?.filter((opt) => opt.state_id === selectedStateId)
-      : input.options;
+  // Ayudas cortas bajo algunos campos
+  const AYUDAS: Record<string, string> = {
+    "identification.number": "Solo números",
+    "phone.number": "Ej.: 0991234567",
+    "address.primary_address": "Calle principal y número",
+    "address.secondary_address": "Intersección o referencia",
+    password: "Mínimo 8 caracteres",
+  };
+  const ETIQUETAS: Record<string, string> = {
+    email: "Correo electrónico",
+    password_confirmation: "Confirmar contraseña",
+  };
 
-    return (
-      <Box key={input.key} sx={{ minWidth: 0, width: "100%" }}>
-        <UserInput
-          label={input.label}
-          type={input.type}
-          id={input.key}
-          validation={
-            input.key === "password_confirmation"
-              ? {
-                  ...input.validation,
-                  validate: (value: string) =>
-                    value === methods.getValues("password") ||
-                    "Las contraseñas no coinciden",
-                }
-              : input.validation
-          }
-          options={resolvedOptions}
-        />
-      </Box>
-    );
-  });
+  // El rol no se elige: el registro público siempre crea una cuenta de cliente
+  const list_inputs = inputRegisterUserConfig
+    .slice(start, end)
+    .filter((input) => input.key !== "role_id")
+    .flatMap((input) => {
+      const resolvedOptions = input.dependsOn
+        ? input.options?.filter((opt) => opt.state_id === selectedStateId)
+        : input.options;
+
+      const campo = (
+        <Box key={input.key} sx={{ minWidth: 0, width: "100%" }}>
+          <CampoRegistro
+            label={ETIQUETAS[input.key] ?? input.label}
+            type={input.type}
+            id={input.key}
+            ayuda={AYUDAS[input.key]}
+            disabled={input.key === "address.city_id" && !selectedStateId}
+            validation={
+              input.key === "password_confirmation"
+                ? {
+                    ...input.validation,
+                    validate: (value: string) =>
+                      value === methods.getValues("password") ||
+                      "Las contraseñas no coinciden",
+                  }
+                : input.validation
+            }
+            options={resolvedOptions}
+          />
+        </Box>
+      );
+
+      // Ocupación "Otra": aparece un campo para escribirla
+      if (input.key === "occupation_id" && ocupacion === OCUPACION_OTRA) {
+        return [
+          campo,
+          <Box key="occupation_other" sx={{ minWidth: 0, width: "100%" }}>
+            <CampoRegistro
+              id="occupation_other"
+              label="¿Cuál es tu ocupación?"
+              type="text"
+              validation={reglaOcupacionOtra}
+              placeholder="Ej.: Diseñadora gráfica"
+            />
+          </Box>,
+        ];
+      }
+      return [campo];
+    });
+
+  const INTRO = [
+    { titulo: "Cuéntanos sobre ti", texto: "Tus datos personales. Solo los ve el equipo de la fundación." },
+    { titulo: "¿Cómo te contactamos?", texto: "Tu teléfono y tu dirección, para coordinar tus citas." },
+    { titulo: "Crea tu acceso", texto: "Con este correo y esta contraseña entrarás al sistema." },
+  ];
+  const intro = INTRO[start === 0 ? 0 : isLast ? 2 : 1];
 
   const onSubmit = methods.handleSubmit((data) => {
     if (isLast) {
@@ -152,7 +202,7 @@ export default function FormRegister({
   // CANDADO: intercepta el clic ANTES de que el navegador alcance a togglear
   // el input nativo. Así el checkbox nunca puede marcarse "de facto"; el único
   // camino para que acceptedTerms sea true es el botón del modal tras leer todo.
-  const handleCheckboxClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleCheckboxClick = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     if (!acceptedTerms) {
       setOpenPolicy(true);
@@ -165,12 +215,19 @@ export default function FormRegister({
   return (
     <FormProvider {...methods}>
       <form onSubmit={(e) => e.preventDefault()} noValidate>
+        <Box sx={{ mb: 3 }}>
+          <Typography component="h2" sx={{ fontFamily: DISPLAY_FONT, fontWeight: 800, fontSize: "1.2rem", letterSpacing: "-0.01em", color: aspy.text }}>
+            {intro.titulo}
+          </Typography>
+          <Typography sx={{ mt: 0.25, fontSize: "0.92rem", lineHeight: 1.5, color: aspy.muted }}>{intro.texto}</Typography>
+        </Box>
         <Box
           sx={{
             display: "grid",
             gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-            gap: 3,
-            mb: 3,
+            columnGap: 2.5,
+            rowGap: 1.25,
+            mb: 2,
             width: "100%",
             boxSizing: "border-box",
             "& > *": { minWidth: 0 },
@@ -179,49 +236,72 @@ export default function FormRegister({
           {list_inputs}
         </Box>
 
-        <Divider sx={{ mb: 2.5 }} />
-
-        {/* COMPONENTE DE POLÍTICA DE PRIVACIDAD */}
+        {/* CONSENTIMIENTO: tarjeta que solo se marca después de leer la política completa */}
         {isLast && (
-          <Box sx={{ mb: 3, p: 2, bgcolor: "rgba(15, 110, 86, 0.04)", borderRadius: 2, border: `1px solid ${tone.green.bg}` }}>
-            <FormControlLabel
-              // Evita que un clic en el <label> dispare el toggle nativo del input;
-              // el único manejador válido es handleCheckboxClick sobre el propio Checkbox.
-              onClick={(e) => e.preventDefault()}
-              control={
-                <Checkbox
-                  checked={acceptedTerms}
-                  onClick={handleCheckboxClick}
-                  // onChange se deja vacío a propósito: toda la lógica vive en onClick
-                  // para que ningún toggle nativo pueda "ganarle" a la validación.
-                  onChange={() => {}}
-                  sx={{
-                    color: "text.secondary",
-                    "&.Mui-checked": { color: tone.green.fg },
-                    "& .MuiSvgIcon-root": { fontSize: 26 },
-                    p: "6px",
+          <ButtonBase
+            onClick={handleCheckboxClick}
+            role="checkbox"
+            aria-checked={acceptedTerms}
+            focusRipple
+            sx={{
+              width: "100%",
+              mb: 3,
+              p: 2,
+              gap: 1.75,
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "flex-start",
+              textAlign: "left",
+              borderRadius: "16px",
+              border: "1.5px solid",
+              borderColor: acceptedTerms ? tone.green.main : aspy.border,
+              bgcolor: acceptedTerms ? tone.green.bg : aspy.surface,
+              transition: "border-color 0.25s, background-color 0.25s, box-shadow 0.25s",
+              "&:hover": { borderColor: tone.green.main, boxShadow: "0 6px 18px rgba(15,110,86,0.12)" },
+              "&.Mui-focusVisible": { outline: "3px solid", outlineColor: tone.green.main, outlineOffset: "2px" },
+            }}
+          >
+            <Box
+              sx={{
+                mt: "2px",
+                flex: "none",
+                display: "grid",
+                placeItems: "center",
+                color: acceptedTerms ? tone.green.fg : "text.disabled",
+                transition: "transform 0.25s",
+                transform: acceptedTerms ? "scale(1.08)" : "scale(1)",
+                "@media (prefers-reduced-motion: reduce)": { transition: "none" },
+              }}
+            >
+              {acceptedTerms ? <CheckCircleRoundedIcon sx={{ fontSize: 28 }} /> : <RadioButtonUncheckedRoundedIcon sx={{ fontSize: 28 }} />}
+            </Box>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography sx={{ fontWeight: 700, fontSize: "0.92rem", color: "text.primary", display: "flex", alignItems: "center", gap: 0.75 }}>
+                <ShieldOutlinedIcon sx={{ fontSize: 17, color: tone.green.fg }} />
+                {acceptedTerms ? "Aceptaste la política de privacidad" : "Acepta la política de privacidad"}
+              </Typography>
+              <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.5, mt: 0.25 }}>
+                He leído y acepto la{" "}
+                <Link
+                  component="span"
+                  role="button"
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    handleOpenPolicy(e);
                   }}
-                />
-              }
-              label={
-                <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.5 }}>
-                  He leído y acepto la{" "}
-                  <Link
-                    component="button"
-                    type="button"
-                    onClick={handleOpenPolicy}
-                    sx={{
-                      fontWeight: 600, color: tone.green.fg, textDecoration: "underline", textUnderlineOffset: 2,
-                      "&:hover": { color: tone.green.fg },
-                    }}
-                  >
-                    Política de Privacidad y el Tratamiento de Datos Personales
-                  </Link>{" "}
-                  de ASPY Ecuador.
+                  sx={{ fontWeight: 600, color: tone.green.fg, textDecoration: "underline", textUnderlineOffset: 2, cursor: "pointer" }}
+                >
+                  Política de Privacidad y el Tratamiento de Datos Personales
+                </Link>{" "}
+                de ASPY Ecuador.
+              </Typography>
+              {!acceptedTerms && (
+                <Typography sx={{ fontSize: "0.78rem", color: "text.disabled", mt: 0.5 }}>
+                  Toca aquí para leerla: se marca cuando terminas de leerla.
                 </Typography>
-              }
-            />
-          </Box>
+              )}
+            </Box>
+          </ButtonBase>
         )}
 
         <Box
@@ -230,6 +310,9 @@ export default function FormRegister({
             justifyContent: start !== 0 ? "space-between" : "flex-end",
             alignItems: "center",
             gap: 1.5,
+            pt: 2.5,
+            borderTop: "1px solid",
+            borderColor: aspy.border,
           }}
         >
           {start !== 0 && (
@@ -238,10 +321,13 @@ export default function FormRegister({
               onClick={onBack}
               startIcon={<ChevronLeftRoundedIcon />}
               sx={{
+                minHeight: 46,
+                px: 2,
+                borderRadius: "999px",
                 textTransform: "none",
                 fontWeight: 600,
-                color: "text.secondary",
-                "&:hover": { color: "primary.main" },
+                color: aspy.muted,
+                "&:hover": { color: aspy.text, bgcolor: aspy.surface },
               }}
             >
               Anterior
@@ -264,30 +350,7 @@ export default function FormRegister({
                 <ChevronRightRoundedIcon fontSize="small" />
               ) : undefined
             }
-            sx={{
-              textTransform: "none",
-              fontWeight: 700,
-              px: 4,
-              py: 1.1,
-              borderRadius: 2.5,
-              fontSize: "0.92rem",
-              minWidth: 140,
-              background: isLast
-                ? `linear-gradient(135deg, ${tone.green.fg} 0%, ${tone.green.main} 100%)`
-                : "linear-gradient(135deg, #1565C0 0%, #1976D2 100%)",
-              boxShadow: isLast
-                ? "0 4px 14px rgba(15,110,86,0.35)"
-                : "0 4px 14px rgba(25,118,210,0.35)",
-              "&:hover": {
-                boxShadow: isLast
-                  ? "0 6px 20px rgba(15,110,86,0.45)"
-                  : "0 6px 20px rgba(25,118,210,0.45)",
-              },
-              "&:disabled": {
-                background: "rgba(0,0,0,0.12)",
-                boxShadow: "none",
-              },
-            }}
+            sx={{ ...authButtonSx(isLast ? "verde" : "azul"), minWidth: 150 }}
           >
             {load ? (
               <CircularProgress size={22} sx={{ color: "white" }} />
@@ -309,7 +372,7 @@ export default function FormRegister({
         scroll="paper"
         slotProps={{
           paper: {
-            sx: { borderRadius: 3, maxHeight: "85vh" },
+            sx: { borderRadius: 3, maxHeight: vh(85) },
           },
         }}
         // Al terminar la animación de apertura, verifica si el contenido ya cabe sin scroll

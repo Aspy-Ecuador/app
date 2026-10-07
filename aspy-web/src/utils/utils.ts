@@ -52,7 +52,7 @@ export function getIncome(data: any): number[] {
       if (date.getFullYear() !== currentYear) return;
 
       const month = date.getMonth();
-      const price = Number(payment?.service?.price) || 0;
+      const price = montoPago(payment);
 
       monthlyIncome[month] += price;
     }
@@ -329,9 +329,19 @@ export function getUnmarkedAppointments(
     data,
     user_id,
   );
+  // Solo citas agendadas que ya empezaron: la asistencia no se marca por adelantado
   return appointments.filter(
-    (appointment) => appointment.appointment_status.appointment_status_id === 2,
+    (appointment) =>
+      appointment.appointment_status.appointment_status_id === 2 && yaEmpezo(appointment),
   );
+}
+
+/** true si la hora de inicio de la cita ya pasó (hora local del navegador, Ecuador). */
+export function yaEmpezo(appointment: Appointment): boolean {
+  const s = appointment.worker_schedule?.schedule;
+  if (!s) return false;
+  const inicio = new Date(`${String(s.date).split("T")[0]}T${s.start_time}`);
+  return inicio.getTime() <= Date.now();
 }
 
 // FINAL
@@ -1114,4 +1124,22 @@ export function exportServicesCSV(
   a.download = `servicios-aspy-${new Date().toISOString().split("T")[0]}.csv`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+/** Monto de un pago: el guardado al pagar; en pagos antiguos, el precio del servicio. */
+export function montoPago(payment: { amount?: string | number | null; service?: { price: string | number } | null }): number {
+  return Number(payment?.amount ?? payment?.service?.price) || 0;
+}
+
+/** Fecha legible en español ("12 de abril de 1988") a partir de "1988-04-12" o "1988-04-12T05:00:00Z". */
+export function fechaLegible(fecha: string | null | undefined): string {
+  if (!fecha) return "";
+  const [y, m, d] = String(fecha).slice(0, 10).split("-").map(Number);
+  if (!y || !m || !d) return String(fecha);
+  return new Date(y, m - 1, d).toLocaleDateString("es-EC", { day: "numeric", month: "long", year: "numeric" });
+}
+
+/** Ocupación para mostrar: si eligió "Otra", el texto que escribió. */
+export function ocupacionDe(person: { occupation?: { name?: string } | null; occupation_other?: string | null } | null | undefined): string {
+  return person?.occupation_other || person?.occupation?.name || "";
 }

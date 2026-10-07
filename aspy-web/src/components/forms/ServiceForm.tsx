@@ -6,6 +6,7 @@ import type { Service } from "@/typesResponse/Service";
 import { useNavigate } from "react-router-dom";
 import serviceAPI from "@API/serviceAPI";
 import UserInput from "@forms/UserInput";
+import { botonPrimarioSx } from "@forms/estilos";
 import Success from "@components/Success";
 import Progress from "@components/Progress";
 import { getService } from "@/utils/utils";
@@ -138,23 +139,7 @@ export default function ServiceForm({
               startIcon={
                 loadingSave ? undefined : <SaveRoundedIcon fontSize="small" />
               }
-              sx={{
-                minWidth: 140,
-                minHeight: 36,
-                borderRadius: 2.5,
-                textTransform: "none",
-                fontWeight: 700,
-                fontSize: "0.9rem",
-                px: 3,
-                background: "linear-gradient(135deg, #1565C0 0%, #1976D2 100%)",
-                color: "#fff",
-                boxShadow: "0 4px 14px rgba(25,118,210,0.3)",
-                "&:hover": { boxShadow: "0 6px 20px rgba(25,118,210,0.4)" },
-                "&:disabled": {
-                  background: "rgba(0,0,0,0.12)",
-                  boxShadow: "none",
-                },
-              }}
+              sx={botonPrimarioSx}
             >
               {loadingSave ? (
                 <CircularProgress size={20} sx={{ color: "#fff" }} />
@@ -169,23 +154,7 @@ export default function ServiceForm({
               startIcon={
                 loadingSave ? undefined : <AddRoundedIcon fontSize="small" />
               }
-              sx={{
-                minWidth: 140,
-                minHeight: 36,
-                borderRadius: 2.5,
-                textTransform: "none",
-                fontWeight: 700,
-                fontSize: "0.9rem",
-                px: 3,
-                background: "linear-gradient(135deg, #0F6E56 0%, #1B8C6E 100%)",
-                color: "#fff",
-                boxShadow: "0 4px 14px rgba(15,110,86,0.3)",
-                "&:hover": { boxShadow: "0 6px 20px rgba(15,110,86,0.4)" },
-                "&:disabled": {
-                  background: "rgba(0,0,0,0.12)",
-                  boxShadow: "none",
-                },
-              }}
+              sx={botonPrimarioSx}
             >
               {loadingSave ? (
                 <CircularProgress size={20} sx={{ color: "#fff" }} />

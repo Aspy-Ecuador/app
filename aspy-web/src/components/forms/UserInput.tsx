@@ -1,11 +1,19 @@
 // FINAL
-import { useFormContext } from "react-hook-form";
-import { AnimatePresence } from "framer-motion";
+// Campo de los formularios del panel (usuarios y servicios): etiqueta arriba y error debajo.
+// Los valores se registran igual que antes (`register`), así que lo que se envía no cambia.
+import { Controller, useFormContext } from "react-hook-form";
 import { findInputError } from "@utils/findInputError";
 import { isFormInvalid } from "@utils/isFormInvalid";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
-import InputError from "@forms/InputError";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useEffect, useState } from "react";
+import Campo from "@forms/Campo";
+import CampoFecha from "@forms/CampoFecha";
+import { campoSx, selectNativoSx } from "@forms/estilos";
 
 type Option = {
   label: string;
@@ -35,12 +43,14 @@ export default function UserInput({
 }: UserInputProps) {
   const {
     register,
+    control,
     formState: { errors },
     watch,
     setValue,
   } = useFormContext();
 
   const [dynamicOptions, setDynamicOptions] = useState<Option[]>(options);
+  const [verContrasena, setVerContrasena] = useState(false);
 
   const dependentValue = dependsOn ? watch(dependsOn) : null;
 
@@ -68,30 +78,22 @@ export default function UserInput({
 
   const inputError = findInputError(errors, id);
   const isInvalid = isFormInvalid(inputError);
+  const mensajeError = isInvalid ? String(inputError.error.message ?? "Revisa este campo") : undefined;
 
   // Si disabled viene explícito desde el padre, toma precedencia.
   // Si no, mantiene la lógica original: deshabilitar cuando depende de otro campo vacío.
   const isDisabled = disabled || (dependsOn ? !dependentValue : false); // ← MODIFICADO
 
   return (
-    <div className="flex flex-col gap-2 w-full">
-      <div className="flex flex-row gap-2 w-full">
-        <h6 className="grow">{label}</h6>
-        <AnimatePresence mode="wait" initial={false}>
-          {isInvalid && (
-            <InputError
-              message={inputError.error.message}
-              key={inputError.error.message}
-            />
-          )}
-        </AnimatePresence>
-      </div>
+    <Campo etiqueta={label} htmlFor={id} error={mensajeError}>
       {type === "select" ? (
-        <select
+        <Box
+          component="select"
           id={id}
           {...register(id, validation)}
-          className="border border-gray-300 rounded-md p-2 w-full bg-transparent dark:border-white/20"
           disabled={isDisabled} // ← MODIFICADO
+          aria-invalid={isInvalid}
+          sx={selectNativoSx}
         >
           <option value="">Seleccione una opción</option>
           {currentOptions?.map((option) => (
@@ -99,32 +101,62 @@ export default function UserInput({
               {option.label}
             </option>
           ))}
-        </select>
+        </Box>
+      ) : id === "birthdate" ? (
+        // Fecha de nacimiento: mismo calendario que el registro (guarda AAAA-MM-DD, como antes)
+        <Controller
+          name={id}
+          control={control}
+          rules={validation}
+          render={({ field }) => (
+            <CampoFecha
+              id={id}
+              name={field.name}
+              titulo={label}
+              value={field.value ?? ""}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              inputRef={field.ref}
+              error={isInvalid}
+              helperText=""
+              disabled={isDisabled}
+              fieldSx={campoSx}
+            />
+          )}
+        />
       ) : (
         <TextField
-          required
           id={id}
-          type={type}
+          type={type === "password" && verContrasena ? "text" : type}
           variant="outlined"
-          size="small"
+          fullWidth
           disabled={isDisabled} // ← NUEVO: también aplica a TextField
-          className="w-full md:max-w-[300px]"
-          sx={{
-            "& input::-webkit-outer-spin-button": {
-              WebkitAppearance: "none",
-              margin: 0,
-            },
-            "& input::-webkit-inner-spin-button": {
-              WebkitAppearance: "none",
-              margin: 0,
-            },
-            "& input[type=number]": {
-              MozAppearance: "textfield",
-            },
+          error={isInvalid}
+          sx={campoSx}
+          slotProps={{
+            htmlInput: type === "password" ? { autoComplete: "new-password" } : undefined,
+            input:
+              type === "password"
+                ? {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label={verContrasena ? "Ocultar contraseña" : "Mostrar contraseña"}
+                          onClick={() => setVerContrasena((v) => !v)}
+                          edge="end"
+                          size="small"
+                          sx={{ border: 0, bgcolor: "transparent", width: 32, height: 32 }}
+                        >
+                          {verContrasena ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }
+                : undefined,
           }}
           {...register(id, validation)}
         />
       )}
-    </div>
+    </Campo>
   );
 }

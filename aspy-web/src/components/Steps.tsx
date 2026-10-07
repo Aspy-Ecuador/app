@@ -1,24 +1,17 @@
 // FINAL
 import Box from "@mui/material/Box";
-import Step from "@mui/material/Step";
-import StepLabel from "@mui/material/StepLabel";
-import Stepper from "@mui/material/Stepper";
+import PasosRegistro from "@components/auth/PasosRegistro";
 
 interface StepsProps {
   activeStep: number;
   steps: string[];
 }
 
+/** Indicador de pasos de los formularios del panel (el mismo del registro). */
 export default function Steps({ activeStep, steps }: StepsProps) {
   return (
-    <Box sx={{ width: "100%", py: 1 }}>
-      <Stepper activeStep={activeStep} alternativeLabel>
-        {steps.map((label) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
+    <Box sx={{ width: "100%", maxWidth: 720, mx: "auto", py: 1.5, px: { xs: 1, md: 0 } }}>
+      <PasosRegistro paso={activeStep} pasos={steps} />
     </Box>
   );
 }

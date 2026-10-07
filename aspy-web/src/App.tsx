@@ -30,6 +30,8 @@ const routeTitles: { [key: string]: string } = {
   "/register": "Registrarse",
   "/pago": "Pago",
   "/sobreAspy": "Mas información",
+  "/manual": "Manual de uso",
+  "/datos-bancarios": "Datos bancarios",
   "/contacto": "Contacto",
 };
 

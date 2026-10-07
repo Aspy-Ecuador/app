@@ -1,6 +1,7 @@
 // FINAL
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
+import { vh } from "@shared-theme/pantallaGrande";
 
 export default function Progress() {
   return (
@@ -9,7 +10,7 @@ export default function Progress() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        height: "100vh",
+        height: vh(100),
       }}
     >
       <CircularProgress />

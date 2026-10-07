@@ -1,7 +1,7 @@
 // FINAL
 import type { Person } from "@/typesResponse/Person";
 import type { UserLogin } from "@/types/UserLogin";
-import { getAge, translateRol } from "@/utils/utils";
+import { getAge, ocupacionDe, translateRol } from "@/utils/utils";
 import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
@@ -334,7 +334,7 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
             <InfoRow
               icon={<WorkRoundedIcon sx={{ fontSize: 15 }} />}
               label="Ocupación"
-              value={person.occupation?.name}
+              value={ocupacionDe(person)}
             />
             <InfoRow
               icon={<BadgeRoundedIcon sx={{ fontSize: 15 }} />}

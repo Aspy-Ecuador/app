@@ -61,6 +61,12 @@ export const navigationCustomizations: Components<Theme> = {
       IconComponent: React.forwardRef<SVGSVGElement, SvgIconProps>((props, ref) => (
         <UnfoldMoreRoundedIcon fontSize="small" {...props} ref={ref} />
       )),
+      // La lista se abre alineada al borde izquierdo del campo (no centrada): así también queda
+      // en su sitio en pantallas grandes, donde el campo está ampliado (ver pantallaGrande.ts).
+      MenuProps: {
+        anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+        transformOrigin: { vertical: 'top', horizontal: 'left' },
+      },
     },
     styleOverrides: {
       root: ({ theme }) => ({
