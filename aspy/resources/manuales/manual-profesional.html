@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manual para profesionales · ASPY</title>
+  <meta name="description" content="Cómo marcar asistencia, subir reportes de sesión, ver pacientes y crear horarios en el sistema de la Fundación Aspy Ecuador.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/manual.css">
+  <link rel="icon" href="assets/logo-aspy.webp">
+</head>
+<body style="--rol: var(--rosa)">
+
+<header class="topbar">
+  <a class="marca" href="index.html"><img src="assets/logo-aspy.webp" alt="Fundación Aspy Ecuador"><span>Manual para profesionales</span></a>
+  <div class="acciones">
+    <a class="btn btn-suave" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg><span class="txt">Todos los manuales</span></a>
+    <a class="btn btn-pdf" data-pdf href="pdf/manual-profesional.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>Descargar PDF</a>
+  </div>
+</header>
+
+<section class="portada">
+  <div class="portada-inner">
+    <img class="logo" src="assets/logo-aspy.webp" alt="Fundación Aspy Ecuador">
+    <span class="rol">Profesionales y terapeutas</span>
+    <h1>Manual de uso para <em>profesionales</em></h1>
+    <p class="bajada">Tu día a día en el sistema: publicar tus horarios, ver tu agenda, marcar la asistencia de tus pacientes y subir el reporte de cada sesión.</p>
+    <div class="botones">
+      <a class="btn btn-pdf" data-pdf href="pdf/manual-profesional.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>Descargar en PDF</a>
+      <a class="btn btn-suave" href="#cap-1">Empezar a leer</a>
+    </div>
+    <div class="meta"><span>Sitio: <b>aspy-web.vercel.app</b></span><span>Versión: <b>octubre 2026</b></span></div>
+  </div>
+</section>
+
+<div class="layout">
+  <nav class="indice" aria-label="Contenido"><h2>Contenido</h2><ol data-indice></ol></nav>
+
+  <main>
+    <details class="indice-movil"><summary>Contenido del manual</summary><ol data-indice></ol></details>
+    <div class="indice-impreso"><h2>Contenido</h2><ol data-indice></ol></div>
+
+    <!-- 1 -->
+    <section class="capitulo" id="cap-1" data-titulo="Ingresar y tu panel">
+      <div class="cap-cabecera"><div class="cap-num">1</div><div><small>Capítulo 1</small><h2>Ingresar y tu panel</h2></div></div>
+      <p class="intro">La fundación crea tu cuenta y te entrega tu correo y contraseña. Entra en <strong>aspy-web.vercel.app</strong> → <span class="boton">Ingresar</span>.</p>
+      <figure class="captura"><div class="marco"><img src="img/profesional/00-login.jpg" alt="Pantalla de ingreso con correo, contraseña y botón resaltados"></div><figcaption>Correo <b>1</b>, contraseña <b>2</b> y <b>Iniciar sesión</b> <b>3</b>.</figcaption></figure>
+      <h3>Tu Vista General</h3>
+      <p>Tu panel te muestra lo que tienes pendiente:</p>
+      <figure class="captura"><div class="marco"><img src="img/profesional/01-panel.jpg" alt="Panel del profesional con citas sin marcar y sin reportar"></div></figure>
+      <ul>
+        <li><span class="n">1</span> <strong>Citas sin marcar:</strong> citas confirmadas que ya empezaron y en las que aún no indicas si el paciente asistió.</li>
+        <li><span class="n">2</span> <strong>Citas sin reportar:</strong> citas a las que el paciente asistió y que todavía no tienen reporte.</li>
+      </ul>
+      <p>En el menú de la izquierda tienes: <strong>Pacientes</strong>, <strong>Citas</strong> (tu agenda) y <strong>Crear Horarios</strong>.</p>
+      <div class="aviso consejo"><span class="ico">💡</span><div><p>Las personas y datos de las imágenes son <strong>ejemplos</strong> creados para este manual.</p></div></div>
+    </section>
+
+    <!-- 2 -->
+    <section class="capitulo" id="cap-2" data-titulo="Crear tus horarios">
+      <div class="cap-cabecera"><div class="cap-num">2</div><div><small>Capítulo 2</small><h2>Crear tus horarios</h2></div></div>
+      <p class="intro">Los pacientes solo pueden agendar en los horarios que tú publicas. Cada horario es un turno de atención (por ejemplo, de 08:00 a 09:00).</p>
+      <ol class="pasos">
+        <li class="paso"><b>Abre “Crear Horarios”</b>
+          <p>A la izquierda está el formulario <strong>Nuevo horario</strong>; a la derecha, todos tus turnos agrupados por día.</p>
+        </li>
+        <li class="paso"><b>Completa el turno</b>
+          <p>Elige la <strong>fecha</strong> <span class="n">1</span> (al tocar el campo se abre un calendario; también puedes escribirla como día/mes/año), la <strong>hora de inicio</strong> <span class="n">2</span> y la <strong>hora de fin</strong> <span class="n">3</span>. El sistema te muestra un resumen y el tipo de turno (mañana o tarde). Presiona <span class="boton" style="background:#1d9e75">Guardar horario</span> <span class="n">4</span>.</p>
+          <figure class="captura"><div class="marco"><img src="img/profesional/13-horario-nuevo.jpg" alt="Formulario de nuevo horario con fecha, horas y botón Guardar"></div></figure>
+        </li>
+        <li class="paso"><b>Listo</b>
+          <p>Aparece el mensaje <strong>“Horario creado correctamente”</strong> y el turno se suma a tu lista como <strong>Disponible</strong>.</p>
+          <figure class="captura"><div class="marco"><img src="img/profesional/14-horario-guardado.jpg" alt="Lista de horarios después de guardar"></div></figure>
+        </li>
+      </ol>
+      <h3>Tu lista de horarios</h3>
+      <figure class="captura"><div class="marco"><img src="img/profesional/15-horarios-lista.jpg" alt="Lista de horarios con uno disponible y uno ocupado"></div></figure>
+      <ul>
+        <li><strong>Disponible</strong> (verde): nadie lo ha reservado. Con el <strong>tacho de basura</strong> (resaltado en rosado) puedes eliminarlo.</li>
+        <li><strong>Ocupado</strong> (gris, resaltado en celeste): un paciente ya lo reservó. No se puede eliminar; si necesitas liberarlo, pide a secretaría que cancele la cita.</li>
+      </ul>
+      <div class="aviso importante"><span class="ico">⏰</span><div><p>No se pueden crear horarios en fechas pasadas ni que <strong>se crucen</strong> con otro tuyo (por ejemplo, 09:00–10:00 y 09:30–10:30 el mismo día).</p></div></div>
+      <div class="aviso consejo"><span class="ico">📆</span><div><p>Publica tus horarios con <strong>una o dos semanas de anticipación</strong> para que las familias puedan organizarse.</p></div></div>
+    </section>
+
+    <!-- 3 -->
+    <section class="capitulo" id="cap-3" data-titulo="Tu agenda de citas">
+      <div class="cap-cabecera"><div class="cap-num">3</div><div><small>Capítulo 3</small><h2>Tu agenda de citas</h2></div></div>
+      <p class="intro">En <strong>Citas</strong> ves tu calendario con todas tus citas y su estado.</p>
+      <figure class="captura"><div class="marco"><img src="img/profesional/09-citas.jpg" alt="Calendario de citas del profesional"></div></figure>
+      <table class="tabla">
+        <thead><tr><th>Color</th><th>Qué significa</th></tr></thead>
+        <tbody>
+          <tr><td><span class="estado" style="--c:#c27a12">Guardada</span></td><td>El paciente reservó; secretaría está revisando el pago.</td></tr>
+          <tr><td><span class="estado" style="--c:#1d9e75">Agendada</span></td><td>Pago aprobado: la cita está confirmada.</td></tr>
+          <tr><td><span class="estado" style="--c:#3b82d6">Asistió</span></td><td>Marcaste que el paciente vino.</td></tr>
+          <tr><td><span class="estado" style="--c:#e04848">No asistió</span></td><td>Marcaste que el paciente no vino.</td></tr>
+          <tr><td><span class="estado" style="--c:#7a68d8">Cancelada</span></td><td>La cita se canceló.</td></tr>
+        </tbody>
+      </table>
+      <p>Usa <strong>‹ ›</strong> para cambiar de semana y <strong>Mes / Semana / Día</strong> para cambiar la vista. Haz clic en una cita para ver sus datos.</p>
+    </section>
+
+    <!-- 4 -->
+    <section class="capitulo" id="cap-4" data-titulo="Marcar la asistencia">
+      <div class="cap-cabecera"><div class="cap-num">4</div><div><small>Capítulo 4</small><h2>Marcar la asistencia</h2></div></div>
+      <p class="intro">Al terminar cada sesión, indica si el paciente asistió. Lo haces desde tu <strong>Vista General</strong>, en <strong>Citas sin marcar</strong>.</p>
+      <ol class="pasos">
+        <li class="paso"><b>Busca la tarjeta de la cita</b>
+          <p>Cada tarjeta muestra paciente, servicio, fecha y hora. Presiona <span class="boton" style="background:#1d9e75">Asistió</span> <span class="n">1</span> o <span class="boton" style="background:#c0392b">No asistió</span> <span class="n">2</span>.</p>
+          <figure class="captura"><div class="marco"><img src="img/profesional/02-asistencia-botones.jpg" alt="Tarjeta de cita con los botones Asistió y No asistió resaltados"></div></figure>
+        </li>
+        <li class="paso"><b>Confirma</b>
+          <p>Revisa los datos de la cita y presiona <span class="boton" style="background:#1d9e75">Sí, asistió</span> (o <strong>Sí, no asistió</strong>). Con <strong>Cancelar</strong> vuelves sin cambiar nada.</p>
+          <figure class="captura"><div class="marco"><img src="img/profesional/03-asistencia-confirmar.jpg" alt="Ventana para confirmar la asistencia"></div></figure>
+        </li>
+        <li class="paso"><b>La cita pasa a “Citas sin reportar”</b>
+          <p>Si marcaste <strong>Asistió</strong>, la cita baja a la sección <strong>Citas sin reportar</strong> para que subas el reporte.</p>
+          <figure class="captura"><div class="marco"><img src="img/profesional/04-asistencia-lista.jpg" alt="Panel después de marcar la asistencia"></div></figure>
+        </li>
+      </ol>
+      <div class="aviso cuidado"><span class="ico">⚠️</span><div><p>Antes de marcar, el sistema te muestra el paciente, el servicio, la fecha y la hora, y pide confirmar. <strong>No se puede deshacer</strong>: revisa bien antes de aceptar.</p><p>Las citas aparecen en “Citas sin marcar” recién cuando llega su hora de inicio; antes no se puede marcar la asistencia.</p></div></div>
+    </section>
+
+    <!-- 5 -->
+    <section class="capitulo" id="cap-5" data-titulo="Subir el reporte de la sesión">
+      <div class="cap-cabecera"><div class="cap-num">5</div><div><small>Capítulo 5</small><h2>Subir el reporte de la sesión</h2></div></div>
+      <p class="intro">El reporte es un documento <strong>PDF</strong> con tus observaciones y recomendaciones. El paciente lo podrá leer desde su cuenta.</p>
+      <ol class="pasos">
+        <li class="paso"><b>Presiona “Nuevo Reporte”</b>
+          <p>En <strong>Citas sin reportar</strong>, busca la cita y presiona <span class="boton claro">Nuevo Reporte</span>.</p>
+          <figure class="captura"><div class="marco"><img src="img/profesional/05-reporte-boton.jpg" alt="Botón Nuevo Reporte resaltado en una cita sin reportar"></div></figure>
+        </li>
+        <li class="paso"><b>Sube el archivo</b>
+          <p>Presiona <strong>Subir reporte</strong> y elige el PDF desde tu equipo (máximo 10 MB).</p>
+          <figure class="captura"><div class="marco"><img src="img/profesional/06-reporte-vacio.jpg" alt="Pantalla Nuevo Reporte sin archivo"></div></figure>
+        </li>
+        <li class="paso"><b>Revisa y envía</b>
+          <p>El documento se muestra a la izquierda para que lo revises. Si es el correcto, presiona <span class="boton" style="background:#1976d2">Enviar</span>. Si te equivocaste de archivo, usa <strong>Cancelar</strong> y vuelve a empezar.</p>
+          <figure class="captura"><div class="marco"><img src="img/profesional/07-reporte-cargado.jpg" alt="Vista previa del reporte y botón Enviar"></div></figure>
+        </li>
+        <li class="paso"><b>¡Enviado!</b>
+          <figure class="captura media"><div class="marco"><img src="img/profesional/08-reporte-enviado.jpg" alt="Mensaje de reporte registrado con éxito"></div></figure>
+          <p>El reporte queda guardado con tu nombre como firma y la cita sale de “Citas sin reportar”.</p>
+        </li>
+      </ol>
+      <div class="aviso importante"><span class="ico">📄</span><div><p>Cada cita admite <strong>un solo reporte</strong> y no se puede reemplazar desde el sistema. Revisa el PDF antes de enviarlo.</p><p>Si escribes el reporte en Word, guárdalo como PDF con <em>Archivo → Guardar como → PDF</em>.</p></div></div>
+      <div class="aviso consejo"><span class="ico">🔒</span><div><p>Los reportes solo los ven el paciente, tú y la administración. El personal de secretaría no tiene acceso.</p></div></div>
+    </section>
+
+    <!-- 6 -->
+    <section class="capitulo" id="cap-6" data-titulo="Tus pacientes y su historial">
+      <div class="cap-cabecera"><div class="cap-num">6</div><div><small>Capítulo 6</small><h2>Tus pacientes y su historial</h2></div></div>
+      <p class="intro">En <strong>Pacientes</strong> aparecen solo las personas que tienen o tuvieron citas contigo.</p>
+      <ol class="pasos">
+        <li class="paso"><b>Elige un paciente</b>
+          <p>Haz clic en su fila: a la derecha verás un resumen (correo, edad, género, ocupación). Presiona <strong>Ver información completa</strong>.</p>
+          <figure class="captura"><div class="marco"><img src="img/profesional/10-pacientes.jpg" alt="Lista de pacientes con el botón Ver información completa"></div></figure>
+        </li>
+        <li class="paso"><b>Revisa su historial</b>
+          <p>Verás la línea de tiempo de sus citas contigo y sus datos de contacto. En cada cita, <strong>Ver detalles</strong> abre la cita.</p>
+          <figure class="captura"><div class="marco"><img src="img/profesional/11-historial.jpg" alt="Historial del paciente con el botón Ver detalles"></div></figure>
+        </li>
+        <li class="paso"><b>Detalle de la cita</b>
+          <p>Muestra horario, profesional, paciente y el <strong>reporte</strong> de esa sesión, si ya existe.</p>
+          <figure class="captura"><div class="marco"><img src="img/profesional/12-detalle-cita.jpg" alt="Detalle de la cita con el reporte abierto"></div></figure>
+        </li>
+      </ol>
+    </section>
+
+    <!-- 7 -->
+    <section class="capitulo" id="cap-7" data-titulo="Tu cuenta">
+      <div class="cap-cabecera"><div class="cap-num">7</div><div><small>Capítulo 7</small><h2>Tu cuenta</h2></div></div>
+      <p class="intro">El botón <strong>⋮</strong> junto a tu nombre (abajo a la izquierda) abre tu <strong>Perfil</strong>, el <strong>Manual de uso</strong> (este manual), <strong>Sobre ASPY</strong> y <strong>Cerrar sesión</strong>.</p>
+      <figure class="captura media"><div class="marco"><img src="img/profesional/00-menu-cuenta.jpg" alt="Menú de la cuenta del profesional"></div></figure>
+      <h3>Este manual dentro del sistema</h3>
+      <p>Con <strong>⋮ → Manual de uso</strong> abres este manual sin salir del sistema, y desde ahí puedes descargarlo en PDF.</p>
+      <figure class="captura"><div class="marco"><img src="img/profesional/99-manual-en-sistema.jpg" alt="Pantalla Manual de uso dentro del sistema"></div></figure>
+      <ul>
+        <li>En tu perfil, el <strong>lápiz</strong> te permite corregir tus datos. En el último paso puedes escribir una contraseña nueva; si lo dejas vacío, se conserva la actual.</li>
+        <li>El botón de la <strong>luna</strong> (arriba a la izquierda) activa el modo oscuro.</li>
+        <li>Desde el celular funciona igual: el menú se abre con el botón <strong>☰</strong> (arriba a la izquierda) y el botón de la luna queda arriba a la derecha.</li>
+      </ul>
+      <h3>Rutina recomendada</h3>
+      <ol>
+        <li>Al inicio de la semana: revisa <strong>Crear Horarios</strong> y publica los turnos de las próximas semanas.</li>
+        <li>Cada día: mira tu agenda en <strong>Citas</strong>.</li>
+        <li>Después de cada sesión: marca la <strong>asistencia</strong> y sube el <strong>reporte</strong>.</li>
+      </ol>
+    </section>
+  </main>
+</div>
+
+<footer class="pie">Fundación Aspy Ecuador · Guayaquil · Todo es posible</footer>
+<script src="assets/manual.js"></script>
+</body>
+</html>

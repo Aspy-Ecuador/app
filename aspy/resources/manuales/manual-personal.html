@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manual de secretaría · ASPY</title>
+  <meta name="description" content="Cómo aprobar pagos, gestionar citas, pacientes, profesionales y servicios en el sistema de la Fundación Aspy Ecuador.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/manual.css">
+  <link rel="icon" href="assets/logo-aspy.webp">
+</head>
+<body style="--rol: var(--amarillo)">
+
+<header class="topbar">
+  <a class="marca" href="index.html"><img src="assets/logo-aspy.webp" alt="Fundación Aspy Ecuador"><span>Manual del personal administrativo</span></a>
+  <div class="acciones">
+    <a class="btn btn-suave" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg><span class="txt">Todos los manuales</span></a>
+    <a class="btn btn-pdf" data-pdf href="pdf/manual-personal.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>Descargar PDF</a>
+  </div>
+</header>
+
+<section class="portada">
+  <div class="portada-inner">
+    <img class="logo" src="assets/logo-aspy.webp" alt="Fundación Aspy Ecuador">
+    <span class="rol">Personal administrativo · Secretaría</span>
+    <h1>Manual de uso para el <em>personal administrativo</em></h1>
+    <p class="bajada">Cómo revisar y aprobar pagos, organizar las citas, registrar pacientes y profesionales, y mantener al día los servicios de la fundación.</p>
+    <div class="botones">
+      <a class="btn btn-pdf" data-pdf href="pdf/manual-personal.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>Descargar en PDF</a>
+      <a class="btn btn-suave" href="#cap-1">Empezar a leer</a>
+    </div>
+    <div class="meta"><span>Sitio: <b>aspy-web.vercel.app</b></span><span>Versión: <b>octubre 2026</b></span></div>
+  </div>
+</section>
+
+<div class="layout">
+  <nav class="indice" aria-label="Contenido"><h2>Contenido</h2><ol data-indice></ol></nav>
+
+  <main>
+    <details class="indice-movil"><summary>Contenido del manual</summary><ol data-indice></ol></details>
+    <div class="indice-impreso"><h2>Contenido</h2><ol data-indice></ol></div>
+
+    <!-- 1 -->
+    <section class="capitulo" id="cap-1" data-titulo="Tu trabajo en el sistema">
+      <div class="cap-cabecera"><div class="cap-num">1</div><div><small>Capítulo 1</small><h2>Tu trabajo en el sistema</h2></div></div>
+      <p class="intro">Eres el puente entre las familias y los profesionales: confirmas los pagos para que las citas queden agendadas y mantienes ordenada la información.</p>
+      <h3>Lo que puedes hacer</h3>
+      <ul>
+        <li><strong>Aprobar o rechazar</strong> los comprobantes de pago.</li>
+        <li>Ver el <strong>calendario de todas las citas</strong>, agendar citas para pacientes y cancelarlas.</li>
+        <li>Registrar, editar y habilitar o deshabilitar <strong>pacientes</strong> y <strong>profesionales</strong>.</li>
+        <li>Crear y editar <strong>servicios</strong>, sus precios y quién los atiende.</li>
+        <li>Descargar <strong>recibos</strong> y exportar listas a PDF o Excel.</li>
+      </ul>
+      <div class="aviso importante"><span class="ico">🔒</span><div><p>Por privacidad, los <strong>reportes clínicos</strong> de las sesiones no los ve el personal administrativo: solo el paciente, su profesional y la administración.</p></div></div>
+      <h3>El recorrido de una cita</h3>
+      <table class="tabla">
+        <thead><tr><th>Estado</th><th>Qué pasó</th><th>Quién actúa</th></tr></thead>
+        <tbody>
+          <tr><td><span class="estado" style="--c:#c27a12">Guardada</span></td><td>El paciente agendó y subió su comprobante.</td><td><strong>Tú</strong>: revisas el pago.</td></tr>
+          <tr><td><span class="estado" style="--c:#1d9e75">Agendada</span></td><td>Aprobaste el pago. La cita está confirmada.</td><td>El profesional atiende.</td></tr>
+          <tr><td><span class="estado" style="--c:#3b82d6">Asistió</span> / <span class="estado" style="--c:#e04848">No asistió</span></td><td>El profesional marcó la asistencia.</td><td>El profesional sube el reporte.</td></tr>
+          <tr><td><span class="estado" style="--c:#7a68d8">Cancelada</span></td><td>Alguien la canceló y el horario se liberó.</td><td>—</td></tr>
+        </tbody>
+      </table>
+      <div class="aviso consejo"><span class="ico">💡</span><div><p>Las personas y datos de las imágenes son <strong>ejemplos</strong> creados para este manual.</p></div></div>
+    </section>
+
+    <!-- 2 -->
+    <section class="capitulo" id="cap-2" data-titulo="Ingresar y tu panel">
+      <div class="cap-cabecera"><div class="cap-num">2</div><div><small>Capítulo 2</small><h2>Ingresar y tu panel</h2></div></div>
+      <p class="intro">La fundación te entrega un correo y una contraseña. Entra en <strong>aspy-web.vercel.app</strong> → <span class="boton">Ingresar</span>.</p>
+      <figure class="captura"><div class="marco"><img src="img/personal/00-login.jpg" alt="Pantalla de ingreso con correo, contraseña y botón resaltados"></div><figcaption>Escribe tu correo <b>1</b> y contraseña <b>2</b>, y presiona <b>Iniciar sesión</b> <b>3</b>.</figcaption></figure>
+      <h3>La Vista General</h3>
+      <figure class="captura"><div class="marco"><img src="img/personal/01-panel.jpg" alt="Panel del personal administrativo"></div></figure>
+      <ul>
+        <li><span class="n">1</span> <strong>Acciones rápidas:</strong> atajos para <em>Agendar cita</em> y <em>Agregar servicio</em>.</li>
+        <li><span class="n">2</span> <strong>Filtrar citas:</strong> busca por fecha (se elige en un calendario; la <strong>✕</strong> la borra), profesional o servicio.</li>
+        <li>A la derecha, la <strong>lista de citas</strong> con su estado, paciente, profesional, horario y fecha.</li>
+      </ul>
+      <p>En el menú de la izquierda están: <strong>Profesionales, Pacientes, Citas, Recibos, Pagos</strong> y <strong>Servicios</strong>.</p>
+    </section>
+
+    <!-- 3 -->
+    <section class="capitulo" id="cap-3" data-titulo="Revisar y aprobar pagos">
+      <div class="cap-cabecera"><div class="cap-num">3</div><div><small>Capítulo 3</small><h2>Revisar y aprobar pagos</h2></div></div>
+      <p class="intro">Es la tarea más importante del día: mientras no apruebes el pago, la cita del paciente queda “Guardada” y no está confirmada.</p>
+      <ol class="pasos">
+        <li class="paso"><b>Abre “Pagos”</b>
+          <p>En la columna <strong>Aprobación</strong>, el <strong>reloj amarillo</strong> indica pagos pendientes de revisar (resaltados en la imagen). El <strong>visto verde</strong> son pagos ya aprobados.</p>
+          <figure class="captura"><div class="marco"><img src="img/personal/02-pagos-lista.jpg" alt="Lista de pagos con los pendientes resaltados"></div></figure>
+        </li>
+        <li class="paso"><b>Abre el pago</b>
+          <p>Presiona el <strong>ojo</strong> de la columna <strong>Verificar</strong> en la fila del pago.</p>
+          <figure class="captura"><div class="marco"><img src="img/personal/03-pagos-ver.jpg" alt="Botón del ojo para ver un pago"></div></figure>
+        </li>
+        <li class="paso"><b>Revisa el comprobante</b>
+          <p>Verás tres partes:</p>
+          <ul>
+            <li><span class="n">1</span> Datos del paciente y el botón <strong>Descargar</strong> para guardar el comprobante.</li>
+            <li><span class="n">2</span> El <strong>documento adjunto</strong>: la foto o PDF que subió el paciente.</li>
+            <li><span class="n">3</span> El <strong>recibo</strong>: servicio, total y método de pago.</li>
+          </ul>
+          <figure class="captura"><div class="marco"><img src="img/personal/04-pago-detalle.jpg" alt="Detalle del pago con el comprobante adjunto"></div></figure>
+          <div class="aviso importante"><span class="ico">🔎</span><div><p>Antes de aprobar, verifica en la <strong>cuenta bancaria de la fundación</strong> que el dinero llegó y que el <strong>monto</strong> coincide con el total del recibo.</p></div></div>
+        </li>
+        <li class="paso"><b>Aprueba</b>
+          <p>Presiona <span class="boton" style="background:#1d9e75">Aprobar comprobante</span> y confirma con <strong>Sí, aprobar</strong>.</p>
+          <div class="par">
+            <figure class="captura"><div class="marco"><img src="img/personal/05-pago-botones.jpg" alt="Botones Aprobar comprobante y No aprobar"></div></figure>
+            <figure class="captura"><div class="marco"><img src="img/personal/06-pago-aprobar-confirmar.jpg" alt="Ventana para confirmar la aprobación"></div></figure>
+          </div>
+          <figure class="captura media"><div class="marco"><img src="img/personal/07-pago-aprobado.jpg" alt="Mensaje: Comprobante aprobado exitosamente"></div></figure>
+          <p>Al aprobar: la cita pasa a <strong>Agendada</strong>, el recibo queda <strong>Generado</strong> y el paciente lo puede descargar. En la lista, el pago muestra el visto verde.</p>
+          <figure class="captura"><div class="marco"><img src="img/personal/09-pagos-aprobado.jpg" alt="Lista de pagos con el pago ya aprobado"></div></figure>
+        </li>
+      </ol>
+      <h3>Si el comprobante no es válido</h3>
+      <p>Presiona <span class="boton claro">No aprobar</span> y confirma con <strong>Sí, rechazar</strong>.</p>
+      <figure class="captura"><div class="marco"><img src="img/personal/08-pago-rechazar-confirmar.jpg" alt="Ventana para confirmar el rechazo del comprobante"></div></figure>
+      <div class="aviso cuidado"><span class="ico">⚠️</span><div><p>Rechazar <strong>no se puede deshacer</strong>: la cita se elimina y el horario vuelve a quedar libre. Avisa al paciente (por teléfono o WhatsApp) para que agende de nuevo con el comprobante correcto.</p></div></div>
+    </section>
+
+    <!-- 4 -->
+    <section class="capitulo" id="cap-4" data-titulo="El calendario de citas">
+      <div class="cap-cabecera"><div class="cap-num">4</div><div><small>Capítulo 4</small><h2>El calendario de citas</h2></div></div>
+      <p class="intro">En <strong>Citas</strong> ves todas las citas de la fundación, con el color de su estado.</p>
+      <figure class="captura"><div class="marco"><img src="img/personal/10-citas.jpg" alt="Calendario semanal con las citas de la fundación"></div></figure>
+      <ul>
+        <li>Las flechas <strong>‹ ›</strong> cambian de semana; <strong>Hoy</strong> regresa a la fecha actual; <strong>Mes / Semana / Día</strong> cambian la vista.</li>
+        <li>Con la lista <strong>Profesionales</strong> (a la derecha) ves solo la agenda de una persona.</li>
+      </ul>
+      <figure class="captura"><div class="marco"><img src="img/personal/11-citas-filtro.jpg" alt="Lista para filtrar las citas por profesional"></div></figure>
+      <h3>Ver o cancelar una cita</h3>
+      <p>Haz clic en la cita para ver sus datos. Si hace falta, presiona <span class="boton claro">Cancelar cita</span>: la cita pasa a <strong>Cancelada</strong> y el horario se libera.</p>
+      <figure class="captura"><div class="marco"><img src="img/personal/12-citas-detalle.jpg" alt="Detalle de una cita con el botón Cancelar cita"></div></figure>
+      <div class="aviso consejo"><span class="ico">💡</span><div><p>Los pacientes solo pueden cancelar con más de 24 horas de anticipación. Tú puedes cancelar <strong>en cualquier momento</strong> las citas Guardadas o Agendadas; por eso, cuando un paciente llame a última hora, tú haces la cancelación.</p></div></div>
+    </section>
+
+    <!-- 5 -->
+    <section class="capitulo" id="cap-5" data-titulo="Agendar una cita para un paciente">
+      <div class="cap-cabecera"><div class="cap-num">5</div><div><small>Capítulo 5</small><h2>Agendar una cita para un paciente</h2></div></div>
+      <p class="intro">Útil cuando el paciente llama o viene en persona. Es igual a como agenda un paciente, con un dato más: <strong>a quién</strong> es la cita.</p>
+      <ol class="pasos">
+        <li class="paso"><b>Abre el formulario</b>
+          <p>Usa el botón <strong>+</strong> de la pantalla Citas, o <em>Agendar cita</em> en las acciones rápidas del panel.</p>
+          <figure class="captura media"><div class="marco"><img src="img/personal/13-citas-nueva-boton.jpg" alt="Botón más para crear una cita"></div></figure>
+        </li>
+        <li class="paso"><b>Elige servicio, profesional y paciente</b>
+          <p>La lista <strong>Paciente</strong> muestra a todas las personas registradas y habilitadas.</p>
+          <figure class="captura"><div class="marco"><img src="img/personal/14-agendar-paciente.jpg" alt="Lista de pacientes desplegada en el formulario de cita"></div></figure>
+        </li>
+        <li class="paso"><b>Elige día y hora, y continúa</b>
+          <p>Con el paciente elegido <span class="n">1</span>, selecciona un día verde y una hora, y presiona <span class="boton">Proceder a pagar</span> <span class="n">2</span>.</p>
+          <figure class="captura"><div class="marco"><img src="img/personal/15-agendar-paciente-listo.jpg" alt="Formulario completo con el botón Proceder a pagar"></div></figure>
+        </li>
+        <li class="paso"><b>Sube el comprobante y finaliza</b>
+          <p>Los pasos de pago son los mismos que hace un paciente: subir el comprobante de la transferencia, <strong>Continuar</strong> y <strong>Finalizar reserva</strong>. Luego aprueba el pago desde <strong>Pagos</strong> (capítulo 3).</p>
+        </li>
+      </ol>
+      <div class="aviso importante"><span class="ico">📄</span><div><p>El sistema siempre pide un comprobante. Si el paciente pagó en persona, sube una foto del comprobante físico o del registro de pago de la fundación.</p></div></div>
+    </section>
+
+    <!-- 6 -->
+    <section class="capitulo" id="cap-6" data-titulo="Recibos">
+      <div class="cap-cabecera"><div class="cap-num">6</div><div><small>Capítulo 6</small><h2>Recibos</h2></div></div>
+      <p class="intro">En <strong>Recibos</strong> están los recibos de todos los pagos.</p>
+      <figure class="captura"><div class="marco"><img src="img/personal/16-recibos.jpg" alt="Lista de recibos con el botón de descarga"></div></figure>
+      <ul>
+        <li><strong>Generado:</strong> el pago fue aprobado.</li>
+        <li><strong>Pendiente:</strong> el pago aún no se revisa.</li>
+        <li>La flecha de la columna <strong>Descargar</strong> guarda el recibo en PDF, por si un paciente te lo pide.</li>
+      </ul>
+    </section>
+
+    <!-- 7 -->
+    <section class="capitulo" id="cap-7" data-titulo="Pacientes">
+      <div class="cap-cabecera"><div class="cap-num">7</div><div><small>Capítulo 7</small><h2>Pacientes</h2></div></div>
+      <p class="intro">La lista de todas las personas registradas como pacientes (clientes).</p>
+      <figure class="captura"><div class="marco"><img src="img/personal/17-pacientes.jpg" alt="Lista de pacientes con la ficha de uno abierta"></div></figure>
+      <ul>
+        <li>Haz clic en una fila para ver su <strong>ficha</strong> completa a la derecha.</li>
+        <li><span class="n">1</span> El interruptor <strong>Habilitado</strong> activa o desactiva la cuenta. Una cuenta desactivada no puede iniciar sesión ni aparecer al agendar; si tenía la sesión abierta, se cierra en menos de un minuto y ve el aviso de cuenta deshabilitada.</li>
+        <li><span class="n">2</span> El <strong>lápiz</strong> abre el formulario para corregir sus datos.</li>
+        <li><span class="n">3</span> El botón <strong>+</strong> registra un paciente nuevo.</li>
+      </ul>
+      <h3>Registrar un paciente</h3>
+      <p>Es un formulario de 3 pasos: datos personales, datos generales (contacto y dirección) y seguridad (correo y contraseña). La cédula lleva 10 números, el RUC 13 y el teléfono solo números; si la ocupación no está en la lista, elige <strong>Otra</strong> y escríbela. La fecha de nacimiento se elige en un calendario (año, mes y día) o se escribe como día/mes/año. Si falta un dato, el campo lo indica en rojo; si el correo ya tiene una cuenta, aparece un aviso arriba del formulario. Entrega al paciente su correo y contraseña para que pueda ingresar.</p>
+      <div class="aviso consejo"><span class="ico">🔑</span><div><p><strong>Si alguien olvidó su contraseña:</strong> abre su ficha, presiona el lápiz y, en el último paso, escribe una contraseña nueva. Si dejas esos campos vacíos, la contraseña no cambia.</p></div></div>
+      <figure class="captura"><div class="marco"><img src="img/personal/18-paciente-nuevo.jpg" alt="Formulario para crear un nuevo cliente"></div></figure>
+      <div class="aviso consejo"><span class="ico">💡</span><div><p>Antes de crear una cuenta, busca si la persona ya está en la lista. Así evitas duplicados.</p></div></div>
+    </section>
+
+    <!-- 8 -->
+    <section class="capitulo" id="cap-8" data-titulo="Profesionales">
+      <div class="cap-cabecera"><div class="cap-num">8</div><div><small>Capítulo 8</small><h2>Profesionales</h2></div></div>
+      <p class="intro">Aquí están los terapeutas y psicólogos de la fundación.</p>
+      <figure class="captura"><div class="marco"><img src="img/personal/19-profesionales.jpg" alt="Lista de profesionales con la ficha de una profesional"></div></figure>
+      <ul>
+        <li>Clic en una fila para ver su ficha; el interruptor habilita o deshabilita su cuenta.</li>
+        <li>Con el botón <strong>+</strong> registras un profesional nuevo. El formulario es igual al de pacientes, con el rol <strong>Profesional</strong> ya elegido y dos datos más en el segundo paso: <strong>título</strong> y <strong>especialidad</strong>.</li>
+      </ul>
+      <figure class="captura"><div class="marco"><img src="img/personal/20-profesional-nuevo.jpg" alt="Formulario para crear un nuevo profesional"></div></figure>
+      <div class="aviso importante"><span class="ico">📅</span><div><p>Un profesional nuevo todavía <strong>no aparece al agendar</strong> hasta que: (1) le asignes un servicio (capítulo 9) y (2) cree sus horarios disponibles desde su cuenta.</p></div></div>
+      <p>Si un profesional deja la fundación, <strong>deshabilita</strong> su cuenta en lugar de borrarla: así se conserva el historial de citas.</p>
+    </section>
+
+    <!-- 9 -->
+    <section class="capitulo" id="cap-9" data-titulo="Servicios">
+      <div class="cap-cabecera"><div class="cap-num">9</div><div><small>Capítulo 9</small><h2>Servicios</h2></div></div>
+      <p class="intro">Los servicios son lo que la fundación ofrece (psicología, terapia de lenguaje…) con su precio por sesión.</p>
+      <figure class="captura"><div class="marco"><img src="img/personal/21-servicios.jpg" alt="Lista de servicios con sus botones resaltados"></div></figure>
+      <ul>
+        <li><span class="n">1</span> <strong>+</strong> crea un servicio nuevo.</li>
+        <li><span class="n">2</span> <strong>PDF / Excel</strong> descargan la lista.</li>
+        <li><span class="n">3</span> <strong>Profesional:</strong> elige quién atiende ese servicio. El cambio se guarda solo.</li>
+        <li><span class="n">4</span> El <strong>lápiz</strong> cambia el nombre o el precio.</li>
+        <li><span class="n">5</span> <strong>Disponible:</strong> si lo apagas, el servicio deja de aparecer para agendar (las citas ya agendadas no cambian).</li>
+      </ul>
+      <figure class="captura"><div class="marco"><img src="img/personal/22-servicios-profesional.jpg" alt="Lista de profesionales para asignar a un servicio"></div><figcaption>Al abrir la lista <b>Profesional</b> eliges a la persona que atenderá el servicio.</figcaption></figure>
+      <h3>Crear o editar un servicio</h3>
+      <div class="par">
+        <figure class="captura"><div class="marco"><img src="img/personal/23-servicio-nuevo.jpg" alt="Formulario para registrar un servicio"></div><figcaption>Nuevo: escribe nombre y precio en dólares y presiona <b>Crear</b>.</figcaption></figure>
+        <figure class="captura"><div class="marco"><img src="img/personal/24-servicio-editar.jpg" alt="Formulario para editar un servicio"></div><figcaption>Editar: cambia los datos y presiona <b>Guardar</b>.</figcaption></figure>
+      </div>
+      <div class="aviso consejo"><span class="ico">💡</span><div><p>Después de crear un servicio, recuerda <strong>asignarle un profesional</strong> en la lista; si no, nadie podrá agendarlo.</p></div></div>
+      <div class="aviso consejo"><span class="ico">💲</span><div><p>Puedes cambiar el precio cuando haga falta: cada pago guarda el monto que se cobró, así que los recibos e ingresos anteriores no cambian.</p></div></div>
+    </section>
+
+    <!-- 10 -->
+    <section class="capitulo" id="cap-10" data-titulo="Tu cuenta y buenas prácticas">
+      <div class="cap-cabecera"><div class="cap-num">10</div><div><small>Capítulo 10</small><h2>Tu cuenta y buenas prácticas</h2></div></div>
+      <p class="intro">El botón <strong>⋮</strong> junto a tu nombre abre tu <strong>Perfil</strong>, el <strong>Manual de uso</strong>, <strong>Sobre ASPY</strong> y <strong>Cerrar sesión</strong>.</p>
+      <figure class="captura media"><div class="marco"><img src="img/personal/00-menu-cuenta.jpg" alt="Menú de la cuenta"></div></figure>
+      <h3>Este manual dentro del sistema</h3>
+      <p>En <strong>⋮ → Manual de uso</strong> puedes ver <strong>todos los manuales</strong> (familias, profesionales, secretaría, administración y página web), para orientar a pacientes y profesionales cuando te pregunten. Elige el manual con las pestañas de arriba. Los pacientes y los profesionales solo ven el suyo.</p>
+      <figure class="captura"><div class="marco"><img src="img/personal/99-manual-en-sistema.jpg" alt="Pantalla Manual de uso dentro del sistema"></div></figure>
+      <ul>
+        <li>Revisa <strong>Pagos</strong> al menos una vez al día para que ningún paciente quede esperando.</li>
+        <li>No compartas tu contraseña. Cada persona del equipo debe tener su propia cuenta.</li>
+        <li>Cierra sesión si usas una computadora compartida.</li>
+        <li>Los datos de los pacientes son confidenciales: no los envíes por canales públicos.</li>
+        <li>Si el sistema muestra un error extraño, toma una captura de pantalla y envíala a los desarrolladores (sus correos están abajo).</li>
+      </ul>
+      <p>El botón de la <strong>luna</strong> (arriba a la izquierda; en el celular, arriba a la derecha) activa el modo oscuro.</p>
+    </section>
+  </main>
+</div>
+
+<footer class="pie">Fundación Aspy Ecuador · Guayaquil · Todo es posible</footer>
+<script src="assets/manual.js"></script>
+</body>
+</html>

@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Editar la página web · ASPY</title>
+  <meta name="description" content="Cómo cambiar textos, fotos, contactos y redes de la página web de la Fundación Aspy Ecuador usando Sanity.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/manual.css">
+  <link rel="icon" href="assets/logo-aspy.webp">
+</head>
+<body style="--rol: var(--verde)">
+
+<header class="topbar">
+  <a class="marca" href="index.html"><img src="assets/logo-aspy.webp" alt="Fundación Aspy Ecuador"><span>Manual para editar la página web</span></a>
+  <div class="acciones">
+    <a class="btn btn-suave" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg><span class="txt">Todos los manuales</span></a>
+    <a class="btn btn-pdf" data-pdf href="pdf/manual-pagina-web.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>Descargar PDF</a>
+  </div>
+</header>
+
+<section class="portada">
+  <div class="portada-inner">
+    <img class="logo" src="assets/logo-aspy.webp" alt="Fundación Aspy Ecuador">
+    <span class="rol">Página web · Sanity</span>
+    <h1>Cómo editar la <em>página web</em> de ASPY</h1>
+    <p class="bajada">Cambia textos, fotos, servicios, contactos y redes sociales de la página pública sin ayuda técnica, desde el editor Sanity.</p>
+    <div class="botones">
+      <a class="btn btn-pdf" data-pdf href="pdf/manual-pagina-web.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>Descargar en PDF</a>
+      <a class="btn btn-suave" href="#cap-1">Empezar a leer</a>
+    </div>
+    <div class="meta"><span>Editor: <b>aspy-ecuador.sanity.studio</b></span><span>Página: <b>aspy-web.vercel.app</b></span><span>Versión: <b>octubre 2026</b></span></div>
+  </div>
+</section>
+
+<div class="layout">
+  <nav class="indice" aria-label="Contenido"><h2>Contenido</h2><ol data-indice></ol></nav>
+
+  <main>
+    <details class="indice-movil"><summary>Contenido del manual</summary><ol data-indice></ol></details>
+    <div class="indice-impreso"><h2>Contenido</h2><ol data-indice></ol></div>
+
+    <!-- 1 -->
+    <section class="capitulo" id="cap-1" data-titulo="¿Qué puedes cambiar?">
+      <div class="cap-cabecera"><div class="cap-num">1</div><div><small>Capítulo 1</small><h2>¿Qué puedes cambiar?</h2></div></div>
+      <p class="intro">Casi todo lo que se ve en la página pública: textos, fotos, servicios, pasos, testimonios, aliados, datos de contacto, mapa y redes sociales. El diseño (colores, tipos de letra, orden de las secciones) se mantiene solo, para que la página siempre se vea bien.</p>
+      <figure class="captura"><div class="marco"><img src="img/pagina-web/web-01-hero.jpg" alt="Portada de la página web de ASPY"></div><figcaption>La portada de la página. Cada parte se edita en una sección del editor.</figcaption></figure>
+      <h3>Dónde se edita cada parte</h3>
+      <table class="tabla">
+        <thead><tr><th>En el editor</th><th>En la página</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Ajustes generales</strong></td><td>Logo y textos del menú de arriba.</td></tr>
+          <tr><td><strong>Portada</strong></td><td>Título, descripción, collage de fotos y botones del inicio.</td></tr>
+          <tr><td><strong>Cifras de impacto</strong></td><td>Las tarjetas con números (ej.: +500 familias).</td></tr>
+          <tr><td><strong>Nosotros</strong></td><td>Misión y galería de 3 fotos.</td></tr>
+          <tr><td><strong>Servicios</strong></td><td>Las tarjetas de servicios.</td></tr>
+          <tr><td><strong>Cómo agendar</strong></td><td>Los pasos para pedir una cita.</td></tr>
+          <tr><td><strong>Testimonios</strong></td><td>Frases de familias y participantes.</td></tr>
+          <tr><td><strong>ASPY Band</strong></td><td>La sección de la banda y su carrusel de fotos.</td></tr>
+          <tr><td><strong>Aliados y donaciones</strong></td><td>Logos de instituciones aliadas y datos para donar.</td></tr>
+          <tr><td><strong>Contacto</strong></td><td>WhatsApp, teléfono, correo, dirección, horario y mapa.</td></tr>
+          <tr><td><strong>Redes sociales</strong></td><td>Íconos de Instagram, Facebook, TikTok y YouTube.</td></tr>
+          <tr><td><strong>Pie de página</strong></td><td>Textos del final de la página.</td></tr>
+        </tbody>
+      </table>
+      <div class="aviso consejo"><span class="ico">💡</span><div><p><strong>Regla de oro:</strong> si dejas vacía una lista o un dato (por ejemplo, testimonios o el teléfono), esa parte simplemente <strong>no se muestra</strong> en la página. Nunca queda un hueco feo.</p></div></div>
+    </section>
+
+    <!-- 2 -->
+    <section class="capitulo" id="cap-2" data-titulo="Entrar al editor">
+      <div class="cap-cabecera"><div class="cap-num">2</div><div><small>Capítulo 2</small><h2>Entrar al editor</h2></div></div>
+      <p class="intro">Primero recibirás una <strong>invitación por correo</strong> de Sanity. Acéptala y crea tu acceso con ese mismo correo (puedes usar tu cuenta de Google).</p>
+      <ol class="pasos">
+        <li class="paso"><b>Abre el editor</b>
+          <p>Entra a <strong>aspy-ecuador.sanity.studio</strong> (guárdalo en tus favoritos). Si no has iniciado sesión, elige cómo entrar: <strong>Continue with Google</strong> (con tu cuenta de Google) o <strong>Continue with email</strong> (con correo y contraseña). Esta pantalla de ingreso es de Sanity y aparece en inglés; el resto del editor está en español.</p>
+          <figure class="captura"><div class="marco"><img src="img/pagina-web/01-login.jpg" alt="Pantalla de inicio de sesión de Sanity"></div></figure>
+        </li>
+        <li class="paso"><b>Elige la sección</b>
+          <p>A la izquierda verás todas las secciones de la página. Haz clic en la que quieras editar.</p>
+          <figure class="captura"><div class="marco"><img src="img/pagina-web/02-inicio.jpg" alt="Editor de Sanity con la lista de secciones de la página"></div></figure>
+        </li>
+      </ol>
+      <div class="aviso consejo"><span class="ico">🌐</span><div><p>El editor está en español. En el capítulo 3 tienes una lista de los botones que vas a usar y para qué sirve cada uno.</p></div></div>
+    </section>
+
+    <!-- 3 -->
+    <section class="capitulo" id="cap-3" data-titulo="Editar y publicar">
+      <div class="cap-cabecera"><div class="cap-num">3</div><div><small>Capítulo 3</small><h2>Editar y publicar</h2></div></div>
+      <p class="intro">Los cambios se guardan solos mientras escribes, pero <strong>no salen en la página</strong> hasta que presionas <strong>Publicar</strong>.</p>
+      <figure class="captura"><div class="marco"><img src="img/pagina-web/04-portada.jpg" alt="Sección Portada en el editor con el botón Publicar resaltado"></div><figcaption>El botón <b>Publicar</b> está abajo a la derecha. Se activa cuando hay cambios sin publicar.</figcaption></figure>
+      <ol class="pasos">
+        <li class="paso"><b>Edita</b><p>Cambia el texto en las cajas o sube fotos. Cada campo tiene debajo de su nombre una explicación y el máximo de caracteres.</p></li>
+        <li class="paso"><b>Revisa</b><p>Arriba, la etiqueta <strong>Borrador</strong> se pone amarilla: significa que hay cambios guardados que todavía no se ven en la página.</p></li>
+        <li class="paso"><b>Publica</b><p>Presiona <span class="boton">Publicar</span>. En uno o dos minutos el cambio aparece en la página (recárgala para verlo).</p></li>
+      </ol>
+      <h3>Botones del editor</h3>
+      <table class="tabla">
+        <thead><tr><th>Botón</th><th>Para qué sirve</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Publicar</strong></td><td>Hace visibles los cambios en la página.</td></tr>
+          <tr><td><strong>Publicado</strong></td><td>La versión que se ve hoy en la página.</td></tr>
+          <tr><td><strong>Borrador</strong></td><td>Cambios guardados pero aún no publicados.</td></tr>
+          <tr><td><strong>Descartar cambios</strong></td><td>Borra el borrador y vuelve a lo publicado.</td></tr>
+          <tr><td><strong>Añadir elemento</strong></td><td>Agrega un elemento a una lista (una foto, un servicio, un paso…).</td></tr>
+          <tr><td><strong>Subir</strong> / <strong>Seleccionar</strong></td><td>Subir una foto desde tu equipo / elegir una que ya se subió antes.</td></tr>
+          <tr><td><strong>Eliminar</strong></td><td>Quita un elemento de una lista.</td></tr>
+          <tr><td><strong>Reemplazar</strong></td><td>Cambia una foto por otra.</td></tr>
+          <tr><td><strong>Duplicar</strong></td><td>Crea una copia de un elemento de una lista.</td></tr>
+        </tbody>
+      </table>
+      <div class="aviso importante"><span class="ico">↩️</span><div><p><strong>¿Te equivocaste?</strong> Si aún no publicas, usa <strong>Descartar cambios</strong> (en el menú <strong>⋯</strong> junto al botón Publicar) para volver a lo que estaba publicado. Si ya publicaste, puedes volver a una versión anterior desde el historial del documento (<strong>Restaurar</strong>).</p></div></div>
+      <div class="aviso cuidado"><span class="ico">⚠️</span><div><p>Si un campo tiene un error (por ejemplo, demasiados caracteres o falta un dato obligatorio), aparece en rojo y <strong>no podrás publicar</strong> hasta corregirlo.</p></div></div>
+    </section>
+
+    <!-- 4 -->
+    <section class="capitulo" id="cap-4" data-titulo="Trabajar con fotos">
+      <div class="cap-cabecera"><div class="cap-num">4</div><div><small>Capítulo 4</small><h2>Trabajar con fotos</h2></div></div>
+      <p class="intro">Las fotos se suben igual en todas las secciones (portada, nosotros, servicios, banda y aliados).</p>
+      <figure class="captura"><div class="marco"><img src="img/pagina-web/05-portada-fotos.jpg" alt="Lista de fotos del collage en la portada"></div></figure>
+      <ul>
+        <li><strong>Agregar:</strong> presiona <strong>Añadir elemento</strong> y luego <strong>Subir</strong>, o arrastra la foto desde tu computadora hasta el recuadro.</li>
+        <li><strong>Ordenar:</strong> arrastra cada foto a su nuevo lugar. El orden del editor es el orden en la página.</li>
+        <li><strong>Quitar o cambiar:</strong> usa el menú <strong>⋯</strong> de la foto → <strong>Eliminar</strong>. Para cambiarla por otra, abre la foto y usa <strong>Reemplazar</strong>.</li>
+        <li><strong>Texto alternativo:</strong> al abrir la foto verás el campo <strong>Texto alternativo</strong>. Describe en pocas palabras lo que se ve (ej.: “Niños en clase de música”). Lo usan las personas con discapacidad visual y Google.</li>
+        <li><strong>Recorte:</strong> en las fotos de servicios puedes marcar el <strong>punto importante</strong> (por ejemplo, la cara de la persona) para que no se corte al ajustarla.</li>
+      </ul>
+      <div class="aviso consejo"><span class="ico">📸</span><div>
+        <p><strong>Consejos para que la página cargue rápido y se vea bien:</strong></p>
+        <p>• Usa fotos en <strong>JPG o PNG</strong>, idealmente horizontales y de buena calidad (no hace falta que pesen más de 5 MB).</p>
+        <p>• No subas capturas de pantalla ni fotos con texto encima.</p>
+        <p>• Usa solo fotos con <strong>permiso de las personas</strong> que aparecen, en especial de niños y niñas.</p>
+      </div></div>
+    </section>
+
+    <!-- 5 -->
+    <section class="capitulo" id="cap-5" data-titulo="Portada y ajustes generales">
+      <div class="cap-cabecera"><div class="cap-num">5</div><div><small>Capítulo 5</small><h2>Portada y ajustes generales</h2></div></div>
+      <p class="intro">Lo primero que ve la gente al entrar a la página.</p>
+      <h3>Portada</h3>
+      <ul>
+        <li><strong>Etiqueta superior</strong> (máx. 70 caracteres), <strong>Título</strong> (máx. 40) y <strong>Lema</strong> (máx. 40).</li>
+        <li><strong>Palabra destacada:</strong> la parte del título que va con los colores de ASPY. Debe estar escrita <em>exactamente igual</em> que en el título.</li>
+        <li><strong>Descripción:</strong> el párrafo bajo el título (máx. 320).</li>
+        <li><strong>Fotos del collage:</strong> entre 3 y 8 fotos. Se muestran 3 a la vez y se van turnando cada cierto tiempo (<strong>Segundos entre cambios de foto</strong>).</li>
+        <li><strong>Etiquetas sobre las fotos:</strong> hasta 3 palabras cortas (ej.: Terapia, Inclusión, Arte).</li>
+        <li>Textos de los botones y el texto antes de las redes (ej.: “Síguenos”).</li>
+      </ul>
+      <figure class="captura"><div class="marco"><img src="img/pagina-web/06-portada-botones.jpg" alt="Fotos, etiquetas y botones de la portada en el editor"></div></figure>
+      <h3>Ajustes generales</h3>
+      <p>Aquí está el <strong>logo</strong> que aparece en el menú y al final de la página, y los textos del <strong>menú superior</strong> (Nosotros, Servicios, Cómo agendar, ASPY Band, Contacto) y de sus botones.</p>
+      <figure class="captura"><div class="marco"><img src="img/pagina-web/03-ajustes.jpg" alt="Sección Ajustes generales con el logo"></div></figure>
+      <div class="aviso importante"><span class="ico">🖼️</span><div><p>Para el logo, usa un <strong>PNG con fondo transparente</strong>. Así se ve bien sobre fondos claros y oscuros.</p></div></div>
+    </section>
+
+    <!-- 6 -->
+    <section class="capitulo" id="cap-6" data-titulo="Cifras de impacto">
+      <div class="cap-cabecera"><div class="cap-num">6</div><div><small>Capítulo 6</small><h2>Cifras de impacto</h2></div></div>
+      <p class="intro">Hasta 4 tarjetas con números que muestran lo que logra la fundación. En la página, el número “cuenta” desde cero cuando aparece en pantalla.</p>
+      <figure class="captura"><div class="marco"><img src="img/pagina-web/07-cifras.jpg" alt="Lista de cifras de impacto con el botón Añadir elemento resaltado"></div></figure>
+      <p>Haz clic en una cifra para editarla:</p>
+      <figure class="captura"><div class="marco"><img src="img/pagina-web/08-cifras-editar.jpg" alt="Ventana para editar una cifra con el selector de íconos"></div></figure>
+      <ul>
+        <li><strong>Valor:</strong> el número (ej.: <em>+500</em>, <em>98%</em>, <em>1.200</em>). Máximo 10 caracteres.</li>
+        <li><strong>Descripción:</strong> qué significa (ej.: <em>familias acompañadas</em>).</li>
+        <li><strong>Ícono:</strong> elige el dibujo que mejor la represente. Si no eliges, se pone uno automáticamente.</li>
+      </ul>
+      <div class="aviso importante"><span class="ico">✅</span><div><p>Usa <strong>solo datos reales</strong>. Si la lista está vacía, esta franja no aparece en la página.</p></div></div>
+    </section>
+
+    <!-- 7 -->
+    <section class="capitulo" id="cap-7" data-titulo="Nosotros">
+      <div class="cap-cabecera"><div class="cap-num">7</div><div><small>Capítulo 7</small><h2>Nosotros</h2></div></div>
+      <p class="intro">La sección que cuenta quién es la fundación.</p>
+      <div class="par">
+        <figure class="captura"><div class="marco"><img src="img/pagina-web/09-nosotros.jpg" alt="Sección Nosotros en el editor"></div><figcaption>En el editor.</figcaption></figure>
+        <figure class="captura"><div class="marco"><img src="img/pagina-web/web-02-nosotros.jpg" alt="Sección Nosotros en la página"></div><figcaption>En la página.</figcaption></figure>
+      </div>
+      <ul>
+        <li><strong>Etiqueta</strong> y <strong>Título</strong>.</li>
+        <li><strong>Párrafos:</strong> hasta 4, de máximo 700 caracteres cada uno.</li>
+        <li><strong>Galería:</strong> hasta 3 fotos. La <strong>segunda</strong> se muestra alta (vertical) y las otras dos horizontales.</li>
+      </ul>
+    </section>
+
+    <!-- 8 -->
+    <section class="capitulo" id="cap-8" data-titulo="Servicios">
+      <div class="cap-cabecera"><div class="cap-num">8</div><div><small>Capítulo 8</small><h2>Servicios</h2></div></div>
+      <p class="intro">Las tarjetas que explican lo que ofrece la fundación (hasta 9).</p>
+      <figure class="captura"><div class="marco"><img src="img/pagina-web/web-03-servicios.jpg" alt="Tarjetas de servicios en la página"></div><figcaption>Así se ven en la página.</figcaption></figure>
+      <figure class="captura"><div class="marco"><img src="img/pagina-web/10-servicios.jpg" alt="Lista de servicios en el editor"></div></figure>
+      <p>Haz clic en un servicio para editarlo:</p>
+      <figure class="captura"><div class="marco"><img src="img/pagina-web/11-servicio-editar.jpg" alt="Ventana para editar un servicio con nombre, descripción e ícono"></div></figure>
+      <ul>
+        <li><strong>Nombre</strong> (máx. 50) y <strong>Descripción</strong> (máx. 200).</li>
+        <li><strong>Ícono:</strong> el dibujo de la tarjeta.</li>
+        <li><strong>Foto (opcional):</strong> aparece arriba de la tarjeta. Si al menos un servicio tiene foto, todas las tarjetas usan el formato con imagen; las que no tienen foto muestran su ícono sobre un fondo de color.</li>
+        <li><strong>Color:</strong> azul, rosado o amarillo.</li>
+      </ul>
+      <figure class="captura"><div class="marco"><img src="img/pagina-web/12-servicio-foto.jpg" alt="Campo Foto opcional de un servicio con una imagen de muestra"></div></figure>
+      <div class="aviso importante"><span class="ico">🖼️</span><div><p><strong>Las imágenes que dicen “Imagen de muestra” son provisionales.</strong> Están ahí para mostrar dónde va la foto de cada servicio. Para cambiar una: abre el servicio y, en <strong>Foto (opcional)</strong>, usa el menú <strong>⋯</strong> de la imagen para <strong>subir</strong> una foto real. Después corrige el <strong>Texto alternativo</strong> (describe lo que se ve en la foto) y presiona <strong>Publicar</strong>.</p><p>Si aún no tienes foto para un servicio, puedes dejar la de muestra o quitarla con <strong>Limpiar campo</strong>: esa tarjeta mostrará su ícono sobre un fondo de color.</p></div></div>
+      <div class="aviso consejo"><span class="ico">💡</span><div><p>Estos servicios son solo informativos. Los servicios que se pueden <strong>agendar y pagar</strong> (con precio) se manejan dentro del sistema de citas, por la secretaría.</p></div></div>
+    </section>
+
+    <!-- 9 -->
+    <section class="capitulo" id="cap-9" data-titulo="Cómo agendar y testimonios">
+      <div class="cap-cabecera"><div class="cap-num">9</div><div><small>Capítulo 9</small><h2>Cómo agendar y testimonios</h2></div></div>
+      <h3>Cómo agendar</h3>
+      <p>Los pasos que explican a las familias cómo pedir una cita (se recomiendan 3, máximo 4). Cada paso tiene un título (máx. 40) y una descripción (máx. 200). También puedes cambiar el texto del botón (ej.: “Crear mi cuenta”).</p>
+      <div class="par">
+        <figure class="captura"><div class="marco"><img src="img/pagina-web/13-como-agendar.jpg" alt="Sección Cómo agendar en el editor"></div></figure>
+        <figure class="captura"><div class="marco"><img src="img/pagina-web/web-04-como-agendar.jpg" alt="Sección Cómo agendar en la página"></div></figure>
+      </div>
+      <h3>Testimonios</h3>
+      <p>Hasta 6 frases de familias o participantes. Cada una tiene el <strong>testimonio</strong> (máx. 300), el <strong>nombre</strong> y, opcionalmente, la <strong>relación con la fundación</strong> (ej.: “Madre de un participante”).</p>
+      <div class="par">
+        <figure class="captura"><div class="marco"><img src="img/pagina-web/14-testimonios.jpg" alt="Sección Testimonios en el editor"></div></figure>
+        <figure class="captura"><div class="marco"><img src="img/pagina-web/web-05-testimonios.jpg" alt="Sección Testimonios en la página"></div></figure>
+      </div>
+      <div class="aviso importante"><span class="ico">🤝</span><div><p>Publica solo testimonios <strong>reales y con permiso</strong> de la persona. Si la lista está vacía, la sección no aparece.</p></div></div>
+    </section>
+
+    <!-- 10 -->
+    <section class="capitulo" id="cap-10" data-titulo="ASPY Band">
+      <div class="cap-cabecera"><div class="cap-num">10</div><div><small>Capítulo 10</small><h2>ASPY Band</h2></div></div>
+      <p class="intro">La sección especial de la banda, con un carrusel de fotos que avanza solo.</p>
+      <div class="par">
+        <figure class="captura"><div class="marco"><img src="img/pagina-web/15-band.jpg" alt="Sección ASPY Band en el editor"></div></figure>
+        <figure class="captura"><div class="marco"><img src="img/pagina-web/web-06-aspyband.jpg" alt="Sección ASPY Band en la página"></div></figure>
+      </div>
+      <ul>
+        <li><strong>Etiqueta, Título</strong> y <strong>Palabra destacada</strong> (la parte del título que va en rosado).</li>
+        <li><strong>Descripción</strong> (máx. 450).</li>
+        <li><strong>Fotos de la banda:</strong> de 1 a 10. Se recortan al centro, así que funcionan mejor cuadradas o con las personas al centro.</li>
+        <li><strong>Botón:</strong> texto y enlace (por ejemplo, al Instagram de la banda).</li>
+      </ul>
+    </section>
+
+    <!-- 11 -->
+    <section class="capitulo" id="cap-11" data-titulo="Aliados y donaciones">
+      <div class="cap-cabecera"><div class="cap-num">11</div><div><small>Capítulo 11</small><h2>Aliados y donaciones</h2></div></div>
+      <h3>Aliados</h3>
+      <p>Hasta 12 instituciones aliadas. Cada una tiene <strong>nombre</strong>, <strong>logo</strong> (opcional) y <strong>sitio web</strong> (opcional, para que el logo lleve a su página).</p>
+      <figure class="captura"><div class="marco"><img src="img/pagina-web/16-aliados.jpg" alt="Sección Aliados y donaciones en el editor"></div></figure>
+      <figure class="captura media"><div class="marco"><img src="img/pagina-web/web-07-aliados.jpg" alt="Aliados en la página"></div><figcaption>Si un aliado no tiene logo, se muestra su nombre.</figcaption></figure>
+      <div class="aviso consejo"><span class="ico">🏷️</span><div><p>Los logos se muestran dentro de un recuadro blanco. Usa logos en <strong>PNG o SVG</strong>, horizontales y con fondo transparente o blanco.</p></div></div>
+      <h3>Donaciones</h3>
+      <p>El bloque de donaciones aparece cuando agregas al menos un <strong>dato para donar</strong> (hasta 6, por ejemplo <em>Banco → Banco Pichincha</em>, <em>Cuenta → 123…</em>) o un <strong>botón</strong> con enlace.</p>
+      <figure class="captura"><div class="marco"><img src="img/pagina-web/17-donaciones.jpg" alt="Campos de donaciones en el editor"></div></figure>
+    </section>
+
+    <!-- 12 -->
+    <section class="capitulo" id="cap-12" data-titulo="Contacto, WhatsApp y mapa">
+      <div class="cap-cabecera"><div class="cap-num">12</div><div><small>Capítulo 12</small><h2>Contacto, WhatsApp y mapa</h2></div></div>
+      <p class="intro">Los datos para que las personas se comuniquen o lleguen a la fundación. Los que dejes vacíos no se muestran.</p>
+      <figure class="captura"><div class="marco"><img src="img/pagina-web/18-contacto.jpg" alt="Sección Contacto con el campo WhatsApp resaltado"></div></figure>
+      <h3>WhatsApp</h3>
+      <ul>
+        <li><strong>Número:</strong> escríbelo <strong>con código de país, sin + ni espacios</strong>. Ejemplo: para 099 123 4567 escribe <strong>593991234567</strong>. En la página se verá como 099 123 4567.</li>
+        <li><strong>Mensaje predeterminado:</strong> el texto que aparece ya escrito cuando la persona abre el chat (ej.: “Hola, quisiera más información”).</li>
+        <li><strong>Botón flotante:</strong> el botón verde fijo en la esquina de la página. Puedes activarlo o desactivarlo y ponerle un texto.</li>
+      </ul>
+      <h3>Teléfono, correo, dirección y horario</h3>
+      <p>El <strong>teléfono</strong> también va en formato 593… (la página lo muestra en formato local). En el <strong>horario</strong> escribe una línea por horario, presionando <kbd>Enter</kbd> para pasar a la siguiente (ej.: “Lun a Vie · 10:00 – 18:00”).</p>
+      <h3>Mapa</h3>
+      <figure class="captura"><div class="marco"><img src="img/pagina-web/19-contacto-mapa.jpg" alt="Opciones del mapa en la sección Contacto"></div></figure>
+      <ul>
+        <li><strong>Mostrar mapa:</strong> activa o desactiva el mapa de Google.</li>
+        <li>El mapa usa la <strong>dirección</strong>. Si no marca bien el lugar, escribe en <strong>Ubicación exacta</strong> las coordenadas o el nombre exacto del lugar en Google Maps.</li>
+        <li><strong>Enlace de Google Maps:</strong> abre la ficha de la fundación en Google Maps y copia el enlace de la barra del navegador (empieza con <em>https://www.google.com/maps/place/…</em>). Así el botón “Abrir en Google Maps” lleva directo a la ficha.</li>
+      </ul>
+      <figure class="captura"><div class="marco"><img src="img/pagina-web/web-08-contacto.jpg" alt="Sección de contacto al final de la página"></div><figcaption>El bloque de contacto y el pie de la página.</figcaption></figure>
+    </section>
+
+    <!-- 13 -->
+    <section class="capitulo" id="cap-13" data-titulo="Redes sociales y pie de página">
+      <div class="cap-cabecera"><div class="cap-num">13</div><div><small>Capítulo 13</small><h2>Redes sociales y pie de página</h2></div></div>
+      <h3>Redes sociales</h3>
+      <p>Hay un espacio para cada red: Instagram de la fundación, Instagram de ASPY Band, Facebook, TikTok y YouTube. Para cada una:</p>
+      <ul>
+        <li><strong>Enlace:</strong> la dirección completa, que empieza con <strong>https://</strong> (cópiala desde el navegador).</li>
+        <li><strong>Texto visible:</strong> lo que se lee junto al ícono (ej.: @aspyecuador).</li>
+      </ul>
+      <figure class="captura"><div class="marco"><img src="img/pagina-web/20-redes.jpg" alt="Sección Redes sociales en el editor"></div></figure>
+      <div class="aviso consejo"><span class="ico">💡</span><div><p>Si una red no tiene enlace, su ícono <strong>no aparece</strong> en la página. Así, cuando abran TikTok, solo tienen que pegar el enlace y publicar.</p></div></div>
+      <h3>Pie de página</h3>
+      <p>La descripción corta de la fundación, los títulos de las columnas, la ubicación y el texto del enlace para ingresar al sistema.</p>
+      <figure class="captura"><div class="marco"><img src="img/pagina-web/21-pie.jpg" alt="Sección Pie de página en el editor"></div></figure>
+    </section>
+
+    <!-- 14 -->
+    <section class="capitulo" id="cap-14" data-titulo="Límites y preguntas frecuentes">
+      <div class="cap-cabecera"><div class="cap-num">14</div><div><small>Capítulo 14</small><h2>Límites y preguntas frecuentes</h2></div></div>
+      <p class="intro">Para que la página cargue rápido y se vea ordenada, cada lista tiene un máximo.</p>
+      <table class="tabla">
+        <thead><tr><th>Lista</th><th>Máximo</th></tr></thead>
+        <tbody>
+          <tr><td>Fotos del collage (portada)</td><td>8 (mínimo 1; ideal 3 o más)</td></tr>
+          <tr><td>Etiquetas sobre las fotos</td><td>3</td></tr>
+          <tr><td>Cifras de impacto</td><td>4</td></tr>
+          <tr><td>Párrafos de Nosotros / fotos de la galería</td><td>4 / 3</td></tr>
+          <tr><td>Servicios</td><td>9</td></tr>
+          <tr><td>Pasos de Cómo agendar</td><td>4</td></tr>
+          <tr><td>Testimonios</td><td>6</td></tr>
+          <tr><td>Fotos de ASPY Band</td><td>10</td></tr>
+          <tr><td>Aliados / datos para donar</td><td>12 / 6</td></tr>
+        </tbody>
+      </table>
+      <details class="faq"><summary>Publiqué pero no veo el cambio en la página.</summary><p>Espera uno o dos minutos y recarga la página. Si sigue igual, revisa que la etiqueta <strong>Borrador</strong> ya no esté amarilla (que sí lo hayas publicado).</p></details>
+      <details class="faq"><summary>El botón Publicar está gris.</summary><p>No hay cambios nuevos que publicar, o hay un campo con error (en rojo) que debes corregir primero.</p></details>
+      <details class="faq"><summary>¿Puedo borrar una sección completa?</summary><p>No. Las secciones son fijas para proteger el diseño. Para ocultar una lista (testimonios, cifras…), deja la lista vacía y publica.</p></details>
+      <details class="faq"><summary>¿Puedo romper la página?</summary><p>No. Si falta un dato, la página usa el contenido de respaldo o simplemente oculta esa parte. Lo peor que puede pasar es publicar un texto con una falta de ortografía, y eso se corrige igual de fácil.</p></details>
+      <details class="faq"><summary>¿Dos personas pueden editar al mismo tiempo?</summary><p>Sí. Sanity muestra quién más está editando y guarda los cambios de todos. Lo ideal es ponerse de acuerdo para que una sola persona publique.</p></details>
+      <details class="faq"><summary>¿Dónde cambio los precios de las terapias?</summary><p>Los precios y servicios que se agendan están en el sistema de citas (lo maneja la secretaría), no en Sanity.</p></details>
+    </section>
+  </main>
+</div>
+
+<footer class="pie">Fundación Aspy Ecuador · Guayaquil · Todo es posible</footer>
+<script src="assets/manual.js"></script>
+</body>
+</html>

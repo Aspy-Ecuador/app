@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manual para familias · ASPY</title>
+  <meta name="description" content="Cómo crear tu cuenta, agendar y pagar tus citas, ver recibos y reportes en el sistema de la Fundación Aspy Ecuador.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/manual.css">
+  <link rel="icon" href="assets/logo-aspy.webp">
+</head>
+<body style="--rol: var(--azul)">
+
+<header class="topbar">
+  <a class="marca" href="index.html"><img src="assets/logo-aspy.webp" alt="Fundación Aspy Ecuador"><span>Manual para familias y pacientes</span></a>
+  <div class="acciones">
+    <a class="btn btn-suave" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg><span class="txt">Todos los manuales</span></a>
+    <a class="btn btn-pdf" data-pdf href="pdf/manual-familias.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>Descargar PDF</a>
+  </div>
+</header>
+
+<section class="portada">
+  <div class="portada-inner">
+    <img class="logo" src="assets/logo-aspy.webp" alt="Fundación Aspy Ecuador">
+    <span class="rol">Familias y pacientes</span>
+    <h1>Manual de uso para <em>familias y pacientes</em></h1>
+    <p class="bajada">Todo lo que necesitas para crear tu cuenta, agendar y pagar tus citas, descargar tus recibos y leer los reportes de cada sesión. Paso a paso y con imágenes.</p>
+    <div class="botones">
+      <a class="btn btn-pdf" data-pdf href="pdf/manual-familias.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>Descargar en PDF</a>
+      <a class="btn btn-suave" href="#cap-1">Empezar a leer</a>
+    </div>
+    <div class="meta"><span>Sitio: <b>aspy-web.vercel.app</b></span><span>Versión: <b>octubre 2026</b></span></div>
+  </div>
+</section>
+
+<div class="layout">
+  <nav class="indice" aria-label="Contenido"><h2>Contenido</h2><ol data-indice></ol></nav>
+
+  <main>
+    <details class="indice-movil"><summary>Contenido del manual</summary><ol data-indice></ol></details>
+    <div class="indice-impreso"><h2>Contenido</h2><ol data-indice></ol></div>
+
+    <!-- 1 -->
+    <section class="capitulo" id="cap-1" data-titulo="Antes de empezar">
+      <div class="cap-cabecera"><div class="cap-num">1</div><div><small>Capítulo 1</small><h2>Antes de empezar</h2></div></div>
+      <p class="intro">El sistema de ASPY te permite agendar tus terapias desde el celular o la computadora, sin llamadas ni filas. Aquí verás qué necesitas y cómo se organiza una cita.</p>
+
+      <h3>Lo que necesitas</h3>
+      <ul>
+        <li>Un <strong>celular o computadora</strong> con internet.</li>
+        <li>Un <strong>correo electrónico</strong> que uses de verdad (con él entrarás al sistema).</li>
+        <li>Tu <strong>número de cédula</strong> o pasaporte.</li>
+        <li>Para pagar: hacer una <strong>transferencia bancaria</strong> y guardar la foto o el PDF del comprobante.</li>
+      </ul>
+
+      <h3>¿Cómo funciona una cita?</h3>
+      <ol>
+        <li>Eliges el servicio, el profesional, el día y la hora.</li>
+        <li>Haces la transferencia y subes el comprobante.</li>
+        <li>El personal de ASPY revisa tu pago y <strong>confirma la cita</strong>.</li>
+        <li>Asistes a tu terapia.</li>
+        <li>Tu profesional sube el <strong>reporte de la sesión</strong>, que podrás leer en el sistema.</li>
+      </ol>
+
+      <h3>Los colores de tus citas</h3>
+      <p>En tu calendario, cada cita tiene un color según cómo va:</p>
+      <table class="tabla">
+        <thead><tr><th>Estado</th><th>Qué significa</th></tr></thead>
+        <tbody>
+          <tr><td><span class="estado" style="--c:#c27a12">Guardada</span></td><td>Ya pediste la cita y subiste tu comprobante. ASPY está revisando el pago.</td></tr>
+          <tr><td><span class="estado" style="--c:#1d9e75">Agendada</span></td><td>¡Pago aprobado! Tu cita está confirmada.</td></tr>
+          <tr><td><span class="estado" style="--c:#3b82d6">Asistió</span></td><td>Fuiste a tu cita.</td></tr>
+          <tr><td><span class="estado" style="--c:#e04848">No asistió</span></td><td>La cita pasó y no asististe.</td></tr>
+          <tr><td><span class="estado" style="--c:#7a68d8">Cancelada</span></td><td>La cita se canceló y el horario quedó libre.</td></tr>
+        </tbody>
+      </table>
+      <figure class="captura"><div class="marco"><img src="img/familias/10-leyenda.jpg" alt="Leyenda de colores de las citas: Guardada, Agendada, Asistió, No asistió y Cancelada"></div><figcaption>Esta leyenda aparece siempre encima de tu calendario.</figcaption></figure>
+
+      <div class="aviso consejo"><span class="ico">💡</span><div><p>Las personas, citas y comprobantes que verás en las imágenes son <strong>ejemplos</strong>. En tu cuenta verás tus propios datos.</p></div></div>
+    </section>
+
+    <!-- 2 -->
+    <section class="capitulo" id="cap-2" data-titulo="Crear tu cuenta">
+      <div class="cap-cabecera"><div class="cap-num">2</div><div><small>Capítulo 2</small><h2>Crear tu cuenta</h2></div></div>
+      <p class="intro">Solo se hace una vez. Si ya tienes cuenta, salta al capítulo 3.</p>
+      <ol class="pasos">
+        <li class="paso"><b>Entra a la página de ASPY</b>
+          <p>Abre <strong>aspy-web.vercel.app</strong> y presiona <span class="boton">Ingresar</span> (arriba a la derecha). También puedes usar el botón <span class="boton">Agendar una cita</span>.</p>
+          <figure class="captura"><div class="marco"><img src="img/familias/01-landing-ingresar.jpg" alt="Página de inicio de ASPY con el botón Ingresar resaltado"></div></figure>
+        </li>
+        <li class="paso"><b>Elige “Regístrate”</b>
+          <p>Debajo del formulario de ingreso, presiona <strong>Regístrate</strong>.</p>
+          <figure class="captura"><div class="marco"><img src="img/familias/03-login-registro.jpg" alt="Pantalla de inicio de sesión con el enlace Regístrate resaltado"></div></figure>
+        </li>
+        <li class="paso"><b>Paso 1 de 3: tus datos personales</b>
+          <p>Escribe tu nombre y tu apellido, y elige una opción en cada lista. Para la <strong>fecha de nacimiento</strong> puedes escribirla (día/mes/año) o tocar el ícono del calendario y elegir el año, el mes y el día. Si tu ocupación no aparece, elige <strong>Otra</strong> y escríbela en el campo que aparece <span class="n">1</span>. Al final elige el tipo de identificación y escribe el número <span class="n">2</span>: la cédula lleva <strong>10 números</strong> y el RUC 13 (el campo no acepta letras). Presiona <span class="boton">Siguiente</span> <span class="n">3</span>.</p>
+          <figure class="captura"><div class="marco"><img src="img/familias/04-registro-paso1.jpg" alt="Formulario de registro, paso de datos personales"></div></figure>
+          <figure class="captura media"><div class="marco"><img src="img/familias/04b-registro-calendario.jpg" alt="Calendario para elegir la fecha de nacimiento"></div><figcaption>El calendario de la fecha de nacimiento: primero el año, luego el mes y al final el día.</figcaption></figure>
+        </li>
+        <li class="paso"><b>Paso 2 de 3: contacto y dirección</b>
+          <p>Escribe tu teléfono solo con números (celular: 10 números que empiezan con 09; fijo: 9 números que empiezan con 0). Elige provincia y ciudad (las ciudades aparecen después de elegir la provincia), completa tu dirección y presiona <span class="boton">Siguiente</span>.</p>
+          <figure class="captura"><div class="marco"><img src="img/familias/05-registro-paso2.jpg" alt="Formulario de registro, paso de datos generales"></div></figure>
+        </li>
+        <li class="paso"><b>Paso 3 de 3: correo y contraseña</b>
+          <p>Escribe tu correo y una contraseña de al menos 8 caracteres (dos veces, para confirmarla; el ojo 👁 la muestra u oculta). Luego toca la tarjeta <strong>Acepta la política de privacidad</strong>.</p>
+          <figure class="captura"><div class="marco"><img src="img/familias/06-registro-paso3-antes.jpg" alt="Paso de seguridad con la tarjeta de la política de privacidad resaltada"></div></figure>
+          <div class="par">
+            <figure class="captura"><div class="marco"><img src="img/familias/06a-registro-politica.jpg" alt="Ventana con la Política de Privacidad"></div><figcaption>Se abre la política. Léela hasta el final…</figcaption></figure>
+            <figure class="captura"><div class="marco"><img src="img/familias/06b-registro-politica-aceptar.jpg" alt="Botón para aceptar la política al final del texto"></div><figcaption>…y el botón cambia para que puedas <b>aceptarla</b>.</figcaption></figure>
+          </div>
+        </li>
+        <li class="paso"><b>Termina el registro</b>
+          <p>Con la política aceptada <span class="n">1</span> (la tarjeta se pone verde), presiona <span class="boton">Registrarse</span> <span class="n">2</span>.</p>
+          <figure class="captura"><div class="marco"><img src="img/familias/06-registro-paso3.jpg" alt="Último paso del registro con la casilla marcada y el botón Registrarse"></div></figure>
+          <figure class="captura media"><div class="marco"><img src="img/familias/07-registro-listo.jpg" alt="Mensaje: Se ha registrado con éxito"></div><figcaption>Verás este mensaje. Presiona <b>Aceptar</b> y ya puedes ingresar.</figcaption></figure>
+        </li>
+      </ol>
+      <div class="aviso importante"><span class="ico">🔒</span><div><p><strong>Guarda bien tu contraseña.</strong> Si la olvidas, la fundación te asigna una nueva (capítulo 3).</p></div></div>
+    </section>
+
+    <!-- 3 -->
+    <section class="capitulo" id="cap-3" data-titulo="Ingresar al sistema">
+      <div class="cap-cabecera"><div class="cap-num">3</div><div><small>Capítulo 3</small><h2>Ingresar al sistema</h2></div></div>
+      <p class="intro">Cada vez que quieras usar el sistema, entra con tu correo y tu contraseña.</p>
+      <ol class="pasos">
+        <li class="paso"><b>Abre la pantalla de ingreso</b><p>En la página de ASPY presiona <span class="boton">Ingresar</span>.</p></li>
+        <li class="paso"><b>Escribe tus datos</b>
+          <p>Tu correo <span class="n">1</span>, tu contraseña <span class="n">2</span> y presiona <span class="boton">Iniciar sesión</span> <span class="n">3</span>.</p>
+          <figure class="captura"><div class="marco"><img src="img/familias/02-login.jpg" alt="Pantalla de inicio de sesión con correo, contraseña y botón resaltados"></div></figure>
+        </li>
+      </ol>
+      <div class="aviso consejo"><span class="ico">💡</span><div><p>Tu sesión dura hasta 7 días en el mismo equipo. Si usas una computadora prestada, <strong>cierra sesión</strong> al terminar (capítulo 9).</p><p>Si escribes mal la contraseña muchas veces seguidas, el sistema te pedirá esperar un minuto antes de intentar de nuevo.</p><p>En las pantallas de ingreso y de registro, el botón redondo de arriba a la derecha (🌙 / ☀️) cambia entre <strong>modo claro</strong> y <strong>modo oscuro</strong>.</p></div></div>
+      <h3>¿Olvidaste tu contraseña?</h3>
+      <p>Presiona <strong>¿Olvidaste tu contraseña?</strong>, debajo del campo de contraseña. Por seguridad, la contraseña la restablece la fundación: comunícate con la secretaría o la administración y te asignarán una nueva.</p>
+      <figure class="captura"><div class="marco"><img src="img/familias/03b-login-olvido.jpg" alt="Aviso de cómo recuperar la contraseña"></div></figure>
+    </section>
+
+    <!-- 4 -->
+    <section class="capitulo" id="cap-4" data-titulo="Tu panel">
+      <div class="cap-cabecera"><div class="cap-num">4</div><div><small>Capítulo 4</small><h2>Tu panel</h2></div></div>
+      <p class="intro">Al entrar llegas a la <strong>Vista General</strong>: un saludo y el calendario con todas tus citas.</p>
+      <figure class="captura"><div class="marco"><img src="img/familias/08-panel.jpg" alt="Vista general con saludo y calendario semanal de citas"></div></figure>
+      <h3>El menú de la izquierda</h3>
+      <div class="par">
+        <figure class="captura angosta"><div class="marco"><img src="img/familias/09-menu-lateral.jpg" alt="Menú lateral del paciente"></div></figure>
+        <div>
+          <ul>
+            <li><strong>Vista General:</strong> tu calendario de citas.</li>
+            <li><strong>Nueva cita:</strong> agendar y pagar una cita (capítulo 5).</li>
+            <li><strong>Recibos:</strong> descargar los recibos de tus pagos (capítulo 7).</li>
+            <li><strong>Servicios:</strong> los servicios de ASPY y sus precios.</li>
+            <li><strong>Reportes:</strong> tu historial de citas y los reportes de cada sesión (capítulo 8).</li>
+          </ul>
+          <p>Abajo están tu nombre y el botón <strong>⋮</strong> con tu perfil y la opción para cerrar sesión. Arriba, junto al logo, está el botón para cambiar a <strong>modo oscuro</strong>.</p>
+        </div>
+      </div>
+      <h3>Cómo moverte en el calendario</h3>
+      <ul>
+        <li>Las flechas <strong>‹ ›</strong> pasan a la semana anterior o siguiente. <strong>Hoy</strong> te regresa a la fecha actual.</li>
+        <li><strong>Mes / Semana / Día</strong> cambian cuánto tiempo ves a la vez.</li>
+        <li>Haz clic en una cita para ver sus detalles (capítulo 6).</li>
+      </ul>
+    </section>
+
+    <!-- 5 -->
+    <section class="capitulo" id="cap-5" data-titulo="Agendar y pagar una cita">
+      <div class="cap-cabecera"><div class="cap-num">5</div><div><small>Capítulo 5</small><h2>Agendar y pagar una cita</h2></div></div>
+      <p class="intro">Primero eliges cuándo y con quién; después pagas por transferencia y subes el comprobante. Toma unos 3 minutos.</p>
+      <ol class="pasos">
+        <li class="paso"><b>Abre “Nueva cita”</b>
+          <p>En el menú de la izquierda presiona <strong>Nueva cita</strong>. Luego abre la lista <strong>Servicio</strong> y elige el que necesitas.</p>
+          <figure class="captura"><div class="marco"><img src="img/familias/12-agendar-servicio.jpg" alt="Lista de servicios desplegada"></div></figure>
+        </li>
+        <li class="paso"><b>Elige el profesional</b>
+          <p>En la lista <strong>Profesional</strong> solo aparecen quienes dan ese servicio.</p>
+          <figure class="captura"><div class="marco"><img src="img/familias/13-agendar-profesional.jpg" alt="Lista de profesionales desplegada"></div></figure>
+        </li>
+        <li class="paso"><b>Mira los días disponibles</b>
+          <p>En el calendario de la derecha, los días <strong>pintados de verde</strong> son los que tienen horarios libres con ese profesional.</p>
+          <figure class="captura"><div class="marco"><img src="img/familias/14-agendar-dias.jpg" alt="Calendario con los días disponibles en verde"></div></figure>
+        </li>
+        <li class="paso"><b>Elige día y hora</b>
+          <p>Toca el día <span class="n">1</span>, elige una de las horas que aparecen abajo <span class="n">2</span> y presiona <span class="boton">Proceder a pagar</span> <span class="n">3</span>.</p>
+          <figure class="captura"><div class="marco"><img src="img/familias/15-agendar-hora.jpg" alt="Día y hora elegidos y botón Proceder a pagar"></div></figure>
+        </li>
+        <li class="paso"><b>Haz la transferencia</b>
+          <p>Verás el <strong>total a pagar</strong> y los <strong>datos de la cuenta</strong> de la fundación <span class="n">1</span>. Con el ícono de copiar puedes copiar el número de cuenta. Haz la transferencia desde la app o la web de tu banco y guarda el comprobante (captura de pantalla o PDF).</p>
+          <div class="aviso cuidado"><span class="ico">🏦</span><div><p>La cuenta de la imagen es <strong>de ejemplo</strong>. Transfiere siempre a la que aparece <strong>en tu pantalla</strong>: la registra la fundación. Si ves un aviso de que aún no hay datos bancarios, comunícate con la fundación para agendar.</p></div></div>
+          <figure class="captura"><div class="marco"><img src="img/familias/16-pagar-datos.jpg" alt="Pantalla de pago con los datos de transferencia resaltados"></div></figure>
+        </li>
+        <li class="paso"><b>Sube el comprobante</b>
+          <p>Presiona <span class="boton claro">Subir comprobante</span> y elige la foto o el PDF. Cuando diga <strong>“Archivo cargado correctamente”</strong> <span class="n">1</span>, presiona <span class="boton">Continuar</span> <span class="n">2</span>.</p>
+          <figure class="captura"><div class="marco"><img src="img/familias/17-pagar-comprobante.jpg" alt="Comprobante cargado y botón Continuar"></div></figure>
+        </li>
+        <li class="paso"><b>Revisa y confirma</b>
+          <p>Revisa el resumen. Si todo está bien, presiona <span class="boton">Finalizar reserva</span>. Si necesitas corregir algo, usa <strong>Anterior</strong>.</p>
+          <figure class="captura"><div class="marco"><img src="img/familias/18-pagar-revisar.jpg" alt="Resumen de la cita con el botón Finalizar reserva"></div></figure>
+        </li>
+        <li class="paso"><b>¡Listo!</b>
+          <figure class="captura media"><div class="marco"><img src="img/familias/19-pagar-listo.jpg" alt="Mensaje: Cita registrada con éxito"></div></figure>
+          <p>Tu cita aparece en el calendario en color <strong>naranja (Guardada)</strong> mientras ASPY revisa el pago. Cuando lo aprueben, cambia a <strong>verde (Agendada)</strong>.</p>
+          <figure class="captura"><div class="marco"><img src="img/familias/20-cita-guardada.jpg" alt="Calendario con la nueva cita en estado Guardada"></div></figure>
+        </li>
+      </ol>
+      <div class="aviso importante"><span class="ico">⏳</span><div><p>El horario queda <strong>apartado para ti</strong> desde que finalizas la reserva. Si el comprobante no es válido, ASPY puede rechazarlo: la cita se elimina y el horario se libera.</p></div></div>
+      <div class="aviso consejo"><span class="ico">📷</span><div><p>Asegúrate de que en el comprobante se lean bien el <strong>monto</strong>, la <strong>fecha</strong> y el <strong>número de transacción</strong>. Eso ayuda a que lo aprueben rápido.</p></div></div>
+    </section>
+
+    <!-- 6 -->
+    <section class="capitulo" id="cap-6" data-titulo="Ver o cancelar una cita">
+      <div class="cap-cabecera"><div class="cap-num">6</div><div><small>Capítulo 6</small><h2>Ver o cancelar una cita</h2></div></div>
+      <p class="intro">Haz clic en cualquier cita de tu calendario para ver con quién es, el servicio, la hora y la fecha.</p>
+      <figure class="captura"><div class="marco"><img src="img/familias/11-cita-detalle-cancelar.jpg" alt="Detalle de una cita con el botón Cancelar cita"></div></figure>
+      <h3>Para cancelar</h3>
+      <ol>
+        <li>Abre la cita en el calendario.</li>
+        <li>Presiona <span class="boton claro">Cancelar cita</span>.</li>
+        <li>La cita pasa a <strong>Cancelada</strong> y el horario queda libre para otra persona.</li>
+      </ol>
+      <div class="aviso cuidado"><span class="ico">⚠️</span><div><p>Solo puedes cancelar con <strong>más de 24 horas</strong> de anticipación. Si falta menos, el botón no aparece: comunícate directamente con la fundación.</p><p>Para cambiar la fecha de una cita, cancélala y agenda una nueva. Pregunta a la fundación qué pasa con el pago de la cita cancelada.</p></div></div>
+    </section>
+
+    <!-- 7 -->
+    <section class="capitulo" id="cap-7" data-titulo="Recibos y servicios">
+      <div class="cap-cabecera"><div class="cap-num">7</div><div><small>Capítulo 7</small><h2>Recibos y servicios</h2></div></div>
+      <p class="intro">Cada pago genera un recibo que puedes descargar en PDF cuando quieras.</p>
+      <h3>Descargar un recibo</h3>
+      <p>Entra a <strong>Recibos</strong> y presiona la flecha de descarga de la fila que quieras. El recibo se guarda en tu equipo como PDF.</p>
+      <figure class="captura"><div class="marco"><img src="img/familias/21-recibos.jpg" alt="Lista de recibos con el botón de descarga resaltado"></div></figure>
+      <p>La columna <strong>Estado</strong> dice <strong>Generado</strong> cuando el pago ya fue aprobado, o <strong>Pendiente</strong> si ASPY aún lo está revisando.</p>
+      <h3>Ver los servicios y precios</h3>
+      <p>En <strong>Servicios</strong> verás todos los servicios disponibles y su costo por sesión.</p>
+      <figure class="captura"><div class="marco"><img src="img/familias/22-servicios.jpg" alt="Lista de servicios con su costo"></div></figure>
+    </section>
+
+    <!-- 8 -->
+    <section class="capitulo" id="cap-8" data-titulo="Reportes de tus sesiones">
+      <div class="cap-cabecera"><div class="cap-num">8</div><div><small>Capítulo 8</small><h2>Reportes de tus sesiones</h2></div></div>
+      <p class="intro">Después de cada sesión, tu profesional sube un reporte con observaciones y recomendaciones. Solo lo ven tú, tu profesional y la administración.</p>
+      <ol class="pasos">
+        <li class="paso"><b>Abre “Reportes”</b>
+          <p>Verás tu historial de citas, de la más antigua a la más nueva. Las que ya tienen reporte muestran <strong>Ver reporte</strong>; las demás dicen “Sin reporte”.</p>
+          <figure class="captura"><div class="marco"><img src="img/familias/23-reportes.jpg" alt="Historial de citas con el enlace Ver reporte resaltado"></div></figure>
+        </li>
+        <li class="paso"><b>Lee el reporte</b>
+          <p>Al presionar <strong>Ver reporte</strong>, el documento se abre a la derecha. Desde ahí puedes ampliarlo, descargarlo o imprimirlo con los botones de arriba del documento.</p>
+          <figure class="captura"><div class="marco"><img src="img/familias/24-reporte-abierto.jpg" alt="Reporte de sesión abierto en la vista previa"></div></figure>
+        </li>
+      </ol>
+    </section>
+
+    <!-- 9 -->
+    <section class="capitulo" id="cap-9" data-titulo="Tu perfil y cerrar sesión">
+      <div class="cap-cabecera"><div class="cap-num">9</div><div><small>Capítulo 9</small><h2>Tu perfil y cerrar sesión</h2></div></div>
+      <p class="intro">Revisa y corrige tus datos personales cuando lo necesites.</p>
+      <h3>Abrir tu perfil</h3>
+      <p>Presiona el botón <strong>⋮</strong> junto a tu nombre (abajo a la izquierda). Ahí están <strong>Perfil</strong>, <strong>Manual de uso</strong> (este manual), <strong>Sobre ASPY</strong> y <strong>Cerrar sesión</strong>.</p>
+      <figure class="captura media"><div class="marco"><img src="img/familias/27-menu-usuario.jpg" alt="Menú de la cuenta con Perfil, Manual de uso, Sobre ASPY y Cerrar sesión"></div></figure>
+      <h3>Este manual dentro del sistema</h3>
+      <p>Con <strong>⋮ → Manual de uso</strong> abres este manual sin salir del sistema. Desde ahí también puedes descargarlo en PDF o abrirlo en otra pestaña.</p>
+      <figure class="captura"><div class="marco"><img src="img/familias/32-manual-en-sistema.jpg" alt="Pantalla Manual de uso dentro del sistema"></div></figure>
+      <h3>Editar tus datos</h3>
+      <p>En tu perfil presiona el <strong>lápiz</strong> sobre tu foto.</p>
+      <figure class="captura"><div class="marco"><img src="img/familias/25-perfil.jpg" alt="Perfil del paciente con el botón de editar resaltado"></div></figure>
+      <p>Se abre el mismo formulario de 3 pasos del registro, con tus datos ya llenos. Cambia lo que necesites y avanza con <span class="boton">Siguiente</span> hasta guardar.</p>
+      <figure class="captura"><div class="marco"><img src="img/familias/26-perfil-editar.jpg" alt="Formulario para editar los datos del paciente"></div></figure>
+      <div class="aviso importante"><span class="ico">🔑</span><div><p>En el tercer paso (<strong>Seguridad</strong>) puedes escribir una <strong>nueva contraseña</strong> (mínimo 8 caracteres). Si dejas esos campos vacíos, se conserva la actual.</p></div></div>
+      <h3>Cerrar sesión</h3>
+      <p>En el mismo menú <strong>⋮</strong>, presiona <strong>Cerrar sesión</strong>. Hazlo siempre que uses un equipo que no es tuyo.</p>
+    </section>
+
+    <!-- 10 -->
+    <section class="capitulo" id="cap-10" data-titulo="Modo oscuro y uso en el celular">
+      <div class="cap-cabecera"><div class="cap-num">10</div><div><small>Capítulo 10</small><h2>Modo oscuro y uso en el celular</h2></div></div>
+      <h3>Modo oscuro</h3>
+      <p>Si prefieres colores oscuros (por ejemplo, de noche), presiona el botón de la <strong>luna</strong> arriba a la izquierda. Para volver, presiona el <strong>sol</strong>. El sistema recuerda tu elección.</p>
+      <figure class="captura media"><div class="marco"><img src="img/familias/28-boton-modo.jpg" alt="Botón para cambiar a modo oscuro"></div></figure>
+      <figure class="captura"><div class="marco"><img src="img/familias/29-modo-oscuro.jpg" alt="El panel en modo oscuro"></div></figure>
+      <h3>En el celular</h3>
+      <p>El sistema funciona igual en el celular. El menú se esconde para dar más espacio: ábrelo con el botón <strong>☰</strong> de arriba a la izquierda. El botón de la <strong>luna</strong> (modo oscuro) queda siempre a la vista, arriba a la derecha.</p>
+      <div class="par">
+        <figure class="captura angosta"><div class="marco"><img src="img/familias/30-movil-panel.jpg" alt="Panel del paciente en un celular"></div></figure>
+        <figure class="captura angosta"><div class="marco"><img src="img/familias/31-movil-menu.jpg" alt="Menú abierto en el celular"></div></figure>
+      </div>
+    </section>
+
+    <!-- 11 -->
+    <section class="capitulo" id="cap-11" data-titulo="Preguntas frecuentes">
+      <div class="cap-cabecera"><div class="cap-num">11</div><div><small>Capítulo 11</small><h2>Preguntas frecuentes</h2></div></div>
+      <details class="faq"><summary>¿Cuánto tarda la aprobación de mi pago?</summary><p>Depende de la revisión del personal de ASPY. Mientras tanto, tu horario queda apartado. Si pasa mucho tiempo y la cita sigue en “Guardada”, comunícate con la fundación.</p></details>
+      <details class="faq"><summary>No veo días disponibles en el calendario.</summary><p>Ese profesional aún no tiene horarios libres publicados. Prueba con otro mes (flechas del calendario), con otro profesional o consulta a la fundación.</p></details>
+      <details class="faq"><summary>Me equivoqué de comprobante.</summary><p>Comunícate con la fundación. Si rechazan el comprobante, la cita se elimina y puedes agendar de nuevo con el comprobante correcto.</p></details>
+      <details class="faq"><summary>¿Puedo agendar para mi hijo o hija?</summary><p>Sí. La cuenta queda a nombre de la persona registrada. Si necesitas una cuenta separada para tu hijo o hija, pide ayuda a la fundación.</p></details>
+      <details class="faq"><summary>Dice “Tu cuenta está deshabilitada”.</summary><p>La fundación deshabilitó tu cuenta, así que no puedes ingresar (si estabas dentro, el sistema cierra tu sesión). Comunícate con la administración de la fundación para reactivarla.</p>
+        <figure class="captura media"><div class="marco"><img src="img/familias/33-cuenta-deshabilitada.jpg" alt="Pantalla de ingreso con el aviso de cuenta deshabilitada"></div></figure></details>
+      <details class="faq"><summary>Mi ocupación no está en la lista.</summary><p>Elige <strong>Otra</strong> y escribe tu ocupación en el campo que aparece al lado.</p></details>
+      <details class="faq"><summary>¿Quién puede ver mis reportes?</summary><p>Solo tú, el profesional que te atendió y la administración de ASPY.</p></details>
+    </section>
+  </main>
+</div>
+
+<footer class="pie">Fundación Aspy Ecuador · Guayaquil · Todo es posible</footer>
+<script src="assets/manual.js"></script>
+</body>
+</html>

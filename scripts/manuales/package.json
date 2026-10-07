@@ -1,0 +1,9 @@
+{
+  "name": "aspy-manuales-capturas",
+  "private": true,
+  "type": "module",
+  "description": "Capturas de pantalla y versión artifact de los manuales de uso (solo desarrollo)",
+  "dependencies": {
+    "playwright-core": "^1.63.0"
+  }
+}

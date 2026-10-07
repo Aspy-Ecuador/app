@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manuales de uso · ASPY</title>
+  <meta name="description" content="Manuales de uso del sistema de la Fundación Aspy Ecuador para familias, profesionales, secretaría, administración y la página web.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/manual.css">
+  <link rel="icon" href="assets/logo-aspy.webp">
+</head>
+<body>
+
+<section class="portada">
+  <div class="portada-inner">
+    <img class="logo" src="assets/logo-aspy.webp" alt="Fundación Aspy Ecuador">
+    <span class="rol">Centro de ayuda</span>
+    <h1>Manuales de uso del <em>sistema ASPY</em></h1>
+    <p class="bajada">Guías paso a paso, con imágenes reales del sistema, para cada persona que lo usa. Elige tu manual: puedes leerlo aquí o descargarlo en PDF.</p>
+  </div>
+</section>
+
+<div class="tarjetas">
+  <a class="tarjeta" href="manual-familias.html" style="--fondo: var(--azul-suave)">
+    <span class="emoji">👨‍👩‍👧</span>
+    <h2>Familias y pacientes</h2>
+    <p>Crear tu cuenta, agendar y pagar tus citas, descargar recibos y leer los reportes de tus sesiones.</p>
+    <span class="ir">Abrir manual →</span>
+  </a>
+  <a class="tarjeta" href="manual-profesional.html" style="--fondo: var(--rosa-suave)">
+    <span class="emoji">🧠</span>
+    <h2>Profesionales</h2>
+    <p>Publicar tus horarios, ver tu agenda, marcar asistencia y subir el reporte de cada sesión.</p>
+    <span class="ir">Abrir manual →</span>
+  </a>
+  <a class="tarjeta" href="manual-personal.html" style="--fondo: var(--amarillo-suave)">
+    <span class="emoji">🗂️</span>
+    <h2>Personal administrativo</h2>
+    <p>Aprobar pagos, organizar citas y registrar pacientes, profesionales y servicios.</p>
+    <span class="ir">Abrir manual →</span>
+  </a>
+  <a class="tarjeta" href="manual-administrador.html" style="--fondo: #e9edf3">
+    <span class="emoji">📊</span>
+    <h2>Administración</h2>
+    <p>Indicadores de la fundación, cuentas del equipo, servicios y la agenda general.</p>
+    <span class="ir">Abrir manual →</span>
+  </a>
+  <a class="tarjeta" href="manual-pagina-web.html" style="--fondo: var(--verde-suave)">
+    <span class="emoji">🌐</span>
+    <h2>Editar la página web</h2>
+    <p>Cambiar textos, fotos, servicios, contactos y redes de la página pública con Sanity.</p>
+    <span class="ir">Abrir manual →</span>
+  </a>
+</div>
+
+<footer class="pie" id="creditos-portada"></footer>
+<script src="assets/manual.js"></script>
+<script>
+  // Créditos tomados de la misma configuración que usan los manuales (assets/manual.js)
+  (function () {
+    var a = AUTORES, n = a.map(function (x) { return x.nombre; });
+    var c = a.filter(function (x) { return x.correo; }).map(function (x) { return '<span class="correo">' + x.correo + '</span> <button type="button" class="copiar" data-correo="' + x.correo + '">Copiar</button>'; });
+    document.getElementById("creditos-portada").innerHTML =
+      "Fundación Aspy Ecuador · Todo es posible<br>Desarrollado por " + n.slice(0, -1).join(", ") + " y " + n[n.length - 1] +
+      (c.length ? " · Contacto: " + c.join(" · ") : "");
+  })();
+</script>
+</body>
+</html>
