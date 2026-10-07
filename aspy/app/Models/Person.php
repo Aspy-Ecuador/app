@@ -19,6 +19,7 @@ class Person extends Model
         'user_id',
         'gender_id',
         'occupation_id',
+        'occupation_other', // texto libre cuando la ocupación es "Otra"
         'marital_status_id',
         'education_id',
         'first_name',

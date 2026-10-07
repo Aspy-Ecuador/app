@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Models\PaymentData;
 use App\Models\ProfessionalService;
 use App\Models\Receipt;
+use App\Models\Service;
 use App\Models\WorkerSchedule;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -134,6 +135,8 @@ class AppointmentController extends Controller
                 'service_id'        => $validated['service_id'],
                 'payment_data_id'   => $paymentData->payment_data_id,
                 'payment_status_id' => 2,
+                // Se guarda el precio de hoy: si el servicio cambia de precio, este pago no cambia
+                'amount'            => Service::whereKey($validated['service_id'])->value('price'),
                 'created_by'        => auth()->id(),
                 'creation_date' => now(),
             ]);
@@ -295,6 +298,10 @@ class AppointmentController extends Controller
         }
         if (! in_array((int) $appointment->appointment_status_id, [self::STATUS_SCHEDULED, self::STATUS_ATTENDED, self::STATUS_MISSED], true)) {
             return response()->json(['message' => 'Solo se puede marcar la asistencia de citas agendadas.'], 422);
+        }
+        $start = $this->appointmentStart($appointment);
+        if ($start && $start->isFuture()) {
+            return response()->json(['message' => 'La asistencia se marca cuando la cita ya empezó.'], 422);
         }
 
         try {

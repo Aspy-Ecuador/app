@@ -197,8 +197,16 @@ class PersonController extends Controller
             return $this->forbidden();
         }
 
-        $person->userAccount->is_available = $request->boolean('is_available');
+        $habilitar = $request->boolean('is_available');
+        // Nadie se deshabilita a sí mismo (quedaría fuera del sistema sin poder revertirlo)
+        if (! $habilitar && (int) $person->person_id === $this->currentPersonId()) {
+            return response()->json(['message' => 'No puedes deshabilitar tu propia cuenta.'], 422);
+        }
+
+        $person->userAccount->is_available = $habilitar;
         $person->userAccount->save();
+        // Sus sesiones abiertas se cortan en su siguiente petición (EnsureAccountEnabled),
+        // que además le explica que la cuenta fue deshabilitada.
 
         return response()->json(['message' => 'User availability updated', 'user_account' => $person->userAccount]);
     }    

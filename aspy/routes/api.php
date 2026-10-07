@@ -3,6 +3,8 @@
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AppointmentReportController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BankAccountController;
+use App\Http\Controllers\ManualController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ProfessionalServiceController;
@@ -23,11 +25,21 @@ Route::get('/login', function () {
     return response()->json(['message' => 'Unauthorized, Redirected to Login']);
 });
 
+// Archivos de los manuales: los protege el pase firmado y temporal de /manuales/acceso
+Route::get('/manuales/archivo/{pase}/{ruta}', [ManualController::class, 'archivo'])->where('ruta', '.*');
+
 // Máx. 10 intentos de login por minuto (por IP + email) contra fuerza bruta
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
+    // Comprobación liviana de la sesión (la usa el frontend cada minuto; EnsureAccountEnabled corta las cuentas deshabilitadas)
+    Route::get('/sesion', fn () => response()->noContent());
+    // Datos bancarios para transferir: los lee cualquiera con sesión; solo el Admin los cambia
+    Route::get('/bank-account', [BankAccountController::class, 'show']);
+    Route::put('/bank-account', [BankAccountController::class, 'update'])->middleware('role:admin');
+    // Manuales de uso: pase temporal con los manuales que puede ver el rol (ver ManualController)
+    Route::get('/manuales/acceso', [ManualController::class, 'acceso']);
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 });

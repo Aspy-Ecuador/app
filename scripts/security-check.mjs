@@ -50,7 +50,7 @@ const userPayload = (email, extra = {}) => ({
   first_name: "Test", last_name: email.split("@")[0], birthdate: "1990-01-01",
   phone: { number: "0999999999", type: "movil" },
   address: { type: "casa", country_id: 1, state_id: 1, city_id: 1, primary_address: "Calle 1", secondary_address: "Calle 2" },
-  identification: { type: "cedula", number: "09" + Math.floor(Math.random() * 1e8) },
+  identification: { type: "cedula", number: "09" + String(Math.floor(Math.random() * 1e8)).padStart(8, "0") },
   ...extra,
 });
 async function login(email, password = "Secreta123") {
@@ -94,12 +94,14 @@ check("Profesional crea su propio horario", r.status === 201, JSON.stringify(r.d
 const slot1 = r.data?.worker_schedule?.worker_schedule_id;
 const slot2 = (await mkSlot(P1, 4, "10:00")).data?.worker_schedule?.worker_schedule_id;
 const slot3 = (await mkSlot(P1, 5, "11:00")).data?.worker_schedule?.worker_schedule_id;
+// Turno de hoy a las 00:00 (ya empezó): la asistencia solo se marca cuando la cita ya empezó
+const slotHoy = (await mkSlot(P1, 0, "00:00")).data?.worker_schedule?.worker_schedule_id;
 
 const booking = (client, slot) => ({
   client_id: client.personId, professional_id: P1.personId, service_id: serviceId,
   worker_schedule_id: slot, payment_type: "transferencia", payment_file: "https://example.com/comprobante.pdf",
 });
-r = await call("POST", "/appointment/appointment-create", A.token, booking(A, slot1));
+r = await call("POST", "/appointment/appointment-create", A.token, booking(A, slotHoy));
 check("Cliente agenda su propia cita", r.status === 201, JSON.stringify(r.data));
 const apptA = r.data?.appointment?.appointment_id;
 
@@ -157,7 +159,7 @@ check("Staff ve todas las citas", r.data.some((a) => a.appointment_id === apptA)
 console.log("\nAcciones no permitidas");
 r = await call("POST", "/appointment/appointment-create", B.token, booking(A, slot2));
 check("Cliente B no puede agendar a nombre de A", r.status === 403, r.status);
-r = await call("POST", "/appointment/appointment-create", B.token, { ...booking(B, slot1) });
+r = await call("POST", "/appointment/appointment-create", B.token, { ...booking(B, slotHoy) });
 check("No se puede reservar un horario ocupado", r.status === 422, r.status);
 r = await call("PUT", "/appointment/appointment-approve", A.token, { appointmentId: apptA });
 check("Cliente no puede aprobar su propio pago", r.status === 403, r.status);
@@ -214,6 +216,21 @@ r = await call("PUT", "/appointment/appointment-cancel", B.token, { appointmentI
 check("Cliente B cancela su cita (>24h)", r.status === 200, JSON.stringify(r.data));
 r = await call("POST", "/appointment/appointment-create", S.token, booking(A, slot3));
 check("Staff agenda una cita a nombre de un cliente", r.status === 201, JSON.stringify(r.data));
+const apptFutura = r.data?.appointment?.appointment_id;
+await call("PUT", "/appointment/appointment-approve", S.token, { appointmentId: apptFutura });
+r = await call("PUT", "/appointment/appointment-complete", P1.token, { appointmentId: apptFutura });
+check("No se marca asistencia de una cita que aún no empieza", r.status === 422, r.status);
+
+// El pago guarda su monto: cambiar el precio del servicio no altera pagos anteriores
+const pagoDe = async (appt) => {
+  const pagos = (await call("GET", "/payment", S.token)).data;
+  const citas = (await call("GET", "/appointment", S.token)).data;
+  const cita = citas.find((c) => c.appointment_id === appt);
+  return pagos.find((p) => p.payment_id === cita?.payment_id);
+};
+check("El pago guarda el monto cobrado", Number((await pagoDe(apptA))?.amount) === 25, JSON.stringify((await pagoDe(apptA))?.amount));
+await call("PUT", `/service/${serviceId}`, admin.token, { name: "Terapia " + run, price: 40 });
+check("Cambiar el precio no altera pagos anteriores", Number((await pagoDe(apptA))?.amount) === 25);
 
 r = await call("PUT", `/user-account/${A.personId}`, A.token, userPayload(e("clienta"), { first_name: "Ana" }));
 check("Cliente edita su propio perfil", r.status === 200, JSON.stringify(r.data).slice(0, 200));
@@ -226,6 +243,93 @@ for (const [who, u] of [["admin", admin], ["staff", S], ["profesional", P1], ["c
   const codes = await Promise.all(paths.map((p) => call("GET", p, u.token).then((x) => x.status)));
   check(`Cargas iniciales del ${who} responden 200`, codes.every((c) => c === 200), codes.join(","));
 }
+
+// ───────── Manuales de uso (no son públicos) ─────────
+console.log("\nManuales de uso");
+const archivo = async (pase, ruta) => (await fetch(`${API}/manuales/archivo/${pase}/${ruta}`)).status;
+r = await call("GET", "/manuales/acceso", null);
+check("Sin sesión no se obtiene pase de manuales", r.status === 401, r.status);
+check("Sin pase válido no se abre un manual", (await archivo("falso.falso", "manual-familias.html")) === 403);
+const paseDe = async (u) => (await call("GET", "/manuales/acceso", u.token)).data;
+const pc = await paseDe(A);
+check("Cliente solo recibe el manual de familias", JSON.stringify(pc.manuales) === '["manual-familias"]', JSON.stringify(pc.manuales));
+check("Cliente abre su manual, sus capturas y su PDF",
+  [await archivo(pc.pase, "manual-familias.html"), await archivo(pc.pase, "img/familias/01-landing-ingresar.jpg"), await archivo(pc.pase, "pdf/manual-familias.pdf")].every((s) => s === 200));
+check("Cliente no abre manuales de otros roles",
+  [await archivo(pc.pase, "manual-personal.html"), await archivo(pc.pase, "img/personal/01-panel.jpg"), await archivo(pc.pase, "pdf/manual-administrador.pdf"), await archivo(pc.pase, "index.html")].every((s) => s === 403));
+const pp = await paseDe(P1);
+check("Profesional solo recibe el manual de profesionales", JSON.stringify(pp.manuales) === '["manual-profesional"]', JSON.stringify(pp.manuales));
+check("Profesional no abre el manual de familias", (await archivo(pp.pase, "manual-familias.html")) === 403);
+for (const [who, u] of [["Staff", S], ["Admin", admin]]) {
+  const pt = await paseDe(u);
+  check(`${who} recibe los 5 manuales y abre la portada`, pt.manuales.length === 5 && (await archivo(pt.pase, "index.html")) === 200, JSON.stringify(pt.manuales));
+}
+const [carga, firma] = pc.pase.split(".");
+const datos = JSON.parse(Buffer.from(carga.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString());
+const cargaFalsa = Buffer.from(JSON.stringify({ ...datos, m: ["manual-personal"] })).toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+check("Un pase alterado se rechaza", (await archivo(`${cargaFalsa}.${firma}`, "manual-personal.html")) === 403);
+check("No se puede salir de la carpeta de manuales", [await archivo(pc.pase, "../.env"), await archivo(pc.pase, "..%2F..%2F.env")].every((s) => s === 404 || s === 403));
+
+// ───────── Datos bancarios (solo el Admin los edita) ─────────
+console.log("\nDatos bancarios");
+const cuenta = { bank_name: "Banco Prueba", account_type: "Corriente", account_number: "2100123456", holder_name: "Fundación Aspy Ecuador", holder_id: "0992345678001" };
+r = await call("GET", "/bank-account", null);
+check("Sin sesión no se ven los datos bancarios", r.status === 401, r.status);
+for (const [who, u] of [["Cliente", A], ["Profesional", P1], ["Staff", S]]) {
+  r = await call("PUT", "/bank-account", u.token, { ...cuenta, account_number: "999999999" });
+  check(`${who} no puede cambiar los datos bancarios`, r.status === 403, r.status);
+}
+r = await call("PUT", "/bank-account", admin.token, cuenta);
+check("Admin guarda los datos bancarios", r.status === 200, JSON.stringify(r.data).slice(0, 200));
+r = await call("PUT", "/bank-account", admin.token, { ...cuenta, account_number: "abc123" });
+check("Datos bancarios inválidos se rechazan", r.status === 422, r.status);
+r = await call("GET", "/bank-account", A.token);
+check("Un cliente ve la cuenta para transferir", r.status === 200 && r.data?.account_number === cuenta.account_number, JSON.stringify(r.data));
+
+// ───────── Registro: identificación, teléfono y ocupación "Otra" ─────────
+console.log("\nRegistro");
+await new Promise((ok) => setTimeout(ok, 61_000)); // el registro público admite 5 por minuto por IP
+r = await call("POST", "/user-account/registro", null, userPayload(e("cedulamala"), { identification: { type: "cedula", number: "09ABC12345" } }));
+check("Cédula con letras se rechaza", r.status === 422, r.status);
+r = await call("POST", "/user-account/registro", null, userPayload(e("telmalo"), { phone: { number: "09abc12345", type: "movil" } }));
+check("Teléfono con letras se rechaza", r.status === 422, r.status);
+r = await call("POST", "/user-account/registro", null, userPayload(e("otra1"), { occupation_id: 10 }));
+check("Ocupación 'Otra' exige escribirla", r.status === 422, r.status);
+await new Promise((ok) => setTimeout(ok, 61_000)); // el registro admite 5 por minuto
+r = await call("POST", "/user-account/registro", null, userPayload(e("otra2"), { occupation_id: 10, occupation_other: "Diseñadora gráfica" }));
+const otra = r.status === 201 ? await login(e("otra2")) : null;
+const fichaOtra = otra ? (await call("GET", "/user", otra.token)).data : null;
+check("Ocupación 'Otra' se guarda con su texto", fichaOtra?.person?.occupation_other === "Diseñadora gráfica", `${r.status} ${JSON.stringify(fichaOtra?.person?.occupation_other)}`);
+// Política de privacidad: la acepta quien se registra; el alta desde el panel no la pide
+const sinPolitica = (email, extra = {}) => { const { accepted_privacy_policy: _a, policy_version: _v, ...resto } = userPayload(email, extra); return resto; };
+r = await call("POST", "/user-account/registro", null, sinPolitica(e("sinpolitica")));
+check("Registro público sin aceptar la política se rechaza", r.status === 422 && !!r.data?.errors?.accepted_privacy_policy, r.status);
+r = await call("POST", "/user-account/crear", S.token, sinPolitica(e("altapanel")));
+check("Alta desde el panel no exige la política", r.status === 201, `${r.status} ${JSON.stringify(r.data)}`);
+
+// ───────── Cuentas deshabilitadas ─────────
+console.log("\nCuentas deshabilitadas");
+await call("POST", "/user-account/registro", null, userPayload(e("deshabilitada")));
+const D = await login(e("deshabilitada"));
+const paseD = (await call("GET", "/manuales/acceso", D.token)).data.pase;
+check("La comprobación de sesión responde con sesión y rechaza sin ella",
+  (await call("GET", "/sesion", D.token)).status === 204 && (await call("GET", "/sesion", null)).status === 401);
+r = await call("PATCH", `/person/${D.personId}/available`, S.token, { is_available: false });
+check("Staff deshabilita una cuenta", r.status === 200, r.status);
+r = await call("GET", "/user", D.token);
+check("La sesión abierta se corta y explica que la cuenta está deshabilitada", r.status === 403 && r.data?.code === "cuenta_deshabilitada", `${r.status} ${JSON.stringify(r.data)}`);
+r = await call("GET", "/appointment", D.token);
+check("Ese token ya no sirve para nada más", r.status === 401, r.status);
+check("Un pase de manuales previo deja de funcionar", (await archivo(paseD, "manual-familias.html")) === 403);
+r = await call("POST", "/login", null, { email: e("deshabilitada"), password: "Secreta123" });
+check("Una cuenta deshabilitada no puede iniciar sesión", r.status === 403 && r.data?.code === "cuenta_deshabilitada" && !r.data?.access_token, r.status);
+await call("PATCH", `/person/${D.personId}/available`, S.token, { is_available: true });
+r = await call("POST", "/login", null, { email: e("deshabilitada"), password: "Secreta123" });
+check("Al rehabilitarla vuelve a iniciar sesión", r.status === 200 && !!r.data?.access_token, r.status);
+r = await call("PATCH", `/person/${S.personId}/available`, S.token, { is_available: false });
+check("Staff no puede deshabilitar su propia cuenta", r.status === 422, r.status);
+r = await call("PATCH", `/person/${admin.personId}/available`, admin.token, { is_available: false });
+check("Admin no puede deshabilitar su propia cuenta", r.status === 422, r.status);
 
 // ───────── Fuerza bruta ─────────
 console.log("\nFuerza bruta");

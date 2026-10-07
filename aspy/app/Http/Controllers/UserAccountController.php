@@ -31,6 +31,49 @@ class UserAccountController extends Controller
         };
     }
 
+    /** Ocupación "Otra": se escribe en occupation_other. */
+    private const OCUPACION_OTRA = 10;
+
+    /**
+     * Reglas comunes de alta y edición para teléfono, identificación y ocupación "Otra":
+     * - Teléfono: solo números (se admite + y espacios), entre 7 y 20 caracteres.
+     * - Cédula: 10 números · RUC: 13 números · Pasaporte: letras y números (5 a 20).
+     */
+    private function reglasContacto(Request $request): array
+    {
+        return [
+            'phone.number' => ['required', 'string', 'max:30', 'regex:/^\+?[0-9 ]{7,20}$/'],
+            'identification.type' => 'required|string|in:cedula,ruc,pasaporte',
+            'identification.number' => [
+                'required', 'string', 'max:50',
+                function (string $attribute, mixed $value, \Closure $fail) use ($request) {
+                    $tipo = $request->input('identification.type');
+                    $ok = match ($tipo) {
+                        'cedula' => (bool) preg_match('/^[0-9]{10}$/', (string) $value),
+                        'ruc' => (bool) preg_match('/^[0-9]{13}$/', (string) $value),
+                        default => (bool) preg_match('/^[A-Za-z0-9]{5,20}$/', (string) $value),
+                    };
+                    if (! $ok) {
+                        $fail(match ($tipo) {
+                            'cedula' => 'La cédula debe tener 10 números.',
+                            'ruc' => 'El RUC debe tener 13 números.',
+                            default => 'El pasaporte solo puede tener letras y números (5 a 20).',
+                        });
+                    }
+                },
+            ],
+            'occupation_other' => 'nullable|string|max:80|required_if:occupation_id,'.self::OCUPACION_OTRA,
+        ];
+    }
+
+    /** Texto de la ocupación "Otra" (null si eligió una ocupación de la lista). */
+    private static function ocupacionOtra(array $validated): ?string
+    {
+        return (int) $validated['occupation_id'] === self::OCUPACION_OTRA
+            ? trim((string) ($validated['occupation_other'] ?? '')) ?: null
+            : null;
+    }
+
     public function index()
     {
         $users = UserAccount::with([
@@ -113,13 +156,17 @@ class UserAccountController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
+        // La política de privacidad la acepta la propia persona al registrarse (registro público).
+        // En el alta desde el panel (staff/admin, con sesión) no se pide: nadie la acepta por otro.
+        $registroPublico = ! auth()->check();
+
+        $validated = $request->validate(array_merge([
             // ── UserAccount ───────────────────────────────────
             'email'                     => 'required|email|max:150|unique:user_account,email',
             'password'                  => 'required|string|min:8|confirmed', // espera password_confirmation
             'role_id'                   => 'required|integer|exists:role,role_id',
-            'accepted_privacy_policy'   => 'required|accepted',
-            'policy_version'            => 'required|string|max:10',
+            'accepted_privacy_policy'   => $registroPublico ? 'required|accepted' : 'nullable',
+            'policy_version'            => $registroPublico ? 'required|string|max:10' : 'nullable|string|max:10',
 
             // ── Datos base de Person ──────────────────────────
             'gender_id'                 => 'required|integer|exists:gender,gender_id',
@@ -150,12 +197,12 @@ class UserAccountController extends Controller
             'role'                      => 'nullable|string|in:client,professional,staff',
             'specialty'                 => 'nullable|string|max:150|required_if:role,professional',
             'title'                     => 'nullable|string|max:150',
-        ]);
+        ], $this->reglasContacto($request)));
 
         // El rol lo decide el servidor, nunca el formulario:
         // - Registro público (/registro, sin sesión): siempre Cliente.
         // - Alta por staff (/crear): cualquier rol excepto Admin; solo un Admin crea Admins.
-        if (! auth()->check()) {
+        if ($registroPublico) {
             $validated['role_id'] = self::ROLE_CLIENT;
         } elseif ((int) $validated['role_id'] === self::ROLE_ADMIN && ! $this->isAdmin()) {
             return $this->forbidden('Solo un administrador puede crear administradores.');
@@ -164,7 +211,7 @@ class UserAccountController extends Controller
 
         $createdBy = auth()->id() ?? 0;
 
-        $person = DB::transaction(function () use ($validated, $createdBy, $request) {
+        $person = DB::transaction(function () use ($validated, $createdBy, $request, $registroPublico) {
 
             // 1. Crear UserAccount (contraseña encriptada)
             $userAccount = UserAccount::create([
@@ -177,18 +224,22 @@ class UserAccountController extends Controller
 
             ]);
 
-            UserConsent::create([
-                'user_id'        => $userAccount->user_account_id,
-                'policy_version' => $validated['policy_version'],
-                'ip_address'     => $request->ip(),
-                'accepted_at'    => now(),
-            ]);
+            // Solo queda constancia del consentimiento que dio la propia persona
+            if ($registroPublico) {
+                UserConsent::create([
+                    'user_id'        => $userAccount->user_account_id,
+                    'policy_version' => $validated['policy_version'],
+                    'ip_address'     => $request->ip(),
+                    'accepted_at'    => now(),
+                ]);
+            }
 
             // 2. Crear Person vinculada al UserAccount recién creado
             $person = Person::create([
                 'user_id'           => $userAccount->user_account_id,
                 'gender_id'         => $validated['gender_id'] ?? null,
                 'occupation_id'     => $validated['occupation_id'] ?? null,
+                'occupation_other'  => self::ocupacionOtra($validated),
                 'marital_status_id' => $validated['marital_status_id'] ?? null,
                 'education_id'      => $validated['education_id'] ?? null,
                 'first_name'        => $validated['first_name'],
@@ -274,7 +325,7 @@ class UserAccountController extends Controller
 
     public function update(Request $request, int $id): JsonResponse
     {
-        $validated = $request->validate([
+        $validated = $request->validate(array_merge([
             // ── UserAccount ───────────────────────────────────
             'email' => "required|email|max:150|unique:user_account,email,{$id},user_account_id",
             'password' => 'nullable|string|min:8|confirmed',
@@ -309,7 +360,7 @@ class UserAccountController extends Controller
             'role' => 'nullable|string|in:client,professional,staff',
             'specialty' => 'nullable|string|max:150|required_if:role,professional',
             'title' => 'nullable|string|max:150',
-        ]);
+        ], $this->reglasContacto($request)));
 
         $updatedBy = auth()->id() ?? 0;
 
@@ -357,6 +408,7 @@ class UserAccountController extends Controller
             $person->update([
                 'gender_id' => $validated['gender_id'],
                 'occupation_id' => $validated['occupation_id'],
+                'occupation_other' => self::ocupacionOtra($validated),
                 'marital_status_id' => $validated['marital_status_id'],
                 'education_id' => $validated['education_id'],
                 'first_name' => $validated['first_name'],

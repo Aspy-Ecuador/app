@@ -20,6 +20,7 @@ class Payment extends Model
         'service_id',
         'payment_data_id',
         'payment_status_id',
+        'amount', // monto cobrado (no cambia si después cambia el precio del servicio)
         'created_by',
         'modified_by',
     ];

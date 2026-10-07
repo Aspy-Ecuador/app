@@ -43,6 +43,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Médico/a'],
             ['name' => 'Abogado/a'],
             ['name' => 'Empresario/a'],
+            ['name' => 'Otra'], // id 10: la persona escribe su ocupación en person.occupation_other
         ]);
  
         DB::table('marital_status')->insert([

@@ -15,6 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);
+        // Una cuenta deshabilitada pierde el acceso al instante, aunque tuviera la sesión abierta
+        $middleware->api(append: [\App\Http\Middleware\EnsureAccountEnabled::class]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
