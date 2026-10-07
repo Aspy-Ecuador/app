@@ -256,6 +256,15 @@ export const servicesSection = section("servicesSection", "Servicios", HeartIcon
           text("description", "Descripción", undefined, true, 3, 200),
           iconField(undefined, true),
           defineField({
+            name: "image",
+            title: "Foto (opcional)",
+            description:
+              "Aparece arriba de la tarjeta, recortada en horizontal. Usa fotos reales de la actividad, con permiso de las personas. Si un servicio no tiene foto, se muestra su ícono sobre un fondo de color.",
+            type: "image",
+            options: { hotspot: true },
+            fields: [altField],
+          }),
+          defineField({
             name: "accent",
             title: "Color",
             type: "string",
@@ -273,8 +282,8 @@ export const servicesSection = section("servicesSection", "Servicios", HeartIcon
           }),
         ],
         preview: {
-          select: { title: "title", subtitle: "description", icon: "icon" },
-          prepare: ({ title, subtitle, icon }) => ({ title, subtitle, media: emojiMedia(icon) }),
+          select: { title: "title", subtitle: "description", icon: "icon", image: "image" },
+          prepare: ({ title, subtitle, icon, image }) => ({ title, subtitle, media: image?.asset ? image : emojiMedia(icon) }),
         },
       }),
     ],

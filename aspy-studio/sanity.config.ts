@@ -2,6 +2,7 @@ import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
 import type { StructureBuilder } from "sanity/structure";
 import { visionTool } from "@sanity/vision";
+import { esESLocale } from "@sanity/locale-es-es";
 import { schemaTypes, SECTIONS, SINGLETONS } from "./schemaTypes";
 
 const projectId = process.env.SANITY_STUDIO_PROJECT_ID ?? "";
@@ -27,6 +28,8 @@ export default defineConfig({
   dataset,
 
   plugins: [
+    // Studio en español (botones, menús y mensajes)
+    esESLocale(),
     structureTool({
       title: "Página de inicio",
       structure: (S) => {
