@@ -187,10 +187,10 @@ export default function SideMenu() {
 
   return (
     <>
-      {/* Botón hamburguesa — solo móvil */}
+      {/* Botón hamburguesa — solo móvil. Con el menú abierto se oculta (si no, queda encima del logo) */}
       <Box
         sx={{
-          display: { xs: "flex", md: "none" },
+          display: mobileOpen ? "none" : { xs: "flex", md: "none" },
           position: "fixed",
           top: 12,
           left: 12,
@@ -202,8 +202,8 @@ export default function SideMenu() {
         </IconButton>
       </Box>
 
-      {/* Modo claro / oscuro — solo móvil, siempre a la vista (también está dentro del menú) */}
-      <Box sx={{ display: { xs: "flex", md: "none" }, position: "fixed", top: 12, right: 12, zIndex: 1100 }}>
+      {/* Modo claro / oscuro — solo móvil. Con el menú abierto se oculta: ahí ya está el del menú y se verían dos */}
+      <Box sx={{ display: mobileOpen ? "none" : { xs: "flex", md: "none" }, position: "fixed", top: 12, right: 12, zIndex: 1100 }}>
         <ColorModeToggle sx={botonMovilSx} />
       </Box>
 

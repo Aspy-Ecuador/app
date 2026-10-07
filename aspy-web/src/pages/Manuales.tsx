@@ -81,16 +81,29 @@ export default function Manuales() {
   const url = manualAPI.url(acceso.pase, manual.archivo);
 
   return (
-    <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.5, height: { md: vh(100) } }}>
+    // En celular y tablet el layout deja 56 px arriba para los botones fijos (menú y modo).
+    // La pantalla ocupa justo el alto visible: solo se desplaza el manual, no la página y el manual a la vez.
+    <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.5, height: { xs: `calc(${vh(100)} - 56px)`, md: vh(100) }, minHeight: 480 }}>
       <SimpleHeader text="Manual de uso" chip="Ayuda" />
 
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        spacing={1}
-        sx={{ alignItems: { xs: "stretch", sm: "center" }, justifyContent: "space-between" }}
-      >
+      <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "space-between" }}>
         {visibles.length > 1 ? (
-          <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }} role="tablist" aria-label="Manuales">
+          // En pantallas angostas las pestañas van en una sola fila que se desliza; desde PC, en varias filas
+          <Box
+            role="tablist"
+            aria-label="Manuales"
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              display: "flex",
+              gap: 1,
+              flexWrap: { xs: "nowrap", md: "wrap" },
+              overflowX: { xs: "auto", md: "visible" },
+              py: 0.5,
+              scrollbarWidth: "none",
+              "&::-webkit-scrollbar": { display: "none" },
+            }}
+          >
             {visibles.map((m) => {
               const activo = m.archivo === manual.archivo;
               return (
@@ -100,16 +113,18 @@ export default function Manuales() {
                   aria-selected={activo}
                   label={m.titulo}
                   title={m.descripcion}
+                  // La pestaña elegida queda a la vista aunque esté al final de la fila
+                  ref={activo ? (el: HTMLDivElement | null) => el?.scrollIntoView({ inline: "center", block: "nearest" }) : undefined}
                   onClick={() => elegir(m.archivo)}
                   color={activo ? "primary" : "default"}
                   variant={activo ? "filled" : "outlined"}
-                  sx={{ fontWeight: 600 }}
+                  sx={{ fontWeight: 600, flex: "none", height: { xs: 36, md: 32 } }}
                 />
               );
             })}
-          </Stack>
+          </Box>
         ) : (
-          <Typography sx={{ fontSize: 14, color: "text.secondary" }}>{manual.descripcion}</Typography>
+          <Typography sx={{ flex: 1, minWidth: 0, fontSize: 14, color: "text.secondary" }}>{manual.descripcion}</Typography>
         )}
 
         <Button
@@ -119,10 +134,15 @@ export default function Manuales() {
           rel="noopener noreferrer"
           size="small"
           variant="outlined"
+          aria-label="Abrir el manual en otra pestaña"
+          title="Abrir en otra pestaña"
           startIcon={<OpenInNewRoundedIcon />}
-          sx={{ alignSelf: { xs: "flex-start", sm: "center" }, whiteSpace: "nowrap" }}
+          // En celular queda solo el ícono, para no quitarle espacio al manual
+          sx={{ flex: "none", whiteSpace: "nowrap", minWidth: { xs: 40, sm: 64 }, minHeight: { xs: 36, md: 32 }, px: { xs: 1, sm: 1.5 }, "& .MuiButton-startIcon": { ml: { xs: 0, sm: -0.25 }, mr: { xs: 0, sm: 0.75 } } }}
         >
-          Abrir en otra pestaña
+          <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
+            Abrir en otra pestaña
+          </Box>
         </Button>
       </Stack>
 
@@ -135,7 +155,7 @@ export default function Manuales() {
         sx={{
           flex: 1,
           width: "100%",
-          minHeight: { xs: `calc(${vh(100)} - 210px)`, md: 0 },
+          minHeight: 0,
           border: "0.5px solid",
           borderColor: "divider",
           borderRadius: 3,

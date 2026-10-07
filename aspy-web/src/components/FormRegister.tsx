@@ -1,5 +1,5 @@
 // FINAL
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { inputRegisterUserConfig } from "@/config/userFormRegister";
 import type { UserForm } from "@/typesRequest/UserForm";
@@ -19,14 +19,10 @@ import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 // Imports para la Política de Privacidad
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
+import DialogoPolitica from "@components/privacidad/DialogoPolitica";
 import { aspy, tone } from "@shared-theme/themePrimitives";
 import { authButtonSx } from "@components/auth/estilos";
 import { DISPLAY_FONT } from "@components/landing/constants";
-import { vh } from "@shared-theme/pantallaGrande";
 
 interface FormRegisterProps {
   start: number;
@@ -52,12 +48,6 @@ export default function FormRegister({
   // Estados para controlar la Política de Privacidad
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [openPolicy, setOpenPolicy] = useState(false);
-
-  // Estado para saber si llegó al fondo
-  const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
-
-  // Referencia al contenedor scrolleable del modal (para detectar si ya cabe sin scroll)
-  const contentRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     methods.reset({
@@ -174,29 +164,9 @@ export default function FormRegister({
     }
   });
 
-  // Detecta el scroll en el modal
-  const handleScroll = (e: React.UIEvent<HTMLElement>) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    // Margen de 50px para asegurar que funcione bien en cualquier celular
-    if (scrollHeight - scrollTop <= clientHeight + 50) {
-      setIsScrolledToBottom(true);
-    }
-  };
-
-  // Si el contenido ya cabe completo (no requiere scroll), habilita "Aceptar" igual.
-  // Sin esto, en pantallas grandes o poco texto el evento onScroll nunca se dispara
-  // y el botón queda bloqueado para siempre.
-  const checkContentFit = () => {
-    const el = contentRef.current;
-    if (el && el.scrollHeight <= el.clientHeight + 50) {
-      setIsScrolledToBottom(true);
-    }
-  };
-
   const handleOpenPolicy = (e: React.MouseEvent) => {
     e.preventDefault();
     setOpenPolicy(true);
-    setIsScrolledToBottom(false); // Resetea el estado cada vez que lo abre
   };
 
   // CANDADO: intercepta el clic ANTES de que el navegador alcance a togglear
@@ -206,7 +176,6 @@ export default function FormRegister({
     e.preventDefault();
     if (!acceptedTerms) {
       setOpenPolicy(true);
-      setIsScrolledToBottom(false);
     } else {
       setAcceptedTerms(false);
     }
@@ -363,127 +332,15 @@ export default function FormRegister({
         </Box>
       </form>
 
-      {/* VENTANA FLOTANTE DE LA POLÍTICA */}
-      <Dialog
+      {/* Política de privacidad: solo se puede aceptar después de leerla completa */}
+      <DialogoPolitica
         open={openPolicy}
-        onClose={() => setOpenPolicy(false)}
-        maxWidth="md"
-        fullWidth
-        scroll="paper"
-        slotProps={{
-          paper: {
-            sx: { borderRadius: 3, maxHeight: vh(85) },
-          },
+        onCerrar={() => setOpenPolicy(false)}
+        onAceptar={() => {
+          setAcceptedTerms(true);
+          setOpenPolicy(false);
         }}
-        // Al terminar la animación de apertura, verifica si el contenido ya cabe sin scroll
-        TransitionProps={{
-          onEntered: checkContentFit,
-        }}
-      >
-        <DialogTitle sx={{ fontWeight: 800, color: "text.primary", pb: 1 }}>
-          Política de Privacidad y Tratamiento de Datos Personales
-          <Typography variant="caption" display="block" color="text.secondary">
-            Última actualización: Julio de 2026
-          </Typography>
-        </DialogTitle>
-
-        {/* ref agregado para poder medir scrollHeight/clientHeight desde checkContentFit */}
-        <DialogContent
-          ref={contentRef}
-          dividers
-          sx={{ p: { xs: 2, md: 4 } }}
-          onScroll={handleScroll}
-        >
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, mt: 2, mb: 1 }}>1. Responsable del tratamiento de los datos</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            La Fundación ASPY Ecuador (en adelante, "ASPY") es responsable del tratamiento de los datos personales recopilados a través de esta plataforma web y móvil. ASPY se compromete a tratar la información personal de conformidad con la legislación vigente en la República del Ecuador, especialmente con la Ley Orgánica de Protección de Datos Personales (LOPDP), garantizando la confidencialidad, integridad y seguridad de los datos.
-          </Typography>
-
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, mt: 2, mb: 1 }}>2. Información que recopilamos</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Dependiendo del uso de la plataforma, ASPY podrá recopilar información como: Nombres y apellidos, Número de identificación, Fecha de nacimiento, Dirección, Teléfono, Correo electrónico, Información de representantes legales, Información de profesionales, Información relacionada con citas, Historial terapéutico, Diagnósticos y evaluaciones, Registros de asistencia e Información administrativa necesaria para la prestación de los servicios.
-          </Typography>
-
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, mt: 2, mb: 1 }}>3. Datos personales sensibles</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Debido a la naturaleza de los servicios prestados por ASPY, la plataforma podrá tratar datos sensibles relacionados con la salud de los pacientes. Estos datos serán utilizados únicamente para la prestación de los servicios terapéuticos, administrativos y de seguimiento profesional, manteniendo estrictas medidas de seguridad y confidencialidad.
-          </Typography>
-
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, mt: 2, mb: 1 }}>4. Finalidad del tratamiento</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Los datos personales serán utilizados para: Registrar pacientes y representantes, Gestionar citas, Administrar terapias, Elaborar reportes clínicos y administrativos, Gestionar pagos y servicios, Mantener comunicación con representantes y profesionales, Cumplir obligaciones legales y Mejorar la calidad de los servicios ofrecidos.
-          </Typography>
-
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, mt: 2, mb: 1 }}>5. Confidencialidad</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            ASPY únicamente permitirá el acceso a la información a personal autorizado que requiera conocerla para el cumplimiento de sus funciones. Todo el personal deberá mantener la confidencialidad de la información tratada.
-          </Typography>
-
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, mt: 2, mb: 1 }}>6. Conservación de los datos</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Los datos personales serán conservados únicamente durante el tiempo necesario para cumplir las finalidades descritas o mientras exista una obligación legal que así lo requiera.
-          </Typography>
-
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, mt: 2, mb: 1 }}>7. Derechos del titular de los datos</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Los titulares de los datos personales, o sus representantes legales cuando corresponda, podrán solicitar: Acceso a sus datos, Rectificación de información incorrecta, Actualización de datos, Eliminación de información cuando proceda, Oposición al tratamiento en los casos previstos por la ley y Portabilidad de los datos cuando sea aplicable. Las solicitudes podrán dirigirse a ASPY mediante los canales oficiales de atención.
-          </Typography>
-
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, mt: 2, mb: 1 }}>8. Seguridad de la información</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            ASPY implementa medidas técnicas y organizativas orientadas a proteger los datos personales frente a accesos no autorizados, pérdida, alteración, divulgación o destrucción.
-          </Typography>
-
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, mt: 2, mb: 1 }}>9. Compartición de información</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            ASPY no comercializa los datos personales de sus usuarios. La información únicamente podrá compartirse cuando: Sea necesaria para la prestación de los servicios, Exista autorización del titular o su representante legal, o Sea requerida por autoridad competente conforme a la legislación ecuatoriana.
-          </Typography>
-
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, mt: 2, mb: 1 }}>10. Consentimiento</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Al registrarse en esta plataforma, el usuario declara haber leído la presente Política de Privacidad y autoriza expresamente a ASPY para el tratamiento de sus datos personales, incluidos los datos sensibles relacionados con la salud, cuando sean necesarios para la prestación de los servicios ofrecidos por la institución.
-          </Typography>
-
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, mt: 2, mb: 1 }}>11. Cambios en esta política</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            ASPY podrá actualizar esta Política de Privacidad cuando sea necesario para cumplir cambios legales o mejoras en los servicios. La versión vigente estará siempre disponible dentro de la plataforma.
-          </Typography>
-        </DialogContent>
-
-        <DialogActions sx={{ px: 3, py: 2, bgcolor: "background.default", justifyContent: "space-between" }}>
-          <Button onClick={() => setOpenPolicy(false)} sx={{ color: "text.secondary", textTransform: "none", fontWeight: 600 }}>
-            Cerrar
-          </Button>
-          <Button
-            disabled={!isScrolledToBottom}
-            onClick={() => {
-              setAcceptedTerms(true);
-              setOpenPolicy(false);
-            }}
-            variant="contained"
-            // Empieza en el color de texto (negro / blanco en modo oscuro) y al llegar abajo cambia suavemente a Verde (#0F6E56)
-            sx={{
-              bgcolor: isScrolledToBottom ? "#0F6E56" : "text.primary",
-              color: isScrolledToBottom ? "#ffffff" : "background.paper",
-              borderRadius: 2,
-              textTransform: "none",
-              fontWeight: 600,
-              transition: "all 0.4s ease",
-              "&:hover": {
-                bgcolor: isScrolledToBottom ? "#0F6E56" : "text.primary"
-              },
-              "&:disabled": {
-                bgcolor: "text.primary",
-                color: "background.paper",
-                opacity: 0.6
-              }
-            }}
-          >
-            {/* Si no ha bajado, le indicamos qué hacer. Si ya bajó, le permite aceptar */}
-            {isScrolledToBottom ? "Entendido y Acepto" : "Desliza para aceptar ↓"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      />
     </FormProvider>
   );
 }

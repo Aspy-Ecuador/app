@@ -11,7 +11,12 @@ export interface BankAccount {
 
 const bankAccountAPI = {
   /** null si el Admin todavía no la configuró. */
-  get: async (): Promise<BankAccount | null> => (await api.get(`/bank-account`)).data || null,
+  get: async (): Promise<BankAccount | null> => {
+    // Sin cuenta guardada el servidor responde `{}` (así serializa Laravel un null), no `null`:
+    // solo cuenta como configurada si trae el número de cuenta.
+    const cuenta = (await api.get(`/bank-account`)).data as Partial<BankAccount> | null;
+    return cuenta?.account_number ? (cuenta as BankAccount) : null;
+  },
 
   update: async (data: BankAccount): Promise<BankAccount> => (await api.put(`/bank-account`, data)).data.bank_account,
 };

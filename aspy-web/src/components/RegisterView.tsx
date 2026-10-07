@@ -1,5 +1,6 @@
 // FINAL
 import { useState } from "react";
+import { VERSION_POLITICA } from "@/config/politica";
 import { useNavigate } from "react-router-dom";
 import { register } from "@/API/auth";
 import Box from "@mui/material/Box";
@@ -36,7 +37,7 @@ function buildPayload(data: UserForm, acceptedPrivacyPolicy: boolean) {
     identification: data.identification,
     // NUEVO: Esto le avisa al backend que el usuario completó la lectura y aceptó el modal
     accepted_privacy_policy: acceptedPrivacyPolicy,
-    policy_version: "1.0", 
+    policy_version: VERSION_POLITICA,
   };
 }
 

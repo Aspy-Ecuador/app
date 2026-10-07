@@ -5,6 +5,7 @@ import { RoleDataProvider } from "@/observer/RoleDataContext";
 import type { UserRole } from "@/observer/loadersMap";
 import { getAuthenticatedUserRole } from "@/utils/store";
 import VigilanteSesion from "@components/VigilanteSesion";
+import ConsentimientoPendiente from "@components/privacidad/ConsentimientoPendiente";
 
 const PrivateRoute: React.FC = () => {
   const token = localStorage.getItem("token");
@@ -16,6 +17,7 @@ const PrivateRoute: React.FC = () => {
   return (
     <RoleDataProvider role={role}>
       <VigilanteSesion />
+      <ConsentimientoPendiente />
       <Outlet />
     </RoleDataProvider>
   );
