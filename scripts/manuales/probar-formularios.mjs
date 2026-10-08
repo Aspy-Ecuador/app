@@ -185,7 +185,7 @@ try {
       for (const k of ["bank_name", "account_number", "holder_name", "holder_id"]) await p.locator(`[id="${k}"]`).fill(c[k]);
       await p.getByRole("combobox", { name: /Tipo de cuenta/ }).click();
       await p.getByRole("option", { name: c.account_type, exact: true }).click();
-      await p.getByRole("button", { name: "Guardar" }).click();
+      await p.getByRole("button", { name: "Guardar" }).first().click(); // el segundo "Guardar" es del ajuste de comprobantes rechazados
       await p.getByText("Datos bancarios guardados").waitFor({ timeout: 15000 });
     };
     const nueva = { bank_name: "Banco de Prueba", account_type: "Ahorros", account_number: "22" + sufijo, holder_name: "Titular de Prueba", holder_id: "0999" + sufijo };
@@ -197,6 +197,18 @@ try {
     await guardarCuenta(cuenta0);
     const r = await api("Admin", "/bank-account");
     ok("Admin · datos bancarios: restaurados", (r.data ?? r).account_number === cuenta0.account_number);
+    // Ajuste: cuánto se conservan los comprobantes de pagos rechazados (misma pantalla)
+    const plazo = p.locator("#plazo-comprobante");
+    await plazo.selectOption("7");
+    await p.getByRole("button", { name: "Guardar" }).last().click();
+    await p.getByText("Ajuste guardado").waitFor({ timeout: 15000 });
+    const a1 = await api("Admin", "/ajustes");
+    ok("Admin · comprobantes rechazados: se guardó el plazo elegido (7 días)", (a1.data ?? a1).comprobante_rechazado_dias === 7, JSON.stringify(a1));
+    await plazo.selectOption("1");
+    await p.getByRole("button", { name: "Guardar" }).last().click();
+    await p.getByText("Ajuste guardado").waitFor({ timeout: 15000 });
+    const a2 = await api("Admin", "/ajustes");
+    ok("Admin · comprobantes rechazados: plazo restaurado (1 día)", (a2.data ?? a2).comprobante_rechazado_dias === 1, JSON.stringify(a2));
     ok("Admin · ninguna escritura falló", escrituras.every((e) => e.status < 400), JSON.stringify(escrituras.filter((e) => e.status >= 400)));
     await ctx.close();
   }

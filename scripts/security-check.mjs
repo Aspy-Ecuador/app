@@ -367,6 +367,37 @@ check("No se crean servicios con precios absurdos", r.status === 422, r.status);
   check("Todo el API tiene un límite general de peticiones", Number(limite.headers.get("x-ratelimit-limit")) > 0, limite.headers.get("x-ratelimit-limit"));
 }
 
+// ───────── Ajustes del sistema y rechazo de pagos ─────────
+console.log("\nAjustes y rechazo de pagos");
+r = await call("GET", "/ajustes", null);
+check("Leer los ajustes exige sesión", r.status === 401, r.status);
+r = await call("GET", "/ajustes", A.token);
+check("Un paciente no lee los ajustes del sistema", r.status === 403, r.status);
+r = await call("GET", "/ajustes", S.token);
+check("Secretaría lee cuánto se conserva un comprobante rechazado (por defecto, un día)", r.status === 200 && r.data?.comprobante_rechazado_dias === 1, JSON.stringify(r.data));
+r = await call("PUT", "/ajustes", S.token, { comprobante_rechazado_dias: 0 });
+check("Secretaría no cambia los ajustes", r.status === 403, r.status);
+r = await call("PUT", "/ajustes", admin.token, { comprobante_rechazado_dias: 9999 });
+check("El Admin solo puede elegir un plazo de la lista", r.status === 422, r.status);
+r = await call("PUT", "/ajustes", admin.token, { comprobante_rechazado_dias: 7 });
+check("El Admin cambia el plazo", r.status === 200 && r.data?.comprobante_rechazado_dias === 7, JSON.stringify(r.data));
+await call("PUT", "/ajustes", admin.token, { comprobante_rechazado_dias: 1 });
+{
+  // Una cita nueva de B, pendiente de revisión, para probar el rechazo
+  const turno = (await mkSlot(P1, 7, "13:00")).data?.worker_schedule?.worker_schedule_id;
+  const cita = (await call("POST", "/appointment/appointment-create", B.token, await booking(B, B, turno))).data?.appointment?.appointment_id;
+  r = await call("PUT", "/appointment/appointment-reject", A.token, { appointmentId: cita, motivo: "Un paciente no rechaza pagos." });
+  check("Un paciente no rechaza pagos", r.status === 403, r.status);
+  r = await call("PUT", "/appointment/appointment-reject", S.token, { appointmentId: cita });
+  check("No se rechaza un pago sin escribir el motivo", r.status === 422 && !!r.data?.errors?.motivo, r.status);
+  r = await call("PUT", "/appointment/appointment-reject", S.token, { appointmentId: cita, motivo: "El comprobante no corresponde a este servicio." });
+  check("Secretaría rechaza el pago con su motivo", r.status === 200, `${r.status} ${JSON.stringify(r.data)}`);
+  const deB = (await call("GET", "/payment", B.token)).data?.find((p) => p.payment_status_id === 3);
+  check("El paciente lee por qué se rechazó su pago y cuándo se borra el comprobante", deB?.motivo_rechazo === "El comprobante no corresponde a este servicio." && !!deB?.comprobante_se_borra_el, JSON.stringify(deB)?.slice(0, 200));
+  const deA = (await call("GET", "/payment", A.token)).data ?? [];
+  check("Otro paciente no ve ese pago ni su motivo", !deA.some((p) => p.payment_id === deB?.payment_id), "");
+}
+
 // ───────── Manuales de uso (no son públicos) ─────────
 console.log("\nManuales de uso");
 const archivo = async (pase, ruta) => (await fetch(`${API}/manuales/archivo/${pase}/${ruta}`)).status;

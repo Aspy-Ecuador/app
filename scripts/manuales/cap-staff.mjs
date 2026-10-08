@@ -48,8 +48,38 @@ try {
     await go(p, "/pagos");
     await row("Mateo").last().locator('[data-testid*="Visibility"]').click(); await settle(p, 1500);
     await p.getByRole("button", { name: "No aprobar" }).click(); await p.waitForTimeout(500);
+    // El motivo es obligatorio: sin escribirlo, "Sí, rechazar" no se habilita
+    await p.locator("#motivo-rechazo").fill("El monto transferido no coincide con el precio del servicio."); await p.waitForTimeout(300);
+    await mark(p, p.locator("#motivo-rechazo"), "1");
+    await mark(p, p.getByRole("button", { name: "Sí, rechazar" }), "2");
     await shot(p, "08-pago-rechazar-confirmar");
     await p.getByRole("button", { name: "Cancelar" }).click(); await p.waitForTimeout(300);
+  });
+  // Rechaza de verdad el pago de Mateo (persona ficticia) y muestra cómo queda: el comprobante se
+  // conserva un día y la pantalla dice cuándo se borra
+  await step("pago-rechazado", async () => {
+    await go(p, "/pagos");
+    await row("Mateo").last().locator('[data-testid*="Visibility"]').click(); await settle(p, 1500);
+    await p.getByRole("button", { name: "No aprobar" }).click(); await p.waitForTimeout(400);
+    await p.locator("#motivo-rechazo").fill("El monto transferido no coincide con el precio del servicio.");
+    await p.getByRole("button", { name: "Sí, rechazar" }).click(); await settle(p, 1800);
+    await p.getByRole("button", { name: /Aceptar/ }).click().catch(() => {}); await settle(p, 800);
+    await go(p, "/pagos");
+    await row("Mateo").last().locator('[data-testid*="Visibility"]').click(); await settle(p, 1500);
+    await mark(p, p.getByRole("note").filter({ hasText: "Pago rechazado" }), "");
+    await shot(p, "08b-pago-rechazado");
+  });
+  // Lo que ve la familia después: el aviso con el motivo, en su panel (cuenta ficticia de Mateo)
+  await step("rechazo-paciente", async () => {
+    const c2 = await context(b);
+    const p2 = await c2.newPage();
+    try {
+      await login(p2, "mateo.alvarado@gmail.com", "Aspy2026"); await settle(p2, 1500);
+      await mark(p2, p2.getByRole("region", { name: "Pagos que no se aprobaron" }), "");
+      await rawShot(p2, "cliente/39-pago-rechazado");
+    } finally {
+      await c2.close();
+    }
   });
   await step("pagos-despues", async () => { await go(p, "/pagos"); await mark(p, row("Sofía").last(), ""); await shot(p, "09-pagos-aprobado"); });
 

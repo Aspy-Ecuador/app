@@ -51,7 +51,8 @@ try {
   await step("datos-bancarios", async () => {
     await mark(p, p.getByText("Datos bancarios", { exact: true }).first().locator("xpath=ancestor::*[self::button or self::a][1]"), "1");
     await go(p, "/datos-bancarios");
-    await mark(p, p.getByRole("button", { name: "Guardar" }), "2");
+    await mark(p, p.getByRole("button", { name: "Guardar" }).first(), "2");
+    await mark(p, p.locator("#plazo-comprobante"), "3");
     await shot(p, "09-datos-bancarios");
   });
   await step("citas", async () => {
