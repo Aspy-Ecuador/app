@@ -4,6 +4,7 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import InsertDriveFileRoundedIcon from "@mui/icons-material/InsertDriveFileRounded";
 import { tone } from "@shared-theme/themePrimitives";
+import VisorArchivo from "@components/VisorArchivo";
 
 interface PDFViewerProps {
   url: string;
@@ -43,18 +44,9 @@ export default function PDFViewer({ url }: PDFViewerProps) {
       </Box>
       <Box sx={{ p: 1.25 }}>
         {url ? (
-          <Box
-            component="iframe"
-            src={url}
-            title="Comprobante de pago"
-            sx={{
-              width: "100%",
-              height: 420,
-              border: "none",
-              borderRadius: 2,
-              display: "block",
-            }}
-          />
+          <Box sx={{ height: 420, borderRadius: 2, overflow: "hidden" }}>
+            <VisorArchivo archivo={url} titulo="Comprobante de pago" />
+          </Box>
         ) : (
           <Box
             sx={{

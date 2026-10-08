@@ -2,7 +2,8 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import type { FileData } from "@/types/FileData";
-import { getAppointment, uploadToCloudinary } from "@/utils/utils";
+import { getAppointment } from "@/utils/utils";
+import { mensajeDeError, subirArchivo } from "@/utils/archivos";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Progress from "@components/Progress";
 import appointmentReportAPI from "@/API/appointmentReportAPI";
@@ -29,6 +30,7 @@ export default function AddReport({ setReport }: AddReportProps) {
   const { appointmentId } = useParams();
   const [reporte, setReporte] = useState<FileData | null>(null);
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -60,13 +62,15 @@ export default function AddReport({ setReport }: AddReportProps) {
   const handleSend = async () => {
     if (!reporte || !appointmentId) return;
     setSending(true);
+    setError("");
     try {
-      const reportUrl = await uploadToCloudinary(reporte);
       const dataAppointment = getAppointment(
         data.appointments,
         Number(appointmentId),
       );
       if (!dataAppointment) return;
+      // El PDF se guarda en el servidor (privado) y el reporte lleva su referencia
+      const reportUrl = await subirArchivo(reporte, "reporte");
 
       const dataRequest: ReportRequest = {
         appointmentId: Number(appointmentId),
@@ -80,6 +84,8 @@ export default function AddReport({ setReport }: AddReportProps) {
       await refreshPersons();
       await refreshAppointmentReports();
       setOpen(true);
+    } catch (e) {
+      setError(mensajeDeError(e, "No se pudo enviar el reporte. Intenta de nuevo."));
     } finally {
       setSending(false);
     }
@@ -188,7 +194,7 @@ export default function AddReport({ setReport }: AddReportProps) {
                 Subir reporte
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                Solo PDF · hasta 10 MB
+                Solo PDF · hasta 8 MB
               </Typography>
             </Box>
             <input
@@ -212,6 +218,12 @@ export default function AddReport({ setReport }: AddReportProps) {
             PDF listo para enviar
           </Typography>
         </Stack>
+      )}
+
+      {error && (
+        <Typography role="alert" variant="caption" sx={{ color: "error.main" }}>
+          {error}
+        </Typography>
       )}
 
       <Divider />

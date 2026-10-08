@@ -9,8 +9,6 @@ import logoBase64 from "@assets/logo mediano.png";
 import type { PageViewsBarChartProps } from "@/components/admin/PageViewsBarChart";
 import type { StatCardProps } from "@/components/admin/StatCard";
 import type { AppointmentReport } from "@/typesResponse/AppointmentReport";
-import type { CloudinaryUploadResponse } from "@/typesResponse/CloudinaryUploadResponse";
-import type { FileData } from "@/types/FileData";
 import type { Payment } from "@/typesResponse/Payment";
 import type { FlattenedReceipt } from "@/types/FlattenedReceipt";
 import type { AppointmentWithReports } from "@/types/AppointmentWithReports";
@@ -235,42 +233,6 @@ export function getReportsUser(
     };
   });
 }
-
-// FINAL
-export const uploadToCloudinary = async (file: FileData): Promise<string> => {
-  const realFile = file!.file as File;
-  const formData = new FormData();
-  formData.append("file", realFile);
-  formData.append("upload_preset", "aspy-web");
-
-  formData.append("folder", "pdfs");
-
-  const isPdf = realFile.type === "application/pdf";
-  if (!isPdf && !realFile.type.startsWith("image/")) {
-    throw new Error("Solo se permiten imágenes o PDFs.");
-  }
-
-  const resourceType = isPdf ? "raw" : "image";
-  const url = `https://api.cloudinary.com/v1_1/dyqznwbdb/${resourceType}/upload`;
-
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!res.ok) {
-      const errText = await res.text();
-      throw new Error(`Error Cloudinary: ${res.status} - ${errText}`);
-    }
-
-    const data = (await res.json()) as CloudinaryUploadResponse;
-    return data.secure_url;
-  } catch (error: any) {
-    console.error("Error subiendo a Cloudinary:", error.message);
-    throw new Error("No se pudo subir el archivo a Cloudinary.");
-  }
-};
 
 // FINAL
 export const getPayment = (id: number, data: Payment[]): Payment => {

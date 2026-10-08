@@ -21,6 +21,8 @@ import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutl
 import type { AppointmentWithReports } from "@/types/AppointmentWithReports";
 import { tone } from "@shared-theme/themePrimitives";
 import { vh } from "@shared-theme/pantallaGrande";
+import VisorArchivo from "@components/VisorArchivo";
+import BotonDescargarArchivo from "@buttons/BotonDescargarArchivo";
 
 export default function AppointmentDetail() {
   const { data, loading } = useRoleData();
@@ -294,26 +296,23 @@ export default function AppointmentDetail() {
               }}
             >
               <InsertDriveFileOutlinedIcon sx={{ fontSize: 15, color: "text.disabled" }} />
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" color="text.secondary" sx={{ flex: 1, minWidth: 0 }}>
                 Reporte de la cita #{appointment?.appointment_id}
               </Typography>
+              {appointment?.report?.file && (
+                <BotonDescargarArchivo
+                  archivo={appointment.report.file}
+                  nombre={`reporte-cita-${appointment.appointment_id}`}
+                />
+              )}
             </Box>
 
             {/* Cuerpo del visor */}
             <Box sx={{ flex: 1, position: "relative", minHeight: vh(70) }}>
               {appointment?.report?.file ? (
-                <iframe
-                  src={appointment.report.file}
-                  title="Vista previa del reporte"
-                  width="100%"
-                  height="100%"
-                  style={{
-                    border: "none",
-                    display: "block",
-                    position: "absolute",
-                    inset: 0,
-                  }}
-                />
+                <Box sx={{ position: "absolute", inset: 0 }}>
+                  <VisorArchivo archivo={appointment.report.file} titulo="Vista previa del reporte" />
+                </Box>
               ) : (
                 <Stack
                   alignItems="center"

@@ -6,7 +6,8 @@ import type { AppointmentRequest } from "@/typesRequest/AppointmentRequest";
 import type { FileData } from "@/types/FileData";
 import { useRoleData } from "@/observer/RoleDataContext";
 import { getAuthenticatedPersonID } from "@/utils/store";
-import { uploadToCloudinary } from "@/utils/utils";
+import { mensajeDeError, subirArchivo } from "@/utils/archivos";
+import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
@@ -50,21 +51,24 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<FileData | null>(null);
   const [load, setLoad] = useState(false);
+  const [error, setError] = useState("");
 
   if (loading) return <Progress />;
 
   const handleOpen = async () => {
-    if (file != null) {
-      setLoad(true);
-
-      const uploadedFileUrl = await uploadToCloudinary(file);
+    if (file == null) return;
+    setLoad(true);
+    setError("");
+    try {
+      // El comprobante se guarda en el servidor (privado) y la cita lleva su referencia
+      const comprobante = await subirArchivo(file, "comprobante");
       const resolvedClientId = isClient
         ? getAuthenticatedPersonID()
         : parsedClientId;
 
       const dataSend: AppointmentRequest = {
         payment_type: "Transferencia",
-        payment_file: uploadedFileUrl,
+        payment_file: comprobante,
         client_id: resolvedClientId,
         professional_id: parsedProfessionalId,
         service_id: parsedServiceId,
@@ -78,8 +82,11 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
         refreshPayments(),
       ]);
       setActiveStep(activeStep + 1);
-      setLoad(false);
       setOpen(true);
+    } catch (e) {
+      setError(mensajeDeError(e, "No se pudo registrar la cita. Intenta de nuevo."));
+    } finally {
+      setLoad(false);
     }
   };
 
@@ -155,6 +162,12 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
                 }}
               >
                 {getStepContent(activeStep)}
+
+                {error && (
+                  <Alert severity="error" sx={{ mt: 2.5, borderRadius: 2 }}>
+                    {error}
+                  </Alert>
+                )}
 
                 {/* Botones de navegación */}
                 <Box

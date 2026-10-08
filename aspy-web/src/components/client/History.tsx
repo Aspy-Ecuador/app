@@ -12,6 +12,8 @@ import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useState } from "react";
 import { vh } from "@shared-theme/pantallaGrande";
+import VisorArchivo from "@components/VisorArchivo";
+import BotonDescargarArchivo from "@buttons/BotonDescargarArchivo";
 
 export default function History() {
   const [selectedComments, setSelectedComments] = useState("");
@@ -24,12 +26,17 @@ export default function History() {
         sx={{
           px: 1.75,
           py: 1.25,
+          minHeight: 46,
           borderBottom: "0.5px solid",
           borderColor: "divider",
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
         }}
       >
         <Typography
           sx={{
+            flex: 1,
             fontSize: 10,
             fontWeight: 500,
             letterSpacing: "0.06em",
@@ -39,21 +46,14 @@ export default function History() {
         >
           Vista previa del reporte
         </Typography>
+        {selectedComments && (
+          <BotonDescargarArchivo archivo={selectedComments} nombre="reporte-de-sesion" />
+        )}
       </Box>
 
       <Box sx={{ height: { xs: vh(75), md: vh(80) } }}>
         {selectedComments ? (
-          <Box
-            component="iframe"
-            src={selectedComments}
-            title="Vista previa del reporte"
-            sx={{
-              width: "100%",
-              height: "100%",
-              border: "none",
-              display: "block",
-            }}
-          />
+          <VisorArchivo archivo={selectedComments} titulo="Vista previa del reporte" />
         ) : (
           <Box
             sx={{

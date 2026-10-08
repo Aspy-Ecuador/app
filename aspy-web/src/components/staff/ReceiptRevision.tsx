@@ -2,20 +2,11 @@
 import type { Payment } from "@/typesResponse/Payment";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import FileDownloadRoundedIcon from "@mui/icons-material/FileDownloadRounded";
-import Button from "@mui/material/Button";
-import { tone } from "@shared-theme/themePrimitives";
+import BotonDescargarArchivo from "@buttons/BotonDescargarArchivo";
 
 interface ReceiptRevisionProps {
   receiptData: Payment;
 }
-
-const getFileName = (url: string) =>
-  url.endsWith(".pdf")
-    ? "comprobante.pdf"
-    : url.endsWith(".png")
-      ? "comprobante.png"
-      : "comprobante";
 
 const Field = ({ label, value }: { label: string; value: string }) => (
   <Box sx={{ mb: 1.5 }}>
@@ -38,24 +29,6 @@ const Field = ({ label, value }: { label: string; value: string }) => (
 );
 
 export default function ReceiptRevision({ receiptData }: ReceiptRevisionProps) {
-  const handleDownload = async (fileUrl: string) => {
-    try {
-      const response = await fetch(fileUrl);
-      if (!response.ok) throw new Error("No se pudo descargar");
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = getFileName(fileUrl);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   return (
     <Box>
       <Field
@@ -82,28 +55,14 @@ export default function ReceiptRevision({ receiptData }: ReceiptRevisionProps) {
         }}
       >
         <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
-          Comprobante PDF
+          Comprobante de pago
         </Typography>
-        <Button
-          size="small"
-          startIcon={
-            <FileDownloadRoundedIcon sx={{ fontSize: "14px !important" }} />
-          }
-          onClick={() => handleDownload(receiptData.payment_data.file!)}
-          sx={{
-            fontSize: 11,
-            fontWeight: 500,
-            color: tone.blue.fg,
-            bgcolor: tone.blue.bg,
-            border: `0.5px solid ${tone.blue.border}`,
-            borderRadius: 1.5,
-            px: 1.25,
-            minWidth: 0,
-            "&:hover": { bgcolor: tone.blue.border },
-          }}
-        >
-          Descargar
-        </Button>
+        {receiptData.payment_data.file && (
+          <BotonDescargarArchivo
+            archivo={receiptData.payment_data.file}
+            nombre={`comprobante-pago-${receiptData.payment_id}`}
+          />
+        )}
       </Box>
     </Box>
   );
