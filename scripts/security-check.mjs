@@ -43,6 +43,30 @@ const check = (name, ok, extra = "") => {
 };
 const denied = (r) => r.status === 403 || r.status === 404;
 
+// Comprobantes y reportes: se suben a POST /archivos y la cita o el reporte llevan su referencia ("privado:123").
+// El servidor revisa el contenido del archivo, no el nombre ni el tipo que declara quien lo sube.
+const PDF = Buffer.from("%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[]/Count 0>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n");
+const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64");
+async function subir(token, tipo, bytes = PDF, nombre = "archivo.pdf", mime = "application/pdf") {
+  const datos = new FormData();
+  datos.append("tipo", tipo);
+  datos.append("archivo", new Blob([bytes], { type: mime }), nombre);
+  const res = await fetch(API + "/archivos", {
+    method: "POST",
+    headers: { Accept: "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    body: datos,
+  });
+  let data = null;
+  try { data = await res.json(); } catch {}
+  return { status: res.status, data, ref: data?.archivo };
+}
+async function bajar(token, ref) {
+  const res = await fetch(API + "/archivos/" + String(ref).split(":")[1], {
+    headers: { Accept: "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+  });
+  return { status: res.status, tipo: res.headers.get("content-type") ?? "", bytes: Buffer.from(await res.arrayBuffer()) };
+}
+
 const userPayload = (email, extra = {}) => ({
   email, password: "Secreta123", password_confirmation: "Secreta123",
   role_id: 3, accepted_privacy_policy: true, policy_version: "1.0",
@@ -97,14 +121,17 @@ const slot3 = (await mkSlot(P1, 5, "11:00")).data?.worker_schedule?.worker_sched
 // Turno de hoy a las 00:00 (ya empezó): la asistencia solo se marca cuando la cita ya empezó
 const slotHoy = (await mkSlot(P1, 0, "00:00")).data?.worker_schedule?.worker_schedule_id;
 
-const booking = (client, slot) => ({
+// quien = la cuenta que agenda (sube el comprobante con su sesión); client = para quién es la cita
+const booking = async (quien, client, slot) => ({
   client_id: client.personId, professional_id: P1.personId, service_id: serviceId,
-  worker_schedule_id: slot, payment_type: "transferencia", payment_file: "https://example.com/comprobante.pdf",
+  worker_schedule_id: slot, payment_type: "transferencia", payment_file: (await subir(quien.token, "comprobante")).ref,
 });
 // Un paciente no agenda un turno que ya empezó; secretaría sí puede registrar esa cita (alguien que llegó sin agendar)
-r = await call("POST", "/appointment/appointment-create", A.token, booking(A, slotHoy));
+r = await call("POST", "/appointment/appointment-create", A.token, await booking(A, A, slotHoy));
 check("Cliente no puede agendar un turno que ya empezó", r.status === 422, `${r.status} ${JSON.stringify(r.data)}`);
-r = await call("POST", "/appointment/appointment-create", S.token, booking(A, slotHoy));
+const reservaA = await booking(S, A, slotHoy);
+const comprobanteA = reservaA.payment_file; // lo subió Secretaría; pertenece al pago de A
+r = await call("POST", "/appointment/appointment-create", S.token, reservaA);
 check("Secretaría registra la cita de un turno que ya empezó", r.status === 201, JSON.stringify(r.data));
 const apptA = r.data?.appointment?.appointment_id;
 
@@ -160,9 +187,9 @@ check("Staff ve todas las citas", r.data.some((a) => a.appointment_id === apptA)
 
 // ───────── Acciones no permitidas ─────────
 console.log("\nAcciones no permitidas");
-r = await call("POST", "/appointment/appointment-create", B.token, booking(A, slot2));
+r = await call("POST", "/appointment/appointment-create", B.token, await booking(B, A, slot2));
 check("Cliente B no puede agendar a nombre de A", r.status === 403, r.status);
-r = await call("POST", "/appointment/appointment-create", B.token, { ...booking(B, slotHoy) });
+r = await call("POST", "/appointment/appointment-create", B.token, await booking(B, B, slotHoy));
 check("No se puede reservar un horario ocupado", r.status === 422, r.status);
 r = await call("PUT", "/appointment/appointment-approve", A.token, { appointmentId: apptA });
 check("Cliente no puede aprobar su propio pago", r.status === 403, r.status);
@@ -201,7 +228,8 @@ r = await call("PUT", "/appointment/appointment-approve", S.token, { appointment
 check("Staff aprueba el pago", r.status === 200, JSON.stringify(r.data));
 r = await call("PUT", "/appointment/appointment-complete", P1.token, { appointmentId: apptA });
 check("Profesional 1 marca asistencia de su cita", r.status === 200, JSON.stringify(r.data));
-r = await call("POST", "/appointment/create-report", P1.token, { appointmentId: apptA, file: "https://example.com/r.pdf", sign: "https://example.com/s.png" });
+const reporteA = (await subir(P1.token, "reporte")).ref;
+r = await call("POST", "/appointment/create-report", P1.token, { appointmentId: apptA, file: reporteA, sign: "Profesional Uno" });
 check("Profesional 1 crea el reporte de su cita", r.status === 201, JSON.stringify(r.data));
 r = await call("GET", "/appointment-report", A.token);
 check("Cliente A ve su reporte", r.data.length === 1);
@@ -212,12 +240,12 @@ check("Profesional 2 no ve reportes ajenos", r.data.length === 0);
 r = await call("GET", "/appointment-report", S.token);
 check("Staff no ve reportes clínicos", r.data.length === 0);
 
-r = await call("POST", "/appointment/appointment-create", B.token, booking(B, slot2));
+r = await call("POST", "/appointment/appointment-create", B.token, await booking(B, B, slot2));
 const apptB = r.data?.appointment?.appointment_id;
 check("Cliente B agenda en otro horario", r.status === 201, JSON.stringify(r.data));
 r = await call("PUT", "/appointment/appointment-cancel", B.token, { appointmentId: apptB });
 check("Cliente B cancela su cita (>24h)", r.status === 200, JSON.stringify(r.data));
-r = await call("POST", "/appointment/appointment-create", S.token, booking(A, slot3));
+r = await call("POST", "/appointment/appointment-create", S.token, await booking(S, A, slot3));
 check("Staff agenda una cita a nombre de un cliente", r.status === 201, JSON.stringify(r.data));
 const apptFutura = r.data?.appointment?.appointment_id;
 await call("PUT", "/appointment/appointment-approve", S.token, { appointmentId: apptFutura });
@@ -246,6 +274,71 @@ for (const [who, u] of [["admin", admin], ["staff", S], ["profesional", P1], ["c
   const codes = await Promise.all(paths.map((p) => call("GET", p, u.token).then((x) => x.status)));
   check(`Cargas iniciales del ${who} responden 200`, codes.every((c) => c === 200), codes.join(","));
 }
+
+// ───────── Comprobantes y reportes (archivos privados) ─────────
+console.log("\nComprobantes y reportes (archivos privados)");
+r = await subir(null, "comprobante");
+check("Sin sesión no se sube ningún archivo", r.status === 401, r.status);
+r = await bajar(null, comprobanteA);
+check("Sin sesión no se abre ningún archivo", r.status === 401, r.status);
+
+r = await bajar(A.token, comprobanteA);
+check("Cliente A abre el comprobante de su pago", r.status === 200 && r.tipo.includes("application/pdf") && r.bytes.equals(PDF), `${r.status} ${r.tipo}`);
+r = await bajar(S.token, comprobanteA);
+check("Staff abre el comprobante para revisar el pago", r.status === 200, r.status);
+r = await bajar(admin.token, comprobanteA);
+check("Admin abre el comprobante", r.status === 200, r.status);
+r = await bajar(B.token, comprobanteA);
+check("Cliente B no abre el comprobante de A", r.status === 403, r.status);
+r = await bajar(P1.token, comprobanteA);
+check("El profesional de la cita no abre el comprobante de pago", r.status === 403, r.status);
+
+r = await bajar(A.token, reporteA);
+check("Cliente A abre el reporte de su cita", r.status === 200 && r.bytes.equals(PDF), r.status);
+r = await bajar(P1.token, reporteA);
+check("Profesional 1 abre el reporte que escribió", r.status === 200, r.status);
+r = await bajar(admin.token, reporteA);
+check("Admin abre el reporte", r.status === 200, r.status);
+r = await bajar(S.token, reporteA);
+check("Staff no abre el archivo de un reporte clínico", r.status === 403, r.status);
+r = await bajar(B.token, reporteA);
+check("Cliente B no abre el reporte de A", r.status === 403, r.status);
+r = await bajar(P2.token, reporteA);
+check("Profesional 2 no abre el reporte de un paciente ajeno", r.status === 403, r.status);
+r = await call("GET", "/archivos/999999", A.token);
+check("Un archivo que no existe responde 404", r.status === 404, r.status);
+
+r = await subir(A.token, "reporte");
+check("Cliente no sube reportes", r.status === 403, r.status);
+r = await subir(S.token, "reporte");
+check("Staff no sube reportes", r.status === 403, r.status);
+r = await subir(P1.token, "comprobante");
+check("Profesional no sube comprobantes", r.status === 403, r.status);
+r = await subir(P1.token, "reporte", PNG, "reporte.png", "image/png");
+check("El reporte solo puede ser un PDF", r.status === 422, r.status);
+r = await subir(A.token, "comprobante", PNG, "comprobante.png", "image/png");
+check("El comprobante puede ser una imagen", r.status === 201 && /^privado:\d+$/.test(r.ref ?? ""), `${r.status} ${JSON.stringify(r.data)}`);
+const sueltoA = r.ref;
+r = await subir(A.token, "comprobante", Buffer.from("<html><script>alert(1)</script></html>"), "comprobante.pdf", "application/pdf");
+check("Un archivo disfrazado de PDF se rechaza (se revisa el contenido)", r.status === 422, r.status);
+r = await subir(A.token, "comprobante", Buffer.from("MZ" + "x".repeat(200)), "comprobante.png", "image/png");
+check("Un archivo que no es imagen ni PDF se rechaza", r.status === 422, r.status);
+
+r = await bajar(S.token, sueltoA);
+check("Un archivo recién subido solo lo abre quien lo subió", r.status === 403 && (await bajar(A.token, sueltoA)).status === 200, r.status);
+const slot4 = (await mkSlot(P1, 6, "12:00")).data?.worker_schedule?.worker_schedule_id;
+r = await call("POST", "/appointment/appointment-create", B.token, { ...(await booking(B, B, slot4)), payment_file: sueltoA });
+check("No se agenda con un comprobante que subió otra persona", r.status === 422, r.status);
+r = await call("POST", "/appointment/appointment-create", A.token, { ...(await booking(A, A, slot4)), payment_file: comprobanteA });
+check("No se agenda con un comprobante que ya se usó en otro pago", r.status === 422, r.status);
+r = await call("POST", "/appointment/appointment-create", A.token, { ...(await booking(A, A, slot4)), payment_file: "https://example.com/comprobante.pdf" });
+check("Ya no se aceptan enlaces externos como comprobante", r.status === 422, r.status);
+r = await call("POST", "/appointment/appointment-create", A.token, { ...(await booking(A, A, slot4)), payment_file: reporteA });
+check("Un reporte no sirve como comprobante", r.status === 422, r.status);
+r = await call("GET", "/worker-schedule/" + slot4, A.token);
+check("Esos intentos no ocuparon el horario", r.data?.is_available === true || r.data?.is_available === 1, JSON.stringify(r.data)?.slice(0, 120));
+r = await call("GET", "/payment", S.token);
+check("Los listados no traen el contenido de ningún archivo", r.status === 200 && !JSON.stringify(r.data).includes("contenido"));
 
 // ───────── Manuales de uso (no son públicos) ─────────
 console.log("\nManuales de uso");
@@ -358,7 +451,7 @@ for (let i = 0; i < 12; i++) {
   if (x.status === 429) { got429 = true; break; }
 }
 check("Login bloquea tras muchos intentos fallidos", got429);
-r = await call("POST", "/appointment/appointment-create", A.token, { ...booking(A, slot3), payment_file: undefined });
+r = await call("POST", "/appointment/appointment-create", A.token, { ...(await booking(A, A, slot3)), payment_file: undefined });
 check("Errores de validación no filtran detalles internos", r.status === 422 && !JSON.stringify(r.data).includes("SQLSTATE"));
 
 console.log(`\nResultado: ${pass} OK, ${fail} fallos`);

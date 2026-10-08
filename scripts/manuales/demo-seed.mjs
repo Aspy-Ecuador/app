@@ -96,11 +96,21 @@ for (const p of [lucia, andres, gaby]) {
   slots.set(p, ids);
 }
 
-const book = async (client, prof, service, idx, n) =>
+// El comprobante es un archivo privado: se sube con la sesión del paciente y la cita lleva su referencia
+const COMPROBANTE = fs.readFileSync(new URL("./demo-assets/comprobante.png", import.meta.url));
+const subirComprobante = async (token) => {
+  const datos = new FormData();
+  datos.append("tipo", "comprobante");
+  datos.append("archivo", new Blob([COMPROBANTE], { type: "image/png" }), "comprobante.png");
+  const res = await fetch(API + "/archivos", { method: "POST", headers: { Accept: "application/json", Authorization: `Bearer ${token}` }, body: datos });
+  if (res.status !== 201) console.log("  ! no se pudo subir el comprobante", res.status, await res.text());
+  return (await res.json()).archivo;
+};
+const book = async (client, prof, service, idx) =>
   (await call("POST", "/appointment/appointment-create", client.token, {
     client_id: client.personId, professional_id: prof.personId, service_id: service,
     worker_schedule_id: slots.get(prof)[idx], payment_type: "transferencia",
-    payment_file: `https://demo.aspy.local/comprobante-${n}.png`,
+    payment_file: await subirComprobante(client.token),
   })).data?.appointment?.appointment_id;
 
 const sofia = C["sofia.ramirez@gmail.com"], daniel = C["daniel.cedeno@gmail.com"], valeria = C["valeria.paredes@gmail.com"], mateo = C["mateo.alvarado@gmail.com"];

@@ -14,7 +14,7 @@ export async function browser() {
 
 const CT = { ".png": "image/png", ".pdf": "application/pdf", ".jpg": "image/jpeg" };
 
-/** Contexto con: modo claro, archivos de demo servidos localmente y subidas a Cloudinary simuladas. */
+/** Contexto con: modo claro y archivos de demo servidos localmente (los comprobantes y reportes se suben al backend de demo). */
 export async function context(b, { width = 1440, height = 900, mode = "light", mobile = false } = {}) {
   const ctx = await b.newContext({
     viewport: { width, height },
@@ -35,15 +35,6 @@ export async function context(b, { width = 1440, height = 900, mode = "light", m
       file = path.join(ASSETS, ext === ".pdf" ? "reporte.pdf" : name.startsWith("firma") ? "firma.png" : "comprobante.png");
     }
     route.fulfill({ status: 200, contentType: CT[path.extname(file)] ?? "application/octet-stream", body: fs.readFileSync(file), headers: { "Access-Control-Allow-Origin": "*" } });
-  });
-  // Nunca subir nada real a Cloudinary: se responde con una URL de demo
-  let n = 100;
-  await ctx.route("https://api.cloudinary.com/**", (route) => {
-    const id = n++;
-    route.fulfill({
-      status: 200, contentType: "application/json", headers: { "Access-Control-Allow-Origin": "*" },
-      body: JSON.stringify({ secure_url: `https://demo.aspy.local/subida-${id}.png`, url: `https://demo.aspy.local/subida-${id}.png`, public_id: `demo-${id}` }),
-    });
   });
   // Contenido real de Sanity (solo lectura): se agrega el permiso CORS para este puerto de pruebas
   await ctx.route(/^https:\/\/1windn04\.api(cdn)?\.sanity\.io\//, async (route) => {

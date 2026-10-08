@@ -45,7 +45,7 @@ node cap-hero.mjs             # portada de la web
 - `ONLY=nombre1,nombre2 node cap-x.mjs` rehace solo esos pasos.
 - Las capturas quedan en `out/<carpeta>/`: `cliente/` → `img/familias/`, `staff/` → `img/personal/`, `profesional/` → `img/profesional/`, `admin/` → `img/administrador/`, `sanity/` y `pagina-web/` → `img/pagina-web/`. Copia las que cambiaron a `aspy/resources/manuales/img/...` con el mismo nombre que usa el HTML.
 - Usuarios de demo: `admin@aspy.com` / `ADMIN` (seeder), `recepcion@aspy.com`, `lucia.mendoza@aspy.com`, `sofia.ramirez@gmail.com`, todos con `Aspy2026`.
-- `lib.mjs` simula Cloudinary (no sube nada real) y deja pasar el contenido real de Sanity (solo lectura).
+- Los comprobantes y reportes de demo se suben al backend local (archivos privados, tabla `archivo_privado` de la BD de demo). `lib.mjs` deja pasar el contenido real de Sanity (solo lectura).
 - `studio-lib.mjs` entra al Studio local con la sesión del CLI de Sanity de esta máquina (`~/.config/sanity/config.json`; hay que haber hecho `npx sanity login`).
 
 ## Revisar el diseño responsivo
