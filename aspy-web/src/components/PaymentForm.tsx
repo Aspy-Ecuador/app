@@ -24,6 +24,7 @@ import {
 import { useRoleData } from "@/observer/RoleDataContext";
 import type { Service } from "@typesResponse/Service";
 import bankAccountAPI, { type BankAccount } from "@API/bankAccountAPI";
+import AvisoArchivosSubidos from "@components/AvisoArchivosSubidos";
 import CircularProgress from "@mui/material/CircularProgress";
 
 interface PaymentFormProps {
@@ -317,6 +318,8 @@ export default function PaymentForm({
           </Box>
         )}
       </Box>
+
+      <AvisoArchivosSubidos />
     </Stack>
   );
 }

@@ -10,7 +10,19 @@ const PREFIJO = "privado:";
 export const esArchivoPrivado = (referencia?: string | null): referencia is string =>
   !!referencia && referencia.startsWith(PREFIJO);
 
+/** Cuántos archivos tiene subidos la cuenta y cuáles son sus topes (los pone el servidor). */
+export interface ResumenArchivos {
+  /** Subidos, pero todavía de ninguna cita ni reporte. */
+  sin_usar: number;
+  maximo_sin_usar: number;
+  /** Subidos hoy. */
+  hoy: number;
+  maximo_por_dia: number;
+}
+
 const archivoAPI = {
+  resumen: async (): Promise<ResumenArchivos> => (await api.get("/archivos/resumen")).data,
+
   /** Sube el archivo y devuelve la referencia que se manda al crear la cita o el reporte. */
   subir: async (archivo: File, tipo: TipoArchivo): Promise<string> => {
     const datos = new FormData();

@@ -57,6 +57,7 @@ export function mensajeDeError(error: unknown, general: string): string {
     const datos = error.response?.data as { message?: string; errors?: Record<string, string[]> } | undefined;
     const primero = datos?.errors ? Object.values(datos.errors)[0]?.[0] : undefined;
     if (error.response?.status === 413) return "El archivo pesa demasiado (máximo 8 MB).";
+    if (error.response?.status === 429 && !datos?.message) return "Demasiadas solicitudes seguidas. Espera un minuto e inténtalo de nuevo.";
     return primero ?? datos?.message ?? general;
   }
   return error instanceof Error && error.message ? error.message : general;

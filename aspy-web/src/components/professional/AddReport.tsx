@@ -21,6 +21,7 @@ import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import { tone } from "@shared-theme/themePrimitives";
+import AvisoArchivosSubidos from "@components/AvisoArchivosSubidos";
 
 interface AddReportProps {
   setReport: (file: FileData | null) => void;
@@ -219,6 +220,8 @@ export default function AddReport({ setReport }: AddReportProps) {
           </Typography>
         </Stack>
       )}
+
+      <AvisoArchivosSubidos />
 
       {error && (
         <Typography role="alert" variant="caption" sx={{ color: "error.main" }}>
