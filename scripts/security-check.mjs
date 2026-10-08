@@ -345,6 +345,28 @@ check("Esos intentos no ocuparon el horario", r.data?.is_available === true || r
 r = await call("GET", "/payment", S.token);
 check("Los listados no traen el contenido de ningún archivo", r.status === 200 && !JSON.stringify(r.data).includes("contenido"));
 
+// ───────── Protección contra el abuso (que nadie pueda saturar el sistema ni llenar la base) ─────────
+console.log("\nProtección contra el abuso");
+r = await call("GET", "/archivos/resumen", null);
+check("Consultar cuántos archivos tiene una cuenta exige sesión", r.status === 401, r.status);
+for (let i = 0; i < 6; i++) await subir(B.token, "comprobante");
+r = await call("GET", "/archivos/resumen", B.token);
+check("Una cuenta guarda como máximo 5 archivos sin usar y el sistema le dice cuántos tiene", r.status === 200 && r.data?.sin_usar === 5 && r.data?.maximo_sin_usar === 5 && r.data?.hoy >= 6 && r.data?.maximo_por_dia === 30, JSON.stringify(r.data));
+r = await subir(B.token, "comprobante");
+check("Al subir otro se reemplaza el más antiguo (y lo informa)", r.status === 201 && r.data?.reemplazados === 1 && r.data?.sin_usar === 5, JSON.stringify(r.data));
+r = await call("POST", "/login", null, { email: "nadie@test.com", password: "x", relleno: "a".repeat(300 * 1024) });
+check("Una petición con un cuerpo exagerado se rechaza (413)", r.status === 413, r.status);
+r = await mkSlot(P1, 800, "09:00");
+check("No se crean horarios a más de un año", r.status === 422, r.status);
+r = await call("POST", "/service", admin.token, { name: "Precio absurdo", price: 1e9 });
+check("No se crean servicios con precios absurdos", r.status === 422, r.status);
+{
+  const raiz = await fetch(API.replace(/\/api$/, "/"));
+  check("La dirección del servidor no abre sesiones ni deja cookies", raiz.status === 200 && !raiz.headers.get("set-cookie"), `${raiz.status} ${raiz.headers.get("set-cookie")}`);
+  const limite = await fetch(API + "/login", { headers: { Accept: "application/json" } });
+  check("Todo el API tiene un límite general de peticiones", Number(limite.headers.get("x-ratelimit-limit")) > 0, limite.headers.get("x-ratelimit-limit"));
+}
+
 // ───────── Manuales de uso (no son públicos) ─────────
 console.log("\nManuales de uso");
 const archivo = async (pase, ruta) => (await fetch(`${API}/manuales/archivo/${pase}/${ruta}`)).status;

@@ -40,6 +40,7 @@ node cap-profesional.mjs
 node cap-admin.mjs
 node cap-sanity.mjs           # solo mira el Studio; no edita ni publica
 node cap-hero.mjs             # portada de la web
+node cap-aviso-archivos.mjs   # aviso de archivos subidos sin usar en la pantalla de pago
 ```
 
 - `ONLY=nombre1,nombre2 node cap-x.mjs` rehace solo esos pasos.
