@@ -22,7 +22,6 @@ Aplicación web para la **Fundación Aspy Ecuador** (Guayaquil), que acompaña a
 - Tailwind CSS 4 (utilidades puntuales; su variante `dark:` está sincronizada con el modo de MUI)
 - React Router 7, Redux (sesión), React Hook Form, Axios
 - FullCalendar (agenda), jsPDF / react-pdf (recibos y reportes), Framer Motion
-- Cloudinary (subida de comprobantes y reportes)
 - Despliegue: Vercel
 
 **Backend** (`aspy/`)
