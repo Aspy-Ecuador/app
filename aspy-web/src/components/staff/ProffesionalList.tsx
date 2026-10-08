@@ -118,7 +118,7 @@ export default function ProffesionalList() {
       headerName: "Habilitado",
       disableColumnMenu: true,
       flex: 1,
-      minWidth: 90,
+      minWidth: 128,
       sortable: false,
       filterable: false,
       resizable: false,
