@@ -59,7 +59,8 @@ export default function UsersList() {
   const buttonsData: CardAdmin[] = [
     {
       label: "Usuarios activos",
-      value: users.length,
+      // Solo las cuentas habilitadas: una deshabilitada (o que retiró su consentimiento) no está activa
+      value: users.filter((u) => u.user_account?.is_available ?? true).length,
       icon: <AccountCircleOutlinedIcon fontSize="inherit" />,
     },
     {
@@ -87,13 +88,15 @@ export default function UsersList() {
     }
   }
 
+  // Los anchos mínimos suman 781 px: lo que queda para la tabla en una PC de 1440 con la ficha abierta.
+  // Con más, la columna "Habilitado" quedaba cortada contra la ficha. Si cambias uno, revisa esa suma.
   const columns: GridColDef[] = [
     {
       field: "first_name",
       headerName: "Nombre",
       disableColumnMenu: true,
       flex: 2,
-      minWidth: 130, // Aumentado ligeramente para mejor lectura en tablets
+      minWidth: 108,
       resizable: false,
     },
     {
@@ -101,7 +104,7 @@ export default function UsersList() {
       headerName: "Apellido",
       disableColumnMenu: true,
       flex: 2,
-      minWidth: 130,
+      minWidth: 108,
       resizable: false,
     },
     {
@@ -109,7 +112,7 @@ export default function UsersList() {
       headerName: "Rol",
       disableColumnMenu: true,
       flex: 2,
-      minWidth: 110,
+      minWidth: 122, // "Administrador" entero
       resizable: false,
       renderCell: (params) => {
         const roleName = params.row.user_account?.role?.name ?? "";
@@ -148,7 +151,7 @@ export default function UsersList() {
       headerName: "Celular",
       disableColumnMenu: true,
       flex: 3,
-      minWidth: 130,
+      minWidth: 115,
       resizable: false,
       renderCell: (params) => (
         <Box display="flex" alignItems="center" height="100%">
