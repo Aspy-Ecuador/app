@@ -21,6 +21,7 @@ import type { FlattenedReceipt } from "@/types/FlattenedReceipt";
 import type { Payment } from "@/typesResponse/Payment";
 import { tone } from "@shared-theme/themePrimitives";
 import { vh } from "@shared-theme/pantallaGrande";
+import PagosRechazados from "@client/PagosRechazados";
 
 const statusChipSx = (status: string) => {
   const s = status?.toLowerCase();
@@ -194,6 +195,10 @@ export default function ReceiptList() {
 
         <Grid size={12} className="grid-p-patients-tittle">
           <SimpleHeader text="Comprobantes de Pago" chip="Pago" />
+        </Grid>
+
+        <Grid size={12}>
+          <PagosRechazados />
         </Grid>
 
         {/* Tabla: ocupa todo el ancho en móvil, 8 columnas en desktop si hay panel */}

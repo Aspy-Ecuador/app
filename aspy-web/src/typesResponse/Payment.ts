@@ -29,4 +29,9 @@ export interface Payment {
   payment_status: PaymentStatus;
 
   receipt: Receipt;
+
+  /** Pago rechazado: el motivo que escribió Secretaría (queda aunque el comprobante se borre). */
+  motivo_rechazo?: string | null;
+  /** Pago rechazado: cuándo se borrará su comprobante (lo decide el Admin). Null si no se borra o ya se borró. */
+  comprobante_se_borra_el?: string | null;
 }

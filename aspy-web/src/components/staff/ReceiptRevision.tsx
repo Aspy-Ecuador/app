@@ -3,10 +3,15 @@ import type { Payment } from "@/typesResponse/Payment";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import BotonDescargarArchivo from "@buttons/BotonDescargarArchivo";
+import { fechaHoraLocal } from "@/utils/utils";
+import { tone } from "@shared-theme/themePrimitives";
 
 interface ReceiptRevisionProps {
   receiptData: Payment;
 }
+
+/** Estado de pago "Rechazado" (ids fijos: 1 Aprobado, 2 Pendiente, 3 Rechazado). */
+const PAGO_RECHAZADO = 3;
 
 const Field = ({ label, value }: { label: string; value: string }) => (
   <Box sx={{ mb: 1.5 }}>
@@ -64,6 +69,25 @@ export default function ReceiptRevision({ receiptData }: ReceiptRevisionProps) {
           />
         )}
       </Box>
+
+      {/* Pago rechazado: el motivo queda siempre; el comprobante se conserva lo que decidió el Admin */}
+      {receiptData.payment_status_id === PAGO_RECHAZADO && (
+        <Box role="note" sx={{ mt: 1, p: 1.25, borderRadius: 2, bgcolor: tone.red.bg, border: `0.5px solid ${tone.red.border}` }}>
+          <Typography sx={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: tone.red.fg }}>
+            Pago rechazado
+          </Typography>
+          <Typography sx={{ mt: 0.25, fontSize: 12.5, lineHeight: 1.5, color: "text.primary", whiteSpace: "pre-line", overflowWrap: "anywhere" }}>
+            {receiptData.motivo_rechazo?.trim() || "Sin motivo registrado."}
+          </Typography>
+          <Typography sx={{ mt: 0.75, fontSize: 11.5, lineHeight: 1.5, color: "text.secondary" }}>
+            {!receiptData.payment_data.file
+              ? "Su comprobante ya se borró del sistema."
+              : receiptData.comprobante_se_borra_el
+                ? `El comprobante se borrará del sistema el ${fechaHoraLocal(receiptData.comprobante_se_borra_el)}. Si lo necesitas, descárgalo antes.`
+                : "El comprobante se conserva en el sistema."}
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 }

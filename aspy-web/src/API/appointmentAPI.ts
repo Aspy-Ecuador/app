@@ -14,9 +14,11 @@ const appointmentAPI = {
     return api.post(`/appointment/appointment-create`, data);
   },
 
-  rejectAppointment: async (appointmentId: number): Promise<AxiosResponse> => {
+  /** El motivo es obligatorio: queda registrado en el pago y el paciente lo lee. */
+  rejectAppointment: async (appointmentId: number, motivo: string): Promise<AxiosResponse> => {
     return api.put(`/appointment/appointment-reject`, {
       appointmentId: appointmentId,
+      motivo,
     });
   },
 

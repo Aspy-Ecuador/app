@@ -108,6 +108,7 @@ export function seccionesPolitica(contacto: ContactoResponsable): SeccionPolitic
       parrafos: [
         "Mientras tengas una cuenta y recibas atención en ASPY. Después, solo durante el tiempo que exijan las normas de salud, tributarias y contables aplicables; cumplido ese plazo se eliminan o se vuelven anónimos.",
         "Si retiras tu consentimiento o pides la eliminación, se borran los datos que la ley no obligue a conservar.",
+        "Si la fundación no aprueba un pago, el motivo queda registrado y puedes leerlo en tu cuenta; su comprobante se conserva solo el plazo que fije la administración para poder aclarar el rechazo. Los archivos que subes y no llegas a usar en ninguna cita se borran al día siguiente.",
       ],
     },
     {

@@ -1,5 +1,5 @@
 // FINAL
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -19,10 +19,20 @@ import appointmentAPI from "@/API/appointmentAPI";
 import type { Payment } from "@/typesResponse/Payment";
 import type { Appointment } from "@/typesResponse/Appointment";
 import { tone } from "@shared-theme/themePrimitives";
+import TextField from "@mui/material/TextField";
+import Campo from "@forms/Campo";
+import ajustesAPI, { plazoEnPalabras } from "@API/ajustesAPI";
 
 interface ReceiptDetailsProps {
   receiptData: Payment;
 }
+
+/** Estados de pago (ids fijos): solo un pago pendiente se puede aprobar o rechazar. */
+const PAGO_APROBADO = 1;
+const PAGO_PENDIENTE = 2;
+
+/** El motivo del rechazo lo lee el paciente: tiene que decir algo. */
+const MOTIVO_MINIMO = 5;
 
 type ActionState = "idle" | "approving" | "rejecting";
 type PendingAction = "approve" | "reject" | null;
@@ -44,6 +54,30 @@ export default function ReceiptDetails({ receiptData }: ReceiptDetailsProps) {
   const [successOpen, setSuccessOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [isFail, setIsFail] = useState(false);
+  const [motivo, setMotivo] = useState("");
+  // Días que se conserva el comprobante de un pago rechazado (lo decide el Admin; 0 = no se borra)
+  const [diasConservacion, setDiasConservacion] = useState<number | null>(null);
+
+  useEffect(() => {
+    let vigente = true;
+    ajustesAPI
+      .get()
+      .then((a) => {
+        if (vigente) setDiasConservacion(a.comprobante_rechazado_dias);
+      })
+      .catch(() => {});
+    return () => {
+      vigente = false;
+    };
+  }, []);
+
+  const motivoListo = motivo.trim().length >= MOTIVO_MINIMO;
+  const queSeConserva =
+    diasConservacion === null
+      ? ""
+      : diasConservacion === 0
+        ? " El comprobante se conserva en el sistema."
+        : ` El comprobante se conserva ${plazoEnPalabras(diasConservacion)} más, por si hubo un error, y después se borra del sistema.`;
 
   // Guarda la última acción para que el diálogo no cambie de texto durante la animación de cierre
   const [lastAction, setLastAction] = useState<PendingAction>(null);
@@ -91,7 +125,7 @@ export default function ReceiptDetails({ receiptData }: ReceiptDetailsProps) {
     setActionState("rejecting");
     setPendingAction(null);
     try {
-      await appointmentAPI.rejectAppointment(findAppointment()!.appointment_id);
+      await appointmentAPI.rejectAppointment(findAppointment()!.appointment_id, motivo.trim());
       await refreshAll();
       setIsFail(false);
       setSuccessMessage("Comprobante rechazado");
@@ -107,7 +141,7 @@ export default function ReceiptDetails({ receiptData }: ReceiptDetailsProps) {
 
   const handleConfirm = () => {
     if (pendingAction === "approve") handleApprove();
-    else if (pendingAction === "reject") handleReject();
+    else if (pendingAction === "reject" && motivoListo) handleReject();
   };
 
   const handleSuccessClose = () => {
@@ -152,6 +186,8 @@ export default function ReceiptDetails({ receiptData }: ReceiptDetailsProps) {
         <Box sx={{ p: 1.75 }}>
           <ReceiptRevision receiptData={receiptData} />
 
+          {/* Un pago ya aprobado o rechazado no se vuelve a decidir: los botones solo salen si está pendiente */}
+          {receiptData.payment_status_id === PAGO_PENDIENTE ? (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75, mt: 1.75 }}>
             <Button
               fullWidth
@@ -206,6 +242,11 @@ export default function ReceiptDetails({ receiptData }: ReceiptDetailsProps) {
               )}
             </Button>
           </Box>
+          ) : receiptData.payment_status_id === PAGO_APROBADO ? (
+            <Typography role="note" sx={{ mt: 1, fontSize: 11.5, lineHeight: 1.5, color: tone.green.fg }}>
+              Pago aprobado.
+            </Typography>
+          ) : null}
         </Box>
       </Paper>
 
@@ -218,7 +259,7 @@ export default function ReceiptDetails({ receiptData }: ReceiptDetailsProps) {
             border: "0.5px solid",
             borderColor: "divider",
             boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
-            maxWidth: 360,
+            maxWidth: 420,
             width: "100%",
           },
         }}
@@ -240,8 +281,44 @@ export default function ReceiptDetails({ receiptData }: ReceiptDetailsProps) {
           <Typography sx={{ fontSize: 13, color: "text.secondary", lineHeight: 1.6 }}>
             {isApproving
               ? "¿Estás seguro de que deseas aprobar este comprobante? Esta acción no se puede deshacer."
-              : "¿Estás seguro de que deseas rechazar este comprobante? Esta acción no se puede deshacer."}
+              : `La cita se elimina y el horario queda libre; no se puede deshacer.${queSeConserva}`}
           </Typography>
+          {!isApproving && (
+            <Box sx={{ mt: 1.5 }}>
+              <Campo
+                etiqueta="Motivo del rechazo"
+                htmlFor="motivo-rechazo"
+                ayuda="El paciente lo leerá en su cuenta. Queda registrado aunque el comprobante se borre."
+              >
+                <TextField
+                  id="motivo-rechazo"
+                  value={motivo}
+                  onChange={(e) => setMotivo(e.target.value)}
+                  multiline
+                  minRows={3}
+                  maxRows={6}
+                  fullWidth
+                  placeholder="Ej.: El monto transferido no coincide con el precio del servicio."
+                  slotProps={{ htmlInput: { maxLength: 500 } }}
+                  sx={{
+                    // El tema quita el relleno del campo: aquí se pone a mano (es de varias líneas)
+                    "& .MuiOutlinedInput-root": {
+                      // El tema fija un alto de una línea para todos los campos: este crece con el texto
+                      height: "auto",
+                      minHeight: 88,
+                      alignItems: "flex-start",
+                      px: 1.5,
+                      py: 1,
+                      fontSize: "0.9rem",
+                      lineHeight: 1.5,
+                      borderRadius: "12px",
+                      bgcolor: "background.default",
+                    },
+                  }}
+                />
+              </Campo>
+            </Box>
+          )}
         </DialogContent>
 
         <DialogActions sx={{ px: 2.5, pb: 2.5, pt: 1, gap: 1 }}>
@@ -266,7 +343,9 @@ export default function ReceiptDetails({ receiptData }: ReceiptDetailsProps) {
           <Button
             onClick={handleConfirm}
             size="small"
+            disabled={!isApproving && !motivoListo}
             sx={{
+              "&.Mui-disabled": { color: "#fff", opacity: 0.5 },
               fontSize: 12,
               fontWeight: 500,
               color: "#fff",

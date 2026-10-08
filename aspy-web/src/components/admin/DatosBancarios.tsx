@@ -14,9 +14,21 @@ import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded
 import SimpleHeader from "@components/SimpleHeader";
 import Progress from "@components/Progress";
 import bankAccountAPI, { type BankAccount } from "@API/bankAccountAPI";
+import ajustesAPI from "@API/ajustesAPI";
+import DeleteSweepRoundedIcon from "@mui/icons-material/DeleteSweepRounded";
 import { tone } from "@shared-theme/themePrimitives";
 import Campo from "@forms/Campo";
-import { botonPrimarioSx, campoSx } from "@forms/estilos";
+import { botonPrimarioSx, campoSx, selectNativoSx } from "@forms/estilos";
+
+/** Opciones del plazo (en días; 0 = no borrar). Deben coincidir con `Ajuste::DIAS_PERMITIDOS` del backend. */
+const PLAZOS: [dias: number, texto: string][] = [
+  [1, "Un día después (recomendado)"],
+  [3, "3 días después"],
+  [7, "7 días después"],
+  [15, "15 días después"],
+  [30, "30 días después"],
+  [0, "No borrarlos nunca"],
+];
 
 const VACIO: BankAccount = { bank_name: "", account_type: "Corriente", account_number: "", holder_name: "", holder_id: "" };
 
@@ -29,6 +41,33 @@ export default function DatosBancarios() {
   const [guardando, setGuardando] = useState(false);
   const [errores, setErrores] = useState<Errores>({});
   const [mensaje, setMensaje] = useState<{ tipo: "success" | "error"; texto: string } | null>(null);
+  // Ajuste aparte: cuánto se conserva el comprobante de un pago rechazado
+  const [plazo, setPlazo] = useState<number | null>(null);
+  const [guardandoPlazo, setGuardandoPlazo] = useState(false);
+  const [mensajePlazo, setMensajePlazo] = useState<{ tipo: "success" | "error"; texto: string } | null>(null);
+
+  useEffect(() => {
+    ajustesAPI
+      .get()
+      .then((a) => setPlazo(a.comprobante_rechazado_dias))
+      .catch(() => setMensajePlazo({ tipo: "error", texto: "No se pudo cargar este ajuste." }));
+  }, []);
+
+  const guardarPlazo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (plazo === null) return;
+    setGuardandoPlazo(true);
+    setMensajePlazo(null);
+    try {
+      const guardado = await ajustesAPI.guardar(plazo);
+      setPlazo(guardado.comprobante_rechazado_dias);
+      setMensajePlazo({ tipo: "success", texto: "Ajuste guardado." });
+    } catch {
+      setMensajePlazo({ tipo: "error", texto: "No se pudo guardar el ajuste. Inténtalo de nuevo." });
+    } finally {
+      setGuardandoPlazo(false);
+    }
+  };
 
   useEffect(() => {
     bankAccountAPI
@@ -146,6 +185,59 @@ export default function DatosBancarios() {
                   sx={botonPrimarioSx}
                 >
                   {guardando ? <CircularProgress size={20} sx={{ color: "#fff" }} /> : "Guardar"}
+                </Button>
+              </Box>
+            </Box>
+          </Paper>
+        </Grid>
+
+        <Grid size={{ xs: 12, md: 8, lg: 6 }}>
+          <Paper elevation={0} sx={{ border: "0.5px solid", borderColor: "divider", borderRadius: 3, overflow: "hidden" }}>
+            <Box sx={{ px: 2.5, py: 1.75, borderBottom: "0.5px solid", borderColor: "divider", display: "flex", alignItems: "center", gap: 1.25 }}>
+              <Box sx={{ width: 30, height: 30, borderRadius: "8px", display: "grid", placeItems: "center", bgcolor: tone.red.bg, color: tone.red.fg, flex: "none" }}>
+                <DeleteSweepRoundedIcon sx={{ fontSize: 17 }} />
+              </Box>
+              <Box>
+                <Typography sx={{ fontSize: 13, fontWeight: 600, color: "text.primary", lineHeight: 1.2 }}>
+                  Comprobantes de pagos rechazados
+                </Typography>
+                <Typography sx={{ fontSize: 11, color: "text.disabled", lineHeight: 1.2 }}>
+                  Cuánto tiempo se conservan después de que Secretaría rechaza un pago
+                </Typography>
+              </Box>
+            </Box>
+
+            <Box component="form" onSubmit={guardarPlazo} noValidate sx={{ p: 2.5, display: "flex", flexDirection: "column", gap: 2 }}>
+              <Campo
+                etiqueta="Borrar el comprobante"
+                htmlFor="plazo-comprobante"
+                ayuda="El motivo del rechazo queda siempre registrado y el paciente lo puede leer. El cambio vale también para los comprobantes rechazados que todavía se conservan."
+              >
+                <Box
+                  component="select"
+                  id="plazo-comprobante"
+                  value={plazo ?? ""}
+                  disabled={plazo === null}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    setPlazo(Number(e.target.value));
+                    setMensajePlazo(null);
+                  }}
+                  sx={selectNativoSx}
+                >
+                  {plazo === null && <option value="">Cargando…</option>}
+                  {PLAZOS.map(([dias, texto]) => (
+                    <option key={dias} value={dias}>
+                      {texto}
+                    </option>
+                  ))}
+                </Box>
+              </Campo>
+
+              {mensajePlazo && <Alert severity={mensajePlazo.tipo}>{mensajePlazo.texto}</Alert>}
+
+              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                <Button type="submit" variant="contained" disabled={guardandoPlazo || plazo === null} sx={botonPrimarioSx}>
+                  {guardandoPlazo ? <CircularProgress size={20} sx={{ color: "#fff" }} /> : "Guardar"}
                 </Button>
               </Box>
             </Box>
