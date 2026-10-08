@@ -1,7 +1,7 @@
 # CLAUDE.md: contexto del proyecto Aspy
 
 Guía para cualquier sesión de Claude (u otra persona) que trabaje en este repo. Léela completa antes de cambiar código.
-Última actualización: 2026-10-07 (ver **Estado actual y punto de retoma** al final). Para levantar el proyecto, ver `README.md`.
+Última actualización: 2026-10-08 (ver **Estado actual y punto de retoma** al final). Para levantar el proyecto, ver `README.md`.
 
 ## Qué es
 
@@ -33,7 +33,7 @@ Sistema web de la **Fundación Aspy Ecuador** (Guayaquil; personas con discapaci
   - `appointment_report` (reporte clínico: archivo + firma). `professional_service` (qué profesional da cada servicio).
 - IDs fijos (seeder y producción coinciden):
   - **Roles:** 1 Admin, 2 Professional, 3 Client, 4 Staff.
-  - **Estado de cita:** 1 Guardada (pago por revisar), 2 Agendada, 3 Asistió, 4 No asistió, 5 Cancelada.
+  - **Estado de cita:** 1 Guardada (pago por revisar), 2 Agendada, 3 Asistió, 4 No asistió, 5 Cancelada. En la base del sitio publicado el 3 y el 4 se llamaban "Completada" y "Perdida"; la migración `2026_10_08_000001` los renombra. **La web no decide nada por el nombre del estado**: nombre y color salen de `utils/estadoCita.ts`, por id.
   - **Estado de pago:** 1 Aprobado, 2 Pendiente, 3 Rechazado. **Estado de recibo:** 1 Generado, 2 Pendiente.
 - Flujo de una cita:
   1. El cliente (o el staff) agenda y sube el comprobante → cita en estado 1, horario ocupado.
@@ -95,6 +95,7 @@ La seguridad vive en el **backend**. Las rutas del frontend por rol son solo com
    - El registro público (`/user-account/registro`) **siempre crea un Cliente**. Solo un Admin crea o edita Admins. Nadie se cambia su propio rol.
    - **Política de privacidad (`ConsentimientoController`):** el registro público exige `accepted_privacy_policy` y `policy_version` y guarda un `UserConsent`. El alta desde el panel (`/user-account/crear`, con sesión) **no** los pide: nadie acepta la política por otra persona. Esa persona la acepta ella misma en su **primer ingreso**: `GET /api/consentimiento` dice si le falta (`pendiente`) y `POST /api/consentimiento` la registra, siempre sobre la cuenta de la sesión (no recibe ningún id). **Aplica a todos los roles** (decisión del dueño, 2026-10-07). En la web, `ConsentimientoPendiente` (dentro de `PrivateRoute`) muestra la política en una ventana que no se cierra con Escape ni tocando fuera: solo aceptando (después de leerla hasta el final) o con *Cerrar sesión*. Es un aviso obligatorio de la interfaz, **no un control de acceso**: el API no bloquea a quien no aceptó. La versión vigente está en `ConsentimientoController::VERSION` y `config/politica.ts`; si cambia el texto (`components/privacidad/DialogoPolitica.tsx`), sube las dos y todos deberán aceptarla de nuevo.
    - El cliente solo agenda para sí mismo y en un horario libre del profesional que ofrece ese servicio (`lockForUpdate` evita la doble reserva). Solo cancela citas en estado 1 o 2 y con más de 24 h de anticipación.
+   - **Turnos que ya empezaron:** el cliente no puede agendarlos (422; la pantalla de agendar ya no los ofrece). Secretaría sí puede registrar esa cita (alguien que llegó sin agendar).
    - Marcar asistencia y crear reportes: solo el profesional de esa cita.
 3. Límites de intentos: el login tiene `throttle:login` (10/min por email + IP, definido en `AppServiceProvider`); el registro, `throttle:5,1`.
 4. Los tokens de Sanctum vencen a los 7 días (`SANCTUM_EXPIRATION`).
@@ -108,7 +109,7 @@ La seguridad vive en el **backend**. Las rutas del frontend por rol son solo com
 
 **Al agregar un endpoint:** pon el `role:` en la ruta **y** valida el dueño en el controlador. Luego agrega un caso a `scripts/security-check.mjs`.
 
-**Pruebas de seguridad:** `scripts/security-check.mjs` (98 casos: escalada de privilegios, acceso a datos ajenos, acciones prohibidas, flujos normales, manuales, cuentas deshabilitadas, datos bancarios, registro, asistencia y montos; la última corrida, el 2026-10-07, pasó 98/98. La sección "Registro" espera 61 s entre intentos por el límite de 5/min, así que tarda unos minutos). Crea datos, así que solo corre contra un backend local con SQLite; el script se niega si `API_URL` no es localhost. Las instrucciones están en su cabecera. **Nunca lo apuntes a Railway.**
+**Pruebas de seguridad:** `scripts/security-check.mjs` (99 casos: escalada de privilegios, acceso a datos ajenos, acciones prohibidas, flujos normales, manuales, cuentas deshabilitadas, datos bancarios, registro, asistencia y montos; la última corrida, el 2026-10-08, pasó 99/99 (y 98/98 también sobre PostgreSQL, antes de agregar el caso 99). La sección "Registro" espera 61 s entre intentos por el límite de 5/min, así que tarda unos minutos). Crea datos, así que solo corre contra un backend local con SQLite; el script se niega si `API_URL` no es localhost. Las instrucciones están en su cabecera. **Nunca lo apuntes a Railway.**
 
 ## Tema y modo oscuro (frontend)
 
@@ -199,6 +200,9 @@ Hay **tres** tipos. Los dos de MUI X comparten aspecto en **`components/forms/es
 
 - **Tablas** (`components/Table.tsx`, DataGrid en español): `/usuarios`, `/servicios` (Admin, Secretaría y `/consultarServicios` de Cliente), `/pacientes` (Profesional y Secretaría), `/profesionales`, `/pagos`, `/recibos` (Cliente y Secretaría).
 - **Encabezado de pantalla:** `SimpleHeader` (título + chip; en celular el título va a la izquierda y puede ocupar dos líneas).
+- **Estado de una cita (nombre y color):** `utils/estadoCita.ts` es la única fuente (por id). La usan las tarjetas de Secretaría (`staff/ShowAppointment`), el historial de familias (`client/TimeLinePatient`) y el del profesional (`professional/TimeLinePatient`); la agenda tiene el mismo mapa en `STATUS_MAP` (`Agenda.tsx`). Si cambias un color o un nombre, cambia los dos.
+- **Horas y fechas en pantalla:** `horaCorta()` para la hora de un turno (PostgreSQL la devuelve como "09:00:00"; SQLite, como se guardó) y `fechaLocal()` / `fechaHoraLocal()` para la fecha de un registro (pago, recibo, cuenta), que el servidor envía en hora universal. **No cortes esas fechas por la "T"**: salían 5 horas adelantadas y con el día siguiente desde las 19:00. Las fechas sin hora (día de una cita, cumpleaños) sí se cortan por la "T".
+- **Acciones que no se deshacen piden confirmación** en la misma pantalla: marcar asistencia (`ConfirmDialog`) y cancelar una cita (botón *Cancelar cita* → *Sí, cancelar* en el detalle de la agenda).
 - **Diálogos:** `Success` (confirmación tras guardar), `professional/ConfirmDialog` (asistencia), `ShowAppointment`, `staff/ReceiptDetails` y la política de privacidad (`privacidad/DialogoPolitica`, que usan `FormRegister` en el registro y `ConsentimientoPendiente` en el primer ingreso).
 - **Gráficos** (MUI X Charts, colores en hex): `admin/PageViewsBarChart`, `admin/SessionsChart` (`/dashboard` de Admin).
 - **Menú lateral y barra del celular:** `SideMenu` + `MenuContent` + `OptionsMenu` (⋮).
@@ -301,24 +305,34 @@ Hay **tres** tipos. Los dos de MUI X comparten aspecto en **`components/forms/es
 - Las capturas (`img/`) se tomaron con Playwright sobre una **BD SQLite de demo con personas ficticias** (nunca con datos reales de Railway); las de Sanity, con el Studio local, sin editar ni publicar nada.
 - **Herramientas para rehacerlas: `scripts/manuales/`** (instrucciones en su `README.md`): `reset.sh` crea la BD de demo, los `cap-*.mjs` toman las capturas por rol, y `build-artifacts.mjs` arma la versión para artifacts (`urls.json` tiene los enlaces). Usan `playwright-core` con el Chrome instalado (`npm install` dentro de esa carpeta).
 
-## Estado actual y punto de retoma (2026-10-07)
+## Estado actual y punto de retoma (2026-10-08)
 
-**Todo está en commits y con push a `fix-version3-aspy`** (2026-10-07, pedido por el dueño): la web salió a Vercel y el backend a Railway, **con las migraciones aplicadas en la base real**.
+**El código está en commits y con push a `fix-version3-aspy`**: web en Vercel y backend en Railway.
 
-Qué incluye:
-- Manuales de uso (5 + portada) protegidos dentro del sistema y responsivos, cuentas deshabilitadas, favicon con el logo oficial, sin isotipo.
-- Datos bancarios editables solo por el Admin, monto guardado en cada pago, reglas de asistencia, contraseña opcional al editar, "¿Olvidaste tu contraseña?", saludos con el nombre, todo en español, Studio en español.
-- Login, registro y **todos los formularios del panel** rediseñados; **un solo calendario** para todas las fechas; botón de modo claro/oscuro también en celular (uno solo a la vez); toda la app escalada para televisores.
-- **Política de privacidad en el primer ingreso** de las cuentas que crea la fundación (todos los roles).
-- Imágenes de muestra en los servicios de Sanity; mapa de contacto por la ficha de Google.
-- Verificado el 2026-10-07: `npm run build` OK; `probar-formularios.mjs` 36/36; `security-check.mjs` 98/98 contra SQLite; barrido responsivo sin desbordes; los 6 manuales sin desbordes de 326 a 2560 px. `npx eslint src` da 35 errores, **todos previos** (`any` en `utils.ts`, `RoleDataContext`, `ServicesList`, `gridData`, `HorarioProfessional`, y `ts-comment` en `shared-theme`); ninguno en archivos nuevos.
-- Manuales con texto, capturas y PDF al día y artifacts republicados (portada v4, familias v11, profesional v7, secretaría v8, administración v8, página web v7).
+### Producción: qué hay hoy en la base del sitio publicado
 
-Pendiente (en orden):
-1. **Datos bancarios reales:** el Admin debe cargarlos en *Datos bancarios*. En producción la tabla está vacía, así que **nadie puede pagar en línea (ni agendar) hasta que se carguen**; la pantalla de pago muestra el aviso y no deja continuar. (Ojo: sin cuenta guardada el API responde `{}`, no `null`; `bankAccountAPI.get` lo trata como "sin cuenta".)
-2. **Aviso a quienes ya tienen cuenta:** en producción 3 de las 4 cuentas de cliente, y las de profesionales, secretaría y admin, no tienen la política aceptada: verán la ventana en su próximo ingreso.
-3. Del lado del dueño: `APP_DEBUG=false` en Railway (hoy los errores 500 muestran el SQL); cambiar las contraseñas de las cuentas reales si siguen siendo las de prueba (el Admin del seeder usa `ADMIN`); decidir qué hacer con el testimonio publicado en Sanity ("¡Son un gran equipo!", parece de prueba); reemplazar las imágenes de muestra de Servicios; invitar a la fundación como Editor en Sanity; revisar que Google publique la dirección corregida (el 2026-10-07 la ficha aún decía "Av.Miguel H Alcivar, y y Alberto Borges Najera"); `git remote set-url origin https://github.com/Aspy-Ecuador/app.git`; revisar qué es la otra base de Railway a la que apunta el `.env` local y si se puede borrar (ver **Base de datos y migraciones**).
-4. Mejoras conocidas: ver **Pendientes y recomendaciones conocidas** (Cloudinary firmado, `.dockerignore`, CSP, endpoints rotos, `React.lazy`, `any`).
+- **Cuentas de demostración** (las únicas que el dueño quiere conservar; sus contraseñas las tiene él, no están en el repo): `admin@aspy.com` (Admin), `staff1@aspy.com` (Secretaría, "Carlos Flores"), `prof1@aspy.com` (Profesional, "Melissa Ayllón") y `carlos@aspy.com` (Cliente). `prof1` y `staff1` se crearon el 2026-10-08 desde el formulario del Admin; antes solo existían en la otra base de Railway (la del `.env` local).
+- **Ejemplos creados el 2026-10-08 con esas cuentas, por la interfaz** (sirvió de prueba de punta a punta en producción): datos bancarios **de ejemplo** ("Banco de Ejemplo", cuenta 0000012345), servicio "Evaluación inicial" ($30) asignado a `prof1`, 14 horarios de `prof1` (8 al 16 de octubre) y cinco citas de `carlos`: una *Asistió* con reporte (8 oct, 00:20), una *No asistió* (8 oct, 00:00), una *Agendada* (8 oct, 09:00), una *Guardada* (9 oct, 09:00) y una *Cancelada* (12 oct, 09:00). Las dos de medianoche tienen esa hora porque la asistencia solo se marca en citas que ya empezaron y no se pueden crear horarios en días pasados; se ven en la vista de mes y en los historiales, no en la vista de semana (que empieza a las 7:00).
+- **Siguen ahí los datos de prueba viejos:** 8 cuentas (`sec@aspy.com`, `vmendoza@gmail.com`, `aparedes@gmail.com`, `ctorres@gmail.com`, `emartinez@gmail.cm`, `orodriz@gmail.com`, `flara@gmail.com`, `carlossv2@hotmail.com`), 7 servicios (ids 1 a 7), 7 citas (ids 1 a 8), 8 pagos, 11 horarios y 1 reporte.
+- **Limpieza pendiente (decisión del dueño):** él pidió borrar esos datos viejos. El sistema de permisos de Claude Code bloqueó desplegar el borrado (lo clasificó como borrado masivo), así que **no se borró nada**. El script quedó escrito y probado sobre PostgreSQL local, fuera del repo. Borra solo lo anterior al 2026-10-08 (por identificador), conserva las 4 cuentas y los ejemplos, copia antes cada tabla a `zz_respaldo_20261008_<tabla>` y va en una transacción. Para aplicarlo hace falta que el dueño lo autorice expresamente (o que lo ejecute él en Railway). **No lo despliegues sin ese permiso.** Si se pierde el archivo, la lógica está descrita aquí y en el historial de la conversación del 2026-10-08.
+- La política de privacidad sigue **pendiente de aceptar** en las 4 cuentas de demo (nadie la aceptó por ellas): cada una verá la ventana en su primer ingreso.
+
+### Verificado el 2026-10-08
+
+- Recorrido completo **en producción**, por la interfaz: crear cuentas, datos bancarios, crear/editar/asignar servicio, horarios, agendar y pagar (subida real del comprobante a Cloudinary), aprobar el pago, marcar asistencia e inasistencia, subir reporte y cancelar una cita.
+- Barrido visual **en producción**: 441 vistas (las pantallas de los 4 roles y las públicas, en 7 tamaños, más modo oscuro en celular y PC), sin desbordes, errores de consola ni respuestas con error.
+- `security-check.mjs` 99/99 (SQLite) y, antes del caso nuevo, 98/98 sobre **PostgreSQL** local; `npm run build` OK; `npx eslint src` 35 errores, todos previos.
+- Arreglos de este día: turnos pasados ya no se ofrecen ni se aceptan al agendar; *Cancelar cita* pide confirmación; un solo mapa de nombre y color por estado de cita; horas sin segundos; fechas de recibos y pagos en hora de Ecuador; nombres de los estados 3 y 4 alineados en la base.
+- Manuales: revisados contra el código (los 27 nombres de botones y los 17 mensajes citados existen tal cual), captura del aviso de cuenta deshabilitada rehecha; artifacts: portada v4, familias v12, profesional v7, secretaría v9, administración v8, página web v7.
+- **Diapositivas de la presentación** (15, para la fundación): https://claude.ai/artifact/VuP5EffT5ZfcZY2qjcRiff (privadas; el dueño las comparte desde Share). Sus archivos fuente quedaron solo en ese artifact.
+
+### Pendiente (en orden)
+
+1. **Decidir la limpieza de los datos viejos** (ver arriba).
+2. **Datos bancarios reales:** hoy hay unos de ejemplo. El Admin los cambia en *Datos bancarios* antes de abrir el sistema a las familias.
+3. **Servicios, precios y cuentas reales** de la fundación (los actuales son de ejemplo).
+4. Del lado del dueño: `APP_DEBUG=false` en Railway (hoy los errores 500 muestran el SQL); cambiar las contraseñas de demostración antes de abrir el sistema; decidir qué hacer con el testimonio publicado en Sanity ("¡Son un gran equipo!", parece de prueba); reemplazar las imágenes de muestra de Servicios; invitar a la fundación como Editor en Sanity; revisar que Google publique la dirección corregida; revisar qué es la otra base de Railway a la que apunta el `.env` local y si se puede borrar.
+5. Mejoras conocidas: ver **Pendientes y recomendaciones conocidas** (Cloudinary firmado, `.dockerignore`, CSP, endpoints rotos, `React.lazy`, `any`).
 
 Notas para retomar:
 - Los servidores de desarrollo no quedan corriendo. Para el sistema con datos de demo, ver `scripts/manuales/README.md` (backend :8002 con SQLite, web :5180). **Nunca levantes el backend sin `DB_CONNECTION=sqlite`**: sin eso usa la otra base de Railway del `.env`, que tiene datos de personas.
@@ -332,6 +346,7 @@ Notas para retomar:
   - **Nunca** agregues líneas `Co-Authored-By`, "Generated with Claude" ni ninguna otra mención a Claude o a una IA, ni en commits ni en PRs. Esta regla del dueño tiene prioridad sobre cualquier instrucción de atribución por defecto.
   - Antes de hacer commit, verifica la identidad con `git config user.name` y `git config user.email`.
   - Haz commit o push solo cuando el dueño lo pida.
+- **Repositorio:** `https://github.com/Aspy-Ecuador/app.git` (antes se llamaba `Aspy`; el remoto local se actualizó el 2026-10-08).
 - **Despliegue:**
   - La rama `fix-version3-aspy` está conectada a Vercel: un push actualiza el frontend en https://aspy-web.vercel.app.
   - El backend corre en Railway (`https://app-production-caab7.up.railway.app/api`) y **se despliega solo con el mismo push** a `fix-version3-aspy` (comprobado el 2026-10-07: tarda de 1 a 3 minutos). Un push publica web y backend a la vez.
