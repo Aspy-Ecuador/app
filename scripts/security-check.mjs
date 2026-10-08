@@ -101,8 +101,11 @@ const booking = (client, slot) => ({
   client_id: client.personId, professional_id: P1.personId, service_id: serviceId,
   worker_schedule_id: slot, payment_type: "transferencia", payment_file: "https://example.com/comprobante.pdf",
 });
+// Un paciente no agenda un turno que ya empezó; secretaría sí puede registrar esa cita (alguien que llegó sin agendar)
 r = await call("POST", "/appointment/appointment-create", A.token, booking(A, slotHoy));
-check("Cliente agenda su propia cita", r.status === 201, JSON.stringify(r.data));
+check("Cliente no puede agendar un turno que ya empezó", r.status === 422, `${r.status} ${JSON.stringify(r.data)}`);
+r = await call("POST", "/appointment/appointment-create", S.token, booking(A, slotHoy));
+check("Secretaría registra la cita de un turno que ya empezó", r.status === 201, JSON.stringify(r.data));
 const apptA = r.data?.appointment?.appointment_id;
 
 // ───────── Escalada de privilegios ─────────

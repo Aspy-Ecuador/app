@@ -12,6 +12,7 @@ if ! timeout 120 php artisan migrate --force; then
     --path=$M/2026_10_05_000000_add_is_available_columns.php \
     --path=$M/2026_10_06_000000_add_payment_amount_and_bank_account.php \
     --path=$M/2026_10_06_000001_add_occupation_other.php \
+    --path=$M/2026_10_08_000001_alinear_nombres_de_estados.php \
     || echo "AVISO: tampoco se pudieron aplicar. Revisa la conexión a la base de datos."
 fi
 

@@ -122,6 +122,17 @@ class AppointmentController extends Controller
                 return response()->json(['message' => 'El horario seleccionado ya no está disponible.'], 422);
             }
 
+            // El paciente no agenda un turno que ya empezó. Secretaría sí puede registrar la cita de un
+            // turno en curso (por ejemplo, alguien que llegó sin agendar).
+            if ($this->isClient()) {
+                $horario = $workerSchedule->schedule;
+                $inicio = $horario ? Carbon::parse(substr((string) $horario->getRawOriginal('date'), 0, 10).' '.$horario->start_time) : null;
+                if ($inicio && $inicio->isPast()) {
+                    DB::rollBack();
+                    return response()->json(['message' => 'Ese horario ya empezó. Elige otro.'], 422);
+                }
+            }
+
             $paymentData = PaymentData::create([
                 'client_id'  => $validated['client_id'],
                 'type'       => $validated['payment_type'],
