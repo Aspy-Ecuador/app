@@ -17,11 +17,12 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         // El sitio publicado está detrás del proxy de la plataforma (Railway). Sin esto, todas las personas
-        // llegan con la IP del proxy: los límites de intentos por IP serían uno solo para todo el mundo
-        // (una persona abusando bloquearía a las demás) y la constancia del consentimiento guardaría una IP
-        // que no es de nadie. Solo se confía en proxies de la red interna: así el sistema toma la IP que
-        // anotó el proxy y nadie puede hacerse pasar por otra mandando su propio X-Forwarded-For.
-        $middleware->trustProxies(at: ['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16', '100.64.0.0/10', '127.0.0.1', '::1', 'fc00::/7']);
+        // llegan con la IP del proxy: los límites de intentos por IP no distinguirían a nadie y la constancia
+        // del consentimiento guardaría una IP que no es de la persona. Solo se confía en la red interna de la
+        // plataforma, y la IP de cada persona se toma del encabezado que la plataforma misma escribe
+        // (ver IpRealDetrasDelProxy): nadie puede hacerse pasar por otra IP mandando sus propios encabezados.
+        $middleware->trustProxies(at: \App\Http\Middleware\IpRealDetrasDelProxy::RED_INTERNA);
+        $middleware->prepend(\App\Http\Middleware\IpRealDetrasDelProxy::class);
 
         // Este servidor solo ofrece el API: la web del sistema vive en otro sitio y las sesiones van con
         // tokens. Se quitan las sesiones y cookies de navegador de las rutas web: con ellas, cada visita

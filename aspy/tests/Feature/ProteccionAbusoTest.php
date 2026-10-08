@@ -147,17 +147,44 @@ test('un paciente no puede acaparar la agenda: máximo 10 citas esperando la rev
 });
 
 test('la IP de cada persona es la suya, no la del proxy, y no se puede falsear', function () {
-    // Detrás del proxy de la plataforma (red interna): vale la IP que anotó el proxy, la última de la lista
-    $this->withServerVariables(['REMOTE_ADDR' => '10.20.30.40'])
-        ->withHeaders(['X-Forwarded-For' => '9.9.9.9, 203.0.113.7'])
-        ->postJson('/api/user-account/registro', cuentaNueva('proxy@prueba.test', consentimiento()))->assertStatus(201);
-    expect(UserConsent::where('user_id', UserAccount::where('email', 'proxy@prueba.test')->value('user_account_id'))->value('ip_address'))->toBe('203.0.113.7');
+    $ipDe = fn (string $email) => UserConsent::where('user_id', UserAccount::where('email', $email)->value('user_account_id'))->value('ip_address');
 
-    // Si alguien llegara directo (sin el proxy), su encabezado no se cree: vale la conexión real
+    // Así llegan las peticiones en el sitio publicado (comprobado el 2026-10-08): desde la red interna de
+    // la plataforma, con la IP de la persona en X-Real-IP y, en X-Forwarded-For, además la del servidor
+    // de entrada (que cambia en cada petición). Vale la de la persona.
+    $this->withServerVariables(['REMOTE_ADDR' => '100.64.0.2'])
+        ->withHeaders(['X-Real-IP' => '203.0.113.7', 'X-Forwarded-For' => '203.0.113.7, 152.233.47.69'])
+        ->postJson('/api/user-account/registro', cuentaNueva('plataforma@prueba.test', consentimiento()))->assertStatus(201);
+    expect($ipDe('plataforma@prueba.test'))->toBe('203.0.113.7');
+
+    // Otro proxy de la red interna que solo manda X-Forwarded-For: vale la última IP que no es de la red interna
+    $this->withServerVariables(['REMOTE_ADDR' => '10.20.30.40'])
+        ->withHeaders(['X-Real-IP' => '', 'X-Forwarded-For' => '9.9.9.9, 203.0.113.8'])
+        ->postJson('/api/user-account/registro', cuentaNueva('otro-proxy@prueba.test', consentimiento()))->assertStatus(201);
+    expect($ipDe('otro-proxy@prueba.test'))->toBe('203.0.113.8');
+
+    // Si alguien llegara directo (sin el proxy), sus encabezados no se creen: vale la conexión real
     $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.5'])
-        ->withHeaders(['X-Forwarded-For' => '9.9.9.9'])
+        ->withHeaders(['X-Real-IP' => '9.9.9.9', 'X-Forwarded-For' => '9.9.9.9'])
         ->postJson('/api/user-account/registro', cuentaNueva('directo@prueba.test', consentimiento()))->assertStatus(201);
-    expect(UserConsent::where('user_id', UserAccount::where('email', 'directo@prueba.test')->value('user_account_id'))->value('ip_address'))->toBe('198.51.100.5');
+    expect($ipDe('directo@prueba.test'))->toBe('198.51.100.5');
+});
+
+test('una misma persona cae siempre en el mismo límite aunque cambie el servidor de entrada de la plataforma', function () {
+    // 5 registros por minuto por persona: cada petición entra por un servidor de entrada distinto
+    for ($i = 1; $i <= 5; $i++) {
+        $this->withServerVariables(['REMOTE_ADDR' => '100.64.0.'.$i])
+            ->withHeaders(['X-Real-IP' => '203.0.113.7', 'X-Forwarded-For' => '203.0.113.7, 152.233.47.'.(60 + $i)])
+            ->postJson('/api/user-account/registro', cuentaNueva("misma{$i}@prueba.test", consentimiento()))->assertStatus(201);
+    }
+    $this->withServerVariables(['REMOTE_ADDR' => '100.64.0.9'])
+        ->withHeaders(['X-Real-IP' => '203.0.113.7', 'X-Forwarded-For' => '203.0.113.7, 152.233.47.99'])
+        ->postJson('/api/user-account/registro', cuentaNueva('misma6@prueba.test', consentimiento()))->assertStatus(429);
+
+    // Otra persona, por el mismo servidor de entrada, no queda bloqueada
+    $this->withServerVariables(['REMOTE_ADDR' => '100.64.0.9'])
+        ->withHeaders(['X-Real-IP' => '203.0.113.50', 'X-Forwarded-For' => '203.0.113.50, 152.233.47.99'])
+        ->postJson('/api/user-account/registro', cuentaNueva('otra-persona@prueba.test', consentimiento()))->assertStatus(201);
 });
 
 test('adivinar contraseñas a la fuerza se frena por correo y por IP', function () {
@@ -185,8 +212,8 @@ test('crear cuentas en masa desde una misma conexión se frena', function () {
     expect($r->json('message'))->toContain('Demasiados intentos seguidos');
 
     // Otra conexión (otra IP detrás del proxy) no queda bloqueada por la primera
-    $this->withServerVariables(['REMOTE_ADDR' => '10.20.30.40'])
-        ->withHeaders(['X-Forwarded-For' => '203.0.113.50'])
+    $this->withServerVariables(['REMOTE_ADDR' => '100.64.0.2'])
+        ->withHeaders(['X-Real-IP' => '203.0.113.50', 'X-Forwarded-For' => '203.0.113.50, 152.233.47.69'])
         ->postJson('/api/user-account/registro', cuentaNueva('otra-conexion@prueba.test', consentimiento()))->assertStatus(201);
 });
 
