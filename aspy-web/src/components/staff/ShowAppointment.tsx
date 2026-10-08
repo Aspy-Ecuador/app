@@ -1,5 +1,7 @@
 // FINAL
 import type { Appointment } from "@/typesResponse/Appointment";
+import { estadoCita } from "@utils/estadoCita";
+import { horaCorta } from "@utils/utils";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -12,17 +14,6 @@ interface ShowAppointmentProps {
   appointments: Appointment[];
 }
 
-const getStatusStyle = (statusName: string) => {
-  const name = statusName.toLowerCase();
-  if (name.includes("guardada"))
-    return { bg: tone.green.bg, color: tone.green.fg, accent: tone.green.main };
-  if (name.includes("perdida"))
-    return { bg: tone.red.bg, color: tone.red.fg, accent: tone.red.main };
-  if (name.includes("completada"))
-    return { bg: tone.blue.bg, color: tone.blue.fg, accent: "#3B82F6" };
-  return { bg: tone.amber.bg, color: tone.amber.fg, accent: tone.amber.main };
-};
-
 const getInitials = (first: string, last: string) =>
   `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
 
@@ -32,12 +23,11 @@ export default function ShowAppointment({
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
       {appointments.map((appointment, index) => {
-        const status = getStatusStyle(appointment.appointment_status.name);
+        const status = estadoCita(appointment.appointment_status);
         const {
           client,
           professional,
           service,
-          appointment_status,
           worker_schedule,
         } = appointment;
         const schedule = worker_schedule.schedule;
@@ -59,7 +49,7 @@ export default function ShowAppointment({
             <Box
               sx={{
                 height: 3,
-                background: `linear-gradient(90deg, ${status.accent}99, ${status.accent})`,
+                background: status.main,
               }}
             />
 
@@ -147,11 +137,11 @@ export default function ShowAppointment({
                   }}
                 >
                   <Chip
-                    label={appointment_status.name}
+                    label={status.nombre}
                     size="small"
                     sx={{
                       background: status.bg,
-                      color: status.color,
+                      color: status.fg,
                       fontWeight: 500,
                       fontSize: 11,
                       height: 22,
@@ -189,7 +179,7 @@ export default function ShowAppointment({
               <Typography
                 sx={{ fontFamily: "monospace", fontSize: 12, fontWeight: 500 }}
               >
-                {schedule.start_time} — {schedule.end_time}
+                {horaCorta(schedule.start_time)} — {horaCorta(schedule.end_time)}
               </Typography>
               <Box
                 sx={{

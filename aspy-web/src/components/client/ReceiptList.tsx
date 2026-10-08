@@ -1,7 +1,7 @@
 // FINAL
 import { useState } from "react";
 import type { GridRowId, GridColDef } from "@mui/x-data-grid";
-import { getReceiptByUser, handleDownloadInvoice, montoPago } from "@utils/utils";
+import { fechaLocal, getReceiptByUser, handleDownloadInvoice, montoPago } from "@utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext";
 import { getAuthenticatedUserID } from "@/utils/store";
 import { useTheme } from "@mui/material/styles";
@@ -171,7 +171,7 @@ export default function ReceiptList() {
       client: `${r.client.first_name} ${r.client.last_name}`,
       service: r.service.name,
       price: montoPago(r),
-      date: r.creation_date.split("T")[0],
+      date: fechaLocal(r.creation_date),
       receipt: r.receipt,
     }));
 

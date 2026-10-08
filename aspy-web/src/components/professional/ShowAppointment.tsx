@@ -1,5 +1,6 @@
 // FINAL
 import { useNavigate } from "react-router-dom";
+import { horaCorta } from "@utils/utils";
 import type { Appointment } from "@/typesResponse/Appointment";
 import { useState } from "react";
 import Card from "@mui/material/Card";
@@ -159,7 +160,7 @@ export default function ShowAppointment({
                         Hora
                       </Typography>
                       <Chip
-                        label={`${cita.worker_schedule.schedule.start_time} – ${cita.worker_schedule.schedule.end_time}`}
+                        label={`${horaCorta(cita.worker_schedule.schedule.start_time)} – ${horaCorta(cita.worker_schedule.schedule.end_time)}`}
                         size="small"
                         variant="outlined"
                         sx={{ fontFamily: "monospace", fontSize: 11 }}
@@ -308,7 +309,7 @@ export default function ShowAppointment({
                         Hora
                       </Typography>
                       <Chip
-                        label={cita.worker_schedule.schedule.start_time}
+                        label={horaCorta(cita.worker_schedule.schedule.start_time)}
                         size="small"
                         variant="outlined"
                         sx={{ fontFamily: "monospace", fontSize: 11 }}

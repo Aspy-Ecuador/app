@@ -280,8 +280,11 @@ const DetailPopover = ({
   // x, y vienen en píxeles de pantalla; dentro del panel con zoom (pantallas grandes) se dividen
   const zoom = zoomActual();
   const safeX = Math.min(detail.x / zoom + 12, window.innerWidth / zoom - 280);
-  const safeY = Math.min(detail.y / zoom - 8, window.innerHeight / zoom - 350);
+  const safeY = Math.min(detail.y / zoom - 8, window.innerHeight / zoom - 400);
   const [cancelling, setCancelling] = useState(false);
+  // Cancelar no se puede deshacer: se pide confirmación en la misma ventana
+  const [confirmando, setConfirmando] = useState(false);
+  const [errorCancelar, setErrorCancelar] = useState("");
 
   const role = getAuthenticatedUserIdRole();
   const now = useMemo(() => new Date(), []);
@@ -301,12 +304,15 @@ const DetailPopover = ({
 
   const handleCancel = async () => {
     setCancelling(true);
+    setErrorCancelar("");
     try {
       await appointmentAPI.cancelAppointment(detail.appointmentId);
       onCancelled(); // ← dispara el refresh + Success en el padre
       onClose();
     } catch (error) {
-      console.log(error);
+      const mensaje = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setErrorCancelar(mensaje ?? "No se pudo cancelar la cita. Inténtalo de nuevo.");
+      setConfirmando(false);
     } finally {
       setCancelling(false);
     }
@@ -420,29 +426,68 @@ const DetailPopover = ({
           {canCancel && (
             <>
               <Box sx={{ height: "0.5px", bgcolor: "divider", my: 0.25 }} />
-              <Button
-                size="small"
-                variant="outlined"
-                disabled={cancelling}
-                onClick={handleCancel}
-                sx={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  borderColor: tone.red.main,
-                  color: tone.red.fg,
-                  borderRadius: "8px",
-                  textTransform: "none",
-                  py: 0.5,
-                  "&:hover": { bgcolor: tone.red.bg, borderColor: tone.red.main },
-                  "&.Mui-disabled": { opacity: 0.6 },
-                }}
-              >
-                {cancelling ? (
-                  <CircularProgress size={14} sx={{ color: tone.red.main }} />
-                ) : (
-                  "Cancelar cita"
-                )}
-              </Button>
+              {errorCancelar && (
+                <Typography role="alert" sx={{ fontSize: 11, lineHeight: 1.35, color: tone.red.fg }}>
+                  {errorCancelar}
+                </Typography>
+              )}
+              {!confirmando ? (
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setConfirmando(true)}
+                  sx={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    borderColor: tone.red.main,
+                    color: tone.red.fg,
+                    borderRadius: "8px",
+                    textTransform: "none",
+                    py: 0.5,
+                    "&:hover": { bgcolor: tone.red.bg, borderColor: tone.red.main },
+                  }}
+                >
+                  Cancelar cita
+                </Button>
+              ) : (
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
+                  <Typography sx={{ fontSize: 11.5, fontWeight: 600, lineHeight: 1.35, color: "text.primary" }}>
+                    ¿Cancelar esta cita? El horario queda libre y no se puede deshacer.
+                  </Typography>
+                  <Box sx={{ display: "flex", gap: 0.75 }}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      disabled={cancelling}
+                      onClick={() => setConfirmando(false)}
+                      sx={{ flex: 1, fontSize: 11, fontWeight: 600, borderRadius: "8px", textTransform: "none", py: 0.5 }}
+                    >
+                      No
+                    </Button>
+                    <Button
+                      size="small"
+                      disabled={cancelling}
+                      onClick={handleCancel}
+                      sx={{
+                        flex: 1.6,
+                        fontSize: 11,
+                        fontWeight: 700,
+                        border: 0,
+                        borderRadius: "8px",
+                        textTransform: "none",
+                        py: 0.5,
+                        color: "#fff",
+                        backgroundImage: "none",
+                        bgcolor: "#C0392B",
+                        "&:hover": { backgroundImage: "none", bgcolor: "#A93226" },
+                        "&.Mui-disabled": { opacity: 0.7, color: "#fff" },
+                      }}
+                    >
+                      {cancelling ? <CircularProgress size={14} sx={{ color: "#fff" }} /> : "Sí, cancelar"}
+                    </Button>
+                  </Box>
+                </Box>
+              )}
             </>
           )}
         </Box>

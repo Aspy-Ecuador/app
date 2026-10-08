@@ -1,5 +1,6 @@
 // FINAL
 import { useRoleData } from "@/observer/RoleDataContext";
+import { horaCorta } from "@utils/utils";
 import { useParams, useNavigate } from "react-router-dom";
 import { getAppointmentsReport } from "@/utils/utils";
 import Box from "@mui/material/Box";
@@ -163,9 +164,9 @@ export default function AppointmentDetail() {
                   <Stack direction="row" alignItems="center" spacing={1}>
                     <AccessTimeRoundedIcon sx={{ fontSize: 14, color: "text.disabled" }} />
                     <Typography variant="body2" fontWeight={500}>
-                      {appointment?.worker_schedule.schedule.start_time}
+                      {horaCorta(appointment?.worker_schedule.schedule.start_time)}
                       {" – "}
-                      {appointment?.worker_schedule.schedule.end_time}
+                      {horaCorta(appointment?.worker_schedule.schedule.end_time)}
                     </Typography>
                   </Stack>
                 </Stack>

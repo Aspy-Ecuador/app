@@ -1,6 +1,8 @@
 // Hay que instalar npm install @mui/lab@6.0.0-beta.32
 // FINAL
 import type { Appointment } from "@/typesResponse/Appointment";
+import { estadoCita } from "@utils/estadoCita";
+import { horaCorta } from "@utils/utils";
 import type { AppointmentReport } from "@/typesResponse/AppointmentReport";
 import type { AppointmentWithReports } from "@/types/AppointmentWithReports";
 import Box from "@mui/material/Box";
@@ -17,20 +19,6 @@ interface TimeLinePatientsProps {
   onSelectComments: (comments: string) => void;
   selectedComments: string;
 }
-
-const getStatusStyle = (statusId: number) => {
-  if (statusId === 1)
-    return { bg: tone.amber.bg, color: tone.amber.fg, accent: tone.amber.main };
-  if (statusId === 2)
-    return { bg: tone.green.bg, color: tone.green.fg, accent: tone.green.main };
-  if (statusId === 3)
-    return { bg: tone.blue.bg, color: tone.blue.fg, accent: tone.blue.main };
-  if (statusId === 4)
-    return { bg: tone.red.bg, color: tone.red.fg, accent: tone.red.main };
-  if (statusId === 5)
-    return { bg: tone.purple.bg, color: tone.purple.fg, accent: tone.purple.main };
-  return { bg: tone.gray.bg, color: tone.gray.fg, accent: tone.gray.main };
-};
 
 export default function TimeLinePatients({
   patient_id,
@@ -113,9 +101,7 @@ export default function TimeLinePatients({
           </Typography>
         ) : (
           appointmentsReportUser.map((report, index) => {
-            const style = getStatusStyle(
-              report.appointment_status.appointment_status_id,
-            );
+            const style = estadoCita(report.appointment_status);
             const isActive =
               report.report?.file === selectedComments && !!selectedComments;
             const isLast = index === appointmentsReportUser.length - 1;
@@ -141,7 +127,7 @@ export default function TimeLinePatients({
                       height: 10,
                       borderRadius: "50%",
                       border: "2px solid",
-                      borderColor: style.accent,
+                      borderColor: style.main,
                       bgcolor: style.bg,
                       flexShrink: 0,
                     }}
@@ -197,10 +183,10 @@ export default function TimeLinePatients({
                           py: 0.25,
                           borderRadius: "20px",
                           bgcolor: style.bg,
-                          color: style.color,
+                          color: style.fg,
                         }}
                       >
-                        {report.appointment_status.name}
+                        {style.nombre}
                       </Box>
                     </Box>
                     <Typography
@@ -209,8 +195,8 @@ export default function TimeLinePatients({
                         color: "text.secondary",
                       }}
                     >
-                      Hora: {report.worker_schedule.schedule.start_time} —{" "}
-                      {report.worker_schedule.schedule.end_time}
+                      Hora: {horaCorta(report.worker_schedule.schedule.start_time)} —{" "}
+                      {horaCorta(report.worker_schedule.schedule.end_time)}
                     </Typography>
                     <Typography sx={{ color: "text.disabled", mt: 0.5 }}>
                       {report.professional.first_name}{" "}

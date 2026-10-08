@@ -36,7 +36,18 @@ export const campoSx = {
     "&.Mui-error.Mui-focused": { boxShadow: `0 0 0 3px ${tone.red.border}` },
     "&.Mui-disabled": { opacity: 0.6 },
   },
-  "& .MuiSelect-select": { display: "flex", alignItems: "center", minHeight: "unset", p: 0, pr: "28px !important" },
+  // Una sola línea centrada con el alto de línea (no con flex): así un texto largo termina en "…"
+  // en vez de montarse sobre la flecha cuando la lista es angosta.
+  "& .MuiSelect-select": {
+    display: "block !important", // el tema lo deja en flex (con más peso), y con flex no hay "…"
+    minHeight: "unset",
+    p: 0,
+    pr: "28px !important",
+    lineHeight: `${ALTO - 2}px`,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  },
   "& .MuiFormHelperText-root": ayudaSx,
   // Sin flechitas en los campos numéricos
   "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button": { WebkitAppearance: "none", margin: 0 },

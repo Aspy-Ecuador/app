@@ -1,5 +1,6 @@
 // FINAL
 import Box from "@mui/material/Box";
+import { fechaHoraLocal } from "@utils/utils";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import CreditCardRoundedIcon from "@mui/icons-material/CreditCardRounded";
@@ -102,13 +103,7 @@ export default function InvoiceView({
         <Field label="Contacto" value={email} />
         <Field
           label="Fecha"
-          value={
-            date.split("T")[0] +
-            " / " +
-            date.split("T")[1].split(":")[0] +
-            ":" +
-            date.split("T")[1].split(":")[1]
-          }
+          value={fechaHoraLocal(date)}
         />
 
         <Box

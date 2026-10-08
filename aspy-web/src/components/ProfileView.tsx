@@ -1,7 +1,7 @@
 // FINAL
 import type { Person } from "@/typesResponse/Person";
 import type { UserLogin } from "@/types/UserLogin";
-import { getAge, ocupacionDe, translateRol } from "@/utils/utils";
+import { fechaLocal, getAge, ocupacionDe, translateRol } from "@/utils/utils";
 import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
@@ -150,8 +150,8 @@ export default function ProfileView({ user, isRowPosition }: ProfileProps) {
 
   const memberSince =
     "email" in user
-      ? user.creation_date?.split("T")[0]
-      : user.user_account?.creation_date?.split("T")[0];
+      ? fechaLocal(user.creation_date)
+      : fechaLocal(user.user_account?.creation_date);
 
   return (
     <Box

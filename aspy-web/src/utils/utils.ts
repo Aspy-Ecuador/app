@@ -336,12 +336,43 @@ export function getUnmarkedAppointments(
   );
 }
 
-/** true si la hora de inicio de la cita ya pasó (hora local del navegador, Ecuador). */
-export function yaEmpezo(appointment: Appointment): boolean {
-  const s = appointment.worker_schedule?.schedule;
+const dos = (n: number) => String(n).padStart(2, "0");
+
+/**
+ * Fecha de un registro (pago, recibo, cuenta) como "AAAA-MM-DD" en la hora de quien la mira.
+ * El servidor la envía en hora universal ("2026-10-08T05:37:00Z"); cortar el texto por la "T"
+ * mostraba la fecha y la hora 5 horas adelantadas (y el día siguiente desde las 19:00).
+ * Una fecha sin hora ("2026-10-08": cumpleaños, día de una cita) se devuelve igual.
+ */
+export function fechaLocal(valor: string | Date | null | undefined): string {
+  if (!valor) return "";
+  if (typeof valor === "string" && /^\d{4}-\d{2}-\d{2}$/.test(valor)) return valor;
+  const d = new Date(valor);
+  if (Number.isNaN(d.getTime())) return String(valor).split("T")[0];
+  return `${d.getFullYear()}-${dos(d.getMonth() + 1)}-${dos(d.getDate())}`;
+}
+
+/** Igual que `fechaLocal`, con la hora: "AAAA-MM-DD / HH:MM". */
+export function fechaHoraLocal(valor: string | Date | null | undefined): string {
+  if (!valor) return "";
+  const d = new Date(valor);
+  if (Number.isNaN(d.getTime())) return String(valor);
+  return `${fechaLocal(valor)} / ${dos(d.getHours())}:${dos(d.getMinutes())}`;
+}
+
+/** Hora como "09:00". El servidor puede devolverla con segundos ("09:00:00"), según la base de datos. */
+export const horaCorta = (hora: string | null | undefined): string => String(hora ?? "").slice(0, 5);
+
+/** true si la hora de inicio de un turno ya pasó (hora local del navegador, Ecuador). */
+export function turnoYaEmpezo(s: { date: string | Date; start_time: string } | null | undefined): boolean {
   if (!s) return false;
   const inicio = new Date(`${String(s.date).split("T")[0]}T${s.start_time}`);
   return inicio.getTime() <= Date.now();
+}
+
+/** true si la hora de inicio de la cita ya pasó (hora local del navegador, Ecuador). */
+export function yaEmpezo(appointment: Appointment): boolean {
+  return turnoYaEmpezo(appointment.worker_schedule?.schedule);
 }
 
 // FINAL
@@ -560,7 +591,7 @@ export function handleDownloadInvoice(invoice: FlattenedReceipt) {
 
   setColor(doc, COLOR.black, "text");
   doc.setFont("helvetica", "bold");
-  doc.text(invoice.receipt.creation_date.split("T")[0], rx + 36, y + 13);
+  doc.text(fechaLocal(invoice.receipt.creation_date), rx + 36, y + 13);
   doc.setFont("helvetica", "normal");
   doc.text(invoice.receipt.receipt_status?.name || "N/A", rx + 36, y + 20);
   doc.text(paymentInfo?.payment_data?.type || "Transferencia", rx + 36, y + 27);

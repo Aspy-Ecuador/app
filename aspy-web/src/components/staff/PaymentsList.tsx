@@ -5,7 +5,7 @@ import type { GridRowId, GridColDef } from "@mui/x-data-grid";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip"; // Añadido para mejor UX en los iconos
 import Table from "@components/Table";
-import { montoPago } from "@utils/utils";
+import { fechaLocal, montoPago } from "@utils/utils";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -78,7 +78,7 @@ export default function PaymentsList() {
         return (
           <Box display="flex" alignItems="center" height="100%">
             <Typography variant="body1">
-              {params.row.creation_date.split("T")[0]}
+              {fechaLocal(params.row.creation_date)}
             </Typography>
           </Box>
         );

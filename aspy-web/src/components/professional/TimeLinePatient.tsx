@@ -1,6 +1,8 @@
 // FINAL
 // Hay que instalar npm install @mui/lab@6.0.0-beta.32
 import { useNavigate, useLocation } from "react-router-dom";
+import { estadoCita } from "@utils/estadoCita";
+import { horaCorta } from "@utils/utils";
 import TimelineItem, { timelineItemClasses } from "@mui/lab/TimelineItem";
 import Timeline from "@mui/lab/Timeline";
 import TimelineSeparator from "@mui/lab/TimelineSeparator";
@@ -19,7 +21,7 @@ import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
-import { aspy, tone } from "@shared-theme/themePrimitives";
+import { aspy } from "@shared-theme/themePrimitives";
 
 // ─── Paleta del logo ASPY ────────────────────────────────────────
 const C = {
@@ -35,47 +37,6 @@ const C = {
   border: aspy.border,
 };
 
-// Colores del dot según el estado de la cita
-function getDotColor(statusName: string): { bg: string; border: string } {
-  const s = statusName?.toLowerCase() ?? "";
-  if (s.includes("complet") || s.includes("asist"))
-    return { bg: tone.green.bg, border: tone.green.main };
-  if (s.includes("cancel") || s.includes("no asist"))
-    return { bg: tone.red.bg, border: tone.red.main };
-  if (s.includes("pend")) return { bg: C.yellowLight, border: C.yellow };
-  return { bg: C.blueLight, border: C.blue };
-}
-
-function getStatusChip(statusName: string) {
-  const s = statusName?.toLowerCase() ?? "";
-  if (s.includes("complet") || s.includes("asist"))
-    return {
-      label: statusName,
-      bgcolor: tone.green.bg,
-      color: tone.green.fg,
-      border: tone.green.border,
-    };
-  if (s.includes("cancel") || s.includes("no asist"))
-    return {
-      label: statusName,
-      bgcolor: tone.red.bg,
-      color: tone.red.fg,
-      border: tone.red.border,
-    };
-  if (s.includes("pend"))
-    return {
-      label: statusName,
-      bgcolor: C.yellowLight,
-      color: tone.amber.fg,
-      border: C.yellow,
-    };
-  return {
-    label: statusName,
-    bgcolor: C.blueLight,
-    color: C.blueDark,
-    border: C.blue,
-  };
-}
 
 interface TimeLinePatientsProps {
   patient: Person;
@@ -126,8 +87,10 @@ export default function TimeLinePatients({ patient }: TimeLinePatientsProps) {
       }}
     >
       {appointmentsReportUser.map((report, index) => {
-        const dot = getDotColor(report.appointment_status.name);
-        const chip = getStatusChip(report.appointment_status.name);
+        // Mismos colores que la leyenda del calendario (un solo mapa por id de estado)
+        const estado = estadoCita(report.appointment_status);
+        const dot = { bg: estado.bg, border: estado.main };
+        const chip = { label: estado.nombre, bgcolor: estado.bg, color: estado.fg, border: estado.border };
         const isLast = index === appointmentsReportUser.length - 1;
 
         return (
@@ -231,8 +194,8 @@ export default function TimeLinePatients({ patient }: TimeLinePatientsProps) {
                         variant="body2"
                         sx={{ color: C.muted, fontSize: "0.8rem" }}
                       >
-                        {report.worker_schedule.schedule.start_time} —{" "}
-                        {report.worker_schedule.schedule.end_time}
+                        {horaCorta(report.worker_schedule.schedule.start_time)} —{" "}
+                        {horaCorta(report.worker_schedule.schedule.end_time)}
                       </Typography>
                     </Box>
                     <Box
