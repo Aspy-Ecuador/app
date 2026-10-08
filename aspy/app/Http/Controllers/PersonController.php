@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use App\Models\Person;
+use App\Models\UserConsent;
 use Illuminate\Http\Request;
 
 class PersonController extends Controller
@@ -31,7 +32,19 @@ class PersonController extends Controller
     public function index()
     {
         if ($this->isStaffOrAdmin()) {
-            return response()->json(Person::with(self::FULL_RELATIONS)->get());
+            // Aviso para la fundación: quién retiró su consentimiento (y no volvió a darlo)
+            $retiros = UserConsent::whereNotNull('revoked_at')
+                ->selectRaw('user_id, MAX(revoked_at) as retirado_el')
+                ->groupBy('user_id')
+                ->pluck('retirado_el', 'user_id');
+            $vigentes = UserConsent::whereNull('revoked_at')->pluck('user_id')->flip();
+
+            $personas = Person::with(self::FULL_RELATIONS)->get()->each(function (Person $p) use ($retiros, $vigentes) {
+                $retirado = isset($retiros[$p->user_id]) && ! isset($vigentes[$p->user_id]);
+                $p->setAttribute('consentimiento_retirado_el', $retirado ? $retiros[$p->user_id] : null);
+            });
+
+            return response()->json($personas);
         }
 
         $me = $this->currentPersonId();

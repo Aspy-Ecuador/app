@@ -45,6 +45,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Política de privacidad: cada quien consulta y acepta la suya (primer ingreso de cuentas creadas desde el panel)
     Route::get('/consentimiento', [ConsentimientoController::class, 'show']);
     Route::post('/consentimiento', [ConsentimientoController::class, 'store']);
+    // Retirar el consentimiento (pacientes y familias): deshabilita la cuenta y deja la constancia
+    Route::post('/consentimiento/retirar', [ConsentimientoController::class, 'retirar']);
     // Comprobantes y reportes: se guardan en el servidor y solo los abre quien corresponde (ver ArchivoPrivadoController)
     Route::post('/archivos', [ArchivoPrivadoController::class, 'store'])->middleware('throttle:20,1');
     Route::get('/archivos/{id}', [ArchivoPrivadoController::class, 'show'])->whereNumber('id');

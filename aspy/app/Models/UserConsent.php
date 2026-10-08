@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/** Constancia de que una persona aceptó la política de privacidad (ver ConsentimientoController). */
 class UserConsent extends Model
 {
     use HasFactory;
@@ -18,10 +19,18 @@ class UserConsent extends Model
         'policy_version',
         'ip_address',
         'accepted_at',
+        'declaraciones',
+        'calidad',
+        'representante_nombre',
+        'representante_identificacion',
+        'user_agent',
+        'revoked_at',
     ];
 
     protected $casts = [
         'accepted_at' => 'datetime',
+        'revoked_at' => 'datetime',
+        'declaraciones' => 'array',
     ];
 
     public function userAccount()

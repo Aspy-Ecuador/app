@@ -160,13 +160,17 @@ class UserAccountController extends Controller
         // En el alta desde el panel (staff/admin, con sesión) no se pide: nadie la acepta por otro.
         $registroPublico = ! auth()->check();
 
-        $validated = $request->validate(array_merge([
+        // Registro público: el consentimiento va completo (declaraciones una por una y, si la cuenta es de
+        // una persona menor de 15 años, los datos de su representante legal). Ver ConsentimientoController.
+        $reglasConsentimiento = $registroPublico
+            ? ConsentimientoController::reglas(self::ROLE_CLIENT, $request->input('birthdate'))
+            : ['accepted_privacy_policy' => 'nullable', 'policy_version' => 'nullable|string|max:10'];
+
+        $validated = $request->validate(array_merge($reglasConsentimiento, [
             // ── UserAccount ───────────────────────────────────
             'email'                     => 'required|email|max:150|unique:user_account,email',
             'password'                  => 'required|string|min:8|confirmed', // espera password_confirmation
             'role_id'                   => 'required|integer|exists:role,role_id',
-            'accepted_privacy_policy'   => $registroPublico ? 'required|accepted' : 'nullable',
-            'policy_version'            => $registroPublico ? 'required|string|in:'.ConsentimientoController::VERSION : 'nullable|string|max:10',
 
             // ── Datos base de Person ──────────────────────────
             'gender_id'                 => 'required|integer|exists:gender,gender_id',
@@ -226,12 +230,9 @@ class UserAccountController extends Controller
 
             // Solo queda constancia del consentimiento que dio la propia persona
             if ($registroPublico) {
-                UserConsent::create([
-                    'user_id'        => $userAccount->user_account_id,
-                    'policy_version' => $validated['policy_version'],
-                    'ip_address'     => $request->ip(),
-                    'accepted_at'    => now(),
-                ]);
+                UserConsent::create(
+                    ['user_id' => $userAccount->user_account_id] + ConsentimientoController::constancia($request, self::ROLE_CLIENT)
+                );
             }
 
             // 2. Crear Person vinculada al UserAccount recién creado
