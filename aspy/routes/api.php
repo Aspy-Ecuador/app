@@ -53,15 +53,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/archivos', [ArchivoPrivadoController::class, 'store'])->middleware('throttle:archivos-subir');
     Route::get('/archivos/resumen', [ArchivoPrivadoController::class, 'resumen']); // cuántos tiene subidos la cuenta y sus topes
     Route::get('/archivos/{id}', [ArchivoPrivadoController::class, 'show'])->whereNumber('id')->middleware('throttle:archivos-ver');
-    // TEMPORAL (solo Admin): qué recibe el servidor de la conexión, para ajustar cómo se reconoce la IP real
-    // de cada persona detrás del proxy de la plataforma. Se quita en cuanto quede ajustado.
-    Route::get('/diagnostico/conexion', function (\Illuminate\Http\Request $request) {
-        $cabeceras = collect($request->headers->all())
-            ->filter(fn ($valor, $nombre) => str_starts_with($nombre, 'x-') || in_array($nombre, ['forwarded', 'via', 'cf-connecting-ip', 'true-client-ip'], true))
-            ->map(fn ($valor) => implode(' | ', $valor));
-
-        return response()->json(['remote_addr' => $request->server('REMOTE_ADDR'), 'ip' => $request->ip(), 'ips' => $request->ips(), 'cabeceras' => $cabeceras]);
-    })->middleware('role:admin');
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 });
