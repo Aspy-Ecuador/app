@@ -27,6 +27,9 @@ RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
 
 COPY nginx.conf /etc/nginx/sites-available/default
 
+# Subida de comprobantes y reportes (hasta 8 MB): PHP trae 2 MB por archivo como máximo
+RUN printf 'upload_max_filesize=10M\npost_max_size=12M\nmemory_limit=256M\n' > /usr/local/etc/php/conf.d/aspy-subidas.ini
+
 # Exponer puerto 9000 (PHP-FPM)
 EXPOSE 8000
 

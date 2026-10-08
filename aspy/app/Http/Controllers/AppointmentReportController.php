@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AppointmentReport;
+use App\Models\ArchivoPrivado;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -70,6 +71,8 @@ class AppointmentReportController extends Controller
     public function destroy($id)
     {
         $report = AppointmentReport::findOrFail($id);
+        // El PDF se borra junto con el reporte: no queda información clínica suelta
+        ArchivoPrivado::where('appointment_report_id', $report->appointment_report_id)->delete();
         $report->delete();
 
         return response()->noContent();

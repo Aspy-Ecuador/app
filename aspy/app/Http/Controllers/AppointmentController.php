@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Appointment;
+use App\Models\ArchivoPrivado;
 use App\Models\AppointmentReport;
 use App\Models\Payment;
 use App\Models\PaymentData;
@@ -96,7 +97,8 @@ class AppointmentController extends Controller
             'service_id'         => 'required|integer|exists:service,service_id',
             'worker_schedule_id' => 'required|integer|exists:worker_schedule,worker_schedule_id',
             'payment_type'       => 'required|string|max:50',
-            'payment_file'       => 'required|string|max:2048',
+            // Referencia al comprobante subido antes con POST /archivos ("privado:123")
+            'payment_file'       => ['required', 'string', 'regex:/^privado:\d{1,9}$/'],
         ]);
 
         // Un cliente solo puede agendar citas para sí mismo
@@ -109,6 +111,12 @@ class AppointmentController extends Controller
             ->exists();
         if (! $offersService) {
             return response()->json(['message' => 'El profesional no ofrece este servicio.'], 422);
+        }
+
+        // El comprobante tiene que ser un archivo que esta misma cuenta acaba de subir y que nadie usó
+        $comprobante = ArchivoPrivado::disponible($validated['payment_file'], ArchivoPrivado::COMPROBANTE, auth()->id());
+        if (! $comprobante) {
+            return response()->json(['message' => 'El comprobante no es válido. Vuelve a subirlo.'], 422);
         }
 
         DB::beginTransaction();
@@ -140,6 +148,11 @@ class AppointmentController extends Controller
                 'created_by' => auth()->id(),
                 'creation_date' => now(),
             ]);
+
+            if (! $comprobante->vincular('payment_data_id', $paymentData->payment_data_id)) {
+                DB::rollBack();
+                return response()->json(['message' => 'El comprobante no es válido. Vuelve a subirlo.'], 422);
+            }
 
             $payment = Payment::create([
                 'client_id'         => $validated['client_id'],
@@ -401,8 +414,6 @@ class AppointmentController extends Controller
     {
         $request->validate([
             'appointmentId' => 'required|integer',
-            'file'          => 'required|string|max:2048',
-            'sign'          => 'required|string|max:2048',
         ]);
 
         $appointment = Appointment::findOrFail($request->appointmentId);
@@ -410,18 +421,40 @@ class AppointmentController extends Controller
         if (! $this->isAdmin() && (int) $appointment->professional_id !== $this->currentPersonId()) {
             return $this->forbidden();
         }
+
+        $request->validate([
+            // Referencia al PDF subido antes con POST /archivos ("privado:123")
+            'file' => ['required', 'string', 'regex:/^privado:\d{1,9}$/'],
+            'sign' => 'required|string|max:255',
+        ]);
+
         if (AppointmentReport::where('appointment_id', $appointment->appointment_id)->exists()) {
             return response()->json(['message' => 'Esta cita ya tiene un reporte.'], 422);
         }
 
+        // El reporte tiene que ser un PDF que esta misma cuenta acaba de subir y que nadie usó
+        $archivo = ArchivoPrivado::disponible($request->input('file'), ArchivoPrivado::REPORTE, auth()->id());
+        if (! $archivo) {
+            return response()->json(['message' => 'El archivo del reporte no es válido. Vuelve a subirlo.'], 422);
+        }
+
+        DB::beginTransaction();
+
         try {
             $report = AppointmentReport::create([
                 'appointment_id' => $appointment->appointment_id,
-                'file'           => $request->input('file'),
+                'file'           => $archivo->referencia(),
                 'sign'           => $request->input('sign'),
                 'created_by'     => auth()->id(),
                 'creation_date'  => now(),
             ]);
+
+            if (! $archivo->vincular('appointment_report_id', $report->appointment_report_id)) {
+                DB::rollBack();
+                return response()->json(['message' => 'El archivo del reporte no es válido. Vuelve a subirlo.'], 422);
+            }
+
+            DB::commit();
 
             return response()->json([
                 'message' => 'Report created successfully.',
@@ -429,6 +462,7 @@ class AppointmentController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->serverError('Failed to create report.', $e);
         }
     }

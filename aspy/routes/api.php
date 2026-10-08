@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AppointmentReportController;
+use App\Http\Controllers\ArchivoPrivadoController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BankAccountController;
 use App\Http\Controllers\ConsentimientoController;
@@ -44,6 +45,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Política de privacidad: cada quien consulta y acepta la suya (primer ingreso de cuentas creadas desde el panel)
     Route::get('/consentimiento', [ConsentimientoController::class, 'show']);
     Route::post('/consentimiento', [ConsentimientoController::class, 'store']);
+    // Comprobantes y reportes: se guardan en el servidor y solo los abre quien corresponde (ver ArchivoPrivadoController)
+    Route::post('/archivos', [ArchivoPrivadoController::class, 'store'])->middleware('throttle:20,1');
+    Route::get('/archivos/{id}', [ArchivoPrivadoController::class, 'show'])->whereNumber('id');
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 });
