@@ -16,7 +16,8 @@ use Symfony\Component\HttpFoundation\Response;
  * cuando, después de responder una petición cualquiera (más o menos 1 de cada 100; no la demora):
  * - contadores vencidos de los límites de intentos (tabla `cache`);
  * - sesiones vencidas (tokens de Sanctum);
- * - comprobantes y reportes subidos hace más de un día que nunca se usaron.
+ * - comprobantes y reportes subidos hace más de un día que nunca se usaron;
+ * - comprobantes de pagos rechazados, un día después del rechazo.
  */
 class MantenimientoOportunista
 {
@@ -51,6 +52,7 @@ class MantenimientoOportunista
                 }
             },
             fn () => ArchivoPrivado::borrarSinUsarVencidos(),
+            fn () => ArchivoPrivado::borrarProgramados(),
         ];
 
         foreach ($tareas as $tarea) {

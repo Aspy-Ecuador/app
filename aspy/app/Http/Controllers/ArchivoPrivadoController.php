@@ -84,8 +84,9 @@ class ArchivoPrivadoController extends Controller
         }
 
         try {
-            // Lo que nadie usó en un día se borra (de cualquier cuenta)
+            // Lo que nadie usó en un día se borra (de cualquier cuenta), y también lo que ya tenía fecha de eliminación
             ArchivoPrivado::borrarSinUsarVencidos();
+            ArchivoPrivado::borrarProgramados();
 
             $resumen = $this->resumenDeLaCuenta();
             if ($resumen['hoy'] >= $resumen['maximo_por_dia']) {
@@ -135,6 +136,12 @@ class ArchivoPrivadoController extends Controller
 
         if (! $this->puedeVer($archivo)) {
             return $this->forbidden();
+        }
+
+        // Comprobante de un pago rechazado cuyo día de gracia ya pasó: se borra y ya no se entrega
+        if ($archivo->eliminar_el && $archivo->eliminar_el->isPast()) {
+            ArchivoPrivado::borrarProgramados();
+            abort(404);
         }
 
         try {

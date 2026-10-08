@@ -15,6 +15,8 @@ if ! timeout 120 php artisan migrate --force; then
     --path=$M/2026_10_08_000001_alinear_nombres_de_estados.php \
     --path=$M/2026_10_08_000002_archivos_privados.php \
     --path=$M/2026_10_08_000004_consentimiento_detallado.php \
+    --path=$M/2026_10_08_000005_archivo_privado_eliminar_el.php \
+    --path=$M/2026_10_08_000006_motivo_de_rechazo_y_ajustes.php \
     || echo "AVISO: tampoco se pudieron aplicar. Revisa la conexión a la base de datos."
 fi
 

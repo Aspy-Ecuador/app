@@ -94,3 +94,22 @@ function entrar($prueba, string $email, string $clave = 'Secreta123'): \Illumina
 
     return $prueba->postJson('/api/login', ['email' => $email, 'password' => $clave]);
 }
+
+const PDF_DE_PRUEBA = "%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[]/Count 0>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n";
+
+/** Sube un PDF de verdad (el servidor revisa el contenido) con la sesión indicada. */
+function subirPdf($prueba, string $token, string $tipo = 'comprobante'): \Illuminate\Testing\TestResponse
+{
+    return como($prueba, $token)->post('/api/archivos', [
+        'tipo' => $tipo,
+        'archivo' => \Illuminate\Http\UploadedFile::fake()->createWithContent('archivo.pdf', PDF_DE_PRUEBA),
+    ], ['Accept' => 'application/json']);
+}
+
+/** Registra un paciente y devuelve su sesión. */
+function pacienteConSesion($prueba, string $email): string
+{
+    $prueba->postJson('/api/user-account/registro', cuentaNueva($email, consentimiento()))->assertStatus(201);
+
+    return entrar($prueba, $email)->json('access_token');
+}

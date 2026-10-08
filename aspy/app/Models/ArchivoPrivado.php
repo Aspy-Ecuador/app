@@ -45,6 +45,7 @@ class ArchivoPrivado extends Model
         'payment_data_id',
         'appointment_report_id',
         'creation_date',
+        'eliminar_el',
     ];
 
     // El contenido no viaja nunca en un listado ni en una respuesta JSON
@@ -52,6 +53,7 @@ class ArchivoPrivado extends Model
 
     protected $casts = [
         'creation_date' => 'datetime',
+        'eliminar_el' => 'datetime',
     ];
 
     public function paymentData()
@@ -76,12 +78,34 @@ class ArchivoPrivado extends Model
         return self::sinUsar()->where('creation_date', '<', now()->subHours(self::HORAS_SIN_USAR))->delete();
     }
 
+    /**
+     * Borra los archivos cuya fecha de eliminación ya llegó (comprobantes de pagos rechazados, pasados
+     * los días que eligió el Admin; ver Ajuste) y deja el pago sin comprobante. Devuelve cuántos borró.
+     */
+    public static function borrarProgramados(): int
+    {
+        $vencidos = self::whereNotNull('eliminar_el')
+            ->where('eliminar_el', '<=', now())
+            ->limit(200)
+            ->get(['archivo_privado_id', 'payment_data_id']);
+        if ($vencidos->isEmpty()) {
+            return 0;
+        }
+
+        $comprobantes = $vencidos->pluck('payment_data_id')->filter();
+        if ($comprobantes->isNotEmpty()) {
+            PaymentData::whereIn('payment_data_id', $comprobantes)->update(['file' => null, 'modification_date' => now()]);
+        }
+
+        return self::whereIn('archivo_privado_id', $vencidos->pluck('archivo_privado_id'))->delete();
+    }
+
     /** Todo menos el contenido (que puede pesar varios MB): para revisar permisos o vincular. */
     public function scopeSinContenido($query)
     {
         return $query->select([
             'archivo_privado_id', 'tipo', 'nombre', 'mime', 'tamano', 'subido_por',
-            'payment_data_id', 'appointment_report_id', 'creation_date',
+            'payment_data_id', 'appointment_report_id', 'creation_date', 'eliminar_el',
         ]);
     }
 

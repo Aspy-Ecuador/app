@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Appointment;
+use App\Models\ArchivoPrivado;
 use App\Models\Payment;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -30,6 +31,9 @@ class PaymentController extends Controller
 
     public function index()
     {
+        // Los comprobantes de pagos rechazados se borran un día después del rechazo
+        ArchivoPrivado::borrarProgramados();
+
         $payments = $this->visiblePayments()->with([
             'client.person.identification',
             'service',
@@ -39,9 +43,16 @@ class PaymentController extends Controller
             'receipt.receiptStatus'
         ])->get();
 
-        return $payments->map(function ($payment) {
+        // Fecha en que se borrará el comprobante, si el pago fue rechazado y todavía se conserva
+        $seBorran = ArchivoPrivado::whereNotNull('eliminar_el')
+            ->whereIn('payment_data_id', $payments->pluck('payment_data_id')->filter())
+            ->get(['payment_data_id', 'eliminar_el'])
+            ->keyBy('payment_data_id');
+
+        return $payments->map(function ($payment) use ($seBorran) {
             $data = $payment->toArray();
             $data['client'] = $payment->client?->person;
+            $data['comprobante_se_borra_el'] = $seBorran->get($payment->payment_data_id)?->eliminar_el;
             return $data;
         });
     }

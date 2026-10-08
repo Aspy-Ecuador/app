@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AjusteController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AppointmentReportController;
 use App\Http\Controllers\ArchivoPrivadoController;
@@ -42,6 +43,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Datos bancarios para transferir: los lee cualquiera con sesión; solo el Admin los cambia
     Route::get('/bank-account', [BankAccountController::class, 'show']);
     Route::put('/bank-account', [BankAccountController::class, 'update'])->middleware('role:admin');
+    // Ajustes del sistema (p. ej., cuánto se conserva el comprobante de un pago rechazado): los leen Secretaría y el Admin; solo el Admin los cambia
+    Route::get('/ajustes', [AjusteController::class, 'show'])->middleware('role:staff');
+    Route::put('/ajustes', [AjusteController::class, 'update'])->middleware('role:admin');
     // Manuales de uso: pase temporal con los manuales que puede ver el rol (ver ManualController)
     Route::get('/manuales/acceso', [ManualController::class, 'acceso']);
     // Política de privacidad: cada quien consulta y acepta la suya (primer ingreso de cuentas creadas desde el panel)

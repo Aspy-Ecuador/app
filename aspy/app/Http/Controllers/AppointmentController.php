@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Ajuste;
 use App\Models\Appointment;
 use App\Models\ArchivoPrivado;
 use App\Models\AppointmentReport;
@@ -216,11 +217,16 @@ class AppointmentController extends Controller
         }
     }
 
-    // Rechazar cita (staff)
+    // Rechazar cita (staff). El motivo es obligatorio: queda registrado en el pago y el paciente lo lee.
     public function rejectAppointment(Request $request)
     {
         $request->validate([
             'appointmentId' => 'required|integer',
+            'motivo' => 'required|string|min:5|max:500',
+        ], [
+            'motivo.required' => 'Escribe el motivo del rechazo: el paciente lo va a leer.',
+            'motivo.min' => 'El motivo es muy corto: explica por qué se rechaza el comprobante.',
+            'motivo.max' => 'El motivo no puede pasar de 500 caracteres.',
         ]);
 
         DB::beginTransaction();
@@ -235,6 +241,7 @@ class AppointmentController extends Controller
 
             $payment = $appointment->payment;
             $payment->payment_status_id = 3;
+            $payment->motivo_rechazo = trim((string) $request->input('motivo'));
             $payment->modified_by = auth()->id();
             $payment->modification_date = now();
             $payment->save();
@@ -242,6 +249,13 @@ class AppointmentController extends Controller
             if ($appointment->payment->receipt) {
                 $appointment->payment->receipt->delete();
             }
+
+            // El comprobante de un pago rechazado se conserva los días que eligió el Admin (por defecto uno,
+            // por si el rechazo fue un error y alguien necesita recuperarlo) y después se borra del sistema
+            // (ArchivoPrivado::borrarProgramados). Con 0 días no se borra nunca. El motivo queda siempre.
+            $dias = Ajuste::comprobanteRechazadoDias();
+            ArchivoPrivado::where('payment_data_id', $payment->payment_data_id)
+                ->update(['eliminar_el' => $dias > 0 ? now()->addDays($dias) : null]);
 
             $workerSchedule = WorkerSchedule::findOrFail($appointment->worker_schedule_id);
             $workerSchedule->is_available = true;
