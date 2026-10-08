@@ -14,7 +14,7 @@ try {
     await shot(p, dir + "/00-login");
     await login(p, email, pass); await settle(p, 1200);
     await p.locator('[data-testid="MoreVertRoundedIcon"], [data-testid="MoreVertIcon"]').first().click(); await p.waitForTimeout(500);
-    await shot(p, dir + "/00-menu-cuenta", { clip: { x: 0, y: 560, width: 480, height: 340 } });
+    await shot(p, dir + "/00-menu-cuenta", { clip: { x: 0, y: 520, width: 480, height: 380 } });
     await ctx.close();
   }
 } finally { await b.close(); }

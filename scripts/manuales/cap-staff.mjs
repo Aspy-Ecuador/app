@@ -132,6 +132,15 @@ try {
     await row("Psicología").first().locator('[data-testid*="Edit"]').click(); await settle(p);
     await shot(p, "24-servicio-editar");
   });
+  // Quien retiró su consentimiento (lo hace cap-cliente, paso "retiro") sale con un escudo rojo junto al interruptor
+  await step("retiro", async () => {
+    await go(p, "/pacientes"); await settle(p, 800);
+    const escudo = row("Rosa").first().locator('[data-testid="GppBadOutlinedIcon"]');
+    await escudo.scrollIntoViewIfNeeded();
+    await escudo.hover(); await p.waitForTimeout(700);
+    await mark(p, escudo, "");
+    await shot(p, "25-paciente-retiro");
+  });
 } finally {
   await b.close();
 }

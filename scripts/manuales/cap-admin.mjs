@@ -60,6 +60,15 @@ try {
     await p.getByRole("button", { name: "Mes" }).click(); await p.waitForTimeout(800);
     await shot(p, "08-citas-mes");
   });
+  // Quien retiró su consentimiento (lo hace cap-cliente, paso "retiro") sale con un escudo rojo junto al interruptor
+  await step("retiro", async () => {
+    await go(p, "/usuarios"); await settle(p, 800);
+    const escudo = row("Rosa").first().locator('[data-testid="GppBadOutlinedIcon"]');
+    await escudo.scrollIntoViewIfNeeded();
+    await escudo.hover(); await p.waitForTimeout(700);
+    await mark(p, escudo, "");
+    await shot(p, "10-usuario-retiro");
+  });
 } finally {
   await b.close();
 }

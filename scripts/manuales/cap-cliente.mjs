@@ -122,8 +122,19 @@ try {
   await step("menu-usuario", async () => {
     await go(p, "/dashboard");
     await p.locator('[data-testid="MoreVertRoundedIcon"], [data-testid="MoreVertIcon"]').first().click(); await p.waitForTimeout(500);
-    await rawShot(p, D + "27-menu-usuario", { clip: { x: 0, y: 560, width: 480, height: 340 } });
+    await rawShot(p, D + "27-menu-usuario", { clip: { x: 0, y: 520, width: 480, height: 380 } });
     await p.keyboard.press("Escape"); await p.waitForTimeout(300);
+  });
+  // Privacidad y mis datos: qué aceptó, sus derechos y el retiro del consentimiento (aquí no se retira nada)
+  await step("privacidad", async () => {
+    await go(p, "/privacidad"); await settle(p, 800);
+    await mark(p, p.getByRole("button", { name: "Retirar mi consentimiento" }), "1");
+    await mark(p, p.getByRole("button", { name: "Ver y corregir mis datos" }), "2");
+    await shot(p, "35-privacidad");
+    await p.getByRole("button", { name: "Retirar mi consentimiento" }).click(); await p.waitForTimeout(500);
+    await mark(p, p.getByRole("button", { name: "Sí, retirar" }), "");
+    await shot(p, "36-privacidad-retirar");
+    await p.getByRole("button", { name: "No, conservar mi cuenta" }).click(); await p.waitForTimeout(400);
   });
   await step("modo-oscuro", async () => {
     const t = p.getByRole("button", { name: /Cambiar a modo/ }).first();
@@ -157,10 +168,36 @@ try {
       });
       if (r.status !== 201 && r.status !== 422) throw new Error("no se pudo crear la cuenta de demo: " + r.status);
       await login(p2, "rosa.paz@gmail.com", "Aspy2026"); await settle(p2, 1200);
-      await p2.getByRole("dialog").waitFor({ timeout: 15000 });
-      await mark(p2, p2.getByRole("button", { name: /Desliza para leerla|Marca las casillas|Acepto/ }), "1");
-      await mark(p2, p2.getByRole("button", { name: "Cerrar sesión" }), "2");
+      const ventana = p2.getByRole("dialog");
+      await ventana.waitFor({ timeout: 15000 });
+      // Al final de la política están las casillas: se marcan y recién entonces se puede aceptar
+      const contenido = ventana.locator(".MuiDialogContent-root");
+      await contenido.evaluate((e) => e.scrollTo(0, e.scrollHeight)); await p2.waitForTimeout(500);
+      const casillas = ventana.locator('input[type="checkbox"]');
+      for (let i = 0; i < (await casillas.count()); i++) await casillas.nth(i).check();
+      await contenido.evaluate((e) => e.scrollTo(0, e.scrollHeight)); await p2.waitForTimeout(400);
+      await mark(p2, ventana.getByRole("button", { name: "Acepto", exact: true }), "1");
+      await mark(p2, ventana.getByRole("button", { name: "Cerrar sesión" }), "2");
       await rawShot(p2, D + "34-politica-primer-ingreso");
+    });
+    // Esa misma persona (ficticia) acepta y luego retira su consentimiento: su cuenta queda deshabilitada
+    // y las listas de Secretaría y Administración la marcan con el escudo rojo (cap-staff y cap-admin).
+    await step("retiro", async () => {
+      await login(p2, "rosa.paz@gmail.com", "Aspy2026"); await settle(p2, 1200);
+      const ventana = p2.getByRole("dialog");
+      if (await ventana.isVisible().catch(() => false)) {
+        await ventana.locator(".MuiDialogContent-root").evaluate((e) => e.scrollTo(0, e.scrollHeight)); await p2.waitForTimeout(400);
+        const casillas = ventana.locator('input[type="checkbox"]');
+        for (let i = 0; i < (await casillas.count()); i++) await casillas.nth(i).check();
+        await ventana.getByRole("button", { name: "Acepto", exact: true }).click();
+        await ventana.waitFor({ state: "hidden", timeout: 15000 });
+      }
+      await go(p2, "/privacidad"); await settle(p2, 800);
+      await p2.getByRole("button", { name: "Retirar mi consentimiento" }).click(); await p2.waitForTimeout(400);
+      await p2.getByRole("button", { name: "Sí, retirar" }).click();
+      await p2.waitForURL(/motivo=consentimiento/, { timeout: 20000 }); await settle(p2, 800);
+      await mark(p2, p2.locator(".MuiAlert-root").first(), "");
+      await rawShot(p2, D + "37-consentimiento-retirado");
     });
   } finally {
     await c2.close();
