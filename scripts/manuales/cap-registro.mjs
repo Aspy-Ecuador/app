@@ -49,16 +49,22 @@ try {
     await p.getByRole("button", { name: /Siguiente/ }).click(); await p.waitForTimeout(500);
 
     await escribir(p, "email", "carmen.vera@gmail.com"); await escribir(p, "password", "Aspy2026"); await escribir(p, "password_confirmation", "Aspy2026");
-    await mark(p, p.getByRole("checkbox"), "");
+    // La tarjeta de la política es el único role="checkbox" fuera de la ventana; dentro están las casillas
+    const tarjeta = p.locator('form [role="checkbox"]');
+    await mark(p, tarjeta, "");
     await shot(p, "06-registro-paso3-antes", { fullPage: true });
-    await p.getByRole("checkbox").click(); await p.waitForTimeout(600);
+    await tarjeta.click(); await p.waitForTimeout(600);
     await shot(p, "06a-registro-politica");
     await p.locator('[role="dialog"] .MuiDialogContent-root').evaluate((e) => e.scrollTo(0, e.scrollHeight)); await p.waitForTimeout(500);
-    const ok = p.locator('[role="dialog"] button').last();
-    await mark(p, ok, "");
+    const casillas = p.locator('[role="dialog"] input[type="checkbox"]');
+    for (let i = 0; i < (await casillas.count()); i++) await casillas.nth(i).check();
+    await p.locator('[role="dialog"] .MuiDialogContent-root').evaluate((e) => e.scrollTo(0, e.scrollHeight)); await p.waitForTimeout(400);
+    const ok = p.locator('[role="dialog"]').getByRole("button", { name: "Acepto", exact: true });
+    await mark(p, casillas.first().locator("xpath=ancestor::label[1]/.."), "1");
+    await mark(p, ok, "2");
     await shot(p, "06b-registro-politica-aceptar");
     await ok.click(); await p.waitForTimeout(600);
-    await mark(p, p.getByRole("checkbox"), "1");
+    await mark(p, tarjeta, "1");
     await mark(p, p.getByRole("button", { name: /Registrarse/ }), "2");
     await shot(p, "06-registro-paso3", { fullPage: true });
     await p.getByRole("button", { name: /Registrarse/ }).click(); await settle(p, 2000);

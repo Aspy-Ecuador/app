@@ -67,9 +67,14 @@ async function bajar(token, ref) {
   return { status: res.status, tipo: res.headers.get("content-type") ?? "", bytes: Buffer.from(await res.arrayBuffer()) };
 }
 
+// Consentimiento (ConsentimientoController): versión vigente y casillas que acepta cada quien, una por una
+const POLITICA = "2.0";
+const CONSENTE_PACIENTE = { declaraciones: ["tratamiento", "datos_sensibles", "transferencia"], representante: null };
+const CONSENTE_PERSONAL = { declaraciones: ["tratamiento", "confidencialidad", "transferencia"], representante: null };
+
 const userPayload = (email, extra = {}) => ({
   email, password: "Secreta123", password_confirmation: "Secreta123",
-  role_id: 3, accepted_privacy_policy: true, policy_version: "1.0",
+  role_id: 3, accepted_privacy_policy: true, policy_version: POLITICA, consentimiento: CONSENTE_PACIENTE,
   gender_id: 1, occupation_id: 1, marital_status_id: 1, education_id: 1,
   first_name: "Test", last_name: email.split("@")[0], birthdate: "1990-01-01",
   phone: { number: "0999999999", type: "movil" },
@@ -397,7 +402,7 @@ const otra = r.status === 201 ? await login(e("otra2")) : null;
 const fichaOtra = otra ? (await call("GET", "/user", otra.token)).data : null;
 check("Ocupación 'Otra' se guarda con su texto", fichaOtra?.person?.occupation_other === "Diseñadora gráfica", `${r.status} ${JSON.stringify(fichaOtra?.person?.occupation_other)}`);
 // Política de privacidad: la acepta quien se registra; el alta desde el panel no la pide
-const sinPolitica = (email, extra = {}) => { const { accepted_privacy_policy: _a, policy_version: _v, ...resto } = userPayload(email, extra); return resto; };
+const sinPolitica = (email, extra = {}) => { const { accepted_privacy_policy: _a, policy_version: _v, consentimiento: _c, ...resto } = userPayload(email, extra); return resto; };
 r = await call("POST", "/user-account/registro", null, sinPolitica(e("sinpolitica")));
 check("Registro público sin aceptar la política se rechaza", r.status === 422 && !!r.data?.errors?.accepted_privacy_policy, r.status);
 r = await call("POST", "/user-account/crear", S.token, sinPolitica(e("altapanel")));
@@ -410,14 +415,38 @@ r = await call("GET", "/consentimiento", altaPanel.token);
 check("Cuenta creada desde el panel: política pendiente", r.status === 200 && r.data?.pendiente === true, JSON.stringify(r.data));
 r = await call("GET", "/consentimiento", A.token);
 check("Quien se registró por su cuenta ya la tiene aceptada", r.data?.pendiente === false, JSON.stringify(r.data));
-r = await call("POST", "/consentimiento", altaPanel.token, { accepted_privacy_policy: false, policy_version: "1.0" });
+r = await call("POST", "/consentimiento", altaPanel.token, { accepted_privacy_policy: false, policy_version: POLITICA, consentimiento: CONSENTE_PACIENTE });
 check("No se registra un consentimiento sin aceptar", r.status === 422, r.status);
-r = await call("POST", "/consentimiento", altaPanel.token, { accepted_privacy_policy: true, policy_version: "9.9" });
+r = await call("POST", "/consentimiento", altaPanel.token, { accepted_privacy_policy: true, policy_version: "9.9", consentimiento: CONSENTE_PACIENTE });
 check("No se acepta una versión que no es la vigente", r.status === 422, r.status);
-r = await call("POST", "/consentimiento", altaPanel.token, { accepted_privacy_policy: true, policy_version: "1.0", user_id: 1, user_account_id: 1 });
+r = await call("POST", "/consentimiento", altaPanel.token, { accepted_privacy_policy: true, policy_version: POLITICA });
+check("No se acepta sin las casillas del consentimiento", r.status === 422, r.status);
+r = await call("POST", "/consentimiento", altaPanel.token, { accepted_privacy_policy: true, policy_version: POLITICA, consentimiento: { declaraciones: ["tratamiento", "transferencia"], representante: null } });
+check("Los datos de salud se autorizan con su propia casilla", r.status === 422, r.status);
+r = await call("GET", "/consentimiento", S.token);
+check("Al personal se le pide el compromiso de confidencialidad", r.data?.declaraciones?.includes("confidencialidad") && !r.data?.declaraciones?.includes("datos_sensibles"), JSON.stringify(r.data));
+r = await call("POST", "/consentimiento", S.token, { accepted_privacy_policy: true, policy_version: POLITICA, consentimiento: CONSENTE_PACIENTE });
+check("El personal no acepta con las casillas de un paciente", r.status === 422, r.status);
+r = await call("POST", "/consentimiento", altaPanel.token, { accepted_privacy_policy: true, policy_version: POLITICA, consentimiento: CONSENTE_PACIENTE, user_id: 1, user_account_id: 1 });
 const consPropio = (await call("GET", "/consentimiento", altaPanel.token)).data;
 const consAjeno = (await call("GET", "/consentimiento", S.token)).data;
 check("Cada quien acepta solo por su propia cuenta", r.status === 201 && consPropio?.pendiente === false && consAjeno?.pendiente === true, `${r.status} ${JSON.stringify(consPropio)} ${JSON.stringify(consAjeno)}`);
+// Retirar el consentimiento: solo la propia persona (paciente), con confirmación; deshabilita su cuenta
+r = await call("POST", "/consentimiento/retirar", null, { confirmar: true });
+check("Retirar el consentimiento exige sesión", r.status === 401, r.status);
+r = await call("POST", "/consentimiento/retirar", S.token, { confirmar: true });
+check("El personal no retira su consentimiento en línea", r.status === 403, r.status);
+r = await call("POST", "/consentimiento/retirar", altaPanel.token, {});
+check("Retirar el consentimiento pide confirmación", r.status === 422, r.status);
+r = await call("POST", "/consentimiento/retirar", altaPanel.token, { confirmar: true });
+check("El paciente retira su consentimiento", r.status === 200 && r.data?.retirado === true, `${r.status} ${JSON.stringify(r.data)}`);
+r = await call("GET", "/user", altaPanel.token);
+check("Al retirarlo se cierran sus sesiones", r.status === 401, r.status);
+r = await call("POST", "/login", null, { email: e("altapanel"), password: "Secreta123" });
+check("…y su cuenta queda deshabilitada", r.status === 403 && r.data?.code === "cuenta_deshabilitada", r.status);
+r = await call("GET", "/person", S.token);
+check("Secretaría ve quién retiró su consentimiento", r.data?.some((p) => p.person_id === altaPanel.personId && !!p.consentimiento_retirado_el) && r.data?.filter((p) => !!p.consentimiento_retirado_el).length === 1, r.status);
+check("Los demás no reciben ese dato", (await call("GET", "/person", A.token)).data?.every((p) => !("consentimiento_retirado_el" in p) || p.consentimiento_retirado_el == null));
 
 // ───────── Cuentas deshabilitadas ─────────
 console.log("\nCuentas deshabilitadas");

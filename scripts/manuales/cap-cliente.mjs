@@ -158,7 +158,7 @@ try {
       if (r.status !== 201 && r.status !== 422) throw new Error("no se pudo crear la cuenta de demo: " + r.status);
       await login(p2, "rosa.paz@gmail.com", "Aspy2026"); await settle(p2, 1200);
       await p2.getByRole("dialog").waitFor({ timeout: 15000 });
-      await mark(p2, p2.getByRole("button", { name: /Desliza para aceptar|Entendido y Acepto/ }), "1");
+      await mark(p2, p2.getByRole("button", { name: /Desliza para leerla|Marca las casillas|Acepto/ }), "1");
       await mark(p2, p2.getByRole("button", { name: "Cerrar sesión" }), "2");
       await rawShot(p2, D + "34-politica-primer-ingreso");
     });

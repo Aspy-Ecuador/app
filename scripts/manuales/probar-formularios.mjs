@@ -219,12 +219,15 @@ try {
       await login(p2, v.email, v.password); await settle(p2, 800);
       const ventana = p2.getByRole("dialog");
       await ventana.waitFor({ timeout: 15000 });
-      ok("Primer ingreso · aparece la política y no se puede aceptar sin leerla", await ventana.getByRole("button", { name: /Desliza para aceptar/ }).isDisabled());
+      ok("Primer ingreso · aparece la política y no se puede aceptar sin leerla", await ventana.getByRole("button", { name: /Desliza para leerla/ }).isDisabled());
       await p2.keyboard.press("Escape"); await p2.waitForTimeout(400);
       ok("Primer ingreso · no se cierra con Escape", await ventana.isVisible());
       await ventana.locator(".MuiDialogContent-root").evaluate((el) => el.scrollTo(0, el.scrollHeight)); await p2.waitForTimeout(500);
       await p2.screenshot({ path: path.join(OUT, "primer-ingreso-politica.jpg"), type: "jpeg", quality: 70 });
-      await ventana.getByRole("button", { name: "Entendido y Acepto" }).click();
+      ok("Primer ingreso · leerla no basta: hay que marcar las casillas", await ventana.getByRole("button", { name: /Marca las casillas/ }).isDisabled());
+      const casillas = ventana.locator('input[type="checkbox"]');
+      for (let i = 0; i < (await casillas.count()); i++) await casillas.nth(i).check();
+      await ventana.getByRole("button", { name: "Acepto", exact: true }).click();
       await ventana.waitFor({ state: "hidden", timeout: 15000 });
       const t = (await token(v.email, v.password)).token;
       const estado = await (await fetch(API + "/consentimiento", { headers: { Authorization: `Bearer ${t}`, Accept: "application/json" } })).json();

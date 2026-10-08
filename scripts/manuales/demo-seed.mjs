@@ -18,7 +18,9 @@ async function login(email, password = PASS) {
   const r = await call("POST", "/login", null, { email, password });
   // Las personas de demo ya aceptaron la política de privacidad; si no, en cada captura saldría
   // la ventana del primer ingreso (las cuentas creadas desde el panel no la tienen aceptada).
-  await call("POST", "/consentimiento", r.data.access_token, { accepted_privacy_policy: true, policy_version: "1.0" });
+  // (cada quien con las casillas que le tocan según su rol; las dice el propio servidor)
+  const estado = (await call("GET", "/consentimiento", r.data.access_token)).data;
+  if (estado?.pendiente) await call("POST", "/consentimiento", r.data.access_token, { accepted_privacy_policy: true, policy_version: estado.version, consentimiento: { declaraciones: estado.declaraciones, representante: null } });
   const me = await call("GET", "/user", r.data.access_token);
   return { token: r.data.access_token, personId: me.data.person?.person_id };
 }
@@ -26,7 +28,7 @@ const inDays = (d) => new Date(Date.now() + d * 864e5).toISOString().slice(0, 10
 let ced = 912345670;
 const user = (email, first, last, extra = {}) => ({
   email, password: PASS, password_confirmation: PASS, role_id: 3,
-  accepted_privacy_policy: true, policy_version: "1.0",
+  accepted_privacy_policy: true, policy_version: "2.0", consentimiento: { declaraciones: ["tratamiento", "datos_sensibles", "transferencia"], representante: null },
   gender_id: extra.gender_id ?? 1, occupation_id: extra.occupation_id ?? 4, marital_status_id: extra.marital_status_id ?? 1, education_id: extra.education_id ?? 5,
   first_name: first, last_name: last, birthdate: extra.birthdate ?? "1988-04-12",
   phone: { number: "09" + String(91234560 + (ced % 100) * 1117).slice(0, 8), type: "movil" },
