@@ -9,11 +9,14 @@ use App\Models\UserAccount;
 
 class AuthController extends Controller
 {
+    /** Sesiones abiertas a la vez por cuenta (celular, computadora...). Al pasar de ahí se cierra la más antigua. */
+    private const MAX_SESIONES = 10;
+
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
+            'email' => 'required|email|max:150',
+            'password' => 'required|string|max:255',
         ]);
 
         $user = UserAccount::where('email', $request->email)->first();
@@ -31,6 +34,17 @@ class AuthController extends Controller
         
         $user->last_login = now();
         $user->saveQuietly();
+
+        // Sesiones: se borran las vencidas de esta cuenta y se conservan las 10 más recientes,
+        // para que la tabla de sesiones no crezca sin fin con cada ingreso
+        $vencimiento = (int) config('sanctum.expiration');
+        if ($vencimiento) {
+            $user->tokens()->where('created_at', '<', now()->subMinutes($vencimiento))->delete();
+        }
+        $sobran = $user->tokens()->orderByDesc('id')->skip(self::MAX_SESIONES - 1)->take(1000)->pluck('id');
+        if ($sobran->isNotEmpty()) {
+            $user->tokens()->whereIn('id', $sobran)->delete();
+        }
 
         $token = $user->createToken('react-token')->plainTextToken;
 

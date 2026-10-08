@@ -12,7 +12,8 @@ class ProfessionalController extends Controller
     {
         $validated = $request->validate([
             'professional_id' => 'required|integer|exists:professional,person_id',
-            'date' => 'required|date|after_or_equal:today',
+            // Hasta un año adelante: nadie agenda más lejos, y evita llenar la agenda de horarios sin sentido
+            'date' => ['required', 'date', 'after_or_equal:today', 'before_or_equal:'.now()->addYear()->toDateString()],
             'start_time' => 'required|date_format:H:i,H:i:s',
             'end_time' => 'required|date_format:H:i,H:i:s|after:start_time',
             'name' => 'required|string|max:150',

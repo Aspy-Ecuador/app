@@ -11,62 +11,12 @@ use App\Models\Person;
 use App\Models\UserAccount;
 use App\Models\UserConsent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Testing\TestResponse;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->seed(); // catálogos y admin@aspy.com
 });
-
-const CASILLAS_PACIENTE = ['tratamiento', 'datos_sensibles', 'transferencia'];
-const CASILLAS_PERSONAL = ['tratamiento', 'confidencialidad', 'transferencia'];
-
-/** Datos de una cuenta nueva; `$extra` cambia o agrega campos. */
-function cuentaNueva(string $email, array $extra = []): array
-{
-    return array_merge([
-        'email' => $email,
-        'password' => 'Secreta123',
-        'password_confirmation' => 'Secreta123',
-        'role_id' => 3,
-        'gender_id' => 1,
-        'occupation_id' => 1,
-        'marital_status_id' => 1,
-        'education_id' => 1,
-        'first_name' => 'Prueba',
-        'last_name' => 'Consentimiento',
-        'birthdate' => '1990-01-01',
-        'phone' => ['number' => '0999999999', 'type' => 'movil'],
-        'address' => ['type' => 'casa', 'country_id' => 1, 'state_id' => 1, 'city_id' => 1, 'primary_address' => 'Calle 1', 'secondary_address' => 'Calle 2'],
-        'identification' => ['type' => 'cedula', 'number' => '09'.str_pad((string) random_int(0, 99999999), 8, '0', STR_PAD_LEFT)],
-    ], $extra);
-}
-
-/** Lo que manda la web cuando la persona marcó sus casillas. */
-function consentimiento(array $casillas = CASILLAS_PACIENTE, ?array $representante = null): array
-{
-    return [
-        'accepted_privacy_policy' => true,
-        'policy_version' => ConsentimientoController::VERSION,
-        'consentimiento' => ['declaraciones' => $casillas, 'representante' => $representante],
-    ];
-}
-
-/** Petición con la sesión de otra cuenta (el guard recuerda al usuario anterior si no se limpia). */
-function como($prueba, ?string $token)
-{
-    app('auth')->forgetGuards();
-
-    return $token ? $prueba->withToken($token) : $prueba->withHeaders(['Authorization' => '']);
-}
-
-function entrar($prueba, string $email, string $clave = 'Secreta123'): TestResponse
-{
-    app('auth')->forgetGuards();
-
-    return $prueba->postJson('/api/login', ['email' => $email, 'password' => $clave]);
-}
 
 test('el registro público exige cada casilla del consentimiento y la versión vigente', function () {
     $sinCasillas = cuentaNueva('a@prueba.test', ['accepted_privacy_policy' => true, 'policy_version' => ConsentimientoController::VERSION]);

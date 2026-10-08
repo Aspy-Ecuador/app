@@ -18,6 +18,12 @@ class ArchivoPrivado extends Model
 
     public const REPORTE = 'reporte';
 
+    /** Archivos sin usar (subidos, pero todavía de ninguna cita ni reporte) que guarda una cuenta: al subir otro se borra el más antiguo. */
+    public const MAX_SIN_USAR = 5;
+
+    /** Horas que se conserva un archivo que nadie usó. */
+    public const HORAS_SIN_USAR = 24;
+
     /** Prefijo con que payment_data.file y appointment_report.file apuntan a un archivo privado. */
     public const PREFIJO = 'privado:';
 
@@ -56,6 +62,18 @@ class ArchivoPrivado extends Model
     public function appointmentReport()
     {
         return $this->belongsTo(AppointmentReport::class, 'appointment_report_id', 'appointment_report_id');
+    }
+
+    /** Subidos, pero todavía de ninguna cita ni reporte. */
+    public function scopeSinUsar($query)
+    {
+        return $query->whereNull('payment_data_id')->whereNull('appointment_report_id');
+    }
+
+    /** Borra los que nadie usó en HORAS_SIN_USAR (de cualquier cuenta). */
+    public static function borrarSinUsarVencidos(): int
+    {
+        return self::sinUsar()->where('creation_date', '<', now()->subHours(self::HORAS_SIN_USAR))->delete();
     }
 
     /** Todo menos el contenido (que puede pesar varios MB): para revisar permisos o vincular. */

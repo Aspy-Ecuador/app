@@ -29,7 +29,7 @@ class ServiceController extends Controller
     {
         $validated = $request->validate([
             'name'       => 'required|string|max:150',
-            'price'      => 'required|numeric|min:0',            
+            'price'      => 'required|numeric|min:0|max:99999.99',
         ]);
  
         $validated['created_by'] = auth()->id();
@@ -50,7 +50,7 @@ class ServiceController extends Controller
  
         $validated = $request->validate([
             'name'        => 'sometimes|required|string|max:150',
-            'price'       => 'sometimes|required|numeric|min:0',
+            'price'       => 'sometimes|required|numeric|min:0|max:99999.99',
         ]);
  
         $validated['modified_by'] = auth()->id();

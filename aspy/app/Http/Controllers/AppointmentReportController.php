@@ -44,8 +44,8 @@ class AppointmentReportController extends Controller
     {
         $validated = $request->validate([
             'appointment_id' => 'required|integer|unique:appointment_report,appointment_id',
-            'comments' => 'required|string',
-            'sign' => 'required|string',
+            'comments' => 'required|string|max:5000',
+            'sign' => 'required|string|max:255',
 
         ]);
 
@@ -56,8 +56,8 @@ class AppointmentReportController extends Controller
     {
         $report = AppointmentReport::findOrFail($id);
         $validated = $request->validate([
-            'comments' => 'string',
-            'sign' => 'string',
+            'comments' => 'string|max:5000',
+            'sign' => 'string|max:255',
         ]);
 
         $validated['modification_date'] = Carbon::now();

@@ -34,7 +34,7 @@ class WorkerScheduleController extends Controller
             'date' => 'required|date',
             'start_time' => 'required|date_format:H:i:s',
             'end_time' => 'required|date_format:H:i:s|after:start_time',
-            'name' => 'nullable|string',
+            'name' => 'nullable|string|max:150',
 
             // Campos para WorkerSchedule
             'person_id' => 'required|integer',

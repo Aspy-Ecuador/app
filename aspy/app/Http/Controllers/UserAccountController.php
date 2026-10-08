@@ -169,7 +169,7 @@ class UserAccountController extends Controller
         $validated = $request->validate(array_merge($reglasConsentimiento, [
             // ── UserAccount ───────────────────────────────────
             'email'                     => 'required|email|max:150|unique:user_account,email',
-            'password'                  => 'required|string|min:8|confirmed', // espera password_confirmation
+            'password'                  => 'required|string|min:8|max:255|confirmed', // espera password_confirmation
             'role_id'                   => 'required|integer|exists:role,role_id',
 
             // ── Datos base de Person ──────────────────────────

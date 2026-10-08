@@ -21,6 +21,8 @@ use App\Http\Controllers\ProfessionalController;
 | - 'role:x,y' (CheckRole) deja pasar a esos roles y SIEMPRE al Admin.
 | - Lo que depende del dueño del registro (mis citas, mi perfil, mis pacientes)
 |   se valida dentro de cada controlador.
+| - Límites de intentos: todo el API tiene uno general ('throttle:api', en bootstrap/app.php) y las
+|   rutas delicadas, el suyo ('throttle:login', 'registro', 'archivos-subir'...). Están en AppServiceProvider.
 */
 
 Route::get('/login', function () {
@@ -48,15 +50,16 @@ Route::middleware('auth:sanctum')->group(function () {
     // Retirar el consentimiento (pacientes y familias): deshabilita la cuenta y deja la constancia
     Route::post('/consentimiento/retirar', [ConsentimientoController::class, 'retirar']);
     // Comprobantes y reportes: se guardan en el servidor y solo los abre quien corresponde (ver ArchivoPrivadoController)
-    Route::post('/archivos', [ArchivoPrivadoController::class, 'store'])->middleware('throttle:20,1');
-    Route::get('/archivos/{id}', [ArchivoPrivadoController::class, 'show'])->whereNumber('id');
+    Route::post('/archivos', [ArchivoPrivadoController::class, 'store'])->middleware('throttle:archivos-subir');
+    Route::get('/archivos/resumen', [ArchivoPrivadoController::class, 'resumen']); // cuántos tiene subidos la cuenta y sus topes
+    Route::get('/archivos/{id}', [ArchivoPrivadoController::class, 'show'])->whereNumber('id')->middleware('throttle:archivos-ver');
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 
 // Registro público: siempre crea un Cliente (el rol lo fija el servidor)
 Route::prefix('user-account')->group(function () {
-    Route::post('/registro', [UserAccountController::class, 'store'])->middleware('throttle:5,1');
+    Route::post('/registro', [UserAccountController::class, 'store'])->middleware('throttle:registro');
 });
 
 // UserAccount
@@ -80,7 +83,7 @@ Route::middleware('auth:sanctum')->prefix('person')->group(function () {
 
 // Professional
 Route::middleware('auth:sanctum')->prefix('professional')->group(function () {
-    Route::post("/create-horario", [ProfessionalController::class, 'createHorario'])->middleware('role:professional,staff');
+    Route::post("/create-horario", [ProfessionalController::class, 'createHorario'])->middleware(['role:professional,staff', 'throttle:horarios']);
 });
 
 // WorkerSchedule (la lista es necesaria para agendar citas)

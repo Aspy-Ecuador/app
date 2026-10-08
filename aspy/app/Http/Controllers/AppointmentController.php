@@ -27,6 +27,12 @@ class AppointmentController extends Controller
 
     private const CLIENT_CANCEL_MIN_HOURS = 24;
 
+    /**
+     * Citas que un paciente puede tener esperando la revisión del pago. Sin un tope, una sola cuenta
+     * podría reservar toda la agenda (cada cita ocupa un horario y guarda un comprobante).
+     */
+    private const MAX_CITAS_POR_REVISAR = 10;
+
     /** Citas visibles para el usuario actual. */
     private function visibleAppointments(): Builder
     {
@@ -111,6 +117,15 @@ class AppointmentController extends Controller
             ->exists();
         if (! $offersService) {
             return response()->json(['message' => 'El profesional no ofrece este servicio.'], 422);
+        }
+
+        if ($this->isClient()) {
+            $porRevisar = Appointment::where('client_id', $this->currentPersonId())->where('appointment_status_id', self::STATUS_SAVED)->count();
+            if ($porRevisar >= self::MAX_CITAS_POR_REVISAR) {
+                return response()->json([
+                    'message' => "Ya tienes {$porRevisar} citas esperando la revisión del pago. Cuando la fundación las revise podrás agendar más.",
+                ], 422);
+            }
         }
 
         // El comprobante tiene que ser un archivo que esta misma cuenta acaba de subir y que nadie usó

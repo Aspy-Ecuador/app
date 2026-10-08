@@ -14,11 +14,25 @@ use Illuminate\Support\Facades\DB;
  * - Reporte (información clínica): lo ven el paciente de la cita, el profesional que la atendió y el
  *   Admin. Secretaría NO.
  * - Recién subido y todavía sin usar en una cita o reporte: solo quien lo subió (y el Admin).
+ *
+ * Para que nadie pueda llenar la base de datos subiendo archivos:
+ * - cada archivo pesa como máximo 8 MB y tiene que ser una imagen o un PDF de verdad;
+ * - una cuenta guarda como máximo MAX_SIN_USAR archivos sin usar (al subir otro se borra el más antiguo);
+ * - los que nadie usó se borran al día siguiente;
+ * - hay un máximo de subidas por día por cuenta y uno de espacio total para archivos sin usar.
  */
 class ArchivoPrivadoController extends Controller
 {
     /** Tamaño máximo en KB (nginx.conf y el Dockerfile dejan pasar hasta 12 MB por petición). */
     private const MAX_KB = 8192;
+
+    /** Subidas por día: una familia sube uno por cita; Secretaría y los profesionales, muchos más. */
+    private const MAX_POR_DIA_PACIENTE = 30;
+
+    private const MAX_POR_DIA_PERSONAL = 300;
+
+    /** Espacio total para archivos que todavía no son de ninguna cita ni reporte (todas las cuentas). */
+    private const MAX_BYTES_SIN_USAR = 300 * 1024 * 1024;
 
     /** Tipos aceptados: la extensión se deduce del contenido, no del nombre que manda el navegador. */
     private const TIPOS = [
@@ -28,6 +42,12 @@ class ArchivoPrivadoController extends Controller
         'webp' => 'image/webp',
         'pdf' => 'application/pdf',
     ];
+
+    /** Cuántos archivos tiene subidos la cuenta y cuáles son sus topes (la web se lo muestra). */
+    public function resumen()
+    {
+        return response()->json($this->resumenDeLaCuenta());
+    }
 
     public function store(Request $request)
     {
@@ -64,12 +84,19 @@ class ArchivoPrivadoController extends Controller
         }
 
         try {
-            // Limpieza: lo que esta persona subió hace más de un día y nunca usó
-            ArchivoPrivado::where('subido_por', auth()->id())
-                ->whereNull('payment_data_id')
-                ->whereNull('appointment_report_id')
-                ->where('creation_date', '<', now()->subDay())
-                ->delete();
+            // Lo que nadie usó en un día se borra (de cualquier cuenta)
+            ArchivoPrivado::borrarSinUsarVencidos();
+
+            $resumen = $this->resumenDeLaCuenta();
+            if ($resumen['hoy'] >= $resumen['maximo_por_dia']) {
+                return response()->json([
+                    'message' => "Hoy ya subiste {$resumen['hoy']} archivos, que es el máximo por día. Podrás subir más mañana.",
+                ] + $resumen, 429);
+            }
+
+            if (! $this->hayEspacioParaSinUsar()) {
+                return response()->json(['message' => 'El sistema está recibiendo demasiados archivos en este momento. Inténtalo de nuevo en unos minutos.'], 503);
+            }
 
             $archivo = ArchivoPrivado::create([
                 'tipo' => $tipo,
@@ -82,7 +109,20 @@ class ArchivoPrivadoController extends Controller
             ]);
             $this->registrar($archivo->archivo_privado_id, 'subir');
 
-            return response()->json(['archivo' => $archivo->referencia()], 201);
+            // Tope de archivos sin usar por cuenta: se conservan los más nuevos
+            $sobran = ArchivoPrivado::sinUsar()
+                ->where('subido_por', auth()->id())
+                ->orderByDesc('archivo_privado_id')
+                ->skip(ArchivoPrivado::MAX_SIN_USAR)
+                ->take(1000)
+                ->pluck('archivo_privado_id');
+            $reemplazados = $sobran->isEmpty() ? 0 : ArchivoPrivado::whereIn('archivo_privado_id', $sobran)->delete();
+
+            return response()->json([
+                'archivo' => $archivo->referencia(),
+                // Cuántos de sus archivos sin usar se borraron para hacerle lugar a este
+                'reemplazados' => $reemplazados,
+            ] + $this->resumenDeLaCuenta(), 201);
         } catch (\Throwable $e) {
             return $this->serverError('No se pudo guardar el archivo.', $e);
         }
@@ -142,9 +182,64 @@ class ArchivoPrivadoController extends Controller
             || ($this->isClient() && (int) $comprobante->client_id === $yo);
     }
 
-    /** Deja constancia de quién subió o abrió el archivo. */
+    private function resumenDeLaCuenta(): array
+    {
+        return [
+            'sin_usar' => ArchivoPrivado::sinUsar()->where('subido_por', auth()->id())->count(),
+            'maximo_sin_usar' => ArchivoPrivado::MAX_SIN_USAR,
+            'hoy' => DB::table('archivo_privado_acceso')
+                ->where('user_account_id', auth()->id())
+                ->where('accion', 'subir')
+                ->where('creation_date', '>=', now()->startOfDay())
+                ->count(),
+            'maximo_por_dia' => $this->isClient() ? self::MAX_POR_DIA_PACIENTE : self::MAX_POR_DIA_PERSONAL,
+        ];
+    }
+
+    /**
+     * ¿Queda espacio para otro archivo sin usar? Si entre todas las cuentas ya se pasó el máximo, se
+     * borran los más antiguos (de más de 10 minutos: los recién subidos están por usarse). Si aun así
+     * no alcanza, alguien está subiendo archivos en masa y no se acepta ninguno más por ahora.
+     */
+    private function hayEspacioParaSinUsar(): bool
+    {
+        $total = (int) ArchivoPrivado::sinUsar()->sum('tamano');
+        if ($total <= self::MAX_BYTES_SIN_USAR) {
+            return true;
+        }
+
+        $antiguos = ArchivoPrivado::sinUsar()
+            ->where('creation_date', '<', now()->subMinutes(10))
+            ->orderBy('archivo_privado_id')
+            ->limit(500)
+            ->get(['archivo_privado_id', 'tamano']);
+
+        foreach ($antiguos as $antiguo) {
+            ArchivoPrivado::whereKey($antiguo->archivo_privado_id)->delete();
+            $total -= (int) $antiguo->tamano;
+            if ($total <= self::MAX_BYTES_SIN_USAR) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** Deja constancia de quién subió o abrió el archivo (abrirlo varias veces seguidas cuenta una vez). */
     private function registrar(int $archivoId, string $accion): void
     {
+        if ($accion === 'ver') {
+            $reciente = DB::table('archivo_privado_acceso')
+                ->where('archivo_privado_id', $archivoId)
+                ->where('user_account_id', auth()->id())
+                ->where('accion', 'ver')
+                ->where('creation_date', '>=', now()->subMinutes(10))
+                ->exists();
+            if ($reciente) {
+                return;
+            }
+        }
+
         DB::table('archivo_privado_acceso')->insert([
             'archivo_privado_id' => $archivoId,
             'user_account_id' => auth()->id(),
