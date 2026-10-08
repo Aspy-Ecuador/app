@@ -11,6 +11,8 @@ import type { UserAccount } from "@/typesResponse/UserAccount";
 // FINAL
 export interface Person {
   person_id: number;
+  /** Solo para Secretaría y Admin: cuándo retiró su consentimiento (null si no lo retiró). */
+  consentimiento_retirado_el?: string | null;
   user_id: number;
 
   user_account: UserAccount;

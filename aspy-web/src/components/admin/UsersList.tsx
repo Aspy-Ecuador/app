@@ -1,5 +1,6 @@
 // FINAL - VERSIÓN OPTIMIZADA (PC INSTANTÁNEO / MÓVIL FLUIDO)
 import { useState } from "react";
+import AvisoConsentimientoRetirado from "@components/privacidad/AvisoConsentimientoRetirado";
 import { useNavigate } from "react-router-dom";
 import type { CardAdmin } from "@/types/CardAdmin";
 import { useRoleData } from "@/observer/RoleDataContext";
@@ -197,6 +198,7 @@ export default function UsersList() {
                 }}
               />
             )}
+            <AvisoConsentimientoRetirado fecha={params.row.consentimiento_retirado_el} />
           </Box>
         );
       },

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import AvisoConsentimientoRetirado from "@components/privacidad/AvisoConsentimientoRetirado";
 import type { GridColDef, GridRowId } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
@@ -157,6 +158,7 @@ export default function ClientsList() {
                 }}
               />
             )}
+            <AvisoConsentimientoRetirado fecha={params.row.consentimiento_retirado_el} />
           </Box>
         );
       },

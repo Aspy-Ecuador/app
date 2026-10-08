@@ -8,16 +8,30 @@ import { C } from "@components/landing/constants";
 interface PasosRegistroProps {
   paso: number;
   pasos: string[];
+  /** Desde PC (lg) los pasos van uno debajo de otro: para ponerlos en una columna junto al formulario. */
+  enColumnaEnPc?: boolean;
 }
 
 const CIRCULO = 36;
+/** Separación entre pasos cuando van en columna. */
+const SEPARACION = 18;
 
-export default function PasosRegistro({ paso, pasos }: PasosRegistroProps) {
+export default function PasosRegistro({ paso, pasos, enColumnaEnPc = false }: PasosRegistroProps) {
+  // Valor para celular/tablet (fila) y, si corresponde, para PC (columna)
+  const segun = <const F, const C>(fila: F, columna: C) => (enColumnaEnPc ? { xs: fila, lg: columna } : fila);
+
   return (
     <Box
       component="ol"
       aria-label={`Paso ${paso + 1} de ${pasos.length}`}
-      sx={{ listStyle: "none", m: 0, p: 0, display: "grid", gridTemplateColumns: `repeat(${pasos.length}, 1fr)` }}
+      sx={{
+        listStyle: "none",
+        m: 0,
+        p: 0,
+        display: "grid",
+        gridTemplateColumns: segun(`repeat(${pasos.length}, 1fr)`, "1fr"),
+        rowGap: segun(0, `${SEPARACION}px`),
+      }}
     >
       {pasos.map((nombre, i) => {
         const hecho = i < paso;
@@ -30,18 +44,19 @@ export default function PasosRegistro({ paso, pasos }: PasosRegistroProps) {
             sx={{
               position: "relative",
               display: "flex",
-              flexDirection: "column",
+              flexDirection: segun("column", "row"),
               alignItems: "center",
-              gap: 1,
-              textAlign: "center",
-              // Línea que une este paso con el anterior
+              gap: segun(1, 1.5),
+              textAlign: segun("center", "left"),
+              // Línea que une este paso con el anterior (horizontal en fila, vertical en columna)
               "&:not(:first-of-type)::before": {
                 content: '""',
                 position: "absolute",
-                top: CIRCULO / 2 - 1.5,
-                left: `calc(-50% + ${CIRCULO / 2 + 8}px)`,
-                right: `calc(50% + ${CIRCULO / 2 + 8}px)`,
-                height: 3,
+                top: segun(`${CIRCULO / 2 - 1.5}px`, `${4 - SEPARACION}px`),
+                left: segun(`calc(-50% + ${CIRCULO / 2 + 8}px)`, `${CIRCULO / 2 - 1.5}px`),
+                right: segun(`calc(50% + ${CIRCULO / 2 + 8}px)`, "auto"),
+                width: segun("auto", "3px"),
+                height: segun("3px", `${SEPARACION - 8}px`),
                 borderRadius: 2,
                 bgcolor: i <= paso ? C.blue : aspy.border,
                 transition: "background-color 0.3s",
@@ -50,6 +65,7 @@ export default function PasosRegistro({ paso, pasos }: PasosRegistroProps) {
           >
             <Box
               sx={{
+                flex: "none",
                 width: CIRCULO,
                 height: CIRCULO,
                 borderRadius: "50%",
@@ -70,8 +86,8 @@ export default function PasosRegistro({ paso, pasos }: PasosRegistroProps) {
             </Box>
             <Typography
               sx={{
-                px: 0.5,
-                fontSize: { xs: "0.76rem", sm: "0.86rem" },
+                px: segun(0.5, 0),
+                fontSize: { xs: "0.76rem", sm: "0.86rem", ...(enColumnaEnPc ? { lg: "0.92rem" } : {}) },
                 lineHeight: 1.25,
                 fontWeight: actual ? 700 : 500,
                 color: actual ? aspy.text : aspy.muted,

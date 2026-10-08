@@ -32,8 +32,9 @@ export default function AuthShell({ children, disableCustomTheme }: AuthShellPro
           alignItems: "center",
           justifyContent: "center",
           px: { xs: 2, sm: 4 },
-          pt: { xs: 9.5, md: 5 },
-          pb: { xs: 3, md: 5 },
+          // En PC el margen es menor para que la tarjeta de registro quepa sin desplazarse
+          pt: { xs: 9.5, md: 5, lg: 2 },
+          pb: { xs: 3, md: 5, lg: 2 },
           color: aspy.text,
           "&::before": {
             content: '""',

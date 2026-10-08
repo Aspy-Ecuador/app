@@ -24,6 +24,9 @@ const campoSx = { ...authFieldSx, "& .MuiFormHelperText-root": { mx: 0.25, mt: 0
 const MENSAJE_DESHABILITADA =
   "Tu cuenta está deshabilitada. Comunícate con el administrador de la fundación.";
 
+const MENSAJE_CONSENTIMIENTO_RETIRADO =
+  "Retiraste tu consentimiento y tu cuenta quedó deshabilitada. Si fue un error o quieres volver, comunícate con la fundación.";
+
 export default function SignInCard() {
   const [emailError, setEmailError] = useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = useState("");
@@ -31,10 +34,14 @@ export default function SignInCard() {
   const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // Si la cuenta se deshabilitó con la sesión abierta, el sistema vuelve aquí con ?motivo=deshabilitada
-  const [loginError, setLoginError] = useState(() =>
-    new URLSearchParams(window.location.search).get("motivo") === "deshabilitada" ? MENSAJE_DESHABILITADA : "",
-  );
+  // Si la cuenta se deshabilitó con la sesión abierta, el sistema vuelve aquí con ?motivo=deshabilitada;
+  // si la persona retiró su consentimiento (Privacidad y mis datos), con ?motivo=consentimiento
+  const [loginError, setLoginError] = useState(() => {
+    const motivo = new URLSearchParams(window.location.search).get("motivo");
+    if (motivo === "deshabilitada") return MENSAJE_DESHABILITADA;
+    if (motivo === "consentimiento") return MENSAJE_CONSENTIMIENTO_RETIRADO;
+    return "";
+  });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 

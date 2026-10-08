@@ -1,7 +1,7 @@
-// Ventana con la Política de Privacidad. La usan el registro público (FormRegister) y el primer
-// ingreso de las cuentas que creó la fundación (ConsentimientoPendiente).
-// Candado: el botón de aceptar solo se habilita después de leerla hasta el final.
-// Si cambias el texto, sube la versión en `config/politica.ts` y en el backend.
+// Ventana con la Política de Privacidad y el consentimiento. La usan el registro público
+// (FormRegister) y el primer ingreso de las cuentas que creó la fundación (ConsentimientoPendiente).
+// Para aceptar hay que leerla hasta el final y marcar, una por una, las casillas que están ahí.
+// Si cambias el texto (seccionesPolitica.ts) o las casillas, sube la versión en `config/politica.ts` y en el backend.
 import { useRef, useState, type ReactNode } from "react";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
@@ -12,58 +12,19 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Typography from "@mui/material/Typography";
 import { vh } from "@shared-theme/pantallaGrande";
-
-const SECCIONES: [titulo: string, texto: string][] = [
-  [
-    "1. Responsable del tratamiento de los datos",
-    'La Fundación ASPY Ecuador (en adelante, "ASPY") es responsable del tratamiento de los datos personales recopilados a través de esta plataforma web y móvil. ASPY se compromete a tratar la información personal de conformidad con la legislación vigente en la República del Ecuador, especialmente con la Ley Orgánica de Protección de Datos Personales (LOPDP), garantizando la confidencialidad, integridad y seguridad de los datos.',
-  ],
-  [
-    "2. Información que recopilamos",
-    "Dependiendo del uso de la plataforma, ASPY podrá recopilar información como: Nombres y apellidos, Número de identificación, Fecha de nacimiento, Dirección, Teléfono, Correo electrónico, Información de representantes legales, Información de profesionales, Información relacionada con citas, Historial terapéutico, Diagnósticos y evaluaciones, Registros de asistencia e Información administrativa necesaria para la prestación de los servicios.",
-  ],
-  [
-    "3. Datos personales sensibles",
-    "Debido a la naturaleza de los servicios prestados por ASPY, la plataforma podrá tratar datos sensibles relacionados con la salud de los pacientes. Estos datos serán utilizados únicamente para la prestación de los servicios terapéuticos, administrativos y de seguimiento profesional, manteniendo estrictas medidas de seguridad y confidencialidad.",
-  ],
-  [
-    "4. Finalidad del tratamiento",
-    "Los datos personales serán utilizados para: Registrar pacientes y representantes, Gestionar citas, Administrar terapias, Elaborar reportes clínicos y administrativos, Gestionar pagos y servicios, Mantener comunicación con representantes y profesionales, Cumplir obligaciones legales y Mejorar la calidad de los servicios ofrecidos.",
-  ],
-  [
-    "5. Confidencialidad",
-    "ASPY únicamente permitirá el acceso a la información a personal autorizado que requiera conocerla para el cumplimiento de sus funciones. Todo el personal deberá mantener la confidencialidad de la información tratada.",
-  ],
-  [
-    "6. Conservación de los datos",
-    "Los datos personales serán conservados únicamente durante el tiempo necesario para cumplir las finalidades descritas o mientras exista una obligación legal que así lo requiera.",
-  ],
-  [
-    "7. Derechos del titular de los datos",
-    "Los titulares de los datos personales, o sus representantes legales cuando corresponda, podrán solicitar: Acceso a sus datos, Rectificación de información incorrecta, Actualización de datos, Eliminación de información cuando proceda, Oposición al tratamiento en los casos previstos por la ley y Portabilidad de los datos cuando sea aplicable. Las solicitudes podrán dirigirse a ASPY mediante los canales oficiales de atención.",
-  ],
-  [
-    "8. Seguridad de la información",
-    "ASPY implementa medidas técnicas y organizativas orientadas a proteger los datos personales frente a accesos no autorizados, pérdida, alteración, divulgación o destrucción.",
-  ],
-  [
-    "9. Compartición de información",
-    "ASPY no comercializa los datos personales de sus usuarios. La información únicamente podrá compartirse cuando: Sea necesaria para la prestación de los servicios, Exista autorización del titular o su representante legal, o Sea requerida por autoridad competente conforme a la legislación ecuatoriana.",
-  ],
-  [
-    "10. Consentimiento",
-    "Al registrarse en esta plataforma, el usuario declara haber leído la presente Política de Privacidad y autoriza expresamente a ASPY para el tratamiento de sus datos personales, incluidos los datos sensibles relacionados con la salud, cuando sean necesarios para la prestación de los servicios ofrecidos por la institución.",
-  ],
-  [
-    "11. Cambios en esta política",
-    "ASPY podrá actualizar esta Política de Privacidad cuando sea necesario para cumplir cambios legales o mejoras en los servicios. La versión vigente estará siempre disponible dentro de la plataforma.",
-  ],
-];
+import { FECHA_POLITICA, VERSION_POLITICA, type Consentimiento, type Declaracion } from "@/config/politica";
+import TextoPolitica from "./TextoPolitica";
+import CasillasConsentimiento from "./CasillasConsentimiento";
+import { armarConsentimiento, CONSENTIMIENTO_VACIO, queFalta, type EstadoConsentimiento, type ModoRepresentante } from "./consentimiento";
 
 interface DialogoPoliticaProps {
   open: boolean;
   onCerrar: () => void;
-  onAceptar: () => void;
+  onAceptar: (consentimiento: Consentimiento) => void;
+  /** Declaraciones que debe aceptar esta persona (dependen de su rol). */
+  declaraciones: Declaracion[];
+  /** Si el consentimiento debe o puede darlo un representante legal (depende de la edad). */
+  representante?: ModoRepresentante;
   /** Texto del botón de la izquierda. */
   textoCerrar?: string;
   /** Primer ingreso: no se cierra con Escape ni tocando fuera; solo se sale aceptando o con el botón de la izquierda. */
@@ -74,12 +35,27 @@ interface DialogoPoliticaProps {
   error?: string;
 }
 
-export default function DialogoPolitica({ open, onCerrar, onAceptar, textoCerrar = "Cerrar", obligatorio = false, aviso, aceptando = false, error }: DialogoPoliticaProps) {
+export default function DialogoPolitica({
+  open,
+  onCerrar,
+  onAceptar,
+  declaraciones,
+  representante = "no",
+  textoCerrar = "Cerrar",
+  obligatorio = false,
+  aviso,
+  aceptando = false,
+  error,
+}: DialogoPoliticaProps) {
   const [leida, setLeida] = useState(false);
+  const [estado, setEstado] = useState<EstadoConsentimiento>(CONSENTIMIENTO_VACIO);
   const contenido = useRef<HTMLDivElement | null>(null);
 
   // Margen de 50 px para que funcione bien en cualquier celular
   const alFondo = (el: HTMLElement) => el.scrollHeight - el.scrollTop <= el.clientHeight + 50;
+
+  const consentimiento = armarConsentimiento(estado, declaraciones, representante);
+  const listo = leida && consentimiento !== null;
 
   return (
     <Dialog
@@ -91,10 +67,13 @@ export default function DialogoPolitica({ open, onCerrar, onAceptar, textoCerrar
       maxWidth="md"
       fullWidth
       scroll="paper"
-      slotProps={{ paper: { sx: { borderRadius: 3, maxHeight: vh(85) } } }}
+      slotProps={{ paper: { sx: { borderRadius: 3, maxHeight: vh(88) } } }}
       TransitionProps={{
-        // Cada vez que se abre hay que volver a leerla
-        onEnter: () => setLeida(false),
+        // Cada vez que se abre hay que volver a leerla y a marcar las casillas
+        onEnter: () => {
+          setLeida(false);
+          setEstado(CONSENTIMIENTO_VACIO);
+        },
         // Si el texto ya cabe completo (pantallas grandes) no hay nada que deslizar: se habilita igual.
         // Sin esto el evento de scroll nunca llega y el botón quedaría bloqueado para siempre.
         onEntered: () => {
@@ -102,10 +81,11 @@ export default function DialogoPolitica({ open, onCerrar, onAceptar, textoCerrar
         },
       }}
     >
-      <DialogTitle sx={{ fontWeight: 800, color: "text.primary", pb: 1 }}>
+      {/* En celular el título es más chico: en tres líneas grandes le quitaba espacio al texto */}
+      <DialogTitle sx={{ fontWeight: 800, color: "text.primary", pb: 1, fontSize: { xs: "1.05rem", sm: "1.25rem" }, lineHeight: 1.3 }}>
         Política de Privacidad y Tratamiento de Datos Personales
         <Typography variant="caption" display="block" color="text.secondary">
-          Última actualización: Julio de 2026
+          Versión {VERSION_POLITICA} · {FECHA_POLITICA}
         </Typography>
       </DialogTitle>
 
@@ -118,22 +98,14 @@ export default function DialogoPolitica({ open, onCerrar, onAceptar, textoCerrar
         }}
       >
         {aviso && (
-          <Alert severity="info" sx={{ mb: 1, borderRadius: 2 }}>
+          <Alert severity="info" sx={{ mb: 2.5, borderRadius: 2 }}>
             {aviso}
           </Alert>
         )}
-        {SECCIONES.map(([titulo, texto]) => (
-          <div key={titulo}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 700, mt: 2, mb: 1 }}>
-              {titulo}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              {texto}
-            </Typography>
-          </div>
-        ))}
+        <TextoPolitica />
+        <CasillasConsentimiento declaraciones={declaraciones} modo={representante} estado={estado} onCambio={setEstado} deshabilitado={aceptando} />
         {error && (
-          <Alert severity="error" sx={{ mt: 1, borderRadius: 2 }}>
+          <Alert severity="error" sx={{ mt: 2, borderRadius: 2 }}>
             {error}
           </Alert>
         )}
@@ -156,26 +128,34 @@ export default function DialogoPolitica({ open, onCerrar, onAceptar, textoCerrar
           {textoCerrar}
         </Button>
         <Button
-          disabled={!leida || aceptando}
-          onClick={onAceptar}
+          disabled={!listo || aceptando}
+          onClick={() => consentimiento && onAceptar(consentimiento)}
           variant="contained"
-          // Empieza en el color del texto y, al llegar abajo, cambia suavemente a verde
+          // Empieza en el color del texto y, cuando todo está completo, cambia suavemente a verde
           sx={{
-            minWidth: 190,
+            minWidth: 210,
             minHeight: { xs: 44, sm: 36 },
             whiteSpace: "nowrap",
             backgroundImage: "none", // el tema pinta los botones con un degradado que taparía el verde
-            bgcolor: leida ? "#0F6E56" : "text.primary",
-            color: leida ? "#ffffff" : "background.paper",
+            bgcolor: listo ? "#0F6E56" : "text.primary",
+            color: listo ? "#ffffff" : "background.paper",
             borderRadius: 2,
             textTransform: "none",
             fontWeight: 600,
             transition: "all 0.4s ease",
-            "&:hover": { backgroundImage: "none", bgcolor: leida ? "#0F6E56" : "text.primary" },
+            "&:hover": { backgroundImage: "none", bgcolor: listo ? "#0F6E56" : "text.primary" },
             "&:disabled": { bgcolor: "text.primary", color: "background.paper", opacity: 0.6 },
           }}
         >
-          {aceptando ? <CircularProgress size={20} sx={{ color: "inherit" }} /> : leida ? "Entendido y Acepto" : "Desliza para aceptar ↓"}
+          {aceptando ? (
+            <CircularProgress size={20} sx={{ color: "inherit" }} />
+          ) : listo ? (
+            "Acepto"
+          ) : leida ? (
+            queFalta(estado, declaraciones, representante)
+          ) : (
+            "Desliza para leerla ↓"
+          )}
         </Button>
       </DialogActions>
     </Dialog>

@@ -20,6 +20,8 @@ import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import DialogoPolitica from "@components/privacidad/DialogoPolitica";
+import { modoRepresentante } from "@components/privacidad/consentimiento";
+import { declaracionesPara, edadDe, type Consentimiento } from "@/config/politica";
 import { aspy, tone } from "@shared-theme/themePrimitives";
 import { authButtonSx } from "@components/auth/estilos";
 import { DISPLAY_FONT } from "@components/landing/constants";
@@ -29,9 +31,12 @@ interface FormRegisterProps {
   end: number;
   onNext: (data: UserForm) => void;
   onBack: () => void;
-  onFinish: (data: UserForm, acceptedPrivacyPolicy: boolean) => void;
+  /** Recibe el consentimiento que dio la persona en la ventana de la política (null si no lo dio). */
+  onFinish: (data: UserForm, consentimiento: Consentimiento | null) => void;
   isLast?: boolean;
   load?: boolean;
+  /** Fecha de nacimiento escrita en el primer paso: si es menor de 15 años, consiente su representante legal. */
+  fechaNacimiento?: string;
 }
 
 export default function FormRegister({
@@ -42,11 +47,14 @@ export default function FormRegister({
   onFinish,
   isLast,
   load,
+  fechaNacimiento,
 }: FormRegisterProps) {
   const methods = useForm<UserForm>();
 
   // Estados para controlar la Política de Privacidad
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  // El consentimiento solo existe si la persona leyó la política y marcó las casillas en la ventana
+  const [consentimiento, setConsentimiento] = useState<Consentimiento | null>(null);
+  const acceptedTerms = consentimiento !== null;
   const [openPolicy, setOpenPolicy] = useState(false);
 
   useEffect(() => {
@@ -158,7 +166,7 @@ export default function FormRegister({
 
   const onSubmit = methods.handleSubmit((data) => {
     if (isLast) {
-      onFinish(data, acceptedTerms);
+      onFinish(data, consentimiento);
     } else {
       onNext(data);
     }
@@ -177,14 +185,14 @@ export default function FormRegister({
     if (!acceptedTerms) {
       setOpenPolicy(true);
     } else {
-      setAcceptedTerms(false);
+      setConsentimiento(null);
     }
   };
 
   return (
     <FormProvider {...methods}>
       <form onSubmit={(e) => e.preventDefault()} noValidate>
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: { xs: 3, lg: 1.75 } }}>
           <Typography component="h2" sx={{ fontFamily: DISPLAY_FONT, fontWeight: 800, fontSize: "1.2rem", letterSpacing: "-0.01em", color: aspy.text }}>
             {intro.titulo}
           </Typography>
@@ -193,10 +201,11 @@ export default function FormRegister({
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-            columnGap: 2.5,
-            rowGap: 1.25,
-            mb: 2,
+            // En PC van de a tres: los 10 campos del primer paso ocupan 4 filas en vez de 5
+            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", lg: "repeat(3, 1fr)" },
+            columnGap: { xs: 2.5, lg: 2 },
+            rowGap: { xs: 1.25, lg: 0.5 },
+            mb: { xs: 2, lg: 1 },
             width: "100%",
             boxSizing: "border-box",
             "& > *": { minWidth: 0 },
@@ -214,7 +223,7 @@ export default function FormRegister({
             focusRipple
             sx={{
               width: "100%",
-              mb: 3,
+              mb: { xs: 3, lg: 2 },
               p: 2,
               gap: 1.75,
               display: "flex",
@@ -266,7 +275,7 @@ export default function FormRegister({
               </Typography>
               {!acceptedTerms && (
                 <Typography sx={{ fontSize: "0.78rem", color: "text.disabled", mt: 0.5 }}>
-                  Toca aquí para leerla: se marca cuando terminas de leerla.
+                  Toca aquí para leerla: se marca cuando la lees y aceptas las casillas del final.
                 </Typography>
               )}
             </Box>
@@ -279,7 +288,7 @@ export default function FormRegister({
             justifyContent: start !== 0 ? "space-between" : "flex-end",
             alignItems: "center",
             gap: 1.5,
-            pt: 2.5,
+            pt: { xs: 2.5, lg: 1.75 },
             borderTop: "1px solid",
             borderColor: aspy.border,
           }}
@@ -336,8 +345,10 @@ export default function FormRegister({
       <DialogoPolitica
         open={openPolicy}
         onCerrar={() => setOpenPolicy(false)}
-        onAceptar={() => {
-          setAcceptedTerms(true);
+        declaraciones={declaracionesPara(true)}
+        representante={modoRepresentante(edadDe(fechaNacimiento))}
+        onAceptar={(aceptado) => {
+          setConsentimiento(aceptado);
           setOpenPolicy(false);
         }}
       />

@@ -1,4 +1,6 @@
 // FINAL
+import type { Consentimiento } from "@/config/politica";
+
 export interface UserForm {
   // ── UserAccount ───────────────────────────────────
   email: string;
@@ -7,6 +9,8 @@ export interface UserForm {
   role_id: number;
   accepted_privacy_policy?: boolean;
   policy_version?: string;
+  /** Registro público: casillas aceptadas y, en menores de 15 años, su representante legal. */
+  consentimiento?: Consentimiento | null;
 
   // ── Person ────────────────────────────────────────
   first_name: string;
