@@ -163,7 +163,10 @@ strong { color: var(--tinta); }
 
 @media (max-width: 640px) {
   .paso { padding-left: 46px; }
-  .paso figure.captura, .paso .par { margin-left: -46px; }
+  /* En celular la captura ocupa todo el ancho y pasa por donde baja la línea que une los pasos:
+     en esos pasos la línea se quita (y, si el navegador no entiende :has, la captura queda por encima). */
+  .paso figure.captura, .paso .par { margin-left: -46px; position: relative; z-index: 1; }
+  .paso:has(figure.captura)::after, .paso:has(.par)::after { display: none; }
 }
 
 /* Capturas */
