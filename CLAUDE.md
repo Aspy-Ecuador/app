@@ -369,7 +369,7 @@ Pedido del dueño: probar las funciones nuevas **en producción de verdad**, no 
 
 ### Producción: qué hay hoy en la base del sitio publicado
 
-- **Cuentas de demostración** (las únicas que el dueño quiere conservar; sus contraseñas las tiene él, no están en el repo): `admin@aspy.com` (Admin), `staff1@aspy.com` (Secretaría, "Carlos Flores"), `prof1@aspy.com` (Profesional, "Melissa Ayllón") y `carlos@aspy.com` (Cliente). **Las cuatro están habilitadas.** Claude no aceptó la política 2.0 por ninguna; el 2026-10-08 por la noche `admin@aspy.com` ya aparecía aceptada (falta que el dueño confirme que fue él) y las otras tres seguían pendientes: verán la ventana en su primer ingreso.
+- **Cuentas de demostración** (las únicas que el dueño quiere conservar; sus contraseñas las tiene él, no están en el repo): `admin@aspy.com` (Admin), `staff1@aspy.com` (Secretaría, "Carlos Flores"), `prof1@aspy.com` (Profesional, "Melissa Ayllón") y `carlos@aspy.com` (Cliente). **Las cuatro están habilitadas.** Claude no aceptó la política 2.0 por ninguna; en `admin@aspy.com` la aceptó el propio dueño (lo confirmó el 2026-10-09) y las otras tres siguen pendientes: verán la ventana en su primer ingreso.
 - **Ejemplos del 2026-10-08** creados con esas cuentas por la interfaz: datos bancarios **de ejemplo** ("Banco de Ejemplo", cuenta 0000012345), servicio "Evaluación inicial" ($30) asignado a `prof1`, horarios de `prof1` (8 al 16 de octubre) y cinco citas de `carlos` (Asistió con reporte, No asistió, Agendada, Guardada y Cancelada). Sus comprobantes y su reporte son **de antes** de los archivos privados: enlaces de Cloudinary con archivos de ejemplo.
 - **Ejemplos con archivos privados** (los dejó la prueba real del 2026-10-08): cita 15 de `carlos`, *Guardada* (9 oct, 15:00), con comprobante privado y pendiente de aprobar o rechazar; y cita 16, *Asistió* (8 oct, 15:00), con comprobante y reporte privados.
 - **Cuenta de prueba `paciente.prueba@aspy.com`** ("Paciente De Prueba", ficticia; se registró por la pantalla pública el 2026-10-08): quedó **deshabilitada**, con el consentimiento retirado. Tiene un pago rechazado con su motivo (pago 14) y 5 archivos sin usar que se borran solos a las 24 h. Se puede borrar en la limpieza.
@@ -399,7 +399,6 @@ Pedido del dueño: probar las funciones nuevas **en producción de verdad**, no 
 6. **Sanity:** cargar el correo de contacto; decidir qué hacer con el testimonio de prueba ("¡Son un gran equipo!"); reemplazar las imágenes de muestra de Servicios; invitar a la fundación como Editor; revisar que Google publique la dirección corregida.
 7. **Ley de protección de datos:** ver **Pendientes y recomendaciones conocidas** (delegado, registro ante la autoridad, contratos con Railway y Vercel, acuerdos de confidencialidad, revisión de la política por un abogado).
 8. **Base de prueba vieja de Railway** (la del `.env` local): decidir si se borra; si se borra, dejar el `.env` local en SQLite.
-9. **Confirmar quién aceptó la política 2.0 en `admin@aspy.com`:** el 2026-10-08 por la noche apareció aceptada y Claude no lo hizo (las otras tres cuentas de demostración seguían pendientes).
 
 **Ya hecho por el dueño (2026-10-09):** `APP_DEBUG=false` en Railway (comprobado: los errores ya no muestran detalles internos) y `LOG_CHANNEL=stderr`.
 
