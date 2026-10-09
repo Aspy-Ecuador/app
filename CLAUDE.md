@@ -1,7 +1,9 @@
 # CLAUDE.md: contexto del proyecto Aspy
 
 Guía para cualquier sesión de Claude (u otra persona) que trabaje en este repo. Léela completa antes de cambiar código.
-Última actualización: 2026-10-08, madrugada (ver **Estado actual y punto de retoma** al final). Para levantar el proyecto, ver `README.md`.
+Última actualización: 2026-10-09 (ver **Estado actual y punto de retoma** al final). Para levantar el proyecto, ver `README.md`.
+
+**Al empezar una sesión:** además de leer este archivo, ve a **Pendiente (lista vigente)**, casi al final, y dile al dueño qué falta y en qué punto está cada cosa antes de proponer trabajo nuevo.
 
 ## Qué es
 
@@ -367,7 +369,7 @@ Pedido del dueño: probar las funciones nuevas **en producción de verdad**, no 
 
 ### Producción: qué hay hoy en la base del sitio publicado
 
-- **Cuentas de demostración** (las únicas que el dueño quiere conservar; sus contraseñas las tiene él, no están en el repo): `admin@aspy.com` (Admin), `staff1@aspy.com` (Secretaría, "Carlos Flores"), `prof1@aspy.com` (Profesional, "Melissa Ayllón") y `carlos@aspy.com` (Cliente). **Las cuatro están habilitadas** y tienen la política 2.0 **pendiente de aceptar** (nadie la aceptó por ellas): cada una verá la ventana en su primer ingreso.
+- **Cuentas de demostración** (las únicas que el dueño quiere conservar; sus contraseñas las tiene él, no están en el repo): `admin@aspy.com` (Admin), `staff1@aspy.com` (Secretaría, "Carlos Flores"), `prof1@aspy.com` (Profesional, "Melissa Ayllón") y `carlos@aspy.com` (Cliente). **Las cuatro están habilitadas.** Claude no aceptó la política 2.0 por ninguna; el 2026-10-08 por la noche `admin@aspy.com` ya aparecía aceptada (falta que el dueño confirme que fue él) y las otras tres seguían pendientes: verán la ventana en su primer ingreso.
 - **Ejemplos del 2026-10-08** creados con esas cuentas por la interfaz: datos bancarios **de ejemplo** ("Banco de Ejemplo", cuenta 0000012345), servicio "Evaluación inicial" ($30) asignado a `prof1`, horarios de `prof1` (8 al 16 de octubre) y cinco citas de `carlos` (Asistió con reporte, No asistió, Agendada, Guardada y Cancelada). Sus comprobantes y su reporte son **de antes** de los archivos privados: enlaces de Cloudinary con archivos de ejemplo.
 - **Ejemplos con archivos privados** (los dejó la prueba real del 2026-10-08): cita 15 de `carlos`, *Guardada* (9 oct, 15:00), con comprobante privado y pendiente de aprobar o rechazar; y cita 16, *Asistió* (8 oct, 15:00), con comprobante y reporte privados.
 - **Cuenta de prueba `paciente.prueba@aspy.com`** ("Paciente De Prueba", ficticia; se registró por la pantalla pública el 2026-10-08): quedó **deshabilitada**, con el consentimiento retirado. Tiene un pago rechazado con su motivo (pago 14) y 5 archivos sin usar que se borran solos a las 24 h. Se puede borrar en la limpieza.
@@ -375,14 +377,31 @@ Pedido del dueño: probar las funciones nuevas **en producción de verdad**, no 
 - **Siguen ahí los datos de prueba viejos:** 8 cuentas (`sec@aspy.com`, `vmendoza@gmail.com`, `aparedes@gmail.com`, `ctorres@gmail.com`, `emartinez@gmail.cm`, `orodriz@gmail.com`, `flara@gmail.com`, `carlossv2@hotmail.com`), 7 servicios, 7 citas, 8 pagos, 11 horarios y 1 reporte. Además hay 3 archivos sueltos de la verificación de archivos privados (no pertenecen a ninguna cita).
 - **Limpieza pendiente (decisión del dueño):** él pidió borrar todo lo de prueba dejando las 4 cuentas y un ejemplo de cada cosa, y dijo "hazlo tú". El sistema de permisos de Claude Code **bloqueó dos veces** desplegar el borrado (lo clasifica como borrado masivo), así que **no se borró nada** y no se buscó otra vía. La migración está escrita y ensayada sobre PostgreSQL local, **fuera del repo**: copia cada tabla a `zz_respaldo_20261008_<tabla>`, vacía citas, pagos, recibos, reportes, archivos, horarios y servicios, borra todas las cuentas menos las 4 de demostración (que deja habilitadas), solo actúa en la base que tiene `sec@aspy.com` y `vmendoza@gmail.com`, y va en una transacción. Para aplicarla tiene que decidirlo el dueño: o la despliega él (copiarla a `aspy/database/migrations/`, commit y push), o agrega él mismo una regla de permiso en su configuración de Claude Code y lo vuelve a pedir. **No la despliegues sin ese permiso ni por otra vía.** Después de la limpieza hay que volver a crear los ejemplos por la interfaz (ya con archivos privados).
 
-### Pendiente (en orden)
+### Pendiente (lista vigente al 2026-10-09)
 
-1. **Limpieza de los datos de prueba** y volver a crear un ejemplo de cada cosa (ver arriba).
-2. **Protección que depende del dueño** (ver **Defensas contra el abuso**): captcha en el registro y protección delante del servidor. (`LOG_CHANNEL=stderr` ya lo puso el dueño en Railway el 2026-10-09.)
-3. **Del lado del dueño, por la ley de protección de datos:** ver **Pendientes y recomendaciones conocidas** (delegado, registro, contratos, correo de contacto, Cloudinary).
-4. **Datos bancarios, servicios, precios y cuentas reales** de la fundación (los actuales son de ejemplo).
-5. Del lado del dueño (`APP_DEBUG=false` ya está puesto en Railway desde el 2026-10-09; comprobado: los errores ya no muestran detalles internos): cambiar las contraseñas de demostración antes de abrir el sistema; decidir qué hacer con el testimonio publicado en Sanity ("¡Son un gran equipo!", parece de prueba); reemplazar las imágenes de muestra de Servicios; invitar a la fundación como Editor en Sanity; revisar que Google publique la dirección corregida; decidir si se borra la otra base de Railway a la que apunta el `.env` local (el dueño confirmó el 2026-10-08 que era una base de prueba vieja, por eso está desactualizada; si la borra, conviene dejar el `.env` local en SQLite).
-6. Mejoras conocidas: copia descargable de "mis datos", borrado definitivo de cuentas, `.dockerignore`, CSP, endpoints rotos, `React.lazy`, `any`, y un `aria-label` para el botón ⋮ del menú de la cuenta (`OptionsMenu`).
+**Esta es la lista que hay que leer al empezar cada sesión** (pedido del dueño, 2026-10-09). Cuando algo se termine, quítalo o márcalo aquí en el mismo trabajo, para que la lista siempre diga la verdad.
+
+**De Claude** (se hace cuando el dueño lo pida):
+
+1. **Confirmar el borrado automático del comprobante rechazado.** Después del 2026-10-09 a las 18:04, en producción y solo mirando: Secretaría → *Pagos* → pago 14 ya no debe ofrecer el comprobante, y el motivo debe seguir ahí (por el API: `payment_data.file` en null y `motivo_rechazo` con su texto).
+2. **Captcha en el registro** (Cloudflare Turnstile, plan gratis). Integrarlo en `/register` y validarlo en `POST /user-account/registro`, activado por variables de entorno (clave pública en Vercel, clave secreta en Railway) para que sin claves todo siga igual. **Espera a que el dueño pase la clave pública**; la secreta la pone él en Railway (que no la mande por el chat). Al hacerlo: casos nuevos en `security-check.mjs`, captura del registro en el manual de familias, y revisar si hay que mencionarlo en la política (cambiar el texto obliga a subir la versión y todos aceptan de nuevo).
+3. **Limpieza de los datos de prueba** y volver a crear un ejemplo de cada cosa. Sigue bloqueada por el sistema de permisos (ver **Producción**): o la despliega el dueño, o agrega él la regla de permiso y lo vuelve a pedir.
+4. **Lectura completa de los manuales**, frase por frase, para concordancia y redacción. La ortografía ya se revisó el 2026-10-09 con un diccionario de español y una lista de errores típicos (tildes que cambian el sentido, y/e, o/u, signos de apertura, puntuación): sin faltas, salvo "y Iniciar sesión", ya corregida.
+5. **Mejoras técnicas:** copia descargable de "mis datos" y borrado definitivo de cuentas; `.dockerignore`; CSP y CORS restringido a `https://aspy-web.vercel.app`; arreglar o quitar los endpoints rotos; partir el paquete con `React.lazy` por rol; quitar los `any`; `aria-label` para el botón ⋮ (`OptionsMenu`).
+
+**Del dueño:**
+
+1. **Cambiar las contraseñas de las 4 cuentas de demostración**, sobre todo la del Admin (sigue siendo la del seeder, que está en el código). Lo más urgente.
+2. **Captcha:** crear la cuenta gratis en Cloudflare, agregar un sitio de Turnstile para `aspy-web.vercel.app`, pasar la clave pública y poner la secreta en Railway.
+3. **Protección delante del servidor** (Cloudflare, plan gratis): necesita un dominio propio de la fundación. Si se pone, hay que volver a comprobar los encabezados de IP (ver **Defensas contra el abuso**).
+4. **Datos reales de la fundación:** cuenta bancaria, servicios, precios y cuentas del personal (los actuales son de ejemplo).
+5. **Cloudinary:** borrar los archivos viejos (siguen públicos por enlace) y desactivar el preset `aspy-web`.
+6. **Sanity:** cargar el correo de contacto; decidir qué hacer con el testimonio de prueba ("¡Son un gran equipo!"); reemplazar las imágenes de muestra de Servicios; invitar a la fundación como Editor; revisar que Google publique la dirección corregida.
+7. **Ley de protección de datos:** ver **Pendientes y recomendaciones conocidas** (delegado, registro ante la autoridad, contratos con Railway y Vercel, acuerdos de confidencialidad, revisión de la política por un abogado).
+8. **Base de prueba vieja de Railway** (la del `.env` local): decidir si se borra; si se borra, dejar el `.env` local en SQLite.
+9. **Confirmar quién aceptó la política 2.0 en `admin@aspy.com`:** el 2026-10-08 por la noche apareció aceptada y Claude no lo hizo (las otras tres cuentas de demostración seguían pendientes).
+
+**Ya hecho por el dueño (2026-10-09):** `APP_DEBUG=false` en Railway (comprobado: los errores ya no muestran detalles internos) y `LOG_CHANNEL=stderr`.
 
 Notas para retomar:
 - **Memoria del equipo:** el 2026-10-08 Claude Code detuvo dos veces los servidores locales de prueba (backend, web y PostgreSQL) por poca memoria. No los levantes por tu cuenta si eso vuelve a pasar: avisa y pide permiso (ese día el dueño lo autorizó después de liberar memoria). Al terminar, ciérralos todos, también los que hayan quedado sueltos escuchando en los puertos 5180, 8002, 8011, 8012 y 54329. Lo que sí se puede hacer sin servidores: `npm run build`, las pruebas Pest del backend (SQLite en memoria) y revisar pantallas **públicas** cargando `aspy-web/dist` desde el disco con Playwright (`route.fulfill`), como se hizo con el registro.
