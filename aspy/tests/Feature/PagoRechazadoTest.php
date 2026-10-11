@@ -26,6 +26,7 @@ beforeEach(function () {
  */
 function escenarioConPagos($prueba, int $cuantos = 2): array
 {
+    alcanceDeHorarios();
     $admin = entrar($prueba, 'admin@aspy.com', 'ADMIN')->json('access_token');
     como($prueba, $admin)->postJson('/api/user-account/crear', cuentaNueva('pro@prueba.test', ['role_id' => 2, 'role' => 'professional', 'specialty' => 'Psicología']))->assertStatus(201);
     como($prueba, $admin)->postJson('/api/user-account/crear', cuentaNueva('sec@prueba.test', ['role_id' => 4, 'role' => 'staff']))->assertStatus(201);

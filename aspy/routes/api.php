@@ -87,6 +87,8 @@ Route::middleware('auth:sanctum')->prefix('person')->group(function () {
 
 // Professional
 Route::middleware('auth:sanctum')->prefix('professional')->group(function () {
+    // Hasta cuándo se pueden crear horarios y si Secretaría puede hacerlo lo decide el Admin (PUT /ajustes)
+    Route::get("/horario-reglas", [ProfessionalController::class, 'reglasHorario'])->middleware('role:professional,staff');
     Route::post("/create-horario", [ProfessionalController::class, 'createHorario'])->middleware(['role:professional,staff', 'throttle:horarios']);
 });
 
@@ -94,7 +96,8 @@ Route::middleware('auth:sanctum')->prefix('professional')->group(function () {
 Route::middleware('auth:sanctum')->prefix('worker-schedule')->group(function () {
     Route::get('/', [WorkerScheduleController::class, 'index']);
     Route::get('/{id}', [WorkerScheduleController::class, 'show']);
-    Route::post('/', [WorkerScheduleController::class, 'store'])->middleware('role:staff');
+    // (Se quitó POST /worker-schedule: no lo usaba la web y creaba horarios sin el permiso ni el límite
+    // de fechas que decide el Admin. Los horarios se crean solo con POST /professional/create-horario.)
     Route::put('/{id}', [WorkerScheduleController::class, 'update'])->middleware('role:professional,staff');
     Route::delete('/{id}', [WorkerScheduleController::class, 'destroy'])->middleware('role:professional,staff');
 });
@@ -136,6 +139,8 @@ Route::middleware('auth:sanctum')->prefix('appointment')->group(function () {
     Route::put('/appointment-complete', [AppointmentController::class, 'completeAppointment'])->middleware('role:professional,staff');
     Route::put('/appointment-missed', [AppointmentController::class, 'missedAppointment'])->middleware('role:professional,staff');
     Route::put('/appointment-cancel', [AppointmentController::class, 'cancelAppointment'])->middleware('role:client,staff');
+    // Enlace de la reunión de una cita virtual: lo pone o lo quita el profesional de esa cita, Secretaría o el Admin
+    Route::put('/appointment-enlace', [AppointmentController::class, 'guardarEnlaceVirtual'])->middleware('role:professional,staff');
     Route::post('/create-report', [AppointmentController::class, 'createReport'])->middleware('role:professional');
 });
 

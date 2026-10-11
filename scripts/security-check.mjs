@@ -88,12 +88,17 @@ async function login(email, password = "Secreta123") {
   const me = await call("GET", "/user", r.data.access_token);
   return { token: r.data.access_token, roleId: me.data.role_id, personId: me.data.person?.person_id, userId: me.data.user_account_id };
 }
-const inDays = (d) => new Date(Date.now() + d * 864e5).toISOString().slice(0, 10);
+// Fechas en la hora de Ecuador, que es la del servidor. Con la hora universal, desde las 19:00 "hoy" ya
+// era mañana y fallaban las pruebas del turno que ya empezó.
+const inDays = (d) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Guayaquil" }).format(new Date(Date.now() + d * 864e5));
 
 // ───────── Preparación ─────────
 console.log("Preparando datos…");
 const admin = await login(ADMIN_EMAIL, ADMIN_PASSWORD);
 const e = (n) => `${n}${run}@test.com`;
+// Hasta cuándo se crean horarios lo decide el Admin (por defecto, el mes en curso). Estas pruebas crean
+// turnos a pocos días: con "dos_meses" no dependen del día del mes en que se corren.
+await call("PUT", "/ajustes", admin.token, { horario_alcance: "dos_meses" });
 
 let r = await call("POST", "/user-account/registro", null, userPayload(e("clienta")));
 if (r.status !== 201) throw new Error("registro A " + JSON.stringify(r.data));
@@ -396,6 +401,122 @@ await call("PUT", "/ajustes", admin.token, { comprobante_rechazado_dias: 1 });
   check("El paciente lee por qué se rechazó su pago y cuándo se borra el comprobante", deB?.motivo_rechazo === "El comprobante no corresponde a este servicio." && !!deB?.comprobante_se_borra_el, JSON.stringify(deB)?.slice(0, 200));
   const deA = (await call("GET", "/payment", A.token)).data ?? [];
   check("Otro paciente no ve ese pago ni su motivo", !deA.some((p) => p.payment_id === deB?.payment_id), "");
+}
+
+// ───────── Horarios: hasta cuándo se crean y quién los crea (lo decide el Admin) ─────────
+console.log("\nHorarios: límite y permiso de Secretaría");
+{
+  const dia = inDays;
+  const horario = (quien, fecha, inicio) => call("POST", "/professional/create-horario", quien.token, { professional_id: P1.personId, date: fecha, start_time: inicio, end_time: inicio.replace(/^(\d+)/, (h) => String(+h + 1).padStart(2, "0")), name: "Turno" });
+
+  r = await call("GET", "/professional/horario-reglas", null);
+  check("Consultar las reglas de los horarios exige sesión", r.status === 401, r.status);
+  r = await call("GET", "/professional/horario-reglas", A.token);
+  check("Un paciente no consulta las reglas de los horarios", r.status === 403, r.status);
+  r = await call("GET", "/professional/horario-reglas", P1.token);
+  check("El profesional sabe hasta cuándo puede crear horarios", r.status === 200 && r.data?.alcance === "dos_meses" && r.data?.puede_gestionar === true && /^\d{4}-\d{2}-\d{2}$/.test(r.data?.hasta ?? ""), JSON.stringify(r.data));
+  for (const [who, u] of [["Secretaría", S], ["Un profesional", P1], ["Un paciente", A]]) {
+    r = await call("PUT", "/ajustes", u.token, { horario_alcance: "dia" });
+    check(`${who} no cambia hasta cuándo se crean horarios`, r.status === 403, r.status);
+    r = await call("PUT", "/ajustes", u.token, { horario_secretaria: true });
+    check(`${who} no decide si Secretaría crea horarios`, r.status === 403, r.status);
+  }
+  r = await call("PUT", "/ajustes", admin.token, { horario_alcance: "cinco_años" });
+  check("El Admin solo puede elegir un alcance de la lista", r.status === 422, r.status);
+  r = await call("PUT", "/ajustes", admin.token, { horario_alcance: "dia" });
+  check("El Admin cambia el alcance sin tocar los demás ajustes", r.status === 200 && r.data?.horario_alcance === "dia" && r.data?.comprobante_rechazado_dias === 1, JSON.stringify(r.data));
+  r = await horario(P1, dia(1), "18:00");
+  check("Con el alcance en «solo hoy», el profesional no crea horarios para mañana", r.status === 422 && !!r.data?.errors?.date, `${r.status} ${JSON.stringify(r.data)}`);
+  r = await horario(P1, dia(0), "22:00");
+  check("…pero sí para hoy", r.status === 201, `${r.status} ${JSON.stringify(r.data)}`);
+  const turnoDeHoy = r.data?.worker_schedule?.worker_schedule_id;
+  r = await horario(admin, dia(30), "18:00");
+  check("El Admin no tiene ese límite", r.status === 201, `${r.status} ${JSON.stringify(r.data)}`);
+  await call("PUT", "/ajustes", admin.token, { horario_alcance: "dos_meses" });
+
+  r = await call("GET", "/professional/horario-reglas", S.token);
+  check("Por defecto, Secretaría no gestiona horarios", r.status === 200 && r.data?.puede_gestionar === false, JSON.stringify(r.data));
+  r = await horario(S, dia(2), "19:00");
+  check("Secretaría no crea horarios si el Admin no lo habilitó", r.status === 403, r.status);
+  r = await call("DELETE", `/worker-schedule/${turnoDeHoy}`, S.token);
+  check("Secretaría no borra horarios si el Admin no lo habilitó", r.status === 403, r.status);
+  r = await call("PUT", "/ajustes", admin.token, { horario_secretaria: true });
+  check("El Admin habilita a Secretaría", r.status === 200 && r.data?.horario_secretaria === true, JSON.stringify(r.data));
+  r = await horario(S, dia(2), "19:00");
+  check("Habilitada, Secretaría crea horarios de un profesional", r.status === 201, `${r.status} ${JSON.stringify(r.data)}`);
+  r = await horario(S, dia(70), "19:00");
+  check("…con el mismo límite de fechas", r.status === 422, r.status);
+  r = await call("DELETE", `/worker-schedule/${turnoDeHoy}`, S.token);
+  check("…y quita un horario libre", r.status === 204, r.status);
+  r = await call("POST", "/professional/create-horario", P2.token, { professional_id: P1.personId, date: dia(2), start_time: "20:00", end_time: "21:00", name: "x" });
+  check("Aun así, un profesional no crea horarios para otro", r.status === 403, r.status);
+  await call("PUT", "/ajustes", admin.token, { horario_secretaria: false });
+  r = await horario(S, dia(3), "19:00");
+  check("Si el Admin lo deshabilita, Secretaría deja de poder", r.status === 403, r.status);
+
+  r = await call("POST", "/worker-schedule", S.token, { date: "2031-01-01", start_time: "09:00:00", end_time: "10:00:00", person_id: P1.personId });
+  check("Ya no existe la ruta antigua que creaba horarios sin permiso ni límite", r.status === 404 || r.status === 405, r.status);
+  r = await horario(P1, dia(1).replaceAll("-", ""), "21:00");
+  check("La fecha de un horario solo se acepta como AAAA-MM-DD", r.status === 422 && !!r.data?.errors?.date, `${r.status} ${JSON.stringify(r.data)}`);
+  r = await call("POST", "/professional/create-horario", P1.token, { professional_id: P1.personId, date: dia(1), start_time: "21:00", end_time: "20:00:00", name: "Turno" });
+  check("La hora de fin tiene que ser posterior a la de inicio, se escriban como se escriban", r.status === 422, r.status);
+  r = await call("POST", "/professional/create-horario", P1.token, { professional_id: P1.personId, date: dia(1), start_time: "21:00", end_time: "21:01", name: "Turno" });
+  check("Un horario dura al menos 10 minutos", r.status === 422, r.status);
+  r = await call("PUT", `/worker-schedule/${slot3}`, P1.token, { is_available: true });
+  check("Un turno con una cita no se vuelve a ofrecer", r.status === 422, `${r.status} ${JSON.stringify(r.data)}`);
+}
+
+// ───────── Citas virtuales (enlace de Zoom, Teams o Meet) ─────────
+console.log("\nCitas virtuales");
+{
+  const MEET = "https://meet.google.com/abc-defg-hij";
+  const enlace = (quien, cita, valor) => call("PUT", "/appointment/appointment-enlace", quien?.token ?? null, { appointmentId: cita, enlace: valor });
+  const citaDe = async (quien, cita) => (await call("GET", "/appointment", quien.token)).data?.find((c) => c.appointment_id === cita);
+
+  // Cita nueva de B con Profesional 1, todavía por revisar
+  const turno = (await mkSlot(P1, 8, "14:00")).data?.worker_schedule?.worker_schedule_id;
+  const cita = (await call("POST", "/appointment/appointment-create", B.token, await booking(B, B, turno))).data?.appointment?.appointment_id;
+
+  r = await enlace(null, cita, MEET);
+  check("Poner el enlace de una cita exige sesión", r.status === 401, r.status);
+  r = await enlace(B, cita, MEET);
+  check("El paciente no pone el enlace de su cita", r.status === 403, r.status);
+  r = await enlace(P2, cita, MEET);
+  check("Profesional 2 no pone enlaces en citas de Profesional 1", denied(r), r.status);
+  r = await call("PUT", "/appointment/appointment-enlace", P1.token, { appointmentId: cita });
+  check("Si el campo del enlace no llega, no se cambia nada", r.status === 422, r.status);
+  for (const [caso, malo] of [
+    ["sin https", "http://meet.google.com/abc-defg-hij"],
+    ["de otro sitio", "https://example.com/reunion"],
+    ["de un dominio que solo se parece", "https://meet.google.com.example.com/abc"],
+    ["con usuario@otro-sitio", "https://zoom.us@example.com/j/1"],
+    ["con código", "javascript:alert(1)//https://zoom.us/j/1"],
+    ["que no es de una reunión (redirige a otro sitio)", "https://meet.google.com/linkredirect?dest=https%3A%2F%2Fexample.com"],
+    ["con caracteres que no se ven", "https://zoom.us/j/1\u0007"],
+    ["que sale de la reunión con «..»", "https://zoom.us/j/../signin"],
+    ["que sale de la reunión con «%2e%2e»", "https://meet.google.com/lookup/%2e%2e/linkredirect?dest=https://example.com"],
+  ]) {
+    r = await enlace(P1, cita, malo);
+    check(`No se acepta un enlace ${caso}`, r.status === 422, r.status);
+  }
+  r = await enlace(P1, cita, MEET);
+  check("El profesional de la cita pone el enlace de Google Meet", r.status === 200 && r.data?.plataforma === "Google Meet", `${r.status} ${JSON.stringify(r.data)}`);
+  let vista = await citaDe(B, cita);
+  check("Con el pago por revisar, el paciente sabe que es virtual pero aún no recibe el enlace", vista?.es_virtual === true && vista?.enlace_virtual === null, JSON.stringify({ v: vista?.es_virtual, e: vista?.enlace_virtual }));
+  vista = await citaDe(S, cita);
+  check("Secretaría ve el enlace", vista?.enlace_virtual === MEET, JSON.stringify(vista?.enlace_virtual));
+  check("Otro paciente y otro profesional no ven esa cita ni su enlace", !(await citaDe(A, cita)) && !(await citaDe(P2, cita)));
+  await call("PUT", "/appointment/appointment-approve", S.token, { appointmentId: cita });
+  vista = await citaDe(B, cita);
+  check("Aprobado el pago, el paciente recibe el enlace", vista?.enlace_virtual === MEET, JSON.stringify(vista?.enlace_virtual));
+  r = await enlace(S, cita, "https://us02web.zoom.us/j/81234567890?pwd=abc123");
+  check("Secretaría cambia el enlace (Zoom)", r.status === 200 && r.data?.plataforma === "Zoom", `${r.status} ${JSON.stringify(r.data)}`);
+  r = await enlace(admin, cita, "");
+  check("Sin enlace, la cita vuelve a ser presencial", r.status === 200 && r.data?.es_virtual === false && (await citaDe(B, cita))?.es_virtual === false, `${r.status} ${JSON.stringify(r.data)}`);
+  r = await enlace(P1, apptA, MEET);
+  check("No se pone enlace en una cita que ya terminó", r.status === 422, r.status);
+  r = await call("PUT", "/appointment/appointment-cancel", S.token, { appointmentId: cita });
+  check("Las respuestas del API no traen el enlace guardado en la base", r.status === 200 && !("enlace_virtual" in (r.data?.appointment ?? {})), JSON.stringify(r.data)?.slice(0, 160));
 }
 
 // ───────── Manuales de uso (no son públicos) ─────────

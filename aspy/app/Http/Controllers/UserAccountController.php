@@ -209,7 +209,7 @@ class UserAccountController extends Controller
         if ($registroPublico) {
             $validated['role_id'] = self::ROLE_CLIENT;
         } elseif ((int) $validated['role_id'] === self::ROLE_ADMIN && ! $this->isAdmin()) {
-            return $this->forbidden('Solo un administrador puede crear administradores.');
+            return $this->forbidden('Solo la administración puede crear cuentas de administración.');
         }
         $validated['role'] = self::subtypeForRole((int) $validated['role_id']);
 
@@ -377,7 +377,7 @@ class UserAccountController extends Controller
                 return $this->forbidden();
             }
             if ((int) $validated['role_id'] === self::ROLE_ADMIN && $target->userAccount?->role_id !== self::ROLE_ADMIN) {
-                return $this->forbidden('Solo un administrador puede asignar el rol de administrador.');
+                return $this->forbidden('Solo la administración puede asignar el rol de administración.');
             }
         }
         if ($isSelf && ! $this->isStaffOrAdmin()) {

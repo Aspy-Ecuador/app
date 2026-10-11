@@ -75,7 +75,7 @@ class ManualController extends Controller
             return $this->rechazo('Este enlace del manual no es válido.');
         }
         if (! UserAccount::whereKey($datos['u'] ?? 0)->where('is_available', true)->exists()) {
-            return $this->rechazo('Tu cuenta está deshabilitada. Comunícate con el administrador de la fundación.');
+            return $this->rechazo('Tu cuenta está deshabilitada. Comunícate con la administración de la fundación.');
         }
         if ($datos['e'] < now()->timestamp) {
             return $this->rechazo('Este enlace del manual venció. Vuelve a abrirlo desde el sistema: menú ⋮ → Manual de uso.');

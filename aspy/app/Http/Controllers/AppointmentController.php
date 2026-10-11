@@ -72,8 +72,23 @@ class AppointmentController extends Controller
                 'modified_by' => $appointment->modified_by,
                 'creation_date' => $appointment->creation_date,
                 'modification_date' => $appointment->modification_date,
-            ];
+            ] + $this->datosVirtuales($appointment);
         });
+    }
+
+    /**
+     * Cita virtual: `es_virtual` y el enlace de la reunión. El paciente recibe el enlace solo cuando
+     * su cita ya está Agendada (pago aprobado); antes solo sabe que será virtual.
+     */
+    private function datosVirtuales(Appointment $appointment): array
+    {
+        $enlace = $appointment->enlace_virtual ?: null;
+        $loVe = ! $this->isClient() || (int) $appointment->appointment_status_id === self::STATUS_SCHEDULED;
+
+        return [
+            'es_virtual' => $enlace !== null,
+            'enlace_virtual' => $loVe ? $enlace : null,
+        ];
     }
 
     public function show($id)
@@ -93,7 +108,62 @@ class AppointmentController extends Controller
             'modified_by' => $appointment->modified_by,
             'creation_date' => $appointment->creation_date,
             'modification_date' => $appointment->modification_date,
-        ];
+        ] + $this->datosVirtuales($appointment);
+    }
+
+    /**
+     * Pone, cambia o quita el enlace de la reunión de una cita virtual (vacío = la cita es presencial).
+     * Lo hace el profesional de esa cita, Secretaría o el Admin, mientras la cita esté Guardada o Agendada.
+     * Solo se aceptan enlaces https de Zoom, Microsoft Teams o Google Meet (Appointment::PLATAFORMAS_VIRTUALES).
+     */
+    public function guardarEnlaceVirtual(Request $request)
+    {
+        $request->validate([
+            'appointmentId' => 'required|integer',
+            // `present`: para quitar el enlace hay que mandarlo vacío a propósito; si el campo no llega, no se toca nada
+            'enlace' => 'present|nullable|string|max:500',
+        ], [
+            'appointmentId.required' => 'Indica la cita.',
+            'appointmentId.integer' => 'Indica la cita.',
+            'enlace.present' => 'Falta el enlace de la reunión.',
+            'enlace.string' => 'El enlace no es válido.',
+            'enlace.max' => 'El enlace es demasiado largo.',
+        ]);
+
+        // Un profesional solo encuentra sus propias citas: una ajena responde igual que una que no existe
+        $appointment = Appointment::query()
+            ->when(! $this->isStaffOrAdmin(), fn ($consulta) => $consulta->where('professional_id', $this->currentPersonId()))
+            ->find($request->appointmentId);
+        if (! $appointment) {
+            return response()->json(['message' => 'No se encontró la cita.'], 404);
+        }
+        if (! in_array((int) $appointment->appointment_status_id, [self::STATUS_SAVED, self::STATUS_SCHEDULED], true)) {
+            return response()->json(['message' => 'El enlace solo se puede cambiar en citas guardadas o agendadas.'], 422);
+        }
+
+        $enlace = trim((string) $request->input('enlace'));
+        if ($enlace !== '' && Appointment::plataformaVirtual($enlace) === null) {
+            return response()->json([
+                'message' => 'Pega el enlace de la reunión de Zoom, Microsoft Teams o Google Meet (empieza con https://).',
+                'errors' => ['enlace' => ['Pega el enlace de la reunión de Zoom, Microsoft Teams o Google Meet (empieza con https://).']],
+            ], 422);
+        }
+
+        try {
+            $appointment->enlace_virtual = $enlace === '' ? null : $enlace;
+            $appointment->modified_by = auth()->id();
+            $appointment->save();
+        } catch (\Exception $e) {
+            return $this->serverError('No se pudo guardar el enlace.', $e);
+        }
+
+        return response()->json([
+            'message' => $enlace === '' ? 'La cita quedó como presencial.' : 'Enlace guardado.',
+            'appointment_id' => $appointment->appointment_id,
+            'es_virtual' => $enlace !== '',
+            'enlace_virtual' => $appointment->enlace_virtual,
+            'plataforma' => Appointment::plataformaVirtual($appointment->enlace_virtual),
+        ]);
     }
 
     public function createAppointment(Request $request)

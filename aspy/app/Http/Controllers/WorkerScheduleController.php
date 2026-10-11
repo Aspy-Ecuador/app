@@ -2,19 +2,33 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Schedule;
+use App\Models\Ajuste;
+use App\Models\Appointment;
 use App\Models\WorkerSchedule;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class WorkerScheduleController extends Controller
 {
-    /** Staff/admin gestionan cualquier horario; un profesional solo los suyos. */
+    private const CITA_CANCELADA = 5;
+
+    // Los horarios se crean solo con POST /professional/create-horario (ProfessionalController), que aplica
+    // el permiso de Secretaría y el límite de fechas que decide el Admin. Aquí no hay `store`.
+
+    /**
+     * El Admin gestiona cualquier horario; un profesional, solo los suyos; Secretaría, cualquiera pero
+     * solo si el Admin lo habilitó (ajuste `horario_secretaria`, el mismo permiso que para crearlos).
+     */
     private function canManage(WorkerSchedule $workerSchedule): bool
     {
-        return $this->isStaffOrAdmin()
-            || ($this->isProfessional() && (int) $workerSchedule->professional_id === $this->currentPersonId());
+        if ($this->isAdmin()) {
+            return true;
+        }
+        if ($this->isProfessional()) {
+            return (int) $workerSchedule->professional_id === $this->currentPersonId();
+        }
+
+        return $this->currentRoleId() === self::ROLE_STAFF && Ajuste::horarioSecretaria();
     }
 
     public function index()
@@ -27,64 +41,6 @@ class WorkerScheduleController extends Controller
         return WorkerSchedule::with(['schedule', 'professional'])->findOrFail($id);
     }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            // Campos para Schedule
-            'date' => 'required|date',
-            'start_time' => 'required|date_format:H:i:s',
-            'end_time' => 'required|date_format:H:i:s|after:start_time',
-            'name' => 'nullable|string|max:150',
-
-            // Campos para WorkerSchedule
-            'person_id' => 'required|integer',
-        ]);
-
-        DB::beginTransaction();
-
-        try {
-            // Buscar Schedule existente con date, start_time, end_time (y opcionalmente name)
-            $schedule = Schedule::where('date', $validated['date'])
-                ->where('start_time', $validated['start_time'])
-                ->where('end_time', $validated['end_time'])
-                ->first();
-
-            if (! $schedule) {
-                // Crear Schedule si no existe
-                $scheduleData = [
-                    'date' => $validated['date'],
-                    'start_time' => $validated['start_time'],
-                    'end_time' => $validated['end_time'],
-                    'name' => $validated['name'] ?? null,
-                ];
-
-                $schedule = Schedule::create($scheduleData);
-            }
-
-            // Crear WorkerSchedule asociado a schedule_id y person_id
-            $workerScheduleData = [
-                'schedule_id' => $schedule->schedule_id,
-                'person_id' => $validated['person_id'],
-                'is_available' => true, // Asignar is_available por defecto
-                'creation_date' => Carbon::now(),
-            ];
-
-            $workerSchedule = WorkerSchedule::create($workerScheduleData);
-
-            DB::commit();
-
-            return response()->json([
-                'schedule' => $schedule,
-                'worker_schedule' => $workerSchedule,
-            ], 201);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return $this->serverError('Error al crear worker schedule.', $e);
-        }
-    }
-
     public function update(Request $request, $id)
     {
         $workerSchedule = WorkerSchedule::findOrFail($id);
@@ -93,7 +49,20 @@ class WorkerScheduleController extends Controller
         }
         $validated = $request->validate([
             'is_available' => 'boolean',
+        ], [
+            'is_available.boolean' => 'Indica si el horario queda disponible o no.',
         ]);
+
+        // Un turno con una cita no se vuelve a ofrecer: otra persona lo reservaría encima. Se libera
+        // cancelando la cita (o al rechazar su pago), que es cuando el sistema lo marca como disponible.
+        if (filter_var($validated['is_available'] ?? false, FILTER_VALIDATE_BOOLEAN) && ! $workerSchedule->is_available) {
+            $conCita = Appointment::where('worker_schedule_id', $workerSchedule->worker_schedule_id)
+                ->where('appointment_status_id', '!=', self::CITA_CANCELADA)
+                ->exists();
+            if ($conCita) {
+                return response()->json(['message' => 'Este horario tiene una cita. Para liberarlo hay que cancelar la cita.'], 422);
+            }
+        }
 
         $validated['modification_date'] = Carbon::now();
         $validated['modified_by'] = auth()->id();

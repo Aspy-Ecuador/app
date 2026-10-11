@@ -23,7 +23,7 @@ class EnsureAccountEnabled
 
             return response()->json([
                 'code' => 'cuenta_deshabilitada',
-                'message' => 'Tu cuenta está deshabilitada. Comunícate con el administrador de la fundación.',
+                'message' => 'Tu cuenta está deshabilitada. Comunícate con la administración de la fundación.',
             ], 403);
         }
 

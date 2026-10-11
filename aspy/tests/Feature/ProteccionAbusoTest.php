@@ -83,6 +83,7 @@ test('los archivos que nadie usó se borran al día siguiente', function () {
 });
 
 test('un paciente no puede acaparar la agenda: máximo 10 citas esperando la revisión del pago', function () {
+    alcanceDeHorarios();
     $admin = entrar($this, 'admin@aspy.com', 'ADMIN')->json('access_token');
     como($this, $admin)->postJson('/api/user-account/crear', cuentaNueva('pro@prueba.test', ['role_id' => 2, 'role' => 'professional', 'specialty' => 'Psicología']))->assertStatus(201);
     como($this, $admin)->postJson('/api/user-account/crear', cuentaNueva('sec@prueba.test', ['role_id' => 4, 'role' => 'staff']))->assertStatus(201);
@@ -239,8 +240,16 @@ test('no se crean horarios a más de un año ni servicios con precios absurdos',
     $horario = fn (string $fecha) => como($this, $pro)->postJson('/api/professional/create-horario', [
         'professional_id' => $proId, 'date' => $fecha, 'start_time' => '09:00', 'end_time' => '10:00', 'name' => 'Turno',
     ]);
+    // El profesional planifica hasta donde le deja el Admin (HorariosTest); nunca a años de distancia
     $horario(now()->addYears(2)->toDateString())->assertStatus(422)->assertJsonValidationErrors('date');
-    $horario(now()->addMonths(2)->toDateString())->assertStatus(201);
+    $horario(now()->toDateString())->assertStatus(201);
+
+    // El Admin no tiene ese límite, pero tampoco crea horarios a más de un año
+    $delAdmin = fn (string $fecha) => como($this, $admin)->postJson('/api/professional/create-horario', [
+        'professional_id' => $proId, 'date' => $fecha, 'start_time' => '11:00', 'end_time' => '12:00', 'name' => 'Turno',
+    ]);
+    $delAdmin(now()->addDays(366)->toDateString())->assertStatus(422)->assertJsonValidationErrors('date');
+    $delAdmin(now()->addMonths(6)->toDateString())->assertStatus(201);
 
     como($this, $admin)->postJson('/api/service', ['name' => 'Carísimo', 'price' => 1000000000])->assertStatus(422)->assertJsonValidationErrors('price');
 });

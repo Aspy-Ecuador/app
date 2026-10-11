@@ -106,6 +106,15 @@ function subirPdf($prueba, string $token, string $tipo = 'comprobante'): \Illumi
     ], ['Accept' => 'application/json']);
 }
 
+/**
+ * Hasta cuándo se pueden crear horarios (lo decide el Admin; por defecto, el mes en curso). Las pruebas
+ * que crean turnos a pocos días usan "dos_meses" para no depender del día del mes en que se corren.
+ */
+function alcanceDeHorarios(string $alcance = 'dos_meses'): void
+{
+    \App\Models\Ajuste::updateOrCreate(['clave' => \App\Models\Ajuste::HORARIO_ALCANCE], ['valor' => $alcance]);
+}
+
 /** Registra un paciente y devuelve su sesión. */
 function pacienteConSesion($prueba, string $email): string
 {
