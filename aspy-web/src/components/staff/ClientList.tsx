@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import AvisoConsentimientoRetirado from "@components/privacidad/AvisoConsentimientoRetirado";
 import type { GridColDef, GridRowId } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +20,10 @@ import personAPI from "@API/personAPI";
 import type { Person } from "@/typesResponse/Person";
 import { tone } from "@shared-theme/themePrimitives";
 import { vh } from "@shared-theme/pantallaGrande";
+import BarraFiltros from "@components/tabla/BarraFiltros";
+import { OPCIONES_HABILITADO, coincide, pasaHabilitado, useFiltros } from "@components/tabla/filtros";
+
+const SIN_FILTROS = { buscar: "", habilitado: "" };
 
 export default function ClientsList() {
   const [selectedId, setSelectedId] = useState<GridRowId | null>(null);
@@ -30,7 +34,18 @@ export default function ClientsList() {
   const [togglingMap, setTogglingMap] = useState<Record<number, boolean>>({});
 
   //Usuario seleccionado
-  const users: Person[] = getClient(data.persons ?? []);
+  const users: Person[] = useMemo(() => getClient(data.persons ?? []), [data.persons]);
+  const { valores: filtros, cambiar, limpiar, hayFiltros } = useFiltros(SIN_FILTROS);
+
+  const filtrados = useMemo(
+    () =>
+      users.filter(
+        (u) =>
+          coincide(filtros.buscar, u.first_name, u.last_name, u.user_account?.email, u.phone?.number, u.identification?.number) &&
+          pasaHabilitado(filtros.habilitado, u.user_account?.is_available ?? true),
+      ),
+    [users, filtros],
+  );
 
   const selectedUser =
     selectedId !== null
@@ -205,6 +220,19 @@ export default function ClientsList() {
           />
         </Grid>
 
+        <Grid size={12}>
+          <BarraFiltros
+            id="pacientes"
+            busqueda={{ value: filtros.buscar, onChange: (v) => cambiar("buscar", v), placeholder: "Nombres, apellidos, correo, celular o identificación" }}
+            listas={[{ id: "habilitado", etiqueta: "Cuenta", value: filtros.habilitado, onChange: (v) => cambiar("habilitado", v), opciones: OPCIONES_HABILITADO, todos: "Todas" }]}
+            total={users.length}
+            mostrados={filtrados.length}
+            que={["paciente", "pacientes"]}
+            hayFiltros={hayFiltros}
+            onLimpiar={limpiar}
+          />
+        </Grid>
+
         {/* Tabla - Conservando el overflowX para habilitar el scroll de las columnas */}
         <Grid
           size={{ xs: 12, md: selectedUser && !isMobile ? 8 : 12 }}
@@ -212,7 +240,7 @@ export default function ClientsList() {
         >
           <Table<Person>
             columns={columns}
-            rows={users}
+            rows={filtrados}
             getRowId={(row) => row.user_id}
             selectedId={selectedId}
             onRowSelect={setSelectedId}

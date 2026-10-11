@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { GridRowId, GridColDef } from "@mui/x-data-grid";
 import { fechaLocal, handleDownloadInvoice, montoPago } from "@utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext";
@@ -19,6 +19,8 @@ import type { FlattenedReceipt } from "@/types/FlattenedReceipt";
 import type { Payment } from "@/typesResponse/Payment";
 import { tone } from "@shared-theme/themePrimitives";
 import { vh } from "@shared-theme/pantallaGrande";
+import BarraFiltros from "@components/tabla/BarraFiltros";
+import { coincide, enPeriodo, useFiltros } from "@components/tabla/filtros";
 
 // Función de estilos para los chips de estado
 const statusChipSx = (status: string) => {
@@ -145,35 +147,60 @@ const columns: GridColDef[] = [
   },
 ];
 
+const SIN_FILTROS = { buscar: "", estado: "", desde: "", hasta: "" };
+
+// Estados de recibo (ids fijos: 1 Generado, 2 Pendiente)
+const ESTADOS_DE_RECIBO = [
+  { value: "1", texto: "Generado" },
+  { value: "2", texto: "Pendiente" },
+];
+
 export default function ReceiptList() {
   const { data, loading } = useRoleData();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   // Lógica original conservada para cargar todos los pagos
-  const payments: Payment[] = data.payments ?? [];
+  const payments: Payment[] = useMemo(() => data.payments ?? [], [data.payments]);
   const [selectedId, setSelectedId] = useState<GridRowId | null>(null);
+  const { valores: filtros, cambiar, limpiar, hayFiltros } = useFiltros(SIN_FILTROS);
 
   const receipt =
     selectedId !== null
       ? (payments.find(
-          (item) => String(item.payment_id) === String(selectedId),
+          // El id de cada fila es el del recibo (no siempre coincide con el del pago)
+          (item) => String(item.receipt?.receipt_id) === String(selectedId),
         ) ?? null)
       : null;
 
-  if (loading) return <Progress />;
+  const flattenedRows: FlattenedReceipt[] = useMemo(
+    () =>
+      payments
+        .filter((r) => r.receipt !== null)
+        .map((r) => ({
+          id: r.receipt.receipt_id,
+          client_id: r.client.person_id,
+          client: `${r.client.first_name} ${r.client.last_name}`,
+          service: r.service.name,
+          price: montoPago(r),
+          date: fechaLocal(r.creation_date),
+          receipt: r.receipt,
+        })),
+    [payments],
+  );
 
-  const flattenedRows: FlattenedReceipt[] = payments
-    .filter((r) => r.receipt !== null)
-    .map((r) => ({
-      id: r.receipt.receipt_id,
-      client_id: r.client.person_id,
-      client: `${r.client.first_name} ${r.client.last_name}`,
-      service: r.service.name,
-      price: montoPago(r),
-      date: fechaLocal(r.creation_date),
-      receipt: r.receipt,
-    }));
+  const filtrados = useMemo(
+    () =>
+      flattenedRows.filter(
+        (r) =>
+          coincide(filtros.buscar, r.client, `#${r.id}`, r.service) &&
+          (filtros.estado === "" || String(r.receipt.receipt_status?.receipt_status_id) === filtros.estado) &&
+          enPeriodo(r.date, filtros.desde, filtros.hasta),
+      ),
+    [flattenedRows, filtros],
+  );
+
+  if (loading) return <Progress />;
 
   const invoicePanel = receipt && (
     <InvoiceView
@@ -195,11 +222,33 @@ export default function ReceiptList() {
           <SimpleHeader text={"Comprobantes de Pago"} chip="Pagos" />
         </Grid>
 
+        <Grid size={12}>
+          <BarraFiltros
+            id="recibos"
+            busqueda={{ value: filtros.buscar, onChange: (v) => cambiar("buscar", v), placeholder: "Nombre del cliente, n.° de recibo o servicio" }}
+            listas={[{ id: "estado", etiqueta: "Estado", value: filtros.estado, onChange: (v) => cambiar("estado", v), opciones: ESTADOS_DE_RECIBO }]}
+            periodo={{
+              desde: filtros.desde,
+              hasta: filtros.hasta,
+              onChange: (desde, hasta) => {
+                cambiar("desde", desde);
+                cambiar("hasta", hasta);
+              },
+              etiqueta: "Emisión",
+            }}
+            total={flattenedRows.length}
+            mostrados={filtrados.length}
+            que={["recibo", "recibos"]}
+            hayFiltros={hayFiltros}
+            onLimpiar={limpiar}
+          />
+        </Grid>
+
         {/* Tabla: Diseño responsive con overflow y grid dinámico */}
         <Grid size={{ xs: 12, md: receipt && !isMobile ? 8 : 12 }} sx={{ overflowX: "auto" }}>
           <Table<FlattenedReceipt>
             columns={columns}
-            rows={flattenedRows}
+            rows={filtrados}
             getRowId={(row) => row.id}
             selectedId={selectedId}
             onRowSelect={setSelectedId}

@@ -160,6 +160,7 @@ export const defaultLandingContent: LandingContent = {
       title: "¿Quieres apoyar a la fundación?",
       description:
         "Tu aporte nos ayuda a sostener terapias, talleres y programas de inclusión para más familias.",
+      accounts: [],
       details: [],
     },
   },

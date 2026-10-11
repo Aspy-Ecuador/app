@@ -22,7 +22,7 @@ import { DISPLAY_FONT } from "@components/landing/constants";
 const campoSx = { ...authFieldSx, "& .MuiFormHelperText-root": { mx: 0.25, mt: 0.5, fontSize: "0.78rem", lineHeight: 1.35 } };
 
 const MENSAJE_DESHABILITADA =
-  "Tu cuenta está deshabilitada. Comunícate con el administrador de la fundación.";
+  "Tu cuenta está deshabilitada. Comunícate con la administración de la fundación.";
 
 const MENSAJE_CONSENTIMIENTO_RETIRADO =
   "Retiraste tu consentimiento y tu cuenta quedó deshabilitada. Si fue un error o quieres volver, comunícate con la fundación.";

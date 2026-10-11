@@ -1,5 +1,5 @@
 // FINAL
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useLayoutEffect, useEffect } from "react";
 import { getAuthenticatedUserIdRole } from "@/utils/store";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -19,11 +19,17 @@ import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import MedicalServicesRoundedIcon from "@mui/icons-material/MedicalServicesRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
+import VideocamRoundedIcon from "@mui/icons-material/VideocamRounded";
+import PlaceRoundedIcon from "@mui/icons-material/PlaceRounded";
+import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
+import TextField from "@mui/material/TextField";
 import { useTheme } from "@mui/material/styles";
 import type { Appointment } from "@/typesResponse/Appointment";
 import appointmentAPI from "@/API/appointmentAPI";
 import { paletteVar, tone } from "@shared-theme/themePrimitives";
-import { zoomActual, zoomSoloEn } from "@shared-theme/pantallaGrande";
+import { vh, zoomActual, zoomSoloEn } from "@shared-theme/pantallaGrande";
+import { AYUDA_ENLACE_VIRTUAL, plataformaVirtual } from "@utils/citaVirtual";
+import { ahoraEcuadorDePared, instanteEcuador } from "@utils/utils";
 import { useRoleData } from "@/observer/RoleDataContext"; // ← NUEVO
 import Success from "@components/Success"; // ← NUEVO
 import Progress from "@components/Progress"; // ← NUEVO
@@ -42,6 +48,9 @@ interface DetailInfo {
   y: number;
   rawDate: string;
   rawStart: string;
+  /** Cita virtual: tiene un enlace de reunión (al paciente le llega cuando la cita está Agendada). */
+  esVirtual: boolean;
+  enlaceVirtual: string | null;
 }
 
 const fmt = (t: string) => t.slice(0, 5);
@@ -120,6 +129,10 @@ const statusStyle = (statusId: number) =>
 
 const CANCELLABLE_STATUS_IDS = new Set([1, 2]);
 
+// Roles que ponen o quitan el enlace de una cita virtual (el servidor exige además que el profesional
+// sea el de esa cita): 1 Admin, 2 Profesional, 4 Secretaría
+const ROLES_QUE_PONEN_ENLACE = new Set([1, 2, 4]);
+
 const LEGEND = Object.values(STATUS_MAP).map(({ label, accent }) => ({
   label,
   color: accent,
@@ -173,6 +186,12 @@ const Legend = () => (
         </Typography>
       </Box>
     ))}
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+      <VideocamRoundedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
+      <Typography sx={{ fontSize: 11, fontWeight: 500, color: "text.secondary" }}>
+        Cita virtual
+      </Typography>
+    </Box>
   </Box>
 );
 
@@ -205,6 +224,9 @@ const EventContent = ({ info }: { info: EventContentArg }) => {
           textOverflow: "ellipsis",
         }}
       >
+        {extendedProps.esVirtual && (
+          <VideocamRoundedIcon titleAccess="Cita virtual" aria-label="Cita virtual" sx={{ fontSize: 11, mr: "2px", verticalAlign: "-2px" }} />
+        )}
         {extendedProps.clientName}
       </Typography>
       <Typography
@@ -271,17 +293,42 @@ const DetailPopover = ({
   detail,
   onClose,
   onCancelled,
+  onEnlaceGuardado,
 }: {
   detail: DetailInfo;
   onClose: () => void;
   onCancelled: () => void;
+  onEnlaceGuardado: (appointmentId: number, enlace: string | null) => void;
 }) => {
   const st = statusStyle(detail.statusId);
   // x, y vienen en píxeles de pantalla; dentro del panel con zoom (pantallas grandes) se dividen
   const zoom = zoomActual();
-  const safeX = Math.min(detail.x / zoom + 12, window.innerWidth / zoom - 280);
-  const safeY = Math.min(detail.y / zoom - 8, window.innerHeight / zoom - 400);
+  // El alto cambia (cancelar, poner el enlace): se mide para que la ventana nunca se salga por abajo
+  const ventana = useRef<HTMLDivElement>(null);
+  const [alto, setAlto] = useState(400);
+  useLayoutEffect(() => {
+    const el = ventana.current;
+    if (!el) return;
+    const medir = new ResizeObserver(() => setAlto(el.offsetHeight));
+    medir.observe(el);
+    return () => medir.disconnect();
+  }, []);
+  // Escape cierra la ventana, como cualquier otra del sistema
+  useEffect(() => {
+    const alTeclear = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", alTeclear);
+    return () => window.removeEventListener("keydown", alTeclear);
+  }, [onClose]);
+  const safeX = Math.max(8, Math.min(detail.x / zoom + 12, window.innerWidth / zoom - 280));
+  const safeY = Math.max(8, Math.min(detail.y / zoom - 8, window.innerHeight / zoom - alto - 8));
   const [cancelling, setCancelling] = useState(false);
+  // Enlace de la cita virtual
+  const [editandoEnlace, setEditandoEnlace] = useState(false);
+  const [enlace, setEnlace] = useState(detail.enlaceVirtual ?? "");
+  const [guardandoEnlace, setGuardandoEnlace] = useState(false);
+  const [errorEnlace, setErrorEnlace] = useState("");
   // Cancelar no se puede deshacer: se pide confirmación en la misma ventana
   const [confirmando, setConfirmando] = useState(false);
   const [errorCancelar, setErrorCancelar] = useState("");
@@ -295,12 +342,38 @@ const DetailPopover = ({
     if (role === 4) return true;
 
     if (role === 3) {
-      const appointmentDate = new Date(`${detail.rawDate}T${detail.rawStart}`);
-      return (appointmentDate.getTime() - now.getTime()) / 36e5 > 24;
+      // La fecha y la hora de la cita son de Ecuador, esté donde esté el dispositivo
+      return (instanteEcuador(detail.rawDate, detail.rawStart) - now.getTime()) / 36e5 > 24;
     }
 
     return false;
   })();
+
+  // Solo se ofrece como enlace lo que es https y de Zoom, Teams o Meet (el servidor guarda con esa misma regla)
+  const plataforma = plataformaVirtual(detail.enlaceVirtual);
+  const citaVigente = CANCELLABLE_STATUS_IDS.has(detail.statusId);
+  const puedePonerEnlace = citaVigente && ROLES_QUE_PONEN_ENLACE.has(Number(role));
+
+  const guardarEnlace = async (valor: string) => {
+    const limpio = valor.trim();
+    if (limpio && !plataformaVirtual(limpio)) {
+      setErrorEnlace(AYUDA_ENLACE_VIRTUAL);
+      return;
+    }
+    setGuardandoEnlace(true);
+    setErrorEnlace("");
+    try {
+      const guardado = await appointmentAPI.guardarEnlaceVirtual(detail.appointmentId, limpio);
+      onEnlaceGuardado(detail.appointmentId, guardado.enlace_virtual ?? null);
+      setEnlace(guardado.enlace_virtual ?? "");
+      setEditandoEnlace(false);
+    } catch (error) {
+      const datos = (error as { response?: { data?: { message?: string; errors?: { enlace?: string[] } } } })?.response?.data;
+      setErrorEnlace(datos?.errors?.enlace?.[0] ?? datos?.message ?? "No se pudo guardar el enlace. Inténtalo de nuevo.");
+    } finally {
+      setGuardandoEnlace(false);
+    }
+  };
 
   const handleCancel = async () => {
     setCancelling(true);
@@ -325,6 +398,7 @@ const DetailPopover = ({
         sx={{ position: "fixed", inset: 0, zIndex: 1200 }}
       />
       <Paper
+        ref={ventana}
         elevation={0}
         onClick={(e) => e.stopPropagation()}
         sx={{
@@ -333,10 +407,12 @@ const DetailPopover = ({
           left: safeX,
           top: safeY,
           width: 256,
+          maxHeight: `calc(${vh(100)} - 16px)`,
           border: "0.5px solid",
           borderColor: "divider",
           borderRadius: 3,
-          overflow: "hidden",
+          overflowX: "hidden",
+          overflowY: "auto",
           boxShadow: "0 8px 32px rgba(0,0,0,0.13)",
           animation: "popIn 0.14s ease",
           "@keyframes popIn": {
@@ -369,6 +445,7 @@ const DetailPopover = ({
           />
           <IconButton
             size="small"
+            aria-label="Cerrar el detalle de la cita"
             onClick={onClose}
             sx={{
               width: 22,
@@ -422,6 +499,130 @@ const DetailPopover = ({
             label="Fecha"
             value={detail.date}
           />
+          <DetailField
+            icon={detail.esVirtual ? <VideocamRoundedIcon /> : <PlaceRoundedIcon />}
+            label="Modalidad"
+            value={detail.esVirtual ? `Virtual${plataforma ? ` · ${plataforma}` : ""}` : "Presencial"}
+          />
+
+          {/* Entrar a la reunión: mientras la cita esté vigente y haya un enlace de un servicio aceptado */}
+          {detail.esVirtual && citaVigente && plataforma && !editandoEnlace && (
+            <Button
+              component="a"
+              href={detail.enlaceVirtual ?? undefined}
+              target="_blank"
+              rel="noopener noreferrer"
+              size="small"
+              startIcon={<OpenInNewRoundedIcon sx={{ fontSize: "14px !important" }} />}
+              sx={{
+                fontSize: 11.5,
+                fontWeight: 700,
+                border: 0,
+                borderRadius: "8px",
+                textTransform: "none",
+                py: 0.625,
+                color: "#fff",
+                backgroundImage: "none",
+                bgcolor: "#1D9E75",
+                "&:hover": { backgroundImage: "none", bgcolor: "#0F6E56", color: "#fff" },
+              }}
+            >
+              Entrar a la reunión
+            </Button>
+          )}
+          {/* El paciente recibe el enlace cuando la fundación confirma su pago */}
+          {detail.esVirtual && citaVigente && !detail.enlaceVirtual && !puedePonerEnlace && (
+            <Typography sx={{ fontSize: 11, lineHeight: 1.4, color: "text.secondary" }}>
+              Esta cita es virtual. El enlace para entrar aparecerá aquí cuando la fundación confirme tu pago.
+            </Typography>
+          )}
+
+          {puedePonerEnlace && !editandoEnlace && (
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() => {
+                setEnlace(detail.enlaceVirtual ?? "");
+                setErrorEnlace("");
+                setEditandoEnlace(true);
+              }}
+              sx={{ fontSize: 11, fontWeight: 600, borderRadius: "8px", textTransform: "none", py: 0.5 }}
+            >
+              {detail.esVirtual ? "Cambiar el enlace" : "Es virtual: poner el enlace"}
+            </Button>
+          )}
+          {puedePonerEnlace && editandoEnlace && (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
+              <Box component="label" htmlFor="cita-enlace-virtual" sx={{ fontSize: 11, fontWeight: 600, color: "text.primary" }}>
+                Enlace de la reunión
+              </Box>
+              <TextField
+                id="cita-enlace-virtual"
+                fullWidth
+                autoFocus
+                type="url"
+                value={enlace}
+                disabled={guardandoEnlace}
+                error={Boolean(errorEnlace)}
+                placeholder="https://meet.google.com/…"
+                onChange={(e) => {
+                  setEnlace(e.target.value);
+                  setErrorEnlace("");
+                }}
+                onKeyDown={(e) => {
+                  // Enter con el campo vacío no hace nada: quitar el enlace tiene su propio botón
+                  if (e.key === "Enter" && enlace.trim() && !guardandoEnlace) guardarEnlace(enlace);
+                }}
+                slotProps={{ htmlInput: { inputMode: "url", maxLength: 500, autoComplete: "off", "aria-describedby": "cita-enlace-ayuda" } }}
+                sx={{ "& .MuiOutlinedInput-root": { height: 36, fontSize: 12, borderRadius: "8px" } }}
+              />
+              <Typography id="cita-enlace-ayuda" role={errorEnlace ? "alert" : undefined} sx={{ fontSize: 10.5, lineHeight: 1.35, color: errorEnlace ? tone.red.fg : "text.secondary" }}>
+                {errorEnlace || `${AYUDA_ENLACE_VIRTUAL} Quien tiene la cita lo verá cuando su pago esté aprobado.`}
+              </Typography>
+              <Box sx={{ display: "flex", gap: 0.75 }}>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  disabled={guardandoEnlace}
+                  onClick={() => setEditandoEnlace(false)}
+                  sx={{ flex: 1, fontSize: 11, fontWeight: 600, borderRadius: "8px", textTransform: "none", py: 0.5 }}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  size="small"
+                  disabled={guardandoEnlace || !enlace.trim()}
+                  onClick={() => guardarEnlace(enlace)}
+                  sx={{
+                    flex: 1.4,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    border: 0,
+                    borderRadius: "8px",
+                    textTransform: "none",
+                    py: 0.5,
+                    color: "#fff",
+                    backgroundImage: "none",
+                    bgcolor: "#1D9E75",
+                    "&:hover": { backgroundImage: "none", bgcolor: "#0F6E56" },
+                    "&.Mui-disabled": { opacity: 0.6, color: "#fff" },
+                  }}
+                >
+                  {guardandoEnlace ? <CircularProgress size={14} sx={{ color: "#fff" }} /> : "Guardar enlace"}
+                </Button>
+              </Box>
+              {detail.esVirtual && (
+                <Button
+                  size="small"
+                  disabled={guardandoEnlace}
+                  onClick={() => guardarEnlace("")}
+                  sx={{ fontSize: 11, fontWeight: 600, borderRadius: "8px", textTransform: "none", py: 0.25, color: tone.red.fg }}
+                >
+                  Quitar el enlace (la cita es presencial)
+                </Button>
+              )}
+            </Box>
+          )}
 
           {canCancel && (
             <>
@@ -518,6 +719,13 @@ export default function Agenda({
 
   const handleSuccessClose = () => setOpen(false);
 
+  // Al guardar el enlace de una cita virtual: la ventana lo muestra de inmediato y la agenda se refresca
+  const handleEnlaceGuardado = (appointmentId: number, enlace: string | null) => {
+    // Solo si la ventana sigue mostrando esa misma cita (pudo abrirse otra mientras respondía el servidor)
+    setDetail((d) => (d?.appointmentId === appointmentId ? { ...d, esVirtual: enlace !== null, enlaceVirtual: enlace } : d));
+    refreshAppointments();
+  };
+
   // ← NUEVO: mientras refresca muestra el spinner
   if (loading) return <Progress />;
 
@@ -551,6 +759,8 @@ export default function Agenda({
           }),
           rawDate: baseDate,
           rawStart: startStr,
+          esVirtual: Boolean(a.es_virtual),
+          enlaceVirtual: a.enlace_virtual ?? null,
         },
       };
     });
@@ -572,6 +782,8 @@ export default function Agenda({
       y: rect.top,
       rawDate: ep.rawDate,
       rawStart: ep.rawStart,
+      esVirtual: ep.esVirtual,
+      enlaceVirtual: ep.enlaceVirtual,
     });
   };
 
@@ -712,6 +924,8 @@ export default function Agenda({
           editable={false}
           selectable={false}
           nowIndicator
+          // "Ahora" y "hoy" son los de Ecuador, esté donde esté el dispositivo (las horas se dibujan como están guardadas)
+          now={ahoraEcuadorDePared}
           stickyHeaderDates
           height="auto"
           eventContent={(info) => <EventContent info={info} />}
@@ -725,6 +939,7 @@ export default function Agenda({
           detail={detail}
           onClose={() => setDetail(null)}
           onCancelled={handleCancelled} // ← NUEVO
+          onEnlaceGuardado={handleEnlaceGuardado}
         />
       )}
 

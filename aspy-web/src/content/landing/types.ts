@@ -41,6 +41,21 @@ export type Accent = "blue" | "pink" | "yellow";
 
 export type SocialNetwork = "instagram" | "facebook" | "tiktok" | "youtube" | "linkedin";
 
+/** Una cuenta bancaria para donar (Sanity → Aliados y donaciones → Cuentas para donar). */
+export interface DonationAccount {
+  /** Nombre del banco, p. ej. "Banco Pichincha". */
+  bank: string;
+  accountType?: "ahorros" | "corriente";
+  accountNumber: string;
+  /** Nombre o razón social del titular. */
+  holderName: string;
+  holderIdType?: "cedula" | "ruc";
+  /** Cédula (10 números) o RUC (13) del titular. */
+  holderId?: string;
+  /** Correo del titular (los bancos lo piden al registrar la cuenta para transferir). */
+  email?: string;
+}
+
 /** Secciones del menú (claves sin guiones: así las exige Sanity; el ancla HTML está en NAV_ITEMS). */
 export type NavSectionId = "nosotros" | "servicios" | "comoAgendar" | "aspyband" | "contacto";
 
@@ -63,7 +78,7 @@ export interface LandingContent {
     description: string;
     /** Fotos del collage (se van turnando). Con 1 foto se muestra fija. */
     images: LandingImage[];
-    /** Segundos entre cada cambio de fotos del collage. */
+    /** Segundos entre cada cambio de fotos del collage (de 3 a 30). 0 = las fotos quedan fijas. */
     rotationSeconds: number;
     /** Etiquetas cortas que flotan sobre las fotos. */
     chips: string[];
@@ -123,7 +138,9 @@ export interface LandingContent {
     donation: {
       title: string;
       description: string;
-      /** Datos para donar, p. ej. { label: "Banco", value: "…" }. */
+      /** Cuentas bancarias para donar (banco, tipo y número de cuenta, titular, cédula o RUC y correo). */
+      accounts: DonationAccount[];
+      /** Otros datos para donar que no son una cuenta bancaria, p. ej. { label: "PayPal", value: "…" }. */
       details: { label: string; value: string }[];
       cta?: LandingLink;
     };

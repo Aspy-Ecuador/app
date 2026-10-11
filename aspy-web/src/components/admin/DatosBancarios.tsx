@@ -14,8 +14,10 @@ import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded
 import SimpleHeader from "@components/SimpleHeader";
 import Progress from "@components/Progress";
 import bankAccountAPI, { type BankAccount } from "@API/bankAccountAPI";
-import ajustesAPI from "@API/ajustesAPI";
+import ajustesAPI, { ALCANCES, type AlcanceHorario } from "@API/ajustesAPI";
 import DeleteSweepRoundedIcon from "@mui/icons-material/DeleteSweepRounded";
+import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
+import Switch from "@mui/material/Switch";
 import { tone } from "@shared-theme/themePrimitives";
 import Campo from "@forms/Campo";
 import { botonPrimarioSx, campoSx, selectNativoSx } from "@forms/estilos";
@@ -46,12 +48,45 @@ export default function DatosBancarios() {
   const [guardandoPlazo, setGuardandoPlazo] = useState(false);
   const [mensajePlazo, setMensajePlazo] = useState<{ tipo: "success" | "error"; texto: string } | null>(null);
 
+  // Ajuste aparte: hasta cuándo se crean horarios y si Secretaría puede crearlos
+  const [alcance, setAlcance] = useState<AlcanceHorario | null>(null);
+  const [secretaria, setSecretaria] = useState(false);
+  const [hasta, setHasta] = useState("");
+  const [guardandoHorarios, setGuardandoHorarios] = useState(false);
+  const [mensajeHorarios, setMensajeHorarios] = useState<{ tipo: "success" | "error"; texto: string } | null>(null);
+
   useEffect(() => {
     ajustesAPI
       .get()
-      .then((a) => setPlazo(a.comprobante_rechazado_dias))
-      .catch(() => setMensajePlazo({ tipo: "error", texto: "No se pudo cargar este ajuste." }));
+      .then((a) => {
+        setPlazo(a.comprobante_rechazado_dias);
+        setAlcance(a.horario_alcance);
+        setSecretaria(a.horario_secretaria);
+        setHasta(a.horario_hasta);
+      })
+      .catch(() => {
+        setMensajePlazo({ tipo: "error", texto: "No se pudo cargar este ajuste." });
+        setMensajeHorarios({ tipo: "error", texto: "No se pudo cargar este ajuste." });
+      });
   }, []);
+
+  const guardarHorarios = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (alcance === null) return;
+    setGuardandoHorarios(true);
+    setMensajeHorarios(null);
+    try {
+      const guardado = await ajustesAPI.guardar({ horario_alcance: alcance, horario_secretaria: secretaria });
+      setAlcance(guardado.horario_alcance);
+      setSecretaria(guardado.horario_secretaria);
+      setHasta(guardado.horario_hasta);
+      setMensajeHorarios({ tipo: "success", texto: "Ajuste guardado. Vale para los horarios que se creen desde ahora." });
+    } catch {
+      setMensajeHorarios({ tipo: "error", texto: "No se pudo guardar el ajuste. Inténtalo de nuevo." });
+    } finally {
+      setGuardandoHorarios(false);
+    }
+  };
 
   const guardarPlazo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +94,7 @@ export default function DatosBancarios() {
     setGuardandoPlazo(true);
     setMensajePlazo(null);
     try {
-      const guardado = await ajustesAPI.guardar(plazo);
+      const guardado = await ajustesAPI.guardar({ comprobante_rechazado_dias: plazo });
       setPlazo(guardado.comprobante_rechazado_dias);
       setMensajePlazo({ tipo: "success", texto: "Ajuste guardado." });
     } catch {
@@ -238,6 +273,92 @@ export default function DatosBancarios() {
               <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
                 <Button type="submit" variant="contained" disabled={guardandoPlazo || plazo === null} sx={botonPrimarioSx}>
                   {guardandoPlazo ? <CircularProgress size={20} sx={{ color: "#fff" }} /> : "Guardar"}
+                </Button>
+              </Box>
+            </Box>
+          </Paper>
+        </Grid>
+
+        <Grid size={{ xs: 12, md: 8, lg: 6 }}>
+          <Paper elevation={0} sx={{ border: "0.5px solid", borderColor: "divider", borderRadius: 3, overflow: "hidden" }}>
+            <Box sx={{ px: 2.5, py: 1.75, borderBottom: "0.5px solid", borderColor: "divider", display: "flex", alignItems: "center", gap: 1.25 }}>
+              <Box sx={{ width: 30, height: 30, borderRadius: "8px", display: "grid", placeItems: "center", bgcolor: tone.green.bg, color: tone.green.fg, flex: "none" }}>
+                <EditCalendarRoundedIcon sx={{ fontSize: 17 }} />
+              </Box>
+              <Box>
+                <Typography sx={{ fontSize: 13, fontWeight: 600, color: "text.primary", lineHeight: 1.2 }}>
+                  Horarios de los profesionales
+                </Typography>
+                <Typography sx={{ fontSize: 11, color: "text.disabled", lineHeight: 1.2 }}>
+                  Con cuánta anticipación se pueden crear y quién los crea
+                </Typography>
+              </Box>
+            </Box>
+
+            <Box component="form" onSubmit={guardarHorarios} noValidate sx={{ p: 2.5, display: "flex", flexDirection: "column", gap: 2 }}>
+              <Campo
+                etiqueta="Se pueden crear horarios para"
+                htmlFor="alcance-horarios"
+                ayuda={
+                  hasta
+                    ? `Con la opción guardada, hoy se pueden crear horarios hasta el ${hasta.split("-").reverse().join("/")}. Los horarios que ya existen no se borran.`
+                    : "Los horarios que ya existen no se borran."
+                }
+              >
+                <Box
+                  component="select"
+                  id="alcance-horarios"
+                  value={alcance ?? ""}
+                  disabled={alcance === null}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    setAlcance(e.target.value as AlcanceHorario);
+                    setMensajeHorarios(null);
+                  }}
+                  sx={selectNativoSx}
+                >
+                  {alcance === null && <option value="">Cargando…</option>}
+                  {ALCANCES.map(([valor, texto]) => (
+                    <option key={valor} value={valor}>
+                      {texto}
+                    </option>
+                  ))}
+                </Box>
+              </Campo>
+
+              <Box
+                component="label"
+                htmlFor="horarios-secretaria"
+                sx={{ display: "flex", alignItems: "flex-start", gap: 1.5, p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: "12px", cursor: alcance === null ? "default" : "pointer" }}
+              >
+                <Switch
+                  id="horarios-secretaria"
+                  checked={secretaria}
+                  disabled={alcance === null}
+                  onChange={(e) => {
+                    setSecretaria(e.target.checked);
+                    setMensajeHorarios(null);
+                  }}
+                  sx={{
+                    flex: "none",
+                    "& .MuiSwitch-switchBase.Mui-checked": { color: tone.green.main },
+                    "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": { bgcolor: "#1D9E75" },
+                  }}
+                />
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography sx={{ fontSize: "0.9rem", fontWeight: 600, color: "text.primary", lineHeight: 1.3 }}>
+                    Secretaría también puede crear y quitar horarios
+                  </Typography>
+                  <Typography sx={{ mt: 0.25, fontSize: "0.78rem", color: "text.secondary", lineHeight: 1.35 }}>
+                    Si lo activas, en el menú de Secretaría aparece «Horarios», con el mismo límite de fechas. Apagado, cada profesional crea los suyos.
+                  </Typography>
+                </Box>
+              </Box>
+
+              {mensajeHorarios && <Alert severity={mensajeHorarios.tipo}>{mensajeHorarios.texto}</Alert>}
+
+              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                <Button type="submit" variant="contained" disabled={guardandoHorarios || alcance === null} sx={botonPrimarioSx}>
+                  {guardandoHorarios ? <CircularProgress size={20} sx={{ color: "#fff" }} /> : "Guardar"}
                 </Button>
               </Box>
             </Box>

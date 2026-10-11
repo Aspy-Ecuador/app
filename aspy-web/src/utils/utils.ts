@@ -40,16 +40,17 @@ export function getService(data: any, service_id: number): Service {
 // FINAL
 export function getIncome(data: any): number[] {
   const payments: Payment[] = data.payments ?? [];
-  const currentYear = new Date().getFullYear();
+  const currentYear = Number(hoyEcuador().slice(0, 4));
   const monthlyIncome = Array(12).fill(0);
 
   payments.forEach((payment) => {
     if (payment.payment_status.payment_status_id !== 3) {
-      const date = new Date(payment.creation_date);
+      // Año y mes del pago en la hora de Ecuador (el servidor lo envía en hora universal)
+      const [anio, mes] = fechaLocal(payment.creation_date).split("-").map(Number);
 
-      if (date.getFullYear() !== currentYear) return;
+      if (anio !== currentYear) return;
 
-      const month = date.getMonth();
+      const month = mes - 1;
       const price = montoPago(payment);
 
       monthlyIncome[month] += price;
@@ -63,7 +64,7 @@ export function getIncome(data: any): number[] {
 // FINAL
 export function getDataAppointment(data: any): PageViewsBarChartProps {
   const appointments: Appointment[] = data.appointments ?? [];
-  const currentYear = new Date().getFullYear();
+  const currentYear = Number(hoyEcuador().slice(0, 4));
 
   const scheduled = Array(12).fill(0);
   const completed = Array(12).fill(0);
@@ -71,20 +72,21 @@ export function getDataAppointment(data: any): PageViewsBarChartProps {
   const saved = Array(12).fill(0);
 
   appointments.forEach((appointment) => {
-    const date = new Date(appointment.creation_date);
+    const [anio, mes] = fechaLocal(appointment.creation_date).split("-").map(Number);
 
     // Solo contamos citas del año actual
-    if (date.getFullYear() !== currentYear) return;
+    if (anio !== currentYear) return;
 
-    const month = date.getMonth(); // 0–11
-    const statusName = appointment.appointment_status.name.toLowerCase() ?? "";
-    if (statusName === "agendada") {
+    const month = mes - 1; // 0–11
+    // Por id (1 Guardada, 2 Agendada, 3 Asistió, 5 Cancelada): los nombres cambian entre bases
+    const estado = Number(appointment.appointment_status?.appointment_status_id);
+    if (estado === 2) {
       scheduled[month] += 1;
-    } else if (statusName === "completada") {
+    } else if (estado === 3) {
       completed[month] += 1;
-    } else if (statusName === "perdida") {
+    } else if (estado === 5) {
       cancelled[month] += 1;
-    } else if (statusName === "guardada") {
+    } else if (estado === 1) {
       saved[month] += 1;
     }
   });
@@ -130,13 +132,13 @@ export function getDataCard(data: any): StatCardProps[] {
 export function translateRol(rol: string): string {
   switch (rol.trim().toLowerCase()) {
     case "admin":
-      return "Administrador";
+      return "Administrador/a";
     case "professional":
       return "Profesional";
     case "client":
       return "Cliente";
     case "staff":
-      return "Secretario";
+      return "Secretario/a";
     default:
       return "Desconocido";
   }
@@ -166,8 +168,8 @@ export function getAppointmentProfessional(
 export function getNextAppointments(data: Appointment[]): Appointment[] {
   if (!data) return [];
 
-  const today = new Date();
-  const todayStr = today.toISOString().split("T")[0];
+  // "Hoy" en la hora de Ecuador: con la hora universal, desde las 19:00 las citas de hoy desaparecían
+  const todayStr = hoyEcuador();
   return data.filter(
     (app) => app.worker_schedule.schedule.date >= todayStr, //&&
     //app.appointment_status.appointment_status_id !== 3,
@@ -176,13 +178,11 @@ export function getNextAppointments(data: Appointment[]): Appointment[] {
 
 // FINAL
 export function getAge(birthdate: string): number {
-  const today = new Date();
-  const [year, month, day] = birthdate.split("-").map(Number);
-  let age = today.getFullYear() - year;
+  const [anioActual, mesActual, diaActual] = hoyEcuador().split("-").map(Number);
+  const [year, month, day] = String(birthdate).slice(0, 10).split("-").map(Number);
+  let age = anioActual - year;
 
   // Ajustar si aún no ha cumplido años este año
-  const mesActual = today.getMonth() + 1;
-  const diaActual = today.getDate();
   if (mesActual < month || (mesActual === month && diaActual < day)) {
     age--;
   }
@@ -298,10 +298,55 @@ export function getUnmarkedAppointments(
   );
 }
 
-const dos = (n: number) => String(n).padStart(2, "0");
+// ─── Hora de Ecuador ──────────────────────────────────────────────
+// Todo el sistema usa la hora de Ecuador continental (America/Guayaquil: UTC−5 todo el año, sin horario
+// de verano), igual que el servidor, sin importar la zona horaria del dispositivo con que se mire.
+// Para saber qué día es, qué hora es o si un turno ya empezó, usa estas funciones (no `new Date()` a secas
+// ni `toISOString()`, que dan la hora del dispositivo o la universal).
+const ZONA_ECUADOR = "America/Guayaquil";
+const DESFASE_ECUADOR = "-05:00";
+const relojEcuador = new Intl.DateTimeFormat("en-CA", {
+  timeZone: ZONA_ECUADOR,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
+/** Fecha ("AAAA-MM-DD") y hora ("HH:MM") de un instante, en la hora de Ecuador. */
+function enEcuador(instante: Date): { fecha: string; hora: string } {
+  const p = Object.fromEntries(relojEcuador.formatToParts(instante).map((x) => [x.type, x.value]));
+  return { fecha: `${p.year}-${p.month}-${p.day}`, hora: `${p.hour}:${p.minute}` };
+}
+
+/** Hoy en Ecuador, como "AAAA-MM-DD". */
+export const hoyEcuador = (): string => enEcuador(new Date()).fecha;
+
+/** Instante (en milisegundos) de una fecha y una hora de Ecuador; p. ej., el inicio de un turno. */
+export function instanteEcuador(fecha: string | Date, hora: string): number {
+  const dia = fecha instanceof Date ? enEcuador(fecha).fecha : String(fecha).split("T")[0];
+  return new Date(`${dia}T${hora}${DESFASE_ECUADOR}`).getTime();
+}
 
 /**
- * Fecha de un registro (pago, recibo, cuenta) como "AAAA-MM-DD" en la hora de quien la mira.
+ * "Ahora" de Ecuador como hora de pared ("AAAA-MM-DDTHH:MM:00"), para componentes que dibujan las horas
+ * tal como están guardadas (la agenda): así la línea de la hora actual y el día de hoy son los de Ecuador.
+ */
+export function ahoraEcuadorDePared(): string {
+  const { fecha, hora } = enEcuador(new Date());
+  return `${fecha}T${hora}:00`;
+}
+
+/** Suma días a una fecha "AAAA-MM-DD". No hay horas de por medio: no depende de ninguna zona horaria. */
+export function sumarDias(fecha: string, dias: number): string {
+  const [a, m, d] = fecha.split("-").map(Number);
+  return new Date(Date.UTC(a, m - 1, d + dias)).toISOString().slice(0, 10);
+}
+
+/**
+ * Fecha de un registro (pago, recibo, cuenta) como "AAAA-MM-DD" en la hora de Ecuador.
  * El servidor la envía en hora universal ("2026-10-08T05:37:00Z"); cortar el texto por la "T"
  * mostraba la fecha y la hora 5 horas adelantadas (y el día siguiente desde las 19:00).
  * Una fecha sin hora ("2026-10-08": cumpleaños, día de una cita) se devuelve igual.
@@ -311,28 +356,34 @@ export function fechaLocal(valor: string | Date | null | undefined): string {
   if (typeof valor === "string" && /^\d{4}-\d{2}-\d{2}$/.test(valor)) return valor;
   const d = new Date(valor);
   if (Number.isNaN(d.getTime())) return String(valor).split("T")[0];
-  return `${d.getFullYear()}-${dos(d.getMonth() + 1)}-${dos(d.getDate())}`;
+  return enEcuador(d).fecha;
 }
 
-/** Igual que `fechaLocal`, con la hora: "AAAA-MM-DD / HH:MM". */
+/** Igual que `fechaLocal`, con la hora de Ecuador: "AAAA-MM-DD / HH:MM". */
 export function fechaHoraLocal(valor: string | Date | null | undefined): string {
   if (!valor) return "";
   const d = new Date(valor);
   if (Number.isNaN(d.getTime())) return String(valor);
-  return `${fechaLocal(valor)} / ${dos(d.getHours())}:${dos(d.getMinutes())}`;
+  const { fecha, hora } = enEcuador(d);
+  return `${fecha} / ${hora}`;
 }
 
 /** Hora como "09:00". El servidor puede devolverla con segundos ("09:00:00"), según la base de datos. */
 export const horaCorta = (hora: string | null | undefined): string => String(hora ?? "").slice(0, 5);
 
-/** true si la hora de inicio de un turno ya pasó (hora local del navegador, Ecuador). */
+/** true si la hora de inicio de un turno ya pasó (la fecha y la hora del turno son de Ecuador). */
 export function turnoYaEmpezo(s: { date: string | Date; start_time: string } | null | undefined): boolean {
   if (!s) return false;
-  const inicio = new Date(`${String(s.date).split("T")[0]}T${s.start_time}`);
-  return inicio.getTime() <= Date.now();
+  return instanteEcuador(s.date, s.start_time) <= Date.now();
 }
 
-/** true si la hora de inicio de la cita ya pasó (hora local del navegador, Ecuador). */
+/** true si la hora de fin de un turno ya pasó (hora de Ecuador). */
+export function turnoYaTermino(s: { date: string | Date; end_time: string } | null | undefined): boolean {
+  if (!s) return false;
+  return instanteEcuador(s.date, s.end_time) <= Date.now();
+}
+
+/** true si la hora de inicio de la cita ya pasó (hora de Ecuador). */
 export function yaEmpezo(appointment: Appointment): boolean {
   return turnoYaEmpezo(appointment.worker_schedule?.schedule);
 }
@@ -743,7 +794,7 @@ export function exportUsersExcel(users: Person[]) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `usuarios-aspy-${new Date().toISOString().split("T")[0]}.csv`;
+  a.download = `usuarios-aspy-${hoyEcuador()}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -797,7 +848,7 @@ export function exportUsersPDF(users: Person[]) {
   setColor(doc, COLOR.white, "text");
   doc.setFontSize(8);
   doc.setFont("helvetica", "bold");
-  doc.text(new Date().toLocaleDateString("es-EC"), W - M - 22, 52.5, {
+  doc.text(hoyEcuador().split("-").reverse().join("/"), W - M - 22, 52.5, {
     align: "center",
   });
 
@@ -911,7 +962,7 @@ export function exportUsersPDF(users: Person[]) {
     align: "center",
   });
 
-  doc.save(`usuarios-aspy-${new Date().toISOString().split("T")[0]}.pdf`);
+  doc.save(`usuarios-aspy-${hoyEcuador()}.pdf`);
 }
 
 // FINAL
@@ -966,7 +1017,7 @@ export function exportServicesPDF(
   setColor(doc, COLOR.white, "text");
   doc.setFontSize(8);
   doc.setFont("helvetica", "bold");
-  doc.text(new Date().toLocaleDateString("es-EC"), W - M - 22, 52.5, {
+  doc.text(hoyEcuador().split("-").reverse().join("/"), W - M - 22, 52.5, {
     align: "center",
   });
 
@@ -1070,7 +1121,7 @@ export function exportServicesPDF(
     align: "center",
   });
 
-  doc.save(`servicios-aspy-${new Date().toISOString().split("T")[0]}.pdf`);
+  doc.save(`servicios-aspy-${hoyEcuador()}.pdf`);
 }
 
 // FINAL
@@ -1114,7 +1165,7 @@ export function exportServicesCSV(
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `servicios-aspy-${new Date().toISOString().split("T")[0]}.csv`;
+  a.download = `servicios-aspy-${hoyEcuador()}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }

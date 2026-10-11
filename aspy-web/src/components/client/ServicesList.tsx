@@ -1,6 +1,6 @@
 // FINAL
 import { useRoleData } from "@/observer/RoleDataContext";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { Service } from "@typesResponse/Service";
 import type { GridRowId, GridColDef } from "@mui/x-data-grid";
 import Grid from "@mui/material/Grid";
@@ -9,10 +9,15 @@ import Typography from "@mui/material/Typography";
 import Table from "@components/Table";
 import SimpleHeader from "@components/SimpleHeader";
 import { tone } from "@shared-theme/themePrimitives";
+import BarraFiltros from "@components/tabla/BarraFiltros";
+import { coincide, useFiltros } from "@components/tabla/filtros";
+
+const SIN_FILTROS = { buscar: "" };
 
 export default function ServicesList() {
   const { data } = useRoleData();
   const [rowSelection, setRowSelection] = useState<GridRowId | null>(null);
+  const { valores: filtros, cambiar, limpiar, hayFiltros } = useFiltros(SIN_FILTROS);
 
   const columns: GridColDef[] = [
     {
@@ -52,9 +57,8 @@ export default function ServicesList() {
     },
   ];
 
-  const services: Service[] = (data?.services ?? []).filter(
-    (s: Service) => s.is_available,
-  );
+  const services: Service[] = useMemo(() => (data?.services ?? []).filter((s: Service) => s.is_available), [data?.services]);
+  const filtrados = useMemo(() => services.filter((s) => coincide(filtros.buscar, s.name, `#${s.service_id}`)), [services, filtros]);
 
   return (
     <Box className="box-panel-control" sx={{ padding: 2 }}>
@@ -64,9 +68,21 @@ export default function ServicesList() {
         </Grid>
 
         <Grid size={12}>
+          <BarraFiltros
+            id="servicios"
+            busqueda={{ value: filtros.buscar, onChange: (v) => cambiar("buscar", v), placeholder: "Nombre del servicio" }}
+            total={services.length}
+            mostrados={filtrados.length}
+            que={["servicio", "servicios"]}
+            hayFiltros={hayFiltros}
+            onLimpiar={limpiar}
+          />
+        </Grid>
+
+        <Grid size={12}>
           <Table<Service>
             columns={columns}
-            rows={services}
+            rows={filtrados}
             getRowId={(row) => row.service_id}
             selectedId={rowSelection}
             onRowSelect={setRowSelection}

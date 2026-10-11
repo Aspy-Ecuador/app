@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import type { GridColDef, GridRowId } from "@mui/x-data-grid";
 import type { Service } from "@typesResponse/Service";
 import type { ProfessionalService } from "@typesResponse/ProfessionalService";
+import type { Person } from "@typesResponse/Person";
 import { useRoleData } from "@/observer/RoleDataContext";
 import Box from "@mui/material/Box";
 import serviceAPI from "@API/serviceAPI";
@@ -24,6 +25,15 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import { tone } from "@shared-theme/themePrimitives";
+import BarraFiltros from "@components/tabla/BarraFiltros";
+import { coincide, useFiltros } from "@components/tabla/filtros";
+
+const SIN_FILTROS = { buscar: "", disponible: "", profesional: "" };
+
+const OPCIONES_DISPONIBLE = [
+  { value: "si", texto: "Disponibles" },
+  { value: "no", texto: "No disponibles" },
+];
 
 export default function ServicesList() {
   const { data, loading, refreshProServices, refreshServices } = useRoleData();
@@ -41,6 +51,17 @@ export default function ServicesList() {
   );
 
   const proServices: ProfessionalService[] = data?.proServices ?? [];
+
+  const { valores: filtros, cambiar, limpiar, hayFiltros } = useFiltros(SIN_FILTROS);
+  const filtrados = services.filter((s) => {
+    const asignado = proServices.find((ps) => ps.service_id === s.service_id)?.professional?.person_id;
+    return (
+      coincide(filtros.buscar, s.name, `#${s.service_id}`) &&
+      (filtros.disponible === "" || (filtros.disponible === "si") === Boolean(s.is_available)) &&
+      (filtros.profesional === "" || (filtros.profesional === "ninguno" ? asignado === undefined : String(asignado) === filtros.profesional))
+    );
+  });
+  const opcionesProfesional = [{ value: "ninguno", texto: "Sin asignar" }, ...(professionals as Person[]).map((p) => ({ value: String(p.person_id), texto: `${p.first_name} ${p.last_name}` }))];
 
   const assignedMap: Record<number, number[]> = {};
   for (const ps of proServices) {
@@ -203,7 +224,7 @@ export default function ServicesList() {
       field: "is_available",
       headerName: "Disponible",
       flex: 1,
-      minWidth: 90,
+      minWidth: 104,
       sortable: false,
       filterable: false,
       disableColumnMenu: true,
@@ -409,6 +430,22 @@ export default function ServicesList() {
         </Button>
       </Box>
 
+      {services.length > 0 && (
+        <BarraFiltros
+          id="servicios"
+          busqueda={{ value: filtros.buscar, onChange: (v) => cambiar("buscar", v), placeholder: "Nombre o ID del servicio" }}
+          listas={[
+            { id: "profesional", etiqueta: "Profesional", value: filtros.profesional, onChange: (v) => cambiar("profesional", v), opciones: opcionesProfesional },
+            { id: "disponible", etiqueta: "Disponibilidad", value: filtros.disponible, onChange: (v) => cambiar("disponible", v), opciones: OPCIONES_DISPONIBLE },
+          ]}
+          total={services.length}
+          mostrados={filtrados.length}
+          que={["servicio", "servicios"]}
+          hayFiltros={hayFiltros}
+          onLimpiar={limpiar}
+        />
+      )}
+
       {/* Tabla: en PC se ve normal, en móvil scroll horizontal */}
       <Box sx={{ width: "100%", overflowX: "auto" }}>
         {loading ? (
@@ -416,7 +453,7 @@ export default function ServicesList() {
         ) : services.length ? (
           <Table<Service>
             columns={columns}
-            rows={services}
+            rows={filtrados}
             getRowId={(row) => row.service_id}
             selectedId={selectedId}
             onRowSelect={setSelectedId}

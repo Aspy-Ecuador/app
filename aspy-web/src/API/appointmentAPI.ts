@@ -47,6 +47,10 @@ const appointmentAPI = {
       appointmentId: appointmentId,
     });
   },
+
+  /** Enlace de la reunión de una cita virtual. Vacío = la cita vuelve a ser presencial. */
+  guardarEnlaceVirtual: async (appointmentId: number, enlace: string): Promise<{ es_virtual: boolean; enlace_virtual: string | null }> =>
+    (await api.put(`/appointment/appointment-enlace`, { appointmentId, enlace })).data,
 };
 
 export default appointmentAPI;

@@ -1,5 +1,5 @@
 // FINAL - VERSIÓN OPTIMIZADA (PC INSTANTÁNEO / MÓVIL FLUIDO)
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import AvisoConsentimientoRetirado from "@components/privacidad/AvisoConsentimientoRetirado";
 import { useNavigate } from "react-router-dom";
 import type { CardAdmin } from "@/types/CardAdmin";
@@ -31,6 +31,13 @@ import type { Person } from "@/typesResponse/Person";
 import { tone } from "@shared-theme/themePrimitives";
 import { getAuthenticatedPersonID } from "@store";
 import { vh } from "@shared-theme/pantallaGrande";
+import BarraFiltros from "@components/tabla/BarraFiltros";
+import { OPCIONES_HABILITADO, coincide, pasaHabilitado, useFiltros } from "@components/tabla/filtros";
+
+const SIN_FILTROS = { buscar: "", rol: "", habilitado: "" };
+
+// Roles, por su nombre en la base (ids fijos: 1 Admin, 2 Professional, 3 Client, 4 Staff)
+const ROLES = ["Admin", "Staff", "Professional", "Client"];
 
 const roleChipSx = (role: string) => {
   if (role === "Admin") return { bgcolor: tone.yellow.bg, color: tone.yellow.fg };
@@ -50,7 +57,19 @@ export default function UsersList() {
   // isMobile captura celulares y tablets (breakpoints menores a 900px de ancho)
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  const users: Person[] = data.persons ?? [];
+  const users: Person[] = useMemo(() => data.persons ?? [], [data.persons]);
+  const { valores: filtros, cambiar, limpiar, hayFiltros } = useFiltros(SIN_FILTROS);
+
+  const filtrados = useMemo(
+    () =>
+      users.filter(
+        (u) =>
+          coincide(filtros.buscar, u.first_name, u.last_name, u.user_account?.email, u.phone?.number, u.identification?.number) &&
+          (filtros.rol === "" || u.user_account?.role?.name === filtros.rol) &&
+          pasaHabilitado(filtros.habilitado, u.user_account?.is_available ?? true),
+      ),
+    [users, filtros],
+  );
   const selectedUser =
     selectedId !== null
       ? (users.find((u) => String(u.user_id) === String(selectedId)) ?? null)
@@ -112,7 +131,7 @@ export default function UsersList() {
       headerName: "Rol",
       disableColumnMenu: true,
       flex: 2,
-      minWidth: 122, // "Administrador" entero
+      minWidth: 132, // "Administrador/a" entero
       resizable: false,
       renderCell: (params) => {
         const roleName = params.row.user_account?.role?.name ?? "";
@@ -136,7 +155,7 @@ export default function UsersList() {
       headerName: "Correo",
       disableColumnMenu: true,
       flex: 4,
-      minWidth: 200,
+      minWidth: 190,
       resizable: false,
       renderCell: (params) => (
         <Box display="flex" alignItems="center" height="100%">
@@ -294,6 +313,20 @@ export default function UsersList() {
         </Button>
       </Box>
 
+      <BarraFiltros
+        id="usuarios"
+        busqueda={{ value: filtros.buscar, onChange: (v) => cambiar("buscar", v), placeholder: "Nombre, apellido, correo, celular o identificación" }}
+        listas={[
+          { id: "rol", etiqueta: "Rol", value: filtros.rol, onChange: (v) => cambiar("rol", v), opciones: ROLES.map((r) => ({ value: r, texto: translateRol(r) })) },
+          { id: "habilitado", etiqueta: "Cuenta", value: filtros.habilitado, onChange: (v) => cambiar("habilitado", v), opciones: OPCIONES_HABILITADO, todos: "Todas" },
+        ]}
+        total={users.length}
+        mostrados={filtrados.length}
+        que={["usuario", "usuarios"]}
+        hayFiltros={hayFiltros}
+        onLimpiar={limpiar}
+      />
+
       {/* Tabla + panel de perfil */}
       <Grid container spacing={1.5} alignItems="flex-start">
         {/* En PC (md en adelante), si hay usuario seleccionado ocupa 8, si no 12. Instantáneo. */}
@@ -314,7 +347,7 @@ export default function UsersList() {
             {users.length ? (
               <Table<Person>
                 columns={columns}
-                rows={users}
+                rows={filtrados}
                 getRowId={(row) => row.user_id}
                 selectedId={selectedId}
                 onRowSelect={setSelectedId}

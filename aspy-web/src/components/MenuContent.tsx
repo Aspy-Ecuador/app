@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getAuthenticatedUserRole } from "@store";
 import Box from "@mui/material/Box";
@@ -16,6 +16,7 @@ import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
 import ReceiptLongRoundedIcon from "@mui/icons-material/ReceiptLongRounded";
 import ArticleRoundedIcon from "@mui/icons-material/ArticleRounded";
 import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
+import professionalAPI from "@API/professionalAPI";
 
 interface MenuContentProps {
   onNavigate?: () => void;
@@ -52,6 +53,9 @@ const staffListItems: NavItem[] = [
   { text: "Pagos", route: "/pagos", icon: <PaymentRoundedIcon /> },
   { text: "Servicios", route: "/servicios", icon: <AssignmentRoundedIcon /> },
 ];
+
+// Solo aparece en el menú de Secretaría si el Admin le habilitó gestionar horarios (ajuste `horario_secretaria`)
+const horariosDeSecretaria: NavItem = { text: "Horarios", route: "/horarios", icon: <EditCalendarRoundedIcon /> };
 
 const professionalListItems: NavItem[] = [
   { text: "Vista General", route: "/dashboard", icon: <HomeRoundedIcon /> },
@@ -95,8 +99,26 @@ export default function MenuContent({ onNavigate }: MenuContentProps) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const role = getAuthenticatedUserRole();
-  const items: NavItem[] =
+  const [conHorarios, setConHorarios] = useState(false);
+
+  useEffect(() => {
+    if (role !== "Staff") return;
+    let vigente = true;
+    professionalAPI
+      .reglasHorario()
+      .then((reglas) => vigente && setConHorarios(reglas.puede_gestionar))
+      .catch(() => {});
+    return () => {
+      vigente = false;
+    };
+    // Se vuelve a preguntar al cambiar de pantalla (la respuesta se recuerda un minuto)
+  }, [role, pathname]);
+
+  const base: NavItem[] =
     typeof role === 'string' && role in ROLE_MAP ? ROLE_MAP[role as keyof typeof ROLE_MAP] : [];
+  // "Horarios" va justo después de "Citas"
+  const items: NavItem[] =
+    role === "Staff" && conHorarios ? base.flatMap((item) => (item.route === "/citas" ? [item, horariosDeSecretaria] : [item])) : base;
 
   const handleNav = (route: string) => {
     navigate(route.trim());

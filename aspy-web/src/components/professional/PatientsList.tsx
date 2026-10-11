@@ -1,5 +1,5 @@
 // FINAL
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import type { GridColDef, GridRowId } from "@mui/x-data-grid";
 import SimpleHeader from "@components/SimpleHeader";
@@ -17,6 +17,10 @@ import { getAge, getClients, ocupacionDe } from "@/utils/utils";
 import { getAuthenticatedUserID } from "@/utils/store";
 import type { Person } from "@/typesResponse/Person";
 import { vh } from "@shared-theme/pantallaGrande";
+import BarraFiltros from "@components/tabla/BarraFiltros";
+import { coincide, useFiltros } from "@components/tabla/filtros";
+
+const SIN_FILTROS = { buscar: "" };
 
 const columns: GridColDef[] = [
   {
@@ -97,13 +101,19 @@ export default function PatientsList() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  if (loading) return <Progress />;
+  const { valores: filtros, cambiar, limpiar, hayFiltros } = useFiltros(SIN_FILTROS);
 
-  const users: Person[] = getClients(
-    data.appointments,
-    data.persons,
-    getAuthenticatedUserID(),
+  const users: Person[] = useMemo(
+    () => (loading ? [] : getClients(data.appointments ?? [], data.persons ?? [], getAuthenticatedUserID())),
+    [loading, data.appointments, data.persons],
   );
+
+  const filtrados = useMemo(
+    () => users.filter((u) => coincide(filtros.buscar, u.first_name, u.last_name, u.user_account?.email, u.phone?.number)),
+    [users, filtros],
+  );
+
+  if (loading) return <Progress />;
 
   const selectedUser =
     selectedId !== null
@@ -133,12 +143,26 @@ export default function PatientsList() {
           <SimpleHeader text="Lista de pacientes" chip="Pacientes" />
         </Grid>
 
+        {users.length > 0 && (
+          <Grid size={12}>
+            <BarraFiltros
+              id="mis-pacientes"
+              busqueda={{ value: filtros.buscar, onChange: (v) => cambiar("buscar", v), placeholder: "Nombres, apellidos, correo o celular" }}
+              total={users.length}
+              mostrados={filtrados.length}
+              que={["paciente", "pacientes"]}
+              hayFiltros={hayFiltros}
+              onLimpiar={limpiar}
+            />
+          </Grid>
+        )}
+
         {/* Tabla */}
         <Grid size={{ xs: 12, md: selectedUser && !isMobile ? 8 : 12 }} sx={{ overflowX: "auto" }}>
           {users.length ? (
             <Table<Person>
               columns={columns}
-              rows={users}
+              rows={filtrados}
               getRowId={(row) => row.user_id}
               selectedId={selectedId}
               onRowSelect={setSelectedId}

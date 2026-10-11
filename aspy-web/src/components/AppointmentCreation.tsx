@@ -18,7 +18,7 @@ import type { WorkerProfessional } from "@/typesResponse/WorkerProfessional";
 import type { Person } from "@/typesResponse/Person";
 import type { Service } from "@/typesResponse/Service";
 import { tone } from "@shared-theme/themePrimitives";
-import { turnoYaEmpezo } from "@utils/utils";
+import { turnoYaEmpezo, turnoYaTermino } from "@utils/utils";
 
 interface AppointmentCreationProp {
   isClient: boolean;
@@ -144,11 +144,15 @@ export default function AppointmentCreation({
 
   const workerSchedules = useMemo<WorkerProfessional[]>(() => {
     if (professionalId === null) return [];
-    // Solo turnos libres que todavía no empiezan: antes también se ofrecían los de días y horas que ya pasaron
+    // Solo turnos libres que todavía no empiezan: antes también se ofrecían los de días y horas que ya pasaron.
+    // Secretaría sí puede registrar la cita de un turno en curso (alguien que llegó sin agendar), hasta que termine.
     return workerProfessional.filter(
-      (wp) => wp.professional.person_id === professionalId && wp.is_available && !turnoYaEmpezo(wp.schedule),
+      (wp) =>
+        wp.professional?.person_id === professionalId &&
+        wp.is_available &&
+        (isClient ? !turnoYaEmpezo(wp.schedule) : !turnoYaTermino(wp.schedule)),
     );
-  }, [professionalId, workerProfessional]);
+  }, [professionalId, workerProfessional, isClient]);
 
   const handleToPay = () => {
     if (!serviceId || !workerId || !professionalId) {

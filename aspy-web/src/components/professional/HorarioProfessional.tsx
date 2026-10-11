@@ -21,14 +21,17 @@ import CircularProgress from "@mui/material/CircularProgress";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import { getAuthenticatedPersonID } from "@store";
 import workerScheduleAPI from "@/API/workerScheduleAPI";
-import professionalAPI from "@/API/professionalAPI";
+import professionalAPI, { type ReglasHorario } from "@/API/professionalAPI";
 import type { WorkerProfessional } from "@/typesResponse/WorkerProfessional";
 import type { Schedule } from "@/typesResponse/Schedule";
 import { paletteVar, tone } from "@shared-theme/themePrimitives";
+import { useRoleData } from "@/observer/RoleDataContext";
+import { hoyEcuador } from "@utils/utils";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const todayStr = () => new Date().toISOString().split("T")[0];
+// "Hoy" en la hora de Ecuador: con la hora universal, desde las 19:00 los turnos de hoy desaparecían de la lista
+const todayStr = () => hoyEcuador();
 
 const formatDate = (dateStr: string) => {
   const [year, month, day] = dateStr.split("T")[0].split("-").map(Number);
@@ -40,6 +43,17 @@ const formatDate = (dateStr: string) => {
 };
 
 const fmt = (t: string) => t.slice(0, 5);
+
+/** "31/10/2026" a partir de "2026-10-31". */
+const fechaCorta = (f: string) => f.split("-").reverse().join("/");
+
+/** Aviso con el límite de fechas que definió la administración. */
+const avisoDelLimite = (reglas: ReglasHorario | null): string | undefined => {
+  if (!reglas || reglas.alcance === null) return undefined;
+  return reglas.hasta === reglas.desde
+    ? "Por ahora solo se pueden crear horarios para hoy. Ese límite lo define la administración."
+    : `Se pueden crear horarios hasta el ${fechaCorta(reglas.hasta)}. Ese límite lo define la administración.`;
+};
 
 // Lógica inteligente para detectar el turno automáticamente
 const getTurno = (time: string): string => {
@@ -109,8 +123,20 @@ const fieldSx = {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export default function HorarioProfessional() {
-  const professionalId = getAuthenticatedPersonID();
+interface HorarioProfessionalProps {
+  /** Profesional cuyos horarios se gestionan. Sin indicarlo, los de la propia cuenta (un profesional). */
+  professionalId?: number;
+  /** Nombre de ese profesional, cuando lo gestiona Secretaría. */
+  nombre?: string;
+}
+
+export default function HorarioProfessional({ professionalId: idIndicado, nombre }: HorarioProfessionalProps = {}) {
+  const professionalId = idIndicado ?? getAuthenticatedPersonID();
+  const ajeno = idIndicado !== undefined;
+  // Agendar cita y el panel de Secretaría leen los horarios del contexto: se refrescan al cambiar alguno
+  const { refreshWorkerProfessional } = useRoleData();
+  // Hasta cuándo se puede planificar lo decide el Admin; el servidor lo vuelve a comprobar al guardar
+  const [reglas, setReglas] = useState<ReglasHorario | null>(null);
 
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
@@ -132,7 +158,7 @@ export default function HorarioProfessional() {
       setLoadingList(true);
       const all = await workerScheduleAPI.getAllWorkerSchedules();
       setSchedules(
-        all.filter((ws) => ws.professional.person_id === professionalId),
+        all.filter((ws) => ws.professional?.person_id === professionalId),
       );
     } catch {
       // silent
@@ -143,6 +169,14 @@ export default function HorarioProfessional() {
 
   useEffect(() => {
     fetchSchedules();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [professionalId]);
+
+  useEffect(() => {
+    professionalAPI
+      .reglasHorario(true)
+      .then(setReglas)
+      .catch(() => setReglas(null));
   }, []);
 
   // ── Filtra solo hoy y fechas futuras, agrupa por fecha
@@ -179,6 +213,10 @@ export default function HorarioProfessional() {
       });
       return;
     }
+    if (reglas && date > reglas.hasta) {
+      setSnackbar({ open: true, message: avisoDelLimite(reglas) ?? "Esa fecha está fuera del límite permitido.", severity: "error" });
+      return;
+    }
     try {
       setSubmitting(true);
       await professionalAPI.crearHorario({
@@ -197,10 +235,13 @@ export default function HorarioProfessional() {
       setStartTime("");
       setEndTime("");
       fetchSchedules();
+      refreshWorkerProfessional();
     } catch (error: any) {
+      const datos = error?.response?.data;
       setSnackbar({
         open: true,
-        message: error?.response?.data?.message || "Error al crear el horario.",
+        // El motivo exacto (p. ej., el límite de fechas) viene en el error del campo
+        message: datos?.errors?.date?.[0] || datos?.errors?.end_time?.[0] || datos?.message || "Error al crear el horario.",
         severity: "error",
       });
     } finally {
@@ -213,6 +254,7 @@ export default function HorarioProfessional() {
     try {
       await workerScheduleAPI.deleteWorkerSchedule(workerScheduleId);
       await fetchSchedules();
+      refreshWorkerProfessional();
     } catch (error: any) {
       setSnackbar({
         open: true,
@@ -243,8 +285,8 @@ export default function HorarioProfessional() {
         {/* ── Formulario ── */}
         <SectionPanel label="Nuevo horario">
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.75 }}>
-            <Campo etiqueta="Fecha" htmlFor="horario-fecha">
-              <CampoFecha id="horario-fecha" titulo="Fecha del horario" tipo="futura" value={date} onChange={setDate} fieldSx={campoSx} />
+            <Campo etiqueta="Fecha" htmlFor="horario-fecha" ayuda={avisoDelLimite(reglas)}>
+              <CampoFecha id="horario-fecha" titulo="Fecha del horario" tipo="futura" max={reglas?.hasta} value={date} onChange={setDate} fieldSx={campoSx} />
             </Campo>
 
             <Box
@@ -365,7 +407,7 @@ export default function HorarioProfessional() {
 
         {/* ── Lista de horarios ── */}
         <SectionPanel
-          label="Mis horarios"
+          label={ajeno ? `Horarios de ${nombre ?? "este profesional"}` : "Mis horarios"}
           badge={
             !loadingList && (
               <Typography sx={{ fontSize: 10, color: "text.disabled" }}>
@@ -421,7 +463,7 @@ export default function HorarioProfessional() {
                 <CalendarMonthRoundedIcon sx={{ fontSize: 20 }} />
               </Box>
               <Typography sx={{ fontSize: 12, color: "text.disabled" }}>
-                No tienes horarios próximos registrados
+                {ajeno ? "No hay horarios próximos registrados" : "No tienes horarios próximos registrados"}
               </Typography>
             </Box>
           )}
@@ -601,6 +643,8 @@ export default function HorarioProfessional() {
                               {available && (
                                 <IconButton
                                   size="small"
+                                  aria-label={`Quitar el horario de ${fmt(startStr)} a ${fmt(endStr)}`}
+                                  title="Quitar este horario"
                                   disabled={
                                     deletingMap[ws.worker_schedule_id] ?? false
                                   }

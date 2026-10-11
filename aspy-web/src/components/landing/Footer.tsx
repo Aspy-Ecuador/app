@@ -14,6 +14,8 @@ import { formatPhoneEc, telHref } from "@/content/landing/format";
 import MapRoundedIcon from "@mui/icons-material/MapRounded";
 import { C, DISPLAY_FONT, NAV_ITEMS, NAV_HEIGHT, focusRing, mapsEmbedUrl, mapsSearchUrl, placeFromMapsUrl, scrollTo, whatsappUrl } from "./constants";
 import { BrandMark, Reveal, SocialIcon } from "./shared";
+import CreditoDesarrollador from "@components/CreditoDesarrollador";
+import { hoyEcuador } from "@utils/utils";
 
 interface FooterProps {
   contact: LandingContent["contact"];
@@ -358,9 +360,12 @@ export default function Footer({ contact, social, footer, navigation, logo, ctaL
             alignItems: { xs: "flex-start", sm: "center" },
           }}
         >
-          <Typography sx={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.5)" }}>
-            © {new Date().getFullYear()} Fundación Aspy Ecuador · Todos los derechos reservados
-          </Typography>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+            <Typography sx={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.5)" }}>
+              © {hoyEcuador().slice(0, 4)} Fundación Aspy Ecuador · Todos los derechos reservados
+            </Typography>
+            <CreditoDesarrollador />
+          </Box>
           {showCtas && (
             <Box component={RouterLink} to="/login" sx={{ ...footerLink, fontSize: "0.85rem" }}>
               {footer.loginLabel}

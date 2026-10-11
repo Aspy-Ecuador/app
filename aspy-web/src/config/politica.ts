@@ -2,6 +2,8 @@
 // Debe coincidir con `ConsentimientoController` del backend: si cambia el texto de la política
 // (privacidad/seccionesPolitica.ts) o las declaraciones, sube la versión en los dos lados y todos
 // tendrán que aceptarla de nuevo.
+import { hoyEcuador } from "@utils/utils";
+
 export const VERSION_POLITICA = "2.0";
 export const FECHA_POLITICA = "octubre de 2026";
 
@@ -55,8 +57,9 @@ export function declaracionesPara(esPaciente: boolean): Declaracion[] {
 export function edadDe(fechaNacimiento?: string | null): number | null {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(fechaNacimiento ?? "");
   if (!m) return null;
-  const hoy = new Date();
-  let edad = hoy.getFullYear() - Number(m[1]);
-  if (hoy.getMonth() + 1 < Number(m[2]) || (hoy.getMonth() + 1 === Number(m[2]) && hoy.getDate() < Number(m[3]))) edad--;
+  // "Hoy" en la hora de Ecuador, como en el servidor (que es quien decide si hace falta un representante)
+  const [anio, mes, dia] = hoyEcuador().split("-").map(Number);
+  let edad = anio - Number(m[1]);
+  if (mes < Number(m[2]) || (mes === Number(m[2]) && dia < Number(m[3]))) edad--;
   return edad;
 }

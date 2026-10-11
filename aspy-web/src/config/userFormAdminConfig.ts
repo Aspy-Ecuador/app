@@ -43,7 +43,7 @@ export const inputCreateUserAdminConfig = [
     options: [
       { label: "Profesional", value: 2 },
       { label: "Cliente", value: 3 },
-      { label: "Secretario", value: 4 },
+      { label: "Secretario/a", value: 4 },
     ],
     validation: {
       required: { value: true, message: "Debe seleccionar un rol" },

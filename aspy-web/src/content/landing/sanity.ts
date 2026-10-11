@@ -121,6 +121,7 @@ export const LIST_LIMITS = {
   steps: 4,
   testimonials: 6,
   partners: 12,
+  donationAccounts: 4,
   donationDetails: 6,
   social: 6,
 } as const;
@@ -140,7 +141,11 @@ function applyLimits(c: LandingContent): LandingContent {
     support: {
       ...c.support,
       partners: c.support.partners.slice(0, L.partners),
-      donation: { ...c.support.donation, details: c.support.donation.details.slice(0, L.donationDetails) },
+      donation: {
+        ...c.support.donation,
+        accounts: c.support.donation.accounts.slice(0, L.donationAccounts),
+        details: c.support.donation.details.slice(0, L.donationDetails),
+      },
     },
     social: c.social.slice(0, L.social),
   };

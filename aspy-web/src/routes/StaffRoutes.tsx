@@ -15,6 +15,7 @@ import CheckoutView from "@components/CheckoutView";
 import EditUser from "@staff/EditUser";
 import CreateUser from "@staff/CreateUser";
 import CreateUserAdmin from "@/components/admin/CreateUserAdmin";
+import HorariosProfesionales from "@staff/HorariosProfesionales";
 
 export const StaffRoutes = [
   { path: "/dashboard", element: <ControlPanel /> },
@@ -28,6 +29,8 @@ export const StaffRoutes = [
   { path: "/recibos", element: <ReceiptList /> },
   { path: "/pagos", element: <PaymentsList /> },
   { path: "/citas", element: <Appointments /> },
+  // Solo sirve si el Admin habilitó que Secretaría gestione horarios (si no, la pantalla lo explica)
+  { path: "/horarios", element: <HorariosProfesionales /> },
   { path: "/servicios", element: <Services /> },
   { path: "/agendar-cita", element: <AppointmentView isClient={false} /> },
   { path: "/registrarProfesional", element: <CreateUser /> },

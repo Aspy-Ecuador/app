@@ -10,6 +10,7 @@ import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import MenuContent from "./MenuContent";
 import OptionsMenu from "./OptionsMenu";
 import ColorModeToggle from "../shared-theme/ColorModeToggle";
+import CreditoDesarrollador from "./CreditoDesarrollador";
 import {
   getAuthenticatedUserName,
   getAuthenticatedUserEmail,
@@ -99,14 +100,17 @@ const DrawerContent = ({ name, email, onNavigate }: DrawerContentProps) => (
       <MenuContent onNavigate={onNavigate} />
     </Box>
 
-    {/* Brand dots */}
-    <Box sx={{ display: "flex", gap: 0.5, px: 2, pb: 1.25, flexShrink: 0 }}>
-      {["#4BA3D3", "#F0919E", "#F4C842"].map((c) => (
-        <Box
-          key={c}
-          sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: c }}
-        />
-      ))}
+    {/* Brand dots + crédito del desarrollador */}
+    <Box sx={{ px: 2, pb: 1.25, flexShrink: 0 }}>
+      <Box sx={{ display: "flex", gap: 0.5 }}>
+        {["#4BA3D3", "#F0919E", "#F4C842"].map((c) => (
+          <Box
+            key={c}
+            sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: c }}
+          />
+        ))}
+      </Box>
+      <CreditoDesarrollador sx={{ mt: 1, fontSize: 10 }} />
     </Box>
 
     {/* User footer (Restaurado para que no se vea aplastado) */}

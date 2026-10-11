@@ -18,12 +18,12 @@ import type { Role } from "@/types/Role";
 const roleOptions = [
   {
     value: "admin",
-    label: "Administrador",
+    label: "Administrador/a",
     icon: <SupervisorAccountIcon fontSize="small" />,
   },
   {
     value: "staff",
-    label: "Secretario",
+    label: "Secretario/a",
     icon: <GroupsIcon fontSize="small" />,
   },
   {

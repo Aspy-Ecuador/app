@@ -1,5 +1,5 @@
 // FINAL
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import type { GridRowId, GridColDef } from "@mui/x-data-grid";
 import Button from "@mui/material/Button";
@@ -20,11 +20,34 @@ import { useRoleData } from "@/observer/RoleDataContext";
 import Progress from "../Progress";
 import type { Payment } from "@/typesResponse/Payment";
 import { tone } from "@shared-theme/themePrimitives";
+import BarraFiltros from "@components/tabla/BarraFiltros";
+import { coincide, enPeriodo, useFiltros } from "@components/tabla/filtros";
+
+const SIN_FILTROS = { buscar: "", estado: "", desde: "", hasta: "" };
+
+// Estados de pago (ids fijos: 1 Aprobado, 2 Pendiente, 3 Rechazado)
+const ESTADOS_DE_PAGO = [
+  { value: "2", texto: "Pendiente" },
+  { value: "1", texto: "Aprobado" },
+  { value: "3", texto: "Rechazado" },
+];
 
 export default function PaymentsList() {
   const { data, loading } = useRoleData();
-  const payments: Payment[] = data.payments ?? [];
+  const payments: Payment[] = useMemo(() => data.payments ?? [], [data.payments]);
   const [selectedId, setSelectedId] = useState<GridRowId | null>(null);
+  const { valores: filtros, cambiar, limpiar, hayFiltros } = useFiltros(SIN_FILTROS);
+
+  const filtrados = useMemo(
+    () =>
+      payments.filter(
+        (p) =>
+          coincide(filtros.buscar, p.client?.first_name, p.client?.last_name, `#${p.payment_id}`, p.service?.name) &&
+          (filtros.estado === "" || String(p.payment_status?.payment_status_id) === filtros.estado) &&
+          enPeriodo(p.creation_date, filtros.desde, filtros.hasta),
+      ),
+    [payments, filtros],
+  );
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -165,12 +188,34 @@ export default function PaymentsList() {
         <Grid size={12} className="grid-p-patients-tittle">
           <SimpleHeader text={"Lista de pagos"} chip="Pagos" />
         </Grid>
-        
+
+        <Grid size={12}>
+          <BarraFiltros
+            id="pagos"
+            busqueda={{ value: filtros.buscar, onChange: (v) => cambiar("buscar", v), placeholder: "Nombre del cliente, n.° de pago o servicio" }}
+            listas={[{ id: "estado", etiqueta: "Aprobación", value: filtros.estado, onChange: (v) => cambiar("estado", v), opciones: ESTADOS_DE_PAGO }]}
+            periodo={{
+              desde: filtros.desde,
+              hasta: filtros.hasta,
+              onChange: (desde, hasta) => {
+                cambiar("desde", desde);
+                cambiar("hasta", hasta);
+              },
+              etiqueta: "Emisión",
+            }}
+            total={payments.length}
+            mostrados={filtrados.length}
+            que={["pago", "pagos"]}
+            hayFiltros={hayFiltros}
+            onLimpiar={limpiar}
+          />
+        </Grid>
+
         {/* Contenedor de la tabla adaptado para scroll horizontal en móviles */}
         <Grid size={12} sx={{ overflowX: "auto" }}>
           <Table<Payment>
             columns={columns}
-            rows={payments}
+            rows={filtrados}
             getRowId={(row) => row.payment_id}
             selectedId={selectedId}
             onRowSelect={setSelectedId}

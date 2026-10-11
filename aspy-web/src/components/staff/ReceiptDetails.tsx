@@ -280,7 +280,7 @@ export default function ReceiptDetails({ receiptData }: ReceiptDetailsProps) {
         <DialogContent sx={{ px: 2.5, pt: 1.25, pb: 1 }}>
           <Typography sx={{ fontSize: 13, color: "text.secondary", lineHeight: 1.6 }}>
             {isApproving
-              ? "¿Estás seguro de que deseas aprobar este comprobante? Esta acción no se puede deshacer."
+              ? "¿Confirmas que quieres aprobar este comprobante? Esta acción no se puede deshacer."
               : `La cita se elimina y el horario queda libre; no se puede deshacer.${queSeConserva}`}
           </Typography>
           {!isApproving && (

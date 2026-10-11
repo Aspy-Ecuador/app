@@ -23,6 +23,7 @@ import Progress from "@components/Progress";
 import ButtonList from "@components/ButtonList";
 import ShowAppointment from "@staff/ShowAppointment";
 import WelcomePanel from "@components/WelcomePanel";
+import HorariosDelDia from "@staff/HorariosDelDia";
 
 export default function ControlPanel() {
   const { data, loading } = useRoleData();
@@ -104,6 +105,9 @@ export default function ControlPanel() {
   return (
     <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2 }}>
       <WelcomePanel user={getAuthenticatedFirstName()} />
+
+      {/* De un vistazo: turnos libres y ocupados de hoy, de todos los profesionales */}
+      <HorariosDelDia />
 
       <Grid container spacing={2} alignItems="flex-start">
         {/* Sidebar — acciones rápidas + filtros */}

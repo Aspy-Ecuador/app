@@ -33,7 +33,7 @@ interface UserFormProps {
 const roleLabelMap: Record<number, string> = {
   2: "Profesional",
   3: "Cliente",
-  4: "Secretario",
+  4: "Secretario/a",
 };
 
 export default function UserFormUser({

@@ -21,6 +21,20 @@ const CHIP_SPOTS = [
   { bottom: "8%", left: { xs: "2%", md: "-4%" } },
 ];
 
+/**
+ * Segundos entre cambios de foto: de 3 a 30 (los mismos límites que valida el Studio en
+ * aspy-studio/schemaTypes/sections.ts; si cambias uno, cambia ambos). 0 = las fotos quedan fijas.
+ * Un valor fuera de rango (contenido que no pasó por el Studio) se lleva al límite más cercano.
+ */
+const ROTACION = { min: 3, max: 30, porDefecto: 5 };
+
+/** Milisegundos entre cambios, o null si las fotos quedan fijas. */
+function intervaloDeRotacion(segundos: number): number | null {
+  if (segundos === 0) return null;
+  const valor = Number.isFinite(segundos) && segundos > 0 ? segundos : ROTACION.porDefecto;
+  return Math.min(ROTACION.max, Math.max(ROTACION.min, valor)) * 1000;
+}
+
 function usePrefersReducedMotion() {
   const [reduced] = useState(
     () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches,
@@ -31,7 +45,7 @@ function usePrefersReducedMotion() {
 interface HeroCollageProps {
   images: LandingImage[];
   chips: string[];
-  /** Segundos entre cambios. */
+  /** Segundos entre cambios (3 a 30). 0 = fotos fijas. */
   rotationSeconds: number;
 }
 
@@ -40,16 +54,16 @@ export default function HeroCollage({ images, chips, rotationSeconds }: HeroColl
   const [paused, setPaused] = useState(false);
   const reduced = usePrefersReducedMotion();
   const frames = FRAMES.slice(0, Math.min(images.length, FRAMES.length));
-  const rotates = images.length > 1 && !reduced;
+  const ms = intervaloDeRotacion(rotationSeconds);
+  const rotates = images.length > 1 && !reduced && ms !== null;
 
   useEffect(() => {
-    if (!rotates || paused) return;
-    const ms = Math.max(2, rotationSeconds || 5) * 1000;
+    if (!rotates || paused || ms === null) return;
     const id = window.setInterval(() => {
       if (document.visibilityState === "visible") setOffset((o) => (o + 1) % images.length);
     }, ms);
     return () => window.clearInterval(id);
-  }, [rotates, paused, rotationSeconds, images.length]);
+  }, [rotates, paused, ms, images.length]);
 
   if (images.length === 0) return null;
 

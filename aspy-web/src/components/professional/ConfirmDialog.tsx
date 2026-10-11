@@ -21,8 +21,8 @@ export default function ConfirmDialog({
 }: ConfirmDialogProps) {
   const message =
     value === "2"
-      ? "¿Está seguro de que desea marcar esta cita como asistida?"
-      : "¿Está seguro de que desea marcar esta cita como no asistida?";
+      ? "¿Confirmas que quieres marcar esta cita como asistida?"
+      : "¿Confirmas que quieres marcar esta cita como no asistida?";
   return (
     <Dialog
       disableEnforceFocus

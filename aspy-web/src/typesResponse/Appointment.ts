@@ -20,4 +20,12 @@ export interface Appointment {
   modified_by: string;
   creation_date: string;
   modification_date: string;
+
+  /** true si la cita es virtual (tiene un enlace de reunión guardado). */
+  es_virtual?: boolean;
+  /**
+   * Enlace de la reunión (Zoom, Teams o Meet). Al paciente le llega solo cuando su cita está Agendada;
+   * su profesional, Secretaría y el Admin lo ven siempre.
+   */
+  enlace_virtual?: string | null;
 }
