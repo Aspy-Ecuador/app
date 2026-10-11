@@ -124,7 +124,8 @@ export async function recorteCita(page, ancho = 1440, alto = 900) {
 }
 /** Cierra la ventana de detalle de una cita. */
 export async function cerrarCita(page) {
-  await ventanaCita(page).locator('[data-testid="CloseRoundedIcon"]').first().click().catch(() => {});
+  // Por su nombre accesible: en el sitio publicado los íconos de MUI no llevan `data-testid`
+  await page.getByRole("button", { name: "Cerrar el detalle de la cita" }).first().click().catch(() => {});
   await page.waitForTimeout(300);
 }
 
