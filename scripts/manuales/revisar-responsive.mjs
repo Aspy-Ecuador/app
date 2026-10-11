@@ -20,7 +20,7 @@ const RUTAS = {
   publico: ["/", "/login", "/register"],
   Client: ["/dashboard", "/agendar-cita", "/recibos", "/consultarServicios", "/reportes", "/perfil", "/manual", "/sobreAspy"],
   Professional: ["/dashboard", "/pacientes", "/citas", "/seleccionar-horario", "/perfil"],
-  Staff: ["/dashboard", "/profesionales", "/pacientes", "/citas", "/agendar-cita", "/recibos", "/pagos", "/servicios", "/registrarCliente", "/crear-servicio", "/perfil"],
+  Staff: ["/dashboard", "/profesionales", "/pacientes", "/citas", "/horarios", "/agendar-cita", "/recibos", "/pagos", "/servicios", "/registrarCliente", "/crear-servicio", "/perfil"],
   Admin: ["/dashboard", "/usuarios", "/servicios", "/nuevo-usuario", "/nuevo-servicio", "/citas", "/datos-bancarios", "/perfil"],
 };
 const solo = process.env.SOLO?.split(",");

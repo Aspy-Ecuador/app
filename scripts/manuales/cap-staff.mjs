@@ -1,5 +1,5 @@
 // Capturas del manual del PERSONAL ADMINISTRATIVO (staff). Correr después de cap-cliente.mjs.
-import { browser, context, login, go, settle, shot as rawShot, mark, sel, WEB, fill } from "./lib.mjs";
+import { browser, context, login, go, settle, shot as rawShot, mark, sel, WEB, fill, ventanaCita, recorteCita, cerrarCita } from "./lib.mjs";
 
 const D = "staff/";
 const shot = (p, n, o) => rawShot(p, D + n, o);
@@ -7,6 +7,9 @@ const fails = [];
 const ONLY = process.env.ONLY?.split(","); const step = async (name, fn) => { if (ONLY && !ONLY.includes(name)) return; try { await fn(); } catch (e) { fails.push(name); console.log("FALLÓ", name, e.message.split("\n")[0]); } };
 const b = await browser();
 const ctx = await context(b);
+// El panel muestra los "Horarios de hoy" y un turno libre que ya terminó deja de contarse como disponible:
+// se fija el reloj del navegador a las 08:30 de hoy para que la captura salga igual a cualquier hora.
+{ const h = new Date(); h.setHours(8, 30, 0, 0); await ctx.clock.setFixedTime(h); }
 const p = await ctx.newPage();
 p.on("console", (m) => m.type() === "error" && console.log("  consola:", m.text().slice(0, 160)));
 const row = (text) => p.locator('[role="row"]').filter({ hasText: text });
@@ -14,9 +17,22 @@ const row = (text) => p.locator('[role="row"]').filter({ hasText: text });
 try {
   await login(p, "recepcion@aspy.com", "Aspy2026"); await settle(p, 1200);
   await step("panel", async () => {
-    await mark(p, p.getByText("Acciones rápidas", { exact: false }).locator("xpath=ancestor::div[contains(@class,'MuiPaper')][1]"), "1");
-    await mark(p, p.getByText("Filtrar citas", { exact: false }).locator("xpath=ancestor::div[contains(@class,'MuiPaper')][1]"), "2");
+    // Pantalla más alta solo para esta captura: "Horarios de hoy" empuja hacia abajo las acciones rápidas y el filtro
+    await p.setViewportSize({ width: 1440, height: 1500 }); await settle(p, 600);
+    await mark(p, p.getByRole("region", { name: "Horarios del día" }), "1");
+    await mark(p, p.getByText("Acciones rápidas", { exact: false }).locator("xpath=ancestor::div[contains(@class,'MuiPaper')][1]"), "2");
+    await mark(p, p.getByText("Filtrar citas", { exact: false }).locator("xpath=ancestor::div[contains(@class,'MuiPaper')][1]"), "3");
     await shot(p, "01-panel");
+    await p.setViewportSize({ width: 1440, height: 900 }); await settle(p, 400);
+  });
+  // Horarios de hoy: turnos libres y ocupados de todos los profesionales
+  await step("horarios-hoy", async () => {
+    const tarjeta = p.getByRole("region", { name: "Horarios del día" });
+    await mark(p, tarjeta.locator("span").filter({ hasText: /disponible/ }).first().locator("xpath=.."), "1");
+    await mark(p, tarjeta.getByRole("group", { name: "Qué turnos mostrar" }).locator("xpath=.."), "2");
+    await mark(p, tarjeta.locator("ul").first(), "3");
+    const c = await tarjeta.boundingBox();
+    await shot(p, "01b-horarios-hoy", { clip: { x: c.x - 24, y: c.y - 24, width: c.width + 48, height: Math.min(c.height + 48, 900 - c.y + 24) } });
   });
 
   // ── Pagos ──
@@ -28,6 +44,20 @@ try {
     await shot(p, "02-pagos-lista");
     await mark(p, row("Sofía").last().locator('[data-testid*="Visibility"]'), "");
     await shot(p, "03-pagos-ver");
+  });
+  // Barra para buscar y filtrar (la tienen todas las listas)
+  await step("pagos-filtros", async () => {
+    await go(p, "/pagos");
+    await p.locator("#pagos-buscar").fill("sofia"); await p.waitForTimeout(200);
+    await sel(p, "Aprobación").click(); await p.getByRole("option", { name: "Aprobado" }).click(); await p.waitForTimeout(200);
+    await p.getByRole("button", { name: "Este mes" }).click(); await p.waitForTimeout(400);
+    await mark(p, p.locator("#pagos-buscar"), "1");
+    await mark(p, sel(p, "Aprobación"), "2");
+    await mark(p, p.locator("#pagos-desde"), "3");
+    await mark(p, p.locator("#pagos-hasta"), "3");
+    await mark(p, p.getByText(/^Mostrando/).first(), "4");
+    await shot(p, "02b-pagos-filtros", { clip: { x: 224, y: 0, width: 1216, height: 640 } });
+    await p.getByRole("button", { name: "Limpiar filtros" }).click(); await p.waitForTimeout(300);
   });
   await step("pago-detalle", async () => {
     await row("Sofía").last().locator('[data-testid*="Visibility"]').click(); await settle(p, 1800);
@@ -95,8 +125,26 @@ try {
     await mark(p, p.getByRole("button", { name: "Cancelar cita" }), "");
     await shot(p, "12-citas-detalle");
     await p.keyboard.press("Escape"); await p.waitForTimeout(300);
+    await cerrarCita(p);
     await mark(p, p.locator('[data-testid="AddRoundedIcon"], [data-testid="AddIcon"]').first(), "");
     await shot(p, "13-citas-nueva-boton", { clip: { x: 900, y: 0, width: 540, height: 160 } });
+  });
+  // Citas virtuales: el formulario del enlace (en una cita presencial) y cómo queda una cita virtual
+  await step("cita-virtual", async () => {
+    await go(p, "/citas");
+    await p.getByRole("button", { name: "Mes" }).click(); await p.waitForTimeout(800);
+    await p.locator(".fc-event").filter({ hasText: "Evaluación integral" }).filter({ hasText: "Sofía" }).filter({ hasNot: p.locator('[aria-label="Cita virtual"]') }).first().click(); await p.waitForTimeout(700);
+    await p.getByRole("button", { name: "Es virtual: poner el enlace" }).click(); await p.waitForTimeout(400);
+    await p.locator("#cita-enlace-virtual").fill("https://meet.google.com/abc-defg-hij"); await p.waitForTimeout(200);
+    await mark(p, p.locator("#cita-enlace-virtual"), "1");
+    await mark(p, p.getByRole("button", { name: "Guardar enlace" }), "2");
+    await shot(p, "12c-cita-enlace", { clip: await recorteCita(p) });
+    await p.getByRole("button", { name: "Cancelar", exact: true }).click(); await p.waitForTimeout(300);
+    await cerrarCita(p);
+    await p.locator(".fc-event").filter({ has: p.locator('[aria-label="Cita virtual"]') }).last().click(); await p.waitForTimeout(700);
+    await mark(p, ventanaCita(p).getByRole("link", { name: "Entrar a la reunión" }), "");
+    await shot(p, "12b-cita-virtual", { clip: await recorteCita(p) });
+    await cerrarCita(p);
   });
   await step("agendar-paciente", async () => {
     await go(p, "/agendar-cita");
@@ -170,6 +218,27 @@ try {
     await escudo.hover(); await p.waitForTimeout(700);
     await mark(p, escudo, "");
     await shot(p, "25-paciente-retiro");
+  });
+  // Horarios de profesionales: solo existe si el Admin lo habilita. Se habilita por el API de demo,
+  // se toma la captura y se vuelve a dejar apagado (así el menú de las demás capturas no cambia).
+  await step("horarios-secretaria", async () => {
+    const API = "http://127.0.0.1:8002/api";
+    const J = { "Content-Type": "application/json", Accept: "application/json" };
+    const admin = (await (await fetch(API + "/login", { method: "POST", headers: J, body: JSON.stringify({ email: "admin@aspy.com", password: "ADMIN" }) })).json()).access_token;
+    const habilitar = (valor) => fetch(API + "/ajustes", { method: "PUT", headers: { ...J, Authorization: "Bearer " + admin }, body: JSON.stringify({ horario_secretaria: valor }) });
+    await habilitar(true);
+    try {
+      await p.reload(); await settle(p, 1500);
+      await go(p, "/horarios"); await settle(p, 800);
+      await sel(p, "Profesional").click(); await p.getByRole("option", { name: "Lucía Mendoza" }).click(); await settle(p, 1500);
+      await mark(p, sel(p, "Profesional"), "1");
+      await mark(p, p.getByText("Nuevo horario", { exact: true }).locator("xpath=ancestor::div[contains(@class,'MuiPaper')][1]"), "2");
+      await mark(p, p.getByText(/^Horarios de Lucía/).locator("xpath=ancestor::div[contains(@class,'MuiPaper')][1]"), "3");
+      await shot(p, "26-horarios");
+    } finally {
+      await habilitar(false);
+      await p.reload(); await settle(p, 800);
+    }
   });
 } finally {
   await b.close();

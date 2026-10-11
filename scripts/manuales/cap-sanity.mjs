@@ -49,6 +49,25 @@ try {
     await p.goto(`${STUDIO}/structure`); await p.waitForTimeout(6000); await tidy(p);
         await shot(p, "02-inicio");
   });
+  // Modo claro u oscuro del editor: menú de la cuenta (el nombre y el correo se tapan con un texto genérico)
+  await step("apariencia", async () => {
+    await open(p, "heroSection");
+    await p.locator("#user-menu").click(); await p.waitForTimeout(1200);
+    // El Studio tiene muchos menús en la página (uno por campo): el de la cuenta es el que dice "Cerrar sesión"
+    const menu = p.locator('[role="menu"]').filter({ hasText: "Cerrar sesión" }).last();
+    await menu.evaluate((m) => {
+      const hojas = [...m.querySelectorAll("*")].filter((e) => e.children.length === 0 && e.textContent.trim());
+      const correo = hojas.find((e) => e.textContent.includes("@"));
+      if (correo) { correo.textContent = "tu-correo@ejemplo.com"; const nombre = hojas[hojas.indexOf(correo) - 1]; if (nombre) nombre.textContent = "Tu nombre"; }
+    });
+    const opcion = (t) => menu.getByText(t, { exact: true }).first();
+    await mark(p, p.locator("#user-menu"), "1");
+    await mark(p, opcion("Sistema"), "2");
+    await mark(p, opcion("Oscuro"), "2");
+    await mark(p, opcion("Claro"), "2");
+    await shot(p, "02b-apariencia", { clip: { x: 820, y: 0, width: 620, height: 300 } });
+    await p.keyboard.press("Escape"); await p.waitForTimeout(400);
+  });
   await step("ajustes", async () => { await open(p, "siteSettings"); await mark(p, field(p, "Logo"), ""); await shot(p, "03-ajustes"); });
   await step("portada", async () => {
     await open(p, "heroSection");
@@ -120,6 +139,40 @@ await step("web", async () => {
     await el.screenshot({ path: `out/${D}web-${String(i++).padStart(2, "0")}-${id}.jpg`, type: "jpeg", quality: 86 });
     console.log("  📸 web", id);
   }
+  } finally { await wb.close(); }
+});
+
+// ── Bloque de donaciones con cuentas para donar ──
+// Las cuentas reales las carga la fundación: aquí se muestran dos de EJEMPLO, agregadas solo en la
+// respuesta que recibe este navegador (no se escribe nada en Sanity).
+await step("donaciones-web", async () => {
+  const wb = await browser();
+  const ctx = await context(wb, { width: 1440, height: 900 });
+  await ctx.route(/^https:\/\/1windn04\.api(cdn)?\.sanity\.io\//, async (route) => {
+    const resp = await route.fetch();
+    const json = await resp.json();
+    if (json?.result?.support) {
+      json.result.support.donation = {
+        ...(json.result.support.donation ?? {}),
+        accounts: [
+          { bank: "Banco de Ejemplo", accountType: "ahorros", accountNumber: "0000012345", holderName: "Fundación Aspy Ecuador", holderIdType: "ruc", holderId: "0990000000001", email: "donaciones@ejemplo.org" },
+          { bank: "Cooperativa de Ejemplo", accountType: "corriente", accountNumber: "0000067890", holderName: "Fundación Aspy Ecuador", holderIdType: "ruc", holderId: "0990000000001" },
+        ],
+        details: [],
+      };
+    }
+    route.fulfill({ response: resp, json, headers: { ...resp.headers(), "access-control-allow-origin": "*" } });
+  });
+  const w = await ctx.newPage();
+  try {
+    await w.goto(WEB + "/"); await settle(w, 3000);
+    for (let y = 0; y < 12000; y += 700) { await w.mouse.wheel(0, 700); await w.waitForTimeout(120); }
+    // Solo el recuadro de donaciones, bajado lo justo para que el menú fijo no lo tape
+    const caja = w.locator("#aliados h3").first().locator("xpath=../..");
+    await caja.evaluate((e) => scrollTo(0, e.getBoundingClientRect().top + scrollY - 150)); await w.waitForTimeout(1200);
+    const c = await caja.boundingBox();
+    await w.screenshot({ path: `out/${D}web-07b-donaciones.jpg`, type: "jpeg", quality: 86, clip: { x: c.x - 24, y: c.y - 24, width: c.width + 48, height: c.height + 48 } });
+    console.log("  📸 web donaciones");
   } finally { await wb.close(); }
 });
 console.log(fails.length ? "Fallaron: " + fails.join(", ") : "Todo OK");

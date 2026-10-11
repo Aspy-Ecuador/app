@@ -47,6 +47,9 @@ node cap-aviso-archivos.mjs   # aviso de archivos subidos sin usar en la pantall
 - Las capturas quedan en `out/<carpeta>/`: `cliente/` → `img/familias/`, `staff/` → `img/personal/`, `profesional/` → `img/profesional/`, `admin/` → `img/administrador/`, `sanity/` y `pagina-web/` → `img/pagina-web/`. Copia las que cambiaron a `aspy/resources/manuales/img/...` con el mismo nombre que usa el HTML.
 - Usuarios de demo: `admin@aspy.com` / `ADMIN` (seeder), `recepcion@aspy.com`, `lucia.mendoza@aspy.com`, `sofia.ramirez@gmail.com`, todos con `Aspy2026`.
 - Los comprobantes y reportes de demo se suben al backend local (archivos privados, tabla `archivo_privado` de la BD de demo). `lib.mjs` deja pasar el contenido real de Sanity (solo lectura).
+- La demo deja el ajuste de horarios en "el mes en curso y el siguiente" (`demo-seed.mjs`), para que los turnos de los próximos 12 días se creen cualquier día del mes; dos citas llevan enlace de reunión (citas virtuales) y hay turnos de **hoy**, libres y ocupados, para el panel "Horarios de hoy" de Secretaría.
+- `cap-staff.mjs` fija el reloj del navegador a las 08:30 de hoy (así "Horarios de hoy" sale igual a cualquier hora) y, para la captura de **Horarios** de Secretaría, habilita ese permiso por el API de demo y lo vuelve a apagar.
+- La captura del bloque de donaciones (`cap-sanity.mjs`, paso `donaciones-web`) muestra dos cuentas **de ejemplo** agregadas solo en la respuesta que recibe ese navegador: no escribe nada en Sanity. El paso `apariencia` tapa el nombre y el correo de la cuenta con un texto genérico.
 - `studio-lib.mjs` entra al Studio local con la sesión del CLI de Sanity de esta máquina (`~/.config/sanity/config.json`; hay que haber hecho `npx sanity login`).
 
 ## Revisar el diseño responsivo
@@ -68,7 +71,7 @@ WEB=http://localhost:5173 node probar-formularios.mjs
 bash reset.sh                 # deja la BD de demo limpia otra vez (la prueba crea usuarios y servicios)
 ```
 
-Llena y envía, como lo haría una persona, los formularios del panel (crear y editar usuario, servicios, datos bancarios, horario, perfil propio, filtro de citas, y la política de privacidad en el primer ingreso de una cuenta creada desde el panel) y compara en el API lo guardado con lo escrito. Termina con código 1 si algo falla y deja capturas en `out/formularios/`. Solo corre contra servidores locales. Córrela después de tocar cualquier formulario (la lista de formularios y calendarios está en el "Mapa de pantallas" de `CLAUDE.md`).
+Llena y envía, como lo haría una persona, los formularios del panel (crear y editar usuario, servicios, datos bancarios, los ajustes del Admin —comprobantes rechazados y horarios—, horario del profesional con su límite de fechas, horarios creados por Secretaría, enlace de una cita virtual, perfil propio, filtro de citas, filtros de las tablas, y la política de privacidad en el primer ingreso de una cuenta creada desde el panel) y compara en el API lo guardado con lo escrito. Termina con código 1 si algo falla y deja capturas en `out/formularios/`. Solo corre contra servidores locales. Córrela después de tocar cualquier formulario (la lista de formularios y calendarios está en el "Mapa de pantallas" de `CLAUDE.md`).
 
 ## Después de cambiar un manual
 

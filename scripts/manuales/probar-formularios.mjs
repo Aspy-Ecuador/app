@@ -31,7 +31,23 @@ async function api(rol, ruta) {
   const r = await fetch(API + ruta, { headers: { Authorization: `Bearer ${tokens[rol]}`, Accept: "application/json" } });
   return r.json();
 }
+async function apiPut(rol, ruta, cuerpo) {
+  tokens[rol] ??= (await token(...USERS[rol])).token;
+  const r = await fetch(API + ruta, { method: "PUT", headers: { Authorization: `Bearer ${tokens[rol]}`, Accept: "application/json", "Content-Type": "application/json" }, body: JSON.stringify(cuerpo) });
+  return r.json();
+}
 const lista = (j) => (Array.isArray(j) ? j : j.data ?? []);
+/** "AAAA-MM-DD" → "DD/MM/AAAA", como se escribe en el campo de fecha. */
+const comoSeEscribe = (iso) => iso.split("-").reverse().join("/");
+/** Suma días a una fecha "AAAA-MM-DD". */
+const masDias = (iso, n) => { const [a, m, d] = iso.split("-").map(Number); return new Date(Date.UTC(a, m - 1, d + n)).toISOString().slice(0, 10); };
+/** Abre en la agenda (vista Mes) la cita de ese día cuyo texto contiene `texto`. */
+async function abrirCita(p, fecha, texto) {
+  await p.getByRole("button", { name: "Mes" }).click(); await p.waitForTimeout(600);
+  const cita = p.locator(`.fc-daygrid-day[data-date="${fecha}"] .fc-event`).filter({ hasText: texto }).first();
+  for (let i = 0; i < 3 && !(await cita.isVisible().catch(() => false)); i++) { await p.locator(".fc-next-button").click(); await p.waitForTimeout(500); }
+  await cita.click(); await p.waitForTimeout(600);
+}
 const personaPorCorreo = async (correo) => lista(await api("Admin", "/person")).find((x) => x.user_account?.email === correo);
 
 // ── Navegador ──
@@ -197,18 +213,44 @@ try {
     await guardarCuenta(cuenta0);
     const r = await api("Admin", "/bank-account");
     ok("Admin · datos bancarios: restaurados", (r.data ?? r).account_number === cuenta0.account_number);
-    // Ajuste: cuánto se conservan los comprobantes de pagos rechazados (misma pantalla)
+    // Ajuste: cuánto se conservan los comprobantes de pagos rechazados (misma pantalla, su propia tarjeta)
     const plazo = p.locator("#plazo-comprobante");
-    await plazo.selectOption("7");
-    await p.getByRole("button", { name: "Guardar" }).last().click();
-    await p.getByText("Ajuste guardado").waitFor({ timeout: 15000 });
+    const tarjetaPlazo = p.locator("form").filter({ has: plazo });
+    const guardarPlazo = async (dias) => {
+      await plazo.selectOption(dias);
+      await tarjetaPlazo.getByRole("button", { name: "Guardar" }).click();
+      await tarjetaPlazo.getByText("Ajuste guardado").waitFor({ timeout: 15000 });
+      await p.waitForTimeout(300);
+    };
+    await guardarPlazo("7");
     const a1 = await api("Admin", "/ajustes");
     ok("Admin · comprobantes rechazados: se guardó el plazo elegido (7 días)", (a1.data ?? a1).comprobante_rechazado_dias === 7, JSON.stringify(a1));
-    await plazo.selectOption("1");
-    await p.getByRole("button", { name: "Guardar" }).last().click();
-    await p.getByText("Ajuste guardado").waitFor({ timeout: 15000 });
+    await guardarPlazo("1");
     const a2 = await api("Admin", "/ajustes");
     ok("Admin · comprobantes rechazados: plazo restaurado (1 día)", (a2.data ?? a2).comprobante_rechazado_dias === 1, JSON.stringify(a2));
+
+    // Ajuste: hasta cuándo se crean horarios y si Secretaría puede crearlos (tercera tarjeta)
+    const alcance = p.locator("#alcance-horarios");
+    const tarjetaHorarios = p.locator("form").filter({ has: alcance });
+    const interruptor = p.locator("#horarios-secretaria");
+    const guardarHorarios = async () => {
+      await tarjetaHorarios.getByRole("button", { name: "Guardar" }).click();
+      await tarjetaHorarios.getByText("Ajuste guardado").waitFor({ timeout: 15000 });
+      await p.waitForTimeout(300);
+    };
+    await alcance.selectOption("semana");
+    await interruptor.check();
+    await p.screenshot({ path: path.join(OUT, "admin-ajuste-horarios.jpg"), type: "jpeg", quality: 70, fullPage: true });
+    await guardarHorarios();
+    const h1 = await api("Admin", "/ajustes");
+    ok("Admin · horarios: se guardó el alcance elegido (la semana en curso)", h1.horario_alcance === "semana", JSON.stringify(h1));
+    ok("Admin · horarios: Secretaría quedó habilitada", h1.horario_secretaria === true, JSON.stringify(h1));
+    ok("Admin · horarios: guardar este ajuste no tocó el de los comprobantes", h1.comprobante_rechazado_dias === 1, JSON.stringify(h1));
+    // La demo trabaja con "el mes en curso y el siguiente"; Secretaría sigue habilitada para la prueba de abajo
+    await alcance.selectOption("dos_meses");
+    await guardarHorarios();
+    const h2 = await api("Admin", "/ajustes");
+    ok("Admin · horarios: alcance restaurado (el mes en curso y el siguiente)", h2.horario_alcance === "dos_meses" && h2.horario_secretaria === true, JSON.stringify(h2));
     ok("Admin · ninguna escritura falló", escrituras.every((e) => e.status < 400), JSON.stringify(escrituras.filter((e) => e.status >= 400)));
     await ctx.close();
   }
@@ -282,6 +324,45 @@ try {
     await p.getByRole("option").nth(1).click(); await p.waitForTimeout(400);
     const conPro = await tarjetas();
     ok("Secretaría · filtro por profesional", conPro > 0 && conPro <= total, `${conPro} de ${total}`);
+    // Horarios de profesionales (el Admin lo habilitó arriba): aparece en el menú y se crea un turno para Lucía
+    await p.reload(); await settle(p, 1200);
+    ok("Secretaría · con el permiso del Admin, «Horarios» aparece en el menú", await p.getByRole("button", { name: "Horarios", exact: true }).first().isVisible().catch(() => false));
+    const reglasSec = await api("Staff", "/professional/horario-reglas");
+    await go(p, "/horarios"); await settle(p, 800);
+    await p.getByRole("combobox", { name: /^Profesional/ }).click();
+    await p.getByRole("option", { name: "Lucía Mendoza" }).click(); await settle(p, 1200);
+    await p.locator('[id="horario-fecha"]').fill(comoSeEscribe(reglasSec.hasta));
+    await p.locator('[id="horario-inicio"]').fill("06:00");
+    await p.locator('[id="horario-fin"]').fill("07:00");
+    await p.screenshot({ path: path.join(OUT, "staff-horarios.jpg"), type: "jpeg", quality: 70 });
+    await p.getByRole("button", { name: /Guardar horario/ }).click(); await settle(p, 1200);
+    const lucia = lista(await api("Admin", "/person")).find((x) => x.user_account?.email === USERS.Professional[0]);
+    const delDia = lista(await api("Staff", "/worker-schedule")).filter((w) => w.professional?.person_id === lucia?.person_id && w.schedule?.date?.startsWith(reglasSec.hasta));
+    ok("Secretaría · horario de una profesional: quedó guardado 06:00–07:00 a su nombre", delDia.some((w) => w.schedule.start_time.startsWith("06:00") && w.schedule.end_time.startsWith("07:00")), JSON.stringify(delDia.map((w) => w.schedule)));
+
+    // Filtros de las tablas: buscar, elegir de una lista y limpiar
+    await go(p, "/pagos"); await settle(p, 600);
+    const pagos = lista(await api("Staff", "/payment"));
+    const filas = () => p.locator('.MuiDataGrid-row').count();
+    await p.locator("#pagos-buscar").fill("ramirez sofia"); await p.waitForTimeout(400);
+    const deSofia = pagos.filter((x) => `${x.client?.first_name} ${x.client?.last_name}` === "Sofía Ramírez").length;
+    ok("Secretaría · filtro de pagos: busca por nombre sin tildes y en cualquier orden", deSofia > 0 && (await filas()) === deSofia && (await p.getByText(`Mostrando ${deSofia} de ${pagos.length}`).isVisible()), `filas ${await filas()}, esperadas ${deSofia} de ${pagos.length}`);
+    await p.getByRole("combobox", { name: /^Aprobación/ }).click();
+    await p.getByRole("option", { name: "Pendiente" }).click(); await p.waitForTimeout(400);
+    const pendientes = pagos.filter((x) => `${x.client?.first_name} ${x.client?.last_name}` === "Sofía Ramírez" && x.payment_status_id === 2).length;
+    ok("Secretaría · filtro de pagos: nombre + estado de aprobación", (await filas()) === pendientes, `filas ${await filas()}, esperadas ${pendientes}`);
+    await p.screenshot({ path: path.join(OUT, "staff-pagos-filtros.jpg"), type: "jpeg", quality: 70 });
+    await p.getByRole("button", { name: "Limpiar filtros" }).click(); await p.waitForTimeout(400);
+    ok("Secretaría · filtro de pagos: «Limpiar filtros» vuelve a mostrar todos", (await p.getByText(new RegExp(`^${pagos.length} pagos$`)).isVisible().catch(() => false)) && (await p.locator("#pagos-buscar").inputValue()) === "");
+    await p.getByRole("button", { name: "Hoy", exact: true }).click(); await p.waitForTimeout(400);
+    const hoyEc = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Guayaquil" }).format(new Date());
+    const deHoy = pagos.filter((x) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Guayaquil" }).format(new Date(x.creation_date)) === hoyEc).length;
+    ok("Secretaría · filtro de pagos: «Hoy» deja los pagos de hoy (hora de Ecuador)", (await p.getByText(`Mostrando ${deHoy} de ${pagos.length}`).isVisible().catch(() => false)) && (await p.locator("#pagos-desde").inputValue()) === comoSeEscribe(hoyEc), `de hoy ${deHoy} de ${pagos.length}`);
+
+    // Se devuelve el permiso a como estaba (apagado) y el menú deja de ofrecer «Horarios»
+    await apiPut("Admin", "/ajustes", { horario_secretaria: false });
+    await p.reload(); await settle(p, 1200);
+    ok("Secretaría · sin el permiso, «Horarios» desaparece del menú", !(await p.getByRole("button", { name: "Horarios", exact: true }).first().isVisible().catch(() => false)) && (await api("Admin", "/ajustes")).horario_secretaria === false);
     ok("Secretaría · ninguna escritura falló", escrituras.every((e) => e.status < 400), JSON.stringify(escrituras.filter((e) => e.status >= 400)));
     await ctx.close();
   }
@@ -290,15 +371,23 @@ try {
   {
     const { ctx, p, escrituras } = await sesion("Professional");
     await go(p, "/seleccionar-horario"); await settle(p, 800);
-    const d = new Date(Date.now() + 40 * 864e5); while ([0, 6].includes(d.getDay())) d.setDate(d.getDate() + 1);
-    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-    await p.locator('[id="horario-fecha"]').fill(iso.split("-").reverse().join("/"));
+    // Hasta cuándo se pueden crear horarios lo decide el Admin: primero una fecha fuera del límite, luego la última permitida
+    const reglas = await api("Professional", "/professional/horario-reglas");
+    ok("Profesional · nuevo horario: la pantalla dice hasta qué fecha se puede crear", await p.getByText(`hasta el ${comoSeEscribe(reglas.hasta)}`, { exact: false }).isVisible().catch(() => false), JSON.stringify(reglas));
+    await p.locator('[id="horario-fecha"]').fill(comoSeEscribe(masDias(reglas.hasta, 1)));
+    await p.locator('[id="horario-inicio"]').fill("07:00");
+    await p.locator('[id="horario-fin"]').fill("08:00");
+    await p.getByRole("button", { name: /Guardar horario/ }).click(); await p.waitForTimeout(800);
+    ok("Profesional · nuevo horario: una fecha después del límite no se guarda y se explica", !escrituras.some((e) => e.url.includes("create-horario") && e.status < 300) && (await p.getByRole("alert").filter({ hasText: /límite lo define la administración/ }).first().isVisible().catch(() => false)), JSON.stringify(escrituras.slice(-1)));
+    await p.getByRole("alert").getByRole("button").first().click().catch(() => {}); await p.waitForTimeout(300);
+    const iso = reglas.hasta;
+    await p.locator('[id="horario-fecha"]').fill(comoSeEscribe(iso));
     await p.locator('[id="horario-inicio"]').fill("07:00");
     await p.locator('[id="horario-fin"]').fill("08:00");
     await p.screenshot({ path: path.join(OUT, "pro-horario.jpg"), type: "jpeg", quality: 70 });
     await p.getByRole("button", { name: /Guardar horario/ }).click(); await settle(p, 1200);
-    const envio = escrituras.find((e) => e.url.includes("create-horario"));
-    ok("Profesional · nuevo horario: el servidor lo aceptó", envio && envio.status < 300, JSON.stringify(envio));
+    const envio = escrituras.find((e) => e.url.includes("create-horario") && e.status < 300);
+    ok("Profesional · nuevo horario: el servidor lo aceptó", !!envio, JSON.stringify(escrituras.filter((e) => e.url.includes("create-horario"))));
     ok("Profesional · nuevo horario: se envió la fecha elegida", envio?.cuerpo?.includes(iso), envio?.cuerpo);
     const yo = (await api("Professional", "/user")).person?.person_id;
     const turnos = lista(await api("Professional", "/worker-schedule")).filter((w) => w.professional?.person_id === yo && w.schedule?.date?.startsWith(iso));
@@ -311,6 +400,33 @@ try {
     const despues = lista(await api("Professional", "/person")).find((x) => x.person_id === yo);
     ok("Profesional · editar perfil: teléfono actualizado", despues?.phone?.number === "0981112233", despues?.phone?.number);
     ok("Profesional · editar perfil: nombre, fecha y especialidad intactos", despues?.first_name === antes?.first_name && despues?.birthdate === antes?.birthdate && despues?.professional?.specialty === antes?.professional?.specialty);
+    // Cita virtual: en una cita agendada y presencial se pone el enlace de la reunión, se comprueba y se quita
+    const cita = lista(await api("Professional", "/appointment")).find((c) => c.appointment_status?.appointment_status_id === 2 && !c.es_virtual && c.worker_schedule?.schedule?.date?.slice(0, 10) > new Intl.DateTimeFormat("en-CA", { timeZone: "America/Guayaquil" }).format(new Date()));
+    if (!cita) ok("Profesional · cita virtual: hay una cita agendada y presencial para probar", false);
+    else {
+      const fechaCita = cita.worker_schedule.schedule.date.slice(0, 10);
+      const citaEnApi = async (rol) => lista(await api(rol, "/appointment")).find((c) => c.appointment_id === cita.appointment_id);
+      const TEAMS = "https://teams.microsoft.com/l/meetup-join/19%3ameeting_demo%40thread.v2/0";
+      await go(p, "/citas"); await settle(p, 800);
+      await abrirCita(p, fechaCita, cita.client.first_name);
+      await p.getByRole("button", { name: "Es virtual: poner el enlace" }).click(); await p.waitForTimeout(300);
+      await p.locator("#cita-enlace-virtual").fill("https://ejemplo.com/reunion");
+      await p.getByRole("button", { name: "Guardar enlace" }).click(); await p.waitForTimeout(600);
+      ok("Profesional · cita virtual: un enlace de otro sitio no se guarda y se explica", (await p.getByRole("alert").filter({ hasText: /Zoom, Microsoft Teams o Google Meet/ }).first().isVisible().catch(() => false)) && !(await citaEnApi("Professional"))?.es_virtual);
+      await p.locator("#cita-enlace-virtual").fill(TEAMS);
+      await p.screenshot({ path: path.join(OUT, "pro-cita-enlace.jpg"), type: "jpeg", quality: 70 });
+      await p.getByRole("button", { name: "Guardar enlace" }).click();
+      const entrar = p.getByRole("link", { name: "Entrar a la reunión" });
+      await entrar.waitFor({ timeout: 15000 });
+      ok("Profesional · cita virtual: el enlace quedó guardado tal como se pegó", (await citaEnApi("Professional"))?.enlace_virtual === TEAMS, JSON.stringify((await citaEnApi("Professional"))?.enlace_virtual));
+      ok("Profesional · cita virtual: el botón para entrar abre ese enlace en otra pestaña, sin dar acceso a esta", (await entrar.getAttribute("href")) === TEAMS && (await entrar.getAttribute("target")) === "_blank" && /noopener/.test((await entrar.getAttribute("rel")) ?? ""));
+      const dueno = lista(await api("Admin", "/person")).find((x) => x.person_id === cita.client.person_id)?.user_account?.email;
+      if (dueno === USERS.Client[0]) ok("Familia · cita virtual: con el pago aprobado recibe el enlace", (await citaEnApi("Client"))?.enlace_virtual === TEAMS);
+      await p.getByRole("button", { name: "Cambiar el enlace" }).click(); await p.waitForTimeout(300);
+      await p.getByRole("button", { name: /Quitar el enlace/ }).click();
+      await p.getByRole("button", { name: "Es virtual: poner el enlace" }).waitFor({ timeout: 15000 });
+      ok("Profesional · cita virtual: al quitar el enlace la cita vuelve a ser presencial", (await citaEnApi("Professional"))?.es_virtual === false);
+    }
     ok("Profesional · ninguna escritura falló", escrituras.every((e) => e.status < 400), JSON.stringify(escrituras.filter((e) => e.status >= 400)));
     await ctx.close();
   }

@@ -1,5 +1,5 @@
 // Capturas del manual del PROFESIONAL (terapeuta). Correr después de cap-staff.mjs.
-import { browser, context, login, go, settle, shot as rawShot, mark, ASSETS } from "./lib.mjs";
+import { browser, context, login, go, settle, shot as rawShot, mark, ASSETS, ventanaCita, recorteCita, cerrarCita } from "./lib.mjs";
 
 const D = "profesional/";
 const shot = (p, n, o) => rawShot(p, D + n, o);
@@ -54,6 +54,23 @@ try {
   await step("citas", async () => {
     await go(p, "/citas");
     await shot(p, "09-citas");
+  });
+  // Citas virtuales: pegar el enlace de la reunión (en una cita presencial) y cómo queda una cita virtual
+  await step("cita-virtual", async () => {
+    await go(p, "/citas");
+    await p.getByRole("button", { name: "Mes" }).click(); await p.waitForTimeout(800);
+    await p.locator(".fc-event").filter({ hasText: "Evaluación integral" }).filter({ hasText: "Sofía" }).filter({ hasNot: p.locator('[aria-label="Cita virtual"]') }).first().click(); await p.waitForTimeout(700);
+    await p.getByRole("button", { name: "Es virtual: poner el enlace" }).click(); await p.waitForTimeout(400);
+    await p.locator("#cita-enlace-virtual").fill("https://meet.google.com/abc-defg-hij"); await p.waitForTimeout(200);
+    await mark(p, p.locator("#cita-enlace-virtual"), "1");
+    await mark(p, p.getByRole("button", { name: "Guardar enlace" }), "2");
+    await shot(p, "16-cita-enlace", { clip: await recorteCita(p) });
+    await p.getByRole("button", { name: "Cancelar", exact: true }).click(); await p.waitForTimeout(300);
+    await cerrarCita(p);
+    await p.locator(".fc-event").filter({ has: p.locator('[aria-label="Cita virtual"]') }).last().click(); await p.waitForTimeout(700);
+    await mark(p, ventanaCita(p).getByRole("link", { name: "Entrar a la reunión" }), "");
+    await shot(p, "17-cita-virtual", { clip: await recorteCita(p) });
+    await cerrarCita(p);
   });
   await step("pacientes", async () => {
     await go(p, "/pacientes");

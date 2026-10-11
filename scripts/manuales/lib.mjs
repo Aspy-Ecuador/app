@@ -112,6 +112,22 @@ export async function shot(page, name, opts = {}) {
   console.log("  📸", name);
 }
 
+/** Ventana de detalle de una cita en la agenda (la que se abre al hacer clic en una cita). */
+export function ventanaCita(page) {
+  return page.locator(".MuiPaper-root").filter({ hasText: "Modalidad" }).last();
+}
+/** Recorte para capturar esa ventana con algo del calendario alrededor. */
+export async function recorteCita(page, ancho = 1440, alto = 900) {
+  const c = await ventanaCita(page).boundingBox();
+  const x = Math.max(0, Math.round(c.x - 300)), y = Math.max(0, Math.round(c.y - 50));
+  return { x, y, width: Math.min(ancho - x, Math.round(c.width + 340)), height: Math.min(alto - y, Math.round(c.height + 90)) };
+}
+/** Cierra la ventana de detalle de una cita. */
+export async function cerrarCita(page) {
+  await ventanaCita(page).locator('[data-testid="CloseRoundedIcon"]').first().click().catch(() => {});
+  await page.waitForTimeout(300);
+}
+
 /** Combobox de un Select de MUI por el texto de su etiqueta (la etiqueta va arriba, enlazada con `labelId`). */
 export function sel(page, label) {
   return page.getByRole("combobox", { name: new RegExp(`^${label}`) }).first();

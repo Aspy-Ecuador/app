@@ -1,5 +1,5 @@
 // Capturas del manual del CLIENTE (paciente / familia). Requiere la BD de demo recién creada (reset.sh).
-import { browser, context, login, go, settle, shot as rawShot, mark, sel, ASSETS, WEB, fill } from "./lib.mjs";
+import { browser, context, login, go, settle, shot as rawShot, mark, sel, ASSETS, WEB, fill, ventanaCita, recorteCita, cerrarCita } from "./lib.mjs";
 
 const D = "cliente/";
 const shot = (p, n, o) => rawShot(p, D + n, o);
@@ -52,6 +52,17 @@ try {
     await mark(p, p.getByRole("button", { name: "Cancelar cita" }), "");
     await shot(p, "11-cita-detalle-cancelar");
     await p.keyboard.press("Escape"); await p.waitForTimeout(300);
+  });
+
+  // Cita virtual: el detalle muestra la modalidad y el botón para entrar a la reunión
+  await step("cita-virtual", async () => {
+    await go(p, "/dashboard");
+    await p.getByRole("button", { name: "Mes" }).click(); await p.waitForTimeout(800);
+    await p.locator(".fc-event").filter({ has: p.locator('[aria-label="Cita virtual"]') }).last().click(); await p.waitForTimeout(700);
+    await mark(p, ventanaCita(p).getByRole("link", { name: "Entrar a la reunión" }), "");
+    await shot(p, "11b-cita-virtual", { clip: await recorteCita(p) });
+    await cerrarCita(p);
+    await p.getByRole("button", { name: "Semana" }).click(); await p.waitForTimeout(600);
   });
 
   // ── Agendar una cita ──

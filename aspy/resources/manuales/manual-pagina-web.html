@@ -83,6 +83,15 @@
         </li>
       </ol>
       <div class="aviso consejo"><span class="ico">🌐</span><div><p>El editor está en español. En el capítulo 3 tienes una lista de los botones que vas a usar y para qué sirve cada uno.</p></div></div>
+      <h3>Modo claro u oscuro del editor</h3>
+      <p>El editor se ve claro u oscuro según cómo esté configurado tu equipo. Para elegirlo tú, haz clic en <strong>tu foto o tu inicial</strong> (arriba a la derecha) y elige una de las tres opciones:</p>
+      <figure class="captura media"><div class="marco"><img src="img/pagina-web/02b-apariencia.jpg" alt="Menú de la cuenta en el editor con las opciones Sistema, Oscuro y Claro"></div></figure>
+      <ul>
+        <li><strong>Sistema:</strong> igual que tu computadora o tu celular (es lo que viene marcado).</li>
+        <li><strong>Oscuro:</strong> fondo oscuro, más descansado de noche.</li>
+        <li><strong>Claro:</strong> fondo blanco.</li>
+      </ul>
+      <div class="aviso consejo"><span class="ico">🌙</span><div><p>Ese cambio es solo para ti y para ese navegador: <strong>no cambia nada en la página pública</strong>. La página tiene su propio botón (la luna, abajo a la izquierda) para que cada visitante elija cómo verla; eso no se configura desde Sanity.</p></div></div>
     </section>
 
     <!-- 3 -->
@@ -143,7 +152,8 @@
         <li><strong>Etiqueta superior</strong> (máx. 70 caracteres), <strong>Título</strong> (máx. 40) y <strong>Lema</strong> (máx. 40).</li>
         <li><strong>Palabra destacada:</strong> la parte del título que va con los colores de ASPY. Debe estar escrita <em>exactamente igual</em> que en el título.</li>
         <li><strong>Descripción:</strong> el párrafo bajo el título (máx. 320).</li>
-        <li><strong>Fotos del collage:</strong> entre 3 y 8 fotos. Se muestran 3 a la vez y se van turnando cada cierto tiempo (<strong>Segundos entre cambios de foto</strong>).</li>
+        <li><strong>Fotos del collage:</strong> entre 3 y 8 fotos. Se muestran 3 a la vez y se van turnando.</li>
+        <li><strong>Segundos entre cambios de foto:</strong> cada cuánto se turnan las fotos. Escribe un número entero <strong>entre 3 y 30</strong> (lo recomendado es 5). Si prefieres que las fotos queden <strong>fijas</strong>, escribe <strong>0</strong>. Con cualquier otro valor el campo se pone en rojo y no deja publicar: así nadie deja las fotos cambiando demasiado rápido o casi nunca.</li>
         <li><strong>Etiquetas sobre las fotos:</strong> hasta 3 palabras cortas (ej.: Terapia, Inclusión, Arte).</li>
         <li>Textos de los botones y el texto antes de las redes (ej.: “Síguenos”).</li>
       </ul>
@@ -246,8 +256,24 @@
       <figure class="captura media"><div class="marco"><img src="img/pagina-web/web-07-aliados.jpg" alt="Aliados en la página"></div><figcaption>Si un aliado no tiene logo, se muestra su nombre.</figcaption></figure>
       <div class="aviso consejo"><span class="ico">🏷️</span><div><p>Los logos se muestran dentro de un recuadro blanco. Usa logos en <strong>PNG o SVG</strong>, horizontales y con fondo transparente o blanco.</p></div></div>
       <h3>Donaciones</h3>
-      <p>El bloque de donaciones aparece cuando agregas al menos un <strong>dato para donar</strong> (hasta 6, por ejemplo <em>Banco → Banco Pichincha</em>, <em>Cuenta → 123…</em>) o un <strong>botón</strong> con enlace.</p>
-      <figure class="captura"><div class="marco"><img src="img/pagina-web/17-donaciones.jpg" alt="Campos de donaciones en el editor"></div></figure>
+      <p>El bloque de donaciones aparece cuando hay al menos una <strong>cuenta para donar</strong>, otro dato o un <strong>botón</strong> con enlace. Tiene un título y una descripción que también puedes cambiar.</p>
+      <figure class="captura"><div class="marco"><img src="img/pagina-web/17-donaciones.jpg" alt="Campos de donaciones en el editor, con la lista Cuentas para donar"></div></figure>
+      <h3>Cuentas para donar</h3>
+      <p>En <strong>Cuentas para donar</strong> presiona <strong>Añadir elemento</strong> y llena una ficha por cada cuenta bancaria (hasta 4). Son los mismos datos que pide un banco para hacer una transferencia, de modo que quien dona no tenga que preguntar nada:</p>
+      <table class="tabla">
+        <thead><tr><th>Campo</th><th>Qué va</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Banco</strong></td><td>El nombre del banco. Ej.: Banco Pichincha.</td></tr>
+          <tr><td><strong>Tipo de cuenta</strong></td><td>Ahorros o Corriente.</td></tr>
+          <tr><td><strong>Número de cuenta</strong></td><td>Solo números (y guiones, si el banco los usa).</td></tr>
+          <tr><td><strong>Titular de la cuenta</strong></td><td>El nombre o la razón social, tal como figura en el banco.</td></tr>
+          <tr><td><strong>Identificación del titular</strong></td><td>Elige <em>RUC</em> o <em>Cédula</em> y escribe el número: el RUC tiene 13 números y la cédula, 10.</td></tr>
+          <tr><td><strong>Correo del titular</strong> (opcional)</td><td>Algunos bancos lo piden al registrar la cuenta; también sirve para que quien dona avise de su aporte.</td></tr>
+        </tbody>
+      </table>
+      <figure class="captura"><div class="marco"><img src="img/pagina-web/web-07b-donaciones.jpg" alt="Bloque de donaciones en la página, con una ficha por cada cuenta bancaria"></div><figcaption>Así se ve en la página: una ficha por cada cuenta. Los datos de la imagen son <b>de ejemplo</b>.</figcaption></figure>
+      <div class="aviso cuidado"><span class="ico">⚠️</span><div><p><strong>Revisa dos veces el número de cuenta</strong> antes de publicar: un número mal escrito envía las donaciones a otra cuenta. Si falta un dato obligatorio o la identificación no tiene la cantidad de números correcta, el campo se pone en rojo y no deja publicar.</p></div></div>
+      <p><strong>Otros datos para donar</strong> (opcional, hasta 6) sirve para lo que no es una cuenta bancaria: por ejemplo <em>PayPal → correo</em>, o una referencia que haya que escribir en la transferencia. Los bancos y sus números van arriba, en <em>Cuentas para donar</em>.</p>
     </section>
 
     <!-- 12 -->
@@ -286,6 +312,7 @@
       <div class="aviso consejo"><span class="ico">💡</span><div><p>Si una red no tiene enlace, su ícono <strong>no aparece</strong> en la página. Así, cuando abran TikTok, solo tienen que pegar el enlace y publicar.</p></div></div>
       <h3>Pie de página</h3>
       <p>La descripción corta de la fundación, los títulos de las columnas, la ubicación y el texto del enlace para ingresar al sistema.</p>
+      <p>Al final de la página aparece además <em>Desarrollado por Carlos Salazar</em>, con el ícono de GitHub. Ese crédito es fijo: no se edita desde aquí.</p>
       <figure class="captura"><div class="marco"><img src="img/pagina-web/21-pie.jpg" alt="Sección Pie de página en el editor"></div></figure>
     </section>
 
@@ -304,7 +331,9 @@
           <tr><td>Pasos de Cómo agendar</td><td>4</td></tr>
           <tr><td>Testimonios</td><td>6</td></tr>
           <tr><td>Fotos de ASPY Band</td><td>10</td></tr>
-          <tr><td>Aliados / datos para donar</td><td>12 / 6</td></tr>
+          <tr><td>Aliados</td><td>12</td></tr>
+          <tr><td>Cuentas para donar / otros datos para donar</td><td>4 / 6</td></tr>
+          <tr><td>Segundos entre cambios de foto (portada)</td><td>De 3 a 30 (0 = fotos fijas)</td></tr>
         </tbody>
       </table>
       <details class="faq"><summary>Publiqué pero no veo el cambio en la página.</summary><p>Espera uno o dos minutos y recarga la página. Si sigue igual, revisa que la etiqueta <strong>Borrador</strong> ya no esté amarilla (que sí lo hayas publicado).</p></details>

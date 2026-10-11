@@ -53,7 +53,8 @@ try {
     await go(p, "/datos-bancarios");
     await mark(p, p.getByRole("button", { name: "Guardar" }).first(), "2");
     await mark(p, p.locator("#plazo-comprobante"), "3");
-    await shot(p, "09-datos-bancarios");
+    await mark(p, p.getByText("Horarios de los profesionales", { exact: true }).locator("xpath=ancestor::div[contains(@class,'MuiPaper')][1]"), "4");
+    await shot(p, "09-datos-bancarios", { fullPage: true });
   });
   await step("citas", async () => {
     await go(p, "/citas");

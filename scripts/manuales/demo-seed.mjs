@@ -24,7 +24,8 @@ async function login(email, password = PASS) {
   const me = await call("GET", "/user", r.data.access_token);
   return { token: r.data.access_token, personId: me.data.person?.person_id };
 }
-const inDays = (d) => new Date(Date.now() + d * 864e5).toISOString().slice(0, 10);
+// Fechas en la hora de Ecuador, que es la del servidor (con la hora universal, de noche "hoy" ya sería mañana)
+const inDays = (d) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Guayaquil" }).format(new Date(Date.now() + d * 864e5));
 let ced = 912345670;
 const user = (email, first, last, extra = {}) => ({
   email, password: PASS, password_confirmation: PASS, role_id: 3,
@@ -38,6 +39,9 @@ const user = (email, first, last, extra = {}) => ({
 });
 
 const admin = await login("admin@aspy.com", "ADMIN");
+// Hasta cuándo se crean horarios lo decide el Admin (por defecto, el mes en curso). La demo crea turnos
+// para los próximos 12 días: con "el mes en curso y el siguiente" funciona cualquier día del mes.
+await call("PUT", "/ajustes", admin.token, { horario_alcance: "dos_meses" });
 
 // Personal y profesionales
 const pros = [
@@ -132,6 +136,34 @@ const appts = {
 };
 const staff = await login("recepcion@aspy.com");
 for (const k of ["a1", "a2", "a3", "a4", "a6", "a7", "a8", "a10", "a11", "a12"]) await call("PUT", "/appointment/appointment-approve", staff.token, { appointmentId: appts[k] });
+
+// Citas virtuales: dos citas agendadas llevan el enlace de su reunión (lo pone la profesional de cada una)
+await call("PUT", "/appointment/appointment-enlace", lucia.token, { appointmentId: appts.a10, enlace: "https://meet.google.com/abc-defg-hij" });
+await call("PUT", "/appointment/appointment-enlace", andres.token, { appointmentId: appts.a2, enlace: "https://us02web.zoom.us/j/81234567890" });
+
+// Hoy: turnos de los tres profesionales, algunos ocupados, para el panel "Horarios de hoy" de Secretaría.
+// Las citas de hoy las registra Secretaría (puede hacerlo aunque el turno ya haya empezado). Lucía, cuyas
+// pantallas se capturan, queda solo con una cita por revisar: así su lista de "Citas sin marcar" no cambia.
+const hoy = {};
+for (const [p, horas] of [[lucia, ["09:00", "10:00", "11:00", "15:00", "16:00"]], [andres, ["09:00", "10:00", "11:00", "15:00"]], [gaby, ["09:00", "10:00", "16:00"]]]) {
+  for (const h of horas) {
+    const end = String(+h.slice(0, 2) + 1).padStart(2, "0") + ":00";
+    const r = await call("POST", "/professional/create-horario", p.token, { professional_id: p.personId, date: inDays(0), start_time: h, end_time: end, name: "Turno" });
+    hoy[`${p.personId}-${h}`] = r.data?.worker_schedule?.worker_schedule_id;
+  }
+}
+const citaDeHoy = async (client, prof, service, hora, aprobar) => {
+  const r = await call("POST", "/appointment/appointment-create", staff.token, {
+    client_id: client.personId, professional_id: prof.personId, service_id: service,
+    worker_schedule_id: hoy[`${prof.personId}-${hora}`], payment_type: "transferencia",
+    payment_file: await subirComprobante(staff.token),
+  });
+  if (aprobar) await call("PUT", "/appointment/appointment-approve", staff.token, { appointmentId: r.data?.appointment?.appointment_id });
+};
+await citaDeHoy(daniel, lucia, sid["Psicología"], "10:00", false);
+await citaDeHoy(valeria, andres, sid["Terapia de lenguaje"], "09:00", true);
+await citaDeHoy(sofia, andres, sid["Evaluación integral"], "15:00", true);
+await citaDeHoy(daniel, gaby, sid["Terapia ocupacional"], "09:00", true);
 // Datos bancarios de EJEMPLO (los configura el Admin); se ven en la pantalla de pago
 await call("PUT", "/bank-account", admin.token, { bank_name: "Banco de Ejemplo", account_type: "Corriente", account_number: "0000012345", holder_name: "Fundación Aspy Ecuador", holder_id: "0990000000001" });
 // La cancelación de Valeria se hace antes de mover fechas (más de 24 h de anticipación)

@@ -7,9 +7,9 @@ Aplicación web para la **Fundación Aspy Ecuador** (Guayaquil), que acompaña a
 
 | Rol | Qué puede hacer |
 |---|---|
-| **Admin** | Todo: usuarios (incluidos otros admins), servicios, citas, métricas del panel. |
-| **Staff** (secretaría) | Gestiona usuarios (no admins), servicios, horarios, agenda citas para clientes, aprueba o rechaza pagos. |
-| **Profesional** | Crea sus horarios, ve **sus** pacientes y citas, marca asistencia y sube el reporte de cada sesión. |
+| **Admin** | Todo: usuarios (incluidos otros admins), servicios, citas, métricas del panel, datos bancarios y ajustes (p. ej., con cuánta anticipación se crean horarios y si Secretaría puede crearlos). |
+| **Staff** (secretaría) | Gestiona usuarios (no admins) y servicios, agenda citas para clientes, aprueba o rechaza pagos y ve los horarios libres y ocupados del día. Crea horarios de los profesionales solo si el Admin lo habilita. |
+| **Profesional** | Crea sus horarios (hasta la fecha que permita el Admin), ve **sus** pacientes y citas, pone el enlace de las citas virtuales, marca asistencia y sube el reporte de cada sesión. |
 | **Cliente** | Se registra solo, agenda citas pagando con comprobante, ve sus recibos y reportes y cancela con más de 24 h de anticipación. |
 
 ---
