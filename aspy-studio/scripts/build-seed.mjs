@@ -40,6 +40,7 @@ const ARRAY_MEMBER_TYPES = {
   "impact.stats": "stat",
   "testimonials.items": "testimonial",
   "support.partners": "partner",
+  "support.donation.accounts": "account",
   "support.donation.details": "detail",
   social: "socialLink",
 };

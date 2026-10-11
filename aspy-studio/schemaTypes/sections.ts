@@ -179,9 +179,20 @@ export const heroSection = section("heroSection", "Portada", HomeIcon, [
   defineField({
     name: "rotationSeconds",
     title: "Segundos entre cambios de foto",
+    description:
+      "Cada cuánto se turnan las fotos del collage: un número entero entre 3 y 30 (recomendado: 5). Escribe 0 si prefieres que las fotos queden fijas, sin cambiar solas.",
     type: "number",
     initialValue: 5,
-    validation: (r) => r.min(2).max(30),
+    // Los mismos límites que respeta la web (ROTACION en aspy-web/src/components/landing/HeroCollage.tsx)
+    validation: (r) => [
+      r.required().error("Escribe un número entre 3 y 30, o 0 para dejar las fotos fijas"),
+      r.integer().error("Usa un número entero, sin decimales"),
+      r.custom((valor) =>
+        valor === undefined || valor === 0 || (typeof valor === "number" && valor >= 3 && valor <= 30)
+          ? true
+          : "Debe estar entre 3 y 30 segundos. Si quieres que las fotos no cambien, escribe 0.",
+      ),
+    ],
   }),
   defineField({
     name: "chips",
@@ -394,20 +405,107 @@ export const supportSection = section("supportSection", "Aliados y donaciones", 
   defineField({
     name: "donation",
     title: "Donaciones",
-    description: "El bloque aparece cuando hay al menos un dato para donar o un enlace.",
+    description: "El bloque aparece cuando hay al menos una cuenta para donar, otro dato o un enlace.",
     type: "object",
     fields: [
       text("title", "Título"),
       text("description", "Descripción", undefined, false, 3),
       defineField({
+        name: "accounts",
+        title: "Cuentas para donar",
+        description:
+          "Una ficha por cada cuenta bancaria. Llena los datos tal como los pide el banco para hacer una transferencia: así quien dona no tiene que preguntar nada. Solo datos reales de la fundación.",
+        type: "array",
+        of: [
+          defineArrayMember({
+            type: "object",
+            name: "account",
+            title: "Cuenta bancaria",
+            fields: [
+              text("bank", "Banco", "Ej.: Banco Pichincha", true, undefined, 60),
+              defineField({
+                name: "accountType",
+                title: "Tipo de cuenta",
+                type: "string",
+                initialValue: "ahorros",
+                options: {
+                  layout: "radio",
+                  direction: "horizontal",
+                  list: [
+                    { title: "Ahorros", value: "ahorros" },
+                    { title: "Corriente", value: "corriente" },
+                  ],
+                },
+                validation: (r) => r.required().error("Elige si la cuenta es de ahorros o corriente"),
+              }),
+              defineField({
+                name: "accountNumber",
+                title: "Número de cuenta",
+                description: "Solo números (y guiones, si el banco los usa). Revísalo dos veces: un número mal escrito envía la donación a otra cuenta.",
+                type: "string",
+                validation: (r) => [
+                  r.required().error("Escribe el número de cuenta"),
+                  r.regex(/^[0-9-]{5,25}$/, { name: "número de cuenta" }).error("Solo números y guiones, entre 5 y 25 caracteres"),
+                ],
+              }),
+              text("holderName", "Titular de la cuenta", "Nombre o razón social, como figura en el banco. Ej.: Fundación Aspy Ecuador", true, undefined, 80),
+              defineField({
+                name: "holderIdType",
+                title: "Identificación del titular",
+                type: "string",
+                initialValue: "ruc",
+                options: {
+                  layout: "radio",
+                  direction: "horizontal",
+                  list: [
+                    { title: "RUC", value: "ruc" },
+                    { title: "Cédula", value: "cedula" },
+                  ],
+                },
+                validation: (r) => r.required().error("Elige si es RUC o cédula"),
+              }),
+              defineField({
+                name: "holderId",
+                title: "Número de RUC o cédula",
+                description: "El RUC tiene 13 números y la cédula, 10.",
+                type: "string",
+                validation: (r) =>
+                  r.custom((valor, ctx) => {
+                    if (!valor) return "Escribe el número de RUC o de cédula del titular";
+                    const tipo = (ctx.parent as { holderIdType?: string } | undefined)?.holderIdType;
+                    if (tipo === "cedula") return /^\d{10}$/.test(valor) ? true : "La cédula tiene 10 números";
+                    return /^\d{13}$/.test(valor) ? true : "El RUC tiene 13 números";
+                  }),
+              }),
+              defineField({
+                name: "email",
+                title: "Correo del titular (opcional)",
+                description: "Algunos bancos lo piden al registrar la cuenta para transferir. También sirve para que quien dona avise de su aporte.",
+                type: "email",
+              }),
+            ],
+            preview: {
+              select: { bank: "bank", type: "accountType", number: "accountNumber" },
+              prepare: ({ bank, type, number }) => ({
+                title: bank || "Cuenta sin banco",
+                subtitle: [type === "corriente" ? "Corriente" : type === "ahorros" ? "Ahorros" : null, number].filter(Boolean).join(" · "),
+              }),
+            },
+          }),
+        ],
+        validation: maxItems(4, "cuentas"),
+      }),
+      defineField({
         name: "details",
-        title: "Datos para donar",
+        title: "Otros datos para donar (opcional)",
+        description:
+          "Para lo que no sea una cuenta bancaria: PayPal, una referencia que haya que escribir en la transferencia, etc. Los bancos y sus números van arriba, en «Cuentas para donar».",
         type: "array",
         of: [
           defineArrayMember({
             type: "object",
             name: "detail",
-            fields: [text("label", "Dato", "Ej.: Banco"), text("value", "Valor", "Ej.: Banco Pichincha")],
+            fields: [text("label", "Dato", "Ej.: PayPal"), text("value", "Valor", "Ej.: donaciones@fundacion.org")],
             preview: { select: { title: "label", subtitle: "value" } },
           }),
         ],
