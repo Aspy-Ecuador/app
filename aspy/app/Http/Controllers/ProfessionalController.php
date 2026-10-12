@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ajuste;
+use App\Models\Appointment;
 use App\Models\Schedule;
 use App\Models\WorkerSchedule;
 use Carbon\Carbon;
@@ -48,6 +49,9 @@ class ProfessionalController extends Controller
             'start_time' => 'required|date_format:H:i,H:i:s',
             'end_time' => 'required|date_format:H:i,H:i:s',
             'name' => 'required|string|max:150',
+            // Presencial o virtual: la elige quien crea el horario (si no llega, presencial)
+            'modalidad' => 'sometimes|required|string|in:'.implode(',', WorkerSchedule::MODALIDADES),
+            'enlace' => 'sometimes|nullable|string|max:500',
         ], [
             'professional_id.required' => 'Indica de qué profesional es el horario.',
             'professional_id.exists' => 'Ese profesional no existe.',
@@ -58,6 +62,10 @@ class ProfessionalController extends Controller
             'end_time.required' => 'Elige la hora de fin.',
             'end_time.date_format' => 'La hora de fin no es válida.',
             'name.required' => 'Falta el nombre del turno.',
+            'modalidad.required' => 'Elige si el horario es presencial o virtual.',
+            'modalidad.in' => 'La modalidad debe ser presencial o virtual.',
+            'enlace.string' => 'El enlace no es válido.',
+            'enlace.max' => 'El enlace es demasiado largo.',
             'date.after_or_equal' => 'No se pueden crear horarios en fechas que ya pasaron.',
             'date.before_or_equal' => $hasta->isToday()
                 ? 'Por ahora solo se pueden crear horarios para hoy. Ese límite lo define la administración.'
@@ -81,6 +89,18 @@ class ProfessionalController extends Controller
         // Un profesional solo puede crear horarios para sí mismo
         if ($this->isProfessional() && (int) $validated['professional_id'] !== $this->currentPersonId()) {
             return $this->forbidden();
+        }
+
+        // Modalidad y enlace de la reunión (solo los horarios virtuales lo llevan; puede ponerse después)
+        $modalidad = $validated['modalidad'] ?? WorkerSchedule::PRESENCIAL;
+        $enlace = trim((string) ($validated['enlace'] ?? ''));
+        if ($enlace !== '') {
+            $error = $modalidad !== WorkerSchedule::VIRTUAL
+                ? 'Un horario presencial no lleva enlace. Elige la modalidad virtual.'
+                : (Appointment::plataformaVirtual($enlace) === null ? Appointment::ENLACE_NO_VALIDO : null);
+            if ($error) {
+                return response()->json(['message' => $error, 'errors' => ['enlace' => [$error]]], 422);
+            }
         }
 
         // Validar horarios solapados
@@ -110,18 +130,26 @@ class ProfessionalController extends Controller
             'created_by' => auth()->id(),
         ]);
 
-        // Crear worker_schedule
+        // Crear worker_schedule. El que crea un profesional queda por aprobar: Secretaría o el Admin lo
+        // revisan antes de que se ofrezca a las familias. El que crean ellos ya nace aprobado.
+        $aprobado = $this->isStaffOrAdmin();
         $workerSchedule = WorkerSchedule::create([
             'schedule_id' => $schedule->schedule_id,
             'professional_id' => $validated['professional_id'],
             'is_available' => true,
+            'modalidad' => $modalidad,
+            'enlace_virtual' => $enlace === '' ? null : $enlace,
+            'aprobado' => $aprobado,
+            'aprobado_por' => $aprobado ? auth()->id() : null,
+            'aprobado_el' => $aprobado ? Carbon::now() : null,
             'created_by' => auth()->id(),
         ]);
 
         return response()->json([
-            'message' => 'Horario creado correctamente',
+            'message' => $aprobado ? 'Horario creado correctamente' : 'Horario creado. Secretaría lo revisará antes de publicarlo.',
             'schedule' => $schedule,
-            'worker_schedule' => $workerSchedule,
+            // Quien lo crea siempre puede ver su enlace
+            'worker_schedule' => $workerSchedule->makeVisible('enlace_virtual'),
         ], 201);
     }
 

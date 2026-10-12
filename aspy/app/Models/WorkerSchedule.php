@@ -15,16 +15,41 @@ class WorkerSchedule extends Model
 
     protected $primaryKey = 'worker_schedule_id';
 
+    public const PRESENCIAL = 'presencial';
+
+    public const VIRTUAL = 'virtual';
+
+    public const MODALIDADES = [self::PRESENCIAL, self::VIRTUAL];
+
     protected $fillable = [
         'schedule_id',
         'professional_id',
         'is_available',
+        'modalidad',
+        'enlace_virtual',
+        'aprobado',
+        'aprobado_por',
+        'aprobado_el',
         'created_by',
         'modified_by',
     ];
 
+    /**
+     * El enlace de la reunión no sale al serializar el modelo: lo entregan solo los controladores,
+     * que deciden si quien pregunta lo puede ver (WorkerScheduleController y AppointmentController).
+     */
+    protected $hidden = ['enlace_virtual'];
+
+    /** Lo que vale un horario si no se indica otra cosa (también al serializar uno recién creado). */
+    protected $attributes = [
+        'modalidad' => self::PRESENCIAL,
+        'aprobado' => true,
+    ];
+
     protected $casts = [
         'is_available' => 'boolean',
+        'aprobado' => 'boolean',
+        'aprobado_el' => 'datetime',
         'creation_date' => 'datetime',
         'modification_date' => 'datetime',
     ];
@@ -52,6 +77,11 @@ class WorkerSchedule extends Model
     public function schedule()
     {
         return $this->belongsTo(Schedule::class, 'schedule_id', 'schedule_id');
+    }
+
+    public function esVirtual(): bool
+    {
+        return $this->modalidad === self::VIRTUAL;
     }
 
     public function professional()

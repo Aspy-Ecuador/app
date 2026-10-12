@@ -115,10 +115,70 @@ function alcanceDeHorarios(string $alcance = 'dos_meses'): void
     \App\Models\Ajuste::updateOrCreate(['clave' => \App\Models\Ajuste::HORARIO_ALCANCE], ['valor' => $alcance]);
 }
 
+/**
+ * Aprueba los horarios por aprobar, como lo haría Secretaría: los que crea un profesional no se ofrecen
+ * (ni se pueden reservar) hasta entonces. Las pruebas que no tratan de la aprobación la dan por hecha.
+ */
+function aprobarHorarios(): void
+{
+    \App\Models\WorkerSchedule::where('aprobado', false)->update(['aprobado' => true]);
+}
+
 /** Registra un paciente y devuelve su sesión. */
 function pacienteConSesion($prueba, string $email): string
 {
     $prueba->postJson('/api/user-account/registro', cuentaNueva($email, consentimiento()))->assertStatus(201);
 
     return entrar($prueba, $email)->json('access_token');
+}
+
+// ── Horarios, citas y avisos (HorariosTest y AvisosTest; fechas pensadas para el 14 de octubre de 2026) ──
+
+/** Admin, dos profesionales (la primera ofrece un servicio), Secretaría y una paciente. */
+function escenarioDeHorarios($prueba): array
+{
+    $admin = entrar($prueba, 'admin@aspy.com', 'ADMIN')->json('access_token');
+    foreach ([['pro@prueba.test', 2, 'professional'], ['otro@prueba.test', 2, 'professional'], ['sec@prueba.test', 4, 'staff']] as [$email, $rol, $nombre]) {
+        como($prueba, $admin)->postJson('/api/user-account/crear', cuentaNueva($email, ['role_id' => $rol, 'role' => $nombre, 'specialty' => 'Psicología']))->assertStatus(201);
+    }
+    $servicio = como($prueba, $admin)->postJson('/api/service', ['name' => 'Terapia de prueba', 'price' => 25])->json('service_id');
+    $pro = entrar($prueba, 'pro@prueba.test')->json('access_token');
+    $proId = como($prueba, $pro)->getJson('/api/user')->json('person.person_id');
+    como($prueba, $admin)->postJson('/api/professional-service', ['service_id' => $servicio, 'professional_id' => $proId])->assertSuccessful();
+    $ana = pacienteConSesion($prueba, 'ana@prueba.test');
+
+    return [
+        'admin' => $admin, 'pro' => $pro, 'proId' => $proId, 'servicio' => $servicio,
+        'otro' => entrar($prueba, 'otro@prueba.test')->json('access_token'),
+        'sec' => entrar($prueba, 'sec@prueba.test')->json('access_token'),
+        'ana' => $ana, 'anaId' => como($prueba, $ana)->getJson('/api/user')->json('person.person_id'),
+    ];
+}
+
+function crearHorario($prueba, string $token, int $proId, string $fecha, string $inicio = '09:00', array $extra = [])
+{
+    return como($prueba, $token)->postJson('/api/professional/create-horario', [
+        'professional_id' => $proId, 'date' => $fecha, 'start_time' => $inicio,
+        'end_time' => sprintf('%02d:00', (int) substr($inicio, 0, 2) + 1), 'name' => 'Turno',
+    ] + $extra);
+}
+
+/**
+ * Una cita de la paciente con la profesional, pendiente de revisión, en un turno de mañana que crea la
+ * profesional (`$horario`: su modalidad y su enlace) y aprueba Secretaría.
+ */
+function citaDePrueba($prueba, array $e, string $inicio = '09:00', array $horario = []): int
+{
+    $turno = crearHorario($prueba, $e['pro'], $e['proId'], '2026-10-16', $inicio, $horario)->assertStatus(201)->json('worker_schedule.worker_schedule_id');
+    como($prueba, $e['sec'])->putJson('/api/worker-schedule/'.$turno.'/aprobacion', ['aprobado' => true])->assertOk();
+
+    return como($prueba, $e['ana'])->postJson('/api/appointment/appointment-create', [
+        'client_id' => $e['anaId'], 'professional_id' => $e['proId'], 'service_id' => $e['servicio'], 'worker_schedule_id' => $turno,
+        'payment_type' => 'Transferencia', 'payment_file' => subirPdf($prueba, $e['ana'])->json('archivo'),
+    ])->assertStatus(201)->json('appointment.appointment_id');
+}
+
+function citaComo($prueba, string $token, int $cita): ?array
+{
+    return collect(como($prueba, $token)->getJson('/api/appointment')->assertOk()->json())->firstWhere('appointment_id', $cita);
 }

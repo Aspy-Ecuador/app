@@ -103,6 +103,7 @@ test('un paciente no puede acaparar la agenda: máximo 10 citas esperando la rev
             'name' => 'Turno',
         ])->assertStatus(201)->json('worker_schedule.worker_schedule_id');
     }
+    aprobarHorarios();
 
     $ana = pacienteConSesion($this, 'ana@prueba.test');
     $anaId = como($this, $ana)->getJson('/api/user')->json('person.person_id');

@@ -21,50 +21,8 @@ beforeEach(function () {
     $this->travelTo(Carbon::parse('2026-10-14 10:00:00'));
 });
 
-/** Admin, dos profesionales (la primera ofrece un servicio), Secretaría y una paciente. */
-function escenarioDeHorarios($prueba): array
-{
-    $admin = entrar($prueba, 'admin@aspy.com', 'ADMIN')->json('access_token');
-    foreach ([['pro@prueba.test', 2, 'professional'], ['otro@prueba.test', 2, 'professional'], ['sec@prueba.test', 4, 'staff']] as [$email, $rol, $nombre]) {
-        como($prueba, $admin)->postJson('/api/user-account/crear', cuentaNueva($email, ['role_id' => $rol, 'role' => $nombre, 'specialty' => 'Psicología']))->assertStatus(201);
-    }
-    $servicio = como($prueba, $admin)->postJson('/api/service', ['name' => 'Terapia de prueba', 'price' => 25])->json('service_id');
-    $pro = entrar($prueba, 'pro@prueba.test')->json('access_token');
-    $proId = como($prueba, $pro)->getJson('/api/user')->json('person.person_id');
-    como($prueba, $admin)->postJson('/api/professional-service', ['service_id' => $servicio, 'professional_id' => $proId])->assertSuccessful();
-    $ana = pacienteConSesion($prueba, 'ana@prueba.test');
-
-    return [
-        'admin' => $admin, 'pro' => $pro, 'proId' => $proId, 'servicio' => $servicio,
-        'otro' => entrar($prueba, 'otro@prueba.test')->json('access_token'),
-        'sec' => entrar($prueba, 'sec@prueba.test')->json('access_token'),
-        'ana' => $ana, 'anaId' => como($prueba, $ana)->getJson('/api/user')->json('person.person_id'),
-    ];
-}
-
-function crearHorario($prueba, string $token, int $proId, string $fecha, string $inicio = '09:00')
-{
-    return como($prueba, $token)->postJson('/api/professional/create-horario', [
-        'professional_id' => $proId, 'date' => $fecha, 'start_time' => $inicio,
-        'end_time' => sprintf('%02d:00', (int) substr($inicio, 0, 2) + 1), 'name' => 'Turno',
-    ]);
-}
-
-/** Una cita de la paciente con la profesional, pendiente de revisión, en un turno de mañana. */
-function citaDePrueba($prueba, array $e, string $inicio = '09:00'): int
-{
-    $turno = crearHorario($prueba, $e['pro'], $e['proId'], '2026-10-16', $inicio)->assertStatus(201)->json('worker_schedule.worker_schedule_id');
-
-    return como($prueba, $e['ana'])->postJson('/api/appointment/appointment-create', [
-        'client_id' => $e['anaId'], 'professional_id' => $e['proId'], 'service_id' => $e['servicio'], 'worker_schedule_id' => $turno,
-        'payment_type' => 'Transferencia', 'payment_file' => subirPdf($prueba, $e['ana'])->json('archivo'),
-    ])->assertStatus(201)->json('appointment.appointment_id');
-}
-
-function citaComo($prueba, string $token, int $cita): ?array
-{
-    return collect(como($prueba, $token)->getJson('/api/appointment')->assertOk()->json())->firstWhere('appointment_id', $cita);
-}
+// Los ayudantes (escenarioDeHorarios, crearHorario, citaDePrueba, citaComo) están en tests/Pest.php:
+// también los usa AvisosTest.
 
 test('el profesional crea horarios solo hasta donde le permite el Admin', function () {
     $e = escenarioDeHorarios($this);
@@ -151,13 +109,15 @@ test('Secretaría crea y quita horarios solo si el Admin lo habilita', function 
 
 test('el enlace de una cita virtual lo pone su profesional, Secretaría o el Admin, y solo de Zoom, Teams o Meet', function () {
     $e = escenarioDeHorarios($this);
-    $cita = citaDePrueba($this, $e);
-    $enlace = fn (string $token, ?string $valor, ?int $id = null) => como($this, $token)->putJson('/api/appointment/appointment-enlace', ['appointmentId' => $id ?? $cita, 'enlace' => $valor]);
+    // La modalidad y el enlace son del horario de la cita: aquí, uno virtual que todavía no tiene enlace
+    $cita = citaDePrueba($this, $e, '09:00', ['modalidad' => 'virtual']);
+    $turno = Appointment::findOrFail($cita)->worker_schedule_id;
+    $enlace = fn (string $token, ?string $valor, ?int $id = null) => como($this, $token)->putJson('/api/worker-schedule/'.($id ?? $turno).'/modalidad', ['enlace' => $valor]);
 
     // Quién no puede
     $enlace($e['ana'], 'https://meet.google.com/abc-defg-hij')->assertStatus(403);
-    $enlace($e['otro'], 'https://meet.google.com/abc-defg-hij')->assertStatus(404); // una cita ajena responde igual que una que no existe
-    como($this, null)->putJson('/api/appointment/appointment-enlace', ['appointmentId' => $cita, 'enlace' => 'https://meet.google.com/abc-defg-hij'])->assertStatus(401);
+    $enlace($e['otro'], 'https://meet.google.com/abc-defg-hij')->assertStatus(403); // el horario de otra profesional
+    como($this, null)->putJson('/api/worker-schedule/'.$turno.'/modalidad', ['enlace' => 'https://meet.google.com/abc-defg-hij'])->assertStatus(401);
     $enlace($e['pro'], 'https://meet.google.com/abc-defg-hij', 999999)->assertStatus(404);
 
     // Qué enlaces no se aceptan
@@ -197,12 +157,12 @@ test('el enlace de una cita virtual lo pone su profesional, Secretaría o el Adm
         $enlace($e['pro'], $malo)->assertStatus(422)->assertJsonValidationErrors('enlace');
     }
     $enlace($e['pro'], 'https://zoom.us/j/'.str_repeat('1', 500))->assertStatus(422);
-    expect(Appointment::findOrFail($cita)->enlace_virtual)->toBeNull();
+    expect(App\Models\WorkerSchedule::findOrFail($turno)->enlace_virtual)->toBeNull();
 
-    // Si el campo no llega no se cambia nada (para quitar el enlace hay que mandarlo vacío a propósito)
-    como($this, $e['pro'])->putJson('/api/appointment/appointment-enlace', ['appointmentId' => $cita, 'enlace' => 'https://zoom.us/j/777'])->assertOk();
-    como($this, $e['pro'])->putJson('/api/appointment/appointment-enlace', ['appointmentId' => $cita])->assertStatus(422)->assertJsonValidationErrors('enlace');
-    expect(Appointment::findOrFail($cita)->enlace_virtual)->toBe('https://zoom.us/j/777');
+    // Si no llega ni la modalidad ni el enlace no se cambia nada (para quitar el enlace hay que mandarlo vacío a propósito)
+    $enlace($e['pro'], 'https://zoom.us/j/777')->assertOk();
+    como($this, $e['pro'])->putJson('/api/worker-schedule/'.$turno.'/modalidad', [])->assertStatus(422);
+    expect(App\Models\WorkerSchedule::findOrFail($turno)->enlace_virtual)->toBe('https://zoom.us/j/777');
 
     // Los que sí
     foreach ([
@@ -220,20 +180,40 @@ test('el enlace de una cita virtual lo pone su profesional, Secretaría o el Adm
     $enlace($e['sec'], 'https://meet.google.com/sec-reta-ria')->assertOk();
     $enlace($e['admin'], 'https://meet.google.com/adm-inis-tra')->assertOk();
 
-    // Vacío = la cita vuelve a ser presencial
-    $enlace($e['pro'], '')->assertOk()->assertJson(['es_virtual' => false, 'enlace_virtual' => null]);
-    expect(citaComo($this, $e['pro'], $cita))->toMatchArray(['es_virtual' => false, 'enlace_virtual' => null]);
+    // Vacío = se quita el enlace, pero la cita sigue siendo virtual (queda pendiente de enlace)
+    $enlace($e['pro'], '')->assertOk()->assertJson(['es_virtual' => true, 'enlace_virtual' => null]);
+    expect(citaComo($this, $e['pro'], $cita))->toMatchArray(['modalidad' => 'virtual', 'es_virtual' => true, 'enlace_virtual' => null]);
+
+    // Con la cita ya reservada, la modalidad la cambian Secretaría o el Admin, no la profesional
+    $modalidad = fn (string $token, array $datos) => como($this, $token)->putJson('/api/worker-schedule/'.$turno.'/modalidad', $datos);
+    $r = $modalidad($e['pro'], ['modalidad' => 'presencial'])->assertStatus(422);
+    expect($r->json('message'))->toContain('Secretaría');
+    $enlace($e['pro'], 'https://zoom.us/j/777')->assertOk();
+    // Presencial = sin enlace (se borra el que tenía) y no se le puede poner uno
+    $modalidad($e['sec'], ['modalidad' => 'presencial'])->assertOk()->assertJson(['modalidad' => 'presencial', 'es_virtual' => false, 'enlace_virtual' => null, 'aprobado' => true]);
+    expect(citaComo($this, $e['ana'], $cita))->toMatchArray(['modalidad' => 'presencial', 'es_virtual' => false, 'enlace_virtual' => null]);
+    $enlace($e['pro'], 'https://zoom.us/j/777')->assertStatus(422)->assertJsonValidationErrors('enlace');
+    $modalidad($e['admin'], ['modalidad' => 'virtual', 'enlace' => 'https://zoom.us/j/888'])->assertOk()->assertJson(['es_virtual' => true, 'enlace_virtual' => 'https://zoom.us/j/888', 'plataforma' => 'Zoom']);
+    $modalidad($e['admin'], ['modalidad' => 'por teléfono'])->assertStatus(422)->assertJsonValidationErrors('modalidad');
 });
 
 test('el paciente ve el enlace de su cita virtual solo cuando el pago ya está aprobado', function () {
     $e = escenarioDeHorarios($this);
-    $cita = citaDePrueba($this, $e);
     $meet = 'https://meet.google.com/abc-defg-hij';
-    como($this, $e['pro'])->putJson('/api/appointment/appointment-enlace', ['appointmentId' => $cita, 'enlace' => $meet])->assertOk();
+    // La profesional crea el horario virtual con su enlace de una vez
+    $cita = citaDePrueba($this, $e, '09:00', ['modalidad' => 'virtual', 'enlace' => $meet]);
+    $turno = Appointment::findOrFail($cita)->worker_schedule_id;
 
     // Guardada (pago por revisar): la paciente sabe que es virtual, pero todavía no recibe el enlace
     expect(citaComo($this, $e['ana'], $cita))->toMatchArray(['es_virtual' => true, 'enlace_virtual' => null]);
     expect(como($this, $e['ana'])->getJson('/api/appointment')->getContent())->not->toContain('abc-defg-hij');
+    // Tampoco lo recibe en la lista de horarios (ni ella, ni otro paciente, ni otra profesional)
+    expect(como($this, $e['ana'])->getJson('/api/worker-schedule')->assertOk()->getContent())->not->toContain('abc-defg-hij');
+    expect(como($this, $e['otro'])->getJson('/api/worker-schedule')->assertOk()->getContent())->not->toContain('abc-defg-hij');
+    expect(como($this, $e['ana'])->getJson('/api/worker-schedule/'.$turno)->assertOk()->getContent())->not->toContain('abc-defg-hij');
+    foreach (['pro', 'sec', 'admin'] as $quien) {
+        expect(collect(como($this, $e[$quien])->getJson('/api/worker-schedule')->json())->firstWhere('worker_schedule_id', $turno)['enlace_virtual'])->toBe($meet);
+    }
     // Su profesional, Secretaría y el Admin sí lo ven
     foreach (['pro', 'sec', 'admin'] as $quien) {
         expect(citaComo($this, $e[$quien], $cita))->toMatchArray(['es_virtual' => true, 'enlace_virtual' => $meet]);
@@ -247,18 +227,19 @@ test('el paciente ve el enlace de su cita virtual solo cuando el pago ya está a
     como($this, $e['sec'])->putJson('/api/appointment/appointment-approve', ['appointmentId' => $cita])->assertOk();
     expect(citaComo($this, $e['ana'], $cita))->toMatchArray(['es_virtual' => true, 'enlace_virtual' => $meet]);
 
-    // Si la cita se cancela, deja de recibirlo y ya no se puede cambiar; la respuesta de cancelar tampoco lo trae
+    // Si la cita se cancela, deja de recibirlo; la respuesta de cancelar tampoco lo trae
     $r = como($this, $e['ana'])->putJson('/api/appointment/appointment-cancel', ['appointmentId' => $cita])->assertOk();
     expect($r->getContent())->not->toContain('abc-defg-hij');
     expect(citaComo($this, $e['ana'], $cita))->toMatchArray(['es_virtual' => true, 'enlace_virtual' => null]);
-    como($this, $e['pro'])->putJson('/api/appointment/appointment-enlace', ['appointmentId' => $cita, 'enlace' => 'https://zoom.us/j/1'])->assertStatus(422);
+    // El horario quedó libre otra vez, con su modalidad y su enlace: la profesional lo sigue administrando
+    como($this, $e['pro'])->putJson('/api/worker-schedule/'.$turno.'/modalidad', ['enlace' => 'https://zoom.us/j/1'])->assertOk();
 });
 
 test('cuando la cita ya terminó, el paciente deja de recibir el enlace y nadie lo cambia', function () {
     $e = escenarioDeHorarios($this);
-    $cita = citaDePrueba($this, $e); // viernes 16, 09:00
     $meet = 'https://meet.google.com/abc-defg-hij';
-    como($this, $e['pro'])->putJson('/api/appointment/appointment-enlace', ['appointmentId' => $cita, 'enlace' => $meet])->assertOk();
+    $cita = citaDePrueba($this, $e, '09:00', ['modalidad' => 'virtual', 'enlace' => $meet]); // viernes 16, 09:00
+    $turno = Appointment::findOrFail($cita)->worker_schedule_id;
     como($this, $e['sec'])->putJson('/api/appointment/appointment-approve', ['appointmentId' => $cita])->assertOk();
     expect(citaComo($this, $e['ana'], $cita)['enlace_virtual'])->toBe($meet);
 
@@ -270,8 +251,106 @@ test('cuando la cita ya terminó, el paciente deja de recibir el enlace y nadie 
     // Asistió: la paciente ya no lo recibe (tampoco en la lista de sus reportes) y no se puede cambiar
     expect(citaComo($this, $e['ana'], $cita))->toMatchArray(['es_virtual' => true, 'enlace_virtual' => null]);
     expect(como($this, $e['ana'])->getJson('/api/appointment-report')->assertOk()->getContent())->not->toContain('abc-defg-hij');
-    como($this, $e['pro'])->putJson('/api/appointment/appointment-enlace', ['appointmentId' => $cita, 'enlace' => 'https://zoom.us/j/1'])->assertStatus(422);
-    como($this, $e['admin'])->putJson('/api/appointment/appointment-enlace', ['appointmentId' => $cita, 'enlace' => ''])->assertStatus(422);
+    como($this, $e['pro'])->putJson('/api/worker-schedule/'.$turno.'/modalidad', ['enlace' => 'https://zoom.us/j/1'])->assertStatus(422);
+    como($this, $e['admin'])->putJson('/api/worker-schedule/'.$turno.'/modalidad', ['enlace' => ''])->assertStatus(422);
+    como($this, $e['admin'])->putJson('/api/worker-schedule/'.$turno.'/modalidad', ['modalidad' => 'presencial'])->assertStatus(422);
+    // La ruta anterior, que guardaba el enlace en la cita, ya no existe
+    como($this, $e['admin'])->putJson('/api/appointment/appointment-enlace', ['appointmentId' => $cita, 'enlace' => ''])->assertStatus(404);
+});
+
+test('el horario que crea un profesional no se ofrece hasta que Secretaría o el Admin lo aprueban', function () {
+    $e = escenarioDeHorarios($this);
+    $beto = pacienteConSesion($this, 'beto@prueba.test');
+    $losVe = fn (string $token) => collect(como($this, $token)->getJson('/api/worker-schedule')->assertOk()->json())->pluck('worker_schedule_id')->all();
+    $aprobar = fn (string $token, int $turno, bool $valor = true) => como($this, $token)->putJson('/api/worker-schedule/'.$turno.'/aprobacion', ['aprobado' => $valor]);
+    $reservar = fn (string $token, int $turno) => como($this, $token)->postJson('/api/appointment/appointment-create', [
+        'client_id' => $e['anaId'], 'professional_id' => $e['proId'], 'service_id' => $e['servicio'], 'worker_schedule_id' => $turno,
+        'payment_type' => 'Transferencia', 'payment_file' => subirPdf($this, $token)->json('archivo'),
+    ]);
+
+    // Lo crea la profesional: queda por aprobar y ella lo sabe
+    $r = crearHorario($this, $e['pro'], $e['proId'], '2026-10-16', '09:00', ['modalidad' => 'presencial'])->assertStatus(201)->assertJsonPath('worker_schedule.aprobado', false);
+    expect($r->json('message'))->toContain('Secretaría');
+    $turno = $r->json('worker_schedule.worker_schedule_id');
+
+    // Mientras tanto lo ven ella, Secretaría y el Admin; los pacientes y las demás profesionales, no
+    foreach (['pro', 'sec', 'admin'] as $quien) {
+        expect($losVe($e[$quien]))->toContain($turno);
+    }
+    foreach ([$e['ana'], $beto, $e['otro']] as $token) {
+        expect($losVe($token))->not->toContain($turno);
+        como($this, $token)->getJson('/api/worker-schedule/'.$turno)->assertStatus(404);
+    }
+    // Nadie lo reserva todavía: ni la paciente (aunque adivine su número) ni Secretaría
+    expect($reservar($e['ana'], $turno)->assertStatus(422)->json('message'))->toContain('aprobado');
+    expect($reservar($e['sec'], $turno)->assertStatus(422)->json('message'))->toContain('aprobado');
+    expect(Appointment::count())->toBe(0);
+
+    // Solo Secretaría y el Admin aprueban, y no depende del permiso para crear horarios (que está apagado)
+    foreach (['pro', 'otro', 'ana'] as $quien) {
+        $aprobar($e[$quien], $turno)->assertStatus(403);
+    }
+    como($this, null)->putJson('/api/worker-schedule/'.$turno.'/aprobacion', ['aprobado' => true])->assertStatus(401);
+    $aprobar($e['sec'], $turno)->assertStatus(200)->assertJson(['aprobado' => true]);
+    $aprobar($e['sec'], 999999)->assertStatus(404);
+    como($this, $e['sec'])->putJson('/api/worker-schedule/'.$turno.'/aprobacion', [])->assertStatus(422)->assertJsonValidationErrors('aprobado');
+    expect(App\Models\WorkerSchedule::findOrFail($turno)->aprobado_por)->not->toBeNull();
+
+    // Aprobado: ya lo ven todos y la paciente lo reserva
+    foreach ([$e['ana'], $beto, $e['otro']] as $token) {
+        expect($losVe($token))->toContain($turno);
+    }
+    // Se le puede quitar la aprobación mientras esté libre (deja de ofrecerse)
+    $aprobar($e['admin'], $turno, false)->assertOk()->assertJson(['aprobado' => false]);
+    expect($losVe($e['ana']))->not->toContain($turno);
+    $aprobar($e['admin'], $turno)->assertOk();
+    $reservar($e['ana'], $turno)->assertStatus(201);
+    // Con una cita encima ya no se le quita
+    expect($aprobar($e['sec'], $turno, false)->assertStatus(422)->json('message'))->toContain('cita');
+
+    // Los que crean Secretaría (con permiso) o el Admin nacen aprobados
+    $delAdmin = crearHorario($this, $e['admin'], $e['proId'], '2026-10-17', '09:00')->assertStatus(201)->assertJsonPath('worker_schedule.aprobado', true)->json('worker_schedule.worker_schedule_id');
+    como($this, $e['admin'])->putJson('/api/ajustes', ['horario_secretaria' => true])->assertOk();
+    crearHorario($this, $e['sec'], $e['proId'], '2026-10-17', '11:00')->assertStatus(201)->assertJsonPath('worker_schedule.aprobado', true);
+    expect($losVe($e['ana']))->toContain($delAdmin);
+});
+
+test('quien crea el horario elige si es presencial o virtual, y cambiarlo después tiene reglas', function () {
+    $e = escenarioDeHorarios($this);
+    $meet = 'https://meet.google.com/abc-defg-hij';
+    $modalidad = fn (string $token, int $turno, array $datos) => como($this, $token)->putJson('/api/worker-schedule/'.$turno.'/modalidad', $datos);
+    $enBase = fn (int $turno) => App\Models\WorkerSchedule::findOrFail($turno)->only(['modalidad', 'enlace_virtual', 'aprobado']);
+
+    // Al crearlo: presencial (lo que vale si no se indica) o virtual, con el enlace o sin él
+    $presencial = crearHorario($this, $e['pro'], $e['proId'], '2026-10-16', '08:00')->assertStatus(201)->assertJsonPath('worker_schedule.modalidad', 'presencial')->json('worker_schedule.worker_schedule_id');
+    $virtual = crearHorario($this, $e['pro'], $e['proId'], '2026-10-16', '10:00', ['modalidad' => 'virtual', 'enlace' => $meet])->assertStatus(201)
+        ->assertJsonPath('worker_schedule.modalidad', 'virtual')->assertJsonPath('worker_schedule.enlace_virtual', $meet)->json('worker_schedule.worker_schedule_id');
+    $sinEnlace = crearHorario($this, $e['pro'], $e['proId'], '2026-10-16', '12:00', ['modalidad' => 'virtual'])->assertStatus(201)->json('worker_schedule.worker_schedule_id');
+    expect($enBase($sinEnlace))->toBe(['modalidad' => 'virtual', 'enlace_virtual' => null, 'aprobado' => false]);
+    // Lo que no se acepta al crear
+    crearHorario($this, $e['pro'], $e['proId'], '2026-10-16', '14:00', ['modalidad' => 'mixta'])->assertStatus(422)->assertJsonValidationErrors('modalidad');
+    crearHorario($this, $e['pro'], $e['proId'], '2026-10-16', '14:00', ['modalidad' => 'presencial', 'enlace' => $meet])->assertStatus(422)->assertJsonValidationErrors('enlace');
+    crearHorario($this, $e['pro'], $e['proId'], '2026-10-16', '14:00', ['modalidad' => 'virtual', 'enlace' => 'https://ejemplo.com/reunion'])->assertStatus(422)->assertJsonValidationErrors('enlace');
+    expect(App\Models\WorkerSchedule::count())->toBe(3);
+
+    // La otra profesional y los pacientes no cambian nada de un horario ajeno
+    $modalidad($e['otro'], $presencial, ['modalidad' => 'virtual'])->assertStatus(403);
+    $modalidad($e['ana'], $presencial, ['modalidad' => 'virtual'])->assertStatus(403);
+
+    // Secretaría aprueba el presencial. Si la profesional le cambia la modalidad, vuelve a quedar por aprobar
+    como($this, $e['sec'])->putJson('/api/worker-schedule/'.$presencial.'/aprobacion', ['aprobado' => true])->assertOk();
+    $r = $modalidad($e['pro'], $presencial, ['modalidad' => 'virtual', 'enlace' => $meet])->assertOk()->assertJson(['modalidad' => 'virtual', 'enlace_virtual' => $meet, 'aprobado' => false]);
+    expect($r->json('message'))->toContain('aprobar');
+    // Cambiar solo el enlace no toca la aprobación
+    como($this, $e['sec'])->putJson('/api/worker-schedule/'.$presencial.'/aprobacion', ['aprobado' => true])->assertOk();
+    $modalidad($e['pro'], $presencial, ['enlace' => 'https://zoom.us/j/123'])->assertOk()->assertJson(['aprobado' => true, 'enlace_virtual' => 'https://zoom.us/j/123']);
+    // Repetir la misma modalidad tampoco
+    $modalidad($e['pro'], $presencial, ['modalidad' => 'virtual'])->assertOk()->assertJson(['aprobado' => true, 'enlace_virtual' => 'https://zoom.us/j/123']);
+
+    // Secretaría y el Admin cambian la modalidad de cualquiera sin quitarle la aprobación
+    $modalidad($e['sec'], $presencial, ['modalidad' => 'presencial'])->assertOk()->assertJson(['modalidad' => 'presencial', 'enlace_virtual' => null, 'aprobado' => true]);
+    $modalidad($e['admin'], $virtual, ['modalidad' => 'presencial'])->assertOk()->assertJson(['modalidad' => 'presencial', 'aprobado' => false]); // seguía por aprobar
+    expect($enBase($virtual))->toBe(['modalidad' => 'presencial', 'enlace_virtual' => null, 'aprobado' => false]);
 });
 
 test('un horario se crea con fecha y horas bien formadas, y dura al menos 10 minutos', function () {

@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\ArchivoPrivado;
+use App\Models\Aviso;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +18,8 @@ use Symfony\Component\HttpFoundation\Response;
  * - contadores vencidos de los límites de intentos (tabla `cache`);
  * - sesiones vencidas (tokens de Sanctum);
  * - comprobantes y reportes subidos hace más de un día que nunca se usaron;
- * - comprobantes de pagos rechazados, un día después del rechazo.
+ * - comprobantes de pagos rechazados, un día después del rechazo;
+ * - avisos leídos hace más de un mes y avisos de más de tres meses.
  */
 class MantenimientoOportunista
 {
@@ -53,6 +55,7 @@ class MantenimientoOportunista
             },
             fn () => ArchivoPrivado::borrarSinUsarVencidos(),
             fn () => ArchivoPrivado::borrarProgramados(),
+            fn () => Aviso::borrarViejos(),
         ];
 
         foreach ($tareas as $tarea) {

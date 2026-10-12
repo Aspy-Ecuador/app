@@ -44,6 +44,7 @@ function escenarioConPagos($prueba, int $cuantos = 2): array
             'professional_id' => $proId, 'date' => now()->addDays(3)->toDateString(),
             'start_time' => sprintf('%02d:00', 8 + $i), 'end_time' => sprintf('%02d:00', 9 + $i), 'name' => 'Turno',
         ])->assertStatus(201)->json('worker_schedule.worker_schedule_id');
+        aprobarHorarios();
         $archivos[$i] = subirPdf($prueba, $ana)->json('archivo');
         $citas[$i] = como($prueba, $ana)->postJson('/api/appointment/appointment-create', [
             'client_id' => $anaId, 'professional_id' => $proId, 'service_id' => $servicio, 'worker_schedule_id' => $turno,

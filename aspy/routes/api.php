@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AjusteController;
+use App\Http\Controllers\AvisoController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AppointmentReportController;
 use App\Http\Controllers\ArchivoPrivadoController;
@@ -44,6 +45,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/bank-account', [BankAccountController::class, 'show']);
     Route::put('/bank-account', [BankAccountController::class, 'update'])->middleware('role:admin');
     // Ajustes del sistema (p. ej., cuánto se conserva el comprobante de un pago rechazado): los leen Secretaría y el Admin; solo el Admin los cambia
+    // Avisos de la cuenta con sesión (cada quien, solo los suyos) y lo que tiene por revisar
+    Route::get('/avisos', [AvisoController::class, 'index']);
+    Route::put('/avisos/leidos', [AvisoController::class, 'leidos']);
+
     Route::get('/ajustes', [AjusteController::class, 'show'])->middleware('role:staff');
     Route::put('/ajustes', [AjusteController::class, 'update'])->middleware('role:admin');
     // Manuales de uso: pase temporal con los manuales que puede ver el rol (ver ManualController)
@@ -99,6 +104,10 @@ Route::middleware('auth:sanctum')->prefix('worker-schedule')->group(function () 
     // (Se quitó POST /worker-schedule: no lo usaba la web y creaba horarios sin el permiso ni el límite
     // de fechas que decide el Admin. Los horarios se crean solo con POST /professional/create-horario.)
     Route::put('/{id}', [WorkerScheduleController::class, 'update'])->middleware('role:professional,staff');
+    // Modalidad (presencial o virtual) y enlace de la reunión: el profesional en los suyos; Secretaría y el Admin, en todos
+    Route::put('/{id}/modalidad', [WorkerScheduleController::class, 'modalidad'])->middleware('role:professional,staff');
+    // Un horario creado por un profesional se ofrece a las familias recién cuando Secretaría o el Admin lo aprueban
+    Route::put('/{id}/aprobacion', [WorkerScheduleController::class, 'aprobacion'])->middleware('role:staff');
     Route::delete('/{id}', [WorkerScheduleController::class, 'destroy'])->middleware('role:professional,staff');
 });
 
@@ -139,8 +148,7 @@ Route::middleware('auth:sanctum')->prefix('appointment')->group(function () {
     Route::put('/appointment-complete', [AppointmentController::class, 'completeAppointment'])->middleware('role:professional,staff');
     Route::put('/appointment-missed', [AppointmentController::class, 'missedAppointment'])->middleware('role:professional,staff');
     Route::put('/appointment-cancel', [AppointmentController::class, 'cancelAppointment'])->middleware('role:client,staff');
-    // Enlace de la reunión de una cita virtual: lo pone o lo quita el profesional de esa cita, Secretaría o el Admin
-    Route::put('/appointment-enlace', [AppointmentController::class, 'guardarEnlaceVirtual'])->middleware('role:professional,staff');
+    // (La modalidad y el enlace de una cita virtual son de su horario: PUT /worker-schedule/{id}/modalidad)
     Route::post('/create-report', [AppointmentController::class, 'createReport'])->middleware('role:professional');
 });
 

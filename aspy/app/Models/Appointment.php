@@ -27,8 +27,9 @@ class Appointment extends Model
     ];
 
     /**
-     * El enlace de la reunión no sale al serializar el modelo: lo entrega solo AppointmentController
-     * (`datosVirtuales`), que decide si quien pregunta lo puede ver.
+     * Columna que ya no se usa: la modalidad y el enlace de la reunión son del HORARIO de la cita
+     * (worker_schedule.modalidad y enlace_virtual; la migración 2026_10_11 los copió). Sigue oculta
+     * para que ninguna respuesta entregue un enlace viejo por descuido.
      */
     protected $hidden = ['enlace_virtual'];
 
@@ -45,6 +46,8 @@ class Appointment extends Model
         'teams.live.com' => ['Microsoft Teams', false, ['/meet/']],
         'meet.google.com' => ['Google Meet', false, ['/lookup/']],
     ];
+
+    public const ENLACE_NO_VALIDO = 'Pega el enlace de la reunión de Zoom, Microsoft Teams o Google Meet (empieza con https://).';
 
     /** Google Meet: además, el código de la reunión va directo en la ruta (/abc-defg-hij). */
     private const CODIGO_DE_MEET = '/^\/[a-z]{3}-[a-z]{4}-[a-z]{3}$/iD';
