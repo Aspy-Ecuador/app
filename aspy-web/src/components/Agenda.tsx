@@ -538,10 +538,12 @@ const DetailPopover = ({
               Entrar a la reunión
             </Button>
           )}
-          {/* El paciente recibe el enlace cuando la fundación confirma su pago */}
+          {/* El paciente recibe el enlace cuando la fundación confirma su pago; si ya está confirmado, es que todavía nadie lo puso */}
           {detail.esVirtual && citaVigente && !detail.enlaceVirtual && !puedePonerEnlace && (
             <Typography sx={{ fontSize: 11, lineHeight: 1.4, color: "text.secondary" }}>
-              Esta cita es virtual. El enlace para entrar aparecerá aquí cuando la fundación confirme tu pago.
+              {detail.statusId === 2
+                ? "Esta cita es virtual. Todavía no está el enlace para entrar: aparecerá aquí cuando lo pongan, y te llegará un aviso."
+                : "Esta cita es virtual. El enlace para entrar aparecerá aquí cuando la fundación confirme tu pago."}
             </Typography>
           )}
 
