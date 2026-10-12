@@ -181,6 +181,7 @@ La seguridad vive en el **backend**. Las rutas del frontend por rol son solo com
 
 - **Barrido automático:** `scripts/manuales/revisar-responsive.mjs` recorre las pantallas públicas y las de cada rol en esos 7 tamaños, avisa si alguna se desborda hacia los lados y guarda una captura de cada una en `out/responsive/` (uso en su cabecera; necesita los servidores de demo). Última corrida (2026-10-11, con los filtros, *Horarios de hoy*, `/horarios` y `/avisos`): 41 pantallas × 7 tamaños, sin desbordes.
 - **Celular y tablet:** el panel usa los breakpoints de MUI; las tablas se desplazan dentro de su recuadro y el menú lateral pasa a un botón ☰.
+- **Alto de la pantalla en el celular (2026-10-12):** con la barra del navegador a la vista, `100vh` mide **más** que lo que se ve (`100dvh`). `body` tenía `min-height: 100vh` y centra su contenido, así que una pantalla que mide justo `vh(100)` (el inicio de sesión) quedaba centrada dentro de una página más alta, con una franja vacía arriba y otra abajo. Ahora `body` mide `100dvh` (`index.css`). **Un fondo que debe cubrir la pantalla va `position: fixed` (con `inset: 0`), no `absolute` dentro del contenedor**: así no depende de cuánto mida el contenido. En `AuthShell` el fondo es el `::before` fijo de `main`; en celular y tablet mide `100lvh` para que la imagen no se reacomode cuando la barra del navegador aparece y desaparece, y mientras esa pantalla está abierta la página toma el tono medio de la imagen (`COLOR_DE_PAGINA`), por si asoma al rebotar el desplazamiento. El navegador de pruebas no tiene esa barra: para imitarla, acorta `--vh` (`:root{--vh: calc(1vh - 1.12px) !important}`).
 - **Televisores (`shared-theme/pantallaGrande.ts`):** desde 1800 px de ancho todo se agranda con `zoom` (×1,15 / ×1,5 / ×2). `largeScreenZoom` va en el contenedor raíz de cada pantalla: la landing, `AuthShell` (login y registro) y los 4 layouts del panel. Se eligió `zoom` y no agrandar la letra (`rem`) porque el código mezcla `px` y `rem` y el diseño se desordenaba. Consecuencias que hay que respetar:
   - **Nada de `vh`/`dvh` directos** dentro de esas pantallas: con zoom salen multiplicados. Usa `vh(n)` (se apoya en la variable `--vh` de `index.css`).
   - **Ventanas flotantes de MUI** (menús, calendarios, diálogos, avisos): viven fuera del contenedor con zoom. Se agrandan en `index.css` (mismos cortes y factores; si cambias uno, cambia ambos), aplicando el zoom a su **contenido**, no a la ventana: MUI las posiciona en píxeles de pantalla y con zoom en la ventana misma salen desplazadas.
@@ -428,6 +429,14 @@ Pedido del dueño después de publicar los avisos: los PDF descargados salían c
 - Manuales al día en el repo (texto, capturas y PDF): familias (figura del recibo), profesional (captura de *Detalles de la cita*), secretaría (figura de una lista en PDF) y administración (texto). Artifacts republicados: familias v20, profesional v15, secretaría v18 y administración v17.
 - **Comprobado en producción el 2026-10-12**, solo descargando (no escribe nada), con las cuatro cuentas de demostración: las 10 listas en PDF y en Excel y un recibo, 21 comprobaciones, todas bien (logo oficial, nombre de la fundación y tantas filas como muestra la pantalla). Los archivos descargados se borraron al terminar.
 
+### Fondo del inicio de sesión y del registro (publicado el 2026-10-12)
+
+Pedido del dueño: en el celular, el inicio de sesión dejaba una franja sin imagen arriba y otra abajo (en el registro no, porque su formulario es más alto que la pantalla). Está en commit y con push (el dueño lo pidió: "haz el commit y el push"). **Falta que el dueño lo mire en su celular**: la barra del navegador de un teléfono real no se puede imitar del todo en las pruebas.
+
+- Causa y arreglo en **Diseño responsivo → Alto de la pantalla en el celular** (`index.css` y `components/auth/AuthShell.tsx`).
+- Comprobado en local imitando la barra del navegador: antes quedaban de 80 a 112 px sin imagen en celular y tablet; ahora el fondo cubre toda la pantalla en celular (360 y 390), celular acostado, tablet, PC, Full HD y 4K, en claro y en oscuro, también con el registro desplazado hasta abajo. Barrido de las pantallas públicas en 7 tamaños sin desbordes; `npm run build` OK; `npx eslint src` 34 errores, todos anteriores.
+- Los manuales no cambian: sus capturas del inicio de sesión y del registro son de PC, donde la pantalla se ve igual que antes.
+
 ### Hecho el 2026-10-10 y el 2026-10-11
 
 Pedidos del dueño (ver **Reglas de negocio agregadas (2026-10-10)**): filtros en todas las tablas, *Horarios de hoy*, límite de los horarios y permiso de Secretaría, citas virtuales, hora de Ecuador en todo, redacción sin género, crédito con GitHub y los cambios de Sanity (segundos del collage, cuentas para donar, modo del editor).
@@ -490,6 +499,7 @@ Pedido del dueño: probar las funciones nuevas **en producción de verdad**, no 
 
 **Del dueño:**
 
+0. **Mirar el inicio de sesión en su celular** (publicado el 2026-10-12): ya no deben verse franjas arriba ni abajo de la imagen de fondo. Si todavía se ve algo, decir en qué teléfono y navegador.
 1. **Cambiar las contraseñas de las 4 cuentas de demostración**, sobre todo la del Admin (sigue siendo la del seeder, que está en el código). Lo más urgente: además, el 2026-10-10 el dueño las pegó en el chat para las pruebas.
 2. **Captcha:** crear la cuenta gratis en Cloudflare, agregar un sitio de Turnstile para `aspy-web.vercel.app`, pasar la clave pública y poner la secreta en Railway.
 3. **Protección delante del servidor** (Cloudflare, plan gratis): necesita un dominio propio de la fundación. Si se pone, hay que volver a comprobar los encabezados de IP (ver **Defensas contra el abuso**).
