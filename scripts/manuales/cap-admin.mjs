@@ -20,6 +20,12 @@ try {
     await mark(p, p.getByText("Agregar Usuario", { exact: true }), "3");
     await shot(p, "01-panel");
   });
+  // Avisos: lo que hay por revisar (pagos, horarios por aprobar, datos bancarios sin cargar…)
+  await step("avisos", async () => {
+    const zona = p.getByRole("region", { name: "Avisos" });
+    const c = await zona.boundingBox();
+    await shot(p, "01b-por-revisar", { clip: { x: c.x - 28, y: c.y - 28, width: c.width + 56, height: c.height + 56 } });
+  });
   await step("usuarios", async () => {
     await go(p, "/usuarios");
     await mark(p, p.getByRole("button", { name: /Agregar usuario/ }), "1");
@@ -59,10 +65,18 @@ try {
   await step("citas", async () => {
     await go(p, "/citas");
     await shot(p, "07-citas");
-    await p.getByRole("button", { name: "Mes" }).click(); await p.waitForTimeout(800);
+    await p.getByRole("button", { name: "Mes", exact: true }).click(); await p.waitForTimeout(800);
     await shot(p, "08-citas-mes");
   });
   // Quien retiró su consentimiento (lo hace cap-cliente, paso "retiro") sale con un escudo rojo junto al interruptor
+  await step("horarios", async () => {
+    // El Admin también aprueba los horarios de los profesionales y puede crearlos por ellos
+    await go(p, "/horarios"); await settle(p, 1000);
+    const zona = p.getByRole("region", { name: "Horarios por aprobar" });
+    await mark(p, p.getByRole("button", { name: "Horarios", exact: true }).first(), "1");
+    await mark(p, zona, "2");
+    await shot(p, "11-horarios");
+  });
   await step("retiro", async () => {
     await go(p, "/usuarios"); await settle(p, 800);
     const escudo = row("Rosa").first().locator('[data-testid="GppBadOutlinedIcon"]');

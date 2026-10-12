@@ -55,7 +55,27 @@
         <li><span class="n">1</span> <strong>Citas sin marcar:</strong> citas confirmadas que ya empezaron y en las que aún no indicas si el/la paciente asistió.</li>
         <li><span class="n">2</span> <strong>Citas sin reportar:</strong> citas a las que el/la paciente asistió y que todavía no tienen reporte.</li>
       </ul>
-      <p>En el menú de la izquierda tienes: <strong>Pacientes</strong>, <strong>Citas</strong> (tu agenda) y <strong>Crear Horarios</strong>.</p>
+      <p>En el menú de la izquierda tienes: <strong>Avisos</strong>, <strong>Pacientes</strong>, <strong>Citas</strong> (tu agenda) y <strong>Crear Horarios</strong>.</p>
+      <h3>Avisos: te enteras cuando alguien reserva contigo</h3>
+      <p>Arriba de tu Vista General están tus <strong>avisos</strong>. No tienes que revisar la agenda para saber si hay algo nuevo:</p>
+      <figure class="captura"><div class="marco"><img src="img/profesional/01b-avisos-panel.jpg" alt="Avisos en la Vista General del/la profesional: lo que tiene por revisar y sus avisos sin leer"></div></figure>
+      <ul>
+        <li><span class="n">1</span> <strong>Por revisar:</strong> lo que tienes pendiente en este momento (citas sin asistencia marcada, sesiones sin reporte, citas virtuales sin enlace). En gris, lo que solo te conviene saber, como tus horarios que esperan la aprobación de Secretaría. Cada tarjeta te lleva a la pantalla donde se resuelve.</li>
+        <li><span class="n">2</span> <strong>Avisos sin leer:</strong> lo que pasó mientras no mirabas. Toca uno para abrirlo: si habla de una cita, se abre tu agenda <strong>en esa cita</strong>.</li>
+      </ul>
+      <p>El sistema te avisa cuando:</p>
+      <ul>
+        <li>Un/a paciente <strong>reserva una cita contigo</strong> (todavía falta que Secretaría revise su pago).</li>
+        <li>La cita queda <strong>confirmada</strong> (pago aprobado), o <strong>se elimina</strong> porque el pago no fue aprobado.</li>
+        <li>Alguien <strong>cancela</strong> una cita.</li>
+        <li>Secretaría o la administración <strong>aprueban tus horarios</strong>, les quitan la aprobación o les cambian la modalidad o el enlace. Si aprueban varios seguidos, llega un solo aviso con la cuenta (“Aprobaron 5 horarios tuyos”).</li>
+      </ul>
+      <figure class="captura"><div class="marco"><img src="img/profesional/01c-avisos.jpg" alt="Pantalla Avisos del/la profesional con el contador del menú"></div></figure>
+      <ul>
+        <li><span class="n">1</span> <strong>Avisos</strong>, en el menú, guarda todos tus avisos recientes. El número rosado suma los que tienes sin leer y lo que te toca resolver.</li>
+        <li><span class="n">2</span> <strong>Marcar todos como leídos</strong> limpia los avisos nuevos. Lo que está <em>por revisar</em> no se marca: desaparece cuando lo resuelves.</li>
+      </ul>
+      <div class="aviso consejo"><span class="ico">🔔</span><div><p>Los avisos se leen <strong>dentro del sistema</strong> (no llegan por correo). Si lo tienes abierto cuando llega uno, aparece un recuadro abajo a la derecha con el botón <strong>Ver</strong>. En el celular, la <strong>campana</strong> de arriba a la derecha lleva a tus avisos.</p></div></div>
       <div class="aviso consejo"><span class="ico">💡</span><div><p>Las personas y datos de las imágenes son <strong>ejemplos</strong> creados para este manual.</p></div></div>
     </section>
 
@@ -68,20 +88,34 @@
           <p>A la izquierda está el formulario <strong>Nuevo horario</strong>; a la derecha, todos tus turnos agrupados por día.</p>
         </li>
         <li class="paso"><b>Completa el turno</b>
-          <p>Elige la <strong>fecha</strong> <span class="n">1</span> (al tocar el campo se abre un calendario; también puedes escribirla como día/mes/año), la <strong>hora de inicio</strong> <span class="n">2</span> y la <strong>hora de fin</strong> <span class="n">3</span>. El sistema te muestra un resumen y el tipo de turno (mañana o tarde). Presiona <span class="boton" style="background:#1d9e75">Guardar horario</span> <span class="n">4</span>.</p>
+          <p>Elige la <strong>fecha</strong> <span class="n">1</span> (al tocar el campo se abre un calendario; también puedes escribirla como día/mes/año), la <strong>hora de inicio</strong> <span class="n">2</span> y la <strong>hora de fin</strong> <span class="n">3</span>.</p>
           <p>Debajo de la fecha se lee <strong>hasta qué día</strong> puedes crear horarios (por ejemplo, “hasta el 31/10/2026”). Ese límite lo define la administración: puede ser solo el día de hoy, la semana en curso, dos semanas, el mes en curso o dos meses. El calendario no deja elegir una fecha posterior.</p>
-          <figure class="captura"><div class="marco"><img src="img/profesional/13-horario-nuevo.jpg" alt="Formulario de nuevo horario con fecha, horas y botón Guardar"></div></figure>
         </li>
-        <li class="paso"><b>Listo</b>
-          <p>Aparece el mensaje <strong>“Horario creado correctamente”</strong> y el turno se suma a tu lista como <strong>Disponible</strong>.</p>
-          <figure class="captura"><div class="marco"><img src="img/profesional/14-horario-guardado.jpg" alt="Lista de horarios después de guardar"></div></figure>
+        <li class="paso"><b>Elige la modalidad</b>
+          <p>Indica si ese turno lo atenderás de forma <strong>Presencial</strong> o <strong>Virtual</strong> <span class="n">4</span>. No viene elegida: sin ella el horario no se guarda.</p>
+          <p>Si es <strong>virtual</strong>, puedes pegar de una vez el <strong>enlace de la reunión</strong> <span class="n">5</span> (de Zoom, Microsoft Teams o Google Meet; tiene que empezar con <em>https://</em>). Es opcional: si todavía no lo tienes, lo pones después. Presiona <span class="boton" style="background:#1d9e75">Guardar horario</span> <span class="n">6</span>.</p>
+          <figure class="captura"><div class="marco"><img src="img/profesional/13-horario-nuevo.jpg" alt="Formulario de nuevo horario con fecha, horas, modalidad, enlace de la reunión y botón Guardar"></div></figure>
+        </li>
+        <li class="paso"><b>Secretaría lo revisa</b>
+          <p>Aparece el mensaje <strong>“Horario creado. Secretaría lo revisará antes de publicarlo”</strong> y el turno se suma a tu lista con la etiqueta <strong>Por aprobar</strong>. Las familias lo verán para agendar recién cuando Secretaría o la administración lo aprueben; si hace falta, también pueden cambiarle la modalidad.</p>
+          <figure class="captura"><div class="marco"><img src="img/profesional/14-horario-guardado.jpg" alt="Lista de horarios después de guardar, con el aviso de que Secretaría lo revisará"></div></figure>
         </li>
       </ol>
       <h3>Tu lista de horarios</h3>
-      <figure class="captura"><div class="marco"><img src="img/profesional/15-horarios-lista.jpg" alt="Lista de horarios con uno disponible y uno ocupado"></div></figure>
+      <figure class="captura"><div class="marco"><img src="img/profesional/15-horarios-lista.jpg" alt="Lista de horarios con su modalidad, su estado y los botones para editarlos o quitarlos"></div></figure>
+      <p>Cada turno muestra su <strong>modalidad</strong> (<em>Presencial</em> o <em>Virtual</em>, con el servicio de la reunión o el aviso “falta el enlace”) y su estado:</p>
       <ul>
-        <li><strong>Disponible</strong> (verde): nadie lo ha reservado. Con el <strong>tacho de basura</strong> (resaltado en rosado) puedes eliminarlo.</li>
-        <li><strong>Ocupado</strong> (gris, resaltado en celeste): un/a paciente ya lo reservó. No se puede eliminar; si necesitas liberarlo, pide a secretaría que cancele la cita.</li>
+        <li><strong>Por aprobar</strong> (amarillo): Secretaría todavía no lo revisa; aún no se ofrece a las familias.</li>
+        <li><strong>Disponible</strong> (verde): está aprobado y nadie lo ha reservado. Con el <strong>tacho de basura</strong> <span class="n">1</span> puedes eliminarlo.</li>
+        <li><strong>Ocupado</strong> (gris) <span class="n">3</span>: un/a paciente ya lo reservó. No se puede eliminar; si necesitas liberarlo, pide a secretaría que cancele la cita.</li>
+      </ul>
+      <h3>Cambiar la modalidad o el enlace</h3>
+      <p>Con el <strong>lápiz</strong> <span class="n">2</span> de cada turno se abre un pequeño formulario:</p>
+      <figure class="captura media"><div class="marco"><img src="img/profesional/15b-horario-editar.jpg" alt="Un horario por aprobar con el formulario para cambiar la modalidad y el enlace"></div></figure>
+      <ul>
+        <li><strong>Modalidad:</strong> puedes cambiarla mientras nadie haya reservado el turno. Si ya estaba aprobado, <strong>vuelve a quedar por aprobar</strong> (Secretaría aprobó la modalidad anterior).</li>
+        <li><strong>Enlace de la reunión:</strong> en un turno virtual puedes ponerlo, cambiarlo o quitarlo cuando quieras, aunque ya tenga una cita. No necesita nueva aprobación.</li>
+        <li>Si el turno <strong>ya tiene una cita</strong> y hay que cambiar la modalidad, pídelo a Secretaría: es quien avisa a la familia.</li>
       </ul>
       <div class="aviso importante"><span class="ico">⏰</span><div><p>No se pueden crear horarios en fechas pasadas, ni después del límite que definió la administración, ni que <strong>se crucen</strong> con otro tuyo (por ejemplo, 09:00–10:00 y 09:30–10:30 el mismo día).</p></div></div>
       <div class="aviso consejo"><span class="ico">📆</span><div><p>Publica tus horarios con toda la anticipación que te permita el límite, para que las familias puedan organizarse. Si necesitas planificar más lejos, pídelo a la administración.</p></div></div>
@@ -105,24 +139,21 @@
       </table>
       <p>Usa <strong>‹ ›</strong> para cambiar de semana y <strong>Mes / Semana / Día</strong> para cambiar la vista. Haz clic en una cita para ver sus datos.</p>
       <h3>Citas virtuales</h3>
-      <p>Si vas a atender una cita por videollamada, ponle el <strong>enlace de la reunión</strong>. Tus citas virtuales llevan el ícono de una <strong>cámara</strong> en el calendario.</p>
+      <p>Una cita es virtual cuando su horario lo es (lo elegiste al crearlo). Tus citas virtuales llevan el ícono de una <strong>cámara</strong> en el calendario.</p>
       <ol class="pasos">
-        <li class="paso"><b>Crea la reunión</b>
-          <p>Hazlo en <strong>Zoom, Microsoft Teams o Google Meet</strong>, como siempre, y copia su enlace.</p>
-        </li>
-        <li class="paso"><b>Pégalo en la cita</b>
-          <p>En tu agenda, haz clic en la cita (Guardada o Agendada), presiona <strong>Es virtual: poner el enlace</strong>, pega el enlace y presiona <span class="boton" style="background:#1d9e75">Guardar enlace</span>. Tiene que empezar con <em>https://</em>: por seguridad, el sistema solo acepta enlaces de esos tres servicios.</p>
-          <figure class="captura media"><div class="marco"><img src="img/profesional/16-cita-enlace.jpg" alt="Detalle de una cita con el campo para pegar el enlace de la reunión"></div></figure>
-        </li>
         <li class="paso"><b>Entra desde el sistema</b>
-          <p>La cita muestra <strong>Modalidad: Virtual</strong> y el botón <strong>Entrar a la reunión</strong>, que abre la videollamada en otra pestaña.</p>
+          <p>Haz clic en la cita: muestra <strong>Modalidad: Virtual</strong> y el botón <strong>Entrar a la reunión</strong>, que abre la videollamada en otra pestaña.</p>
           <figure class="captura media"><div class="marco"><img src="img/profesional/17-cita-virtual.jpg" alt="Detalle de una cita virtual con el botón Entrar a la reunión"></div></figure>
+        </li>
+        <li class="paso"><b>Pon o cambia el enlace</b>
+          <p>Si todavía no lo pusiste, o la reunión cambió, presiona <strong>Poner el enlace</strong> (o <strong>Cambiar el enlace</strong>), pega el de <strong>Zoom, Microsoft Teams o Google Meet</strong> <span class="n">1</span> y presiona <span class="boton" style="background:#1d9e75">Guardar enlace</span> <span class="n">2</span>. Tiene que empezar con <em>https://</em>: por seguridad, el sistema solo acepta enlaces de esos tres servicios.</p>
+          <figure class="captura media"><div class="marco"><img src="img/profesional/16-cita-enlace.jpg" alt="Detalle de una cita virtual con el campo para pegar el enlace de la reunión"></div></figure>
         </li>
       </ol>
       <ul>
         <li>El/la paciente ve el botón para entrar <strong>cuando su pago ya está aprobado</strong> (cita Agendada). Antes solo sabe que la cita será virtual.</li>
-        <li><strong>Cambiar el enlace</strong> lo corrige; <strong>Quitar el enlace</strong> deja la cita otra vez como presencial.</li>
-        <li>Secretaría y la administración también pueden poner o cambiar el enlace de tus citas.</li>
+        <li><strong>Quitar el enlace</strong> lo borra; la cita sigue siendo virtual y queda a la espera del nuevo enlace.</li>
+        <li>Con la cita ya reservada, <strong>pasarla de presencial a virtual (o al revés) lo hace Secretaría</strong> o la administración. También pueden poner o cambiar el enlace.</li>
       </ul>
     </section>
 

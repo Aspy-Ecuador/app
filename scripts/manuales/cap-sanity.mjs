@@ -120,34 +120,9 @@ try {
   await b.close();
 }
 
-// ── La página web (contenido real publicado en Sanity) ──
-await step("web", async () => {
-  const wb = await browser();
-  const ctx = await context(wb, { width: 1440, height: 900 });
-  const w = await ctx.newPage();
-  try {
-  await w.goto(WEB + "/"); await settle(w, 3000);
-  for (let y = 0; y < 12000; y += 700) { await w.mouse.wheel(0, 700); await w.waitForTimeout(120); }
-  await w.evaluate(() => scrollTo(0, 0)); await w.waitForTimeout(1200);
-  const ids = await w.evaluate(() => [...document.querySelectorAll("section[id], footer")].map((s) => s.id || "footer"));
-  console.log("  secciones:", ids.join(", "));
-  let i = 1;
-  for (const id of ids) {
-    const el = id === "footer" ? w.locator("footer").last() : w.locator(`#${id}`).first();
-    if (!(await el.isVisible())) { console.log("  (oculta)", id); continue; }
-    await el.scrollIntoViewIfNeeded(); await w.waitForTimeout(900);
-    await el.screenshot({ path: `out/${D}web-${String(i++).padStart(2, "0")}-${id}.jpg`, type: "jpeg", quality: 86 });
-    console.log("  📸 web", id);
-  }
-  } finally { await wb.close(); }
-});
-
-// ── Bloque de donaciones con cuentas para donar ──
-// Las cuentas reales las carga la fundación: aquí se muestran dos de EJEMPLO, agregadas solo en la
-// respuesta que recibe este navegador (no se escribe nada en Sanity).
-await step("donaciones-web", async () => {
-  const wb = await browser();
-  const ctx = await context(wb, { width: 1440, height: 900 });
+// Las cuentas para donar reales las carga la fundación: en las capturas se muestran dos de EJEMPLO,
+// agregadas solo en la respuesta que recibe este navegador (no se escribe nada en Sanity).
+async function conCuentasDeEjemplo(ctx) {
   await ctx.route(/^https:\/\/1windn04\.api(cdn)?\.sanity\.io\//, async (route) => {
     const resp = await route.fetch();
     const json = await resp.json();
@@ -163,6 +138,38 @@ await step("donaciones-web", async () => {
     }
     route.fulfill({ response: resp, json, headers: { ...resp.headers(), "access-control-allow-origin": "*" } });
   });
+}
+
+// ── La página web (contenido real publicado en Sanity, salvo las cuentas para donar) ──
+await step("web", async () => {
+  const wb = await browser();
+  const ctx = await context(wb, { width: 1440, height: 900 });
+  await conCuentasDeEjemplo(ctx);
+  const w = await ctx.newPage();
+  try {
+  await w.goto(WEB + "/"); await settle(w, 3000);
+  for (let y = 0; y < 12000; y += 700) { await w.mouse.wheel(0, 700); await w.waitForTimeout(120); }
+  await w.evaluate(() => scrollTo(0, 0)); await w.waitForTimeout(1200);
+  const ids = await w.evaluate(() => [...document.querySelectorAll("section[id], footer")].map((s) => s.id || "footer"));
+  console.log("  secciones:", ids.join(", "));
+  let i = 1;
+  for (const id of ids) {
+    const el = id === "footer" ? w.locator("footer").last() : w.locator(`#${id}`).first();
+    if (!(await el.isVisible())) { console.log("  (oculta)", id); continue; }
+    await el.scrollIntoViewIfNeeded(); await w.waitForTimeout(900);
+    // El menú fijo solo se deja en la portada: en una sección más alta que la pantalla tapaba su título
+    await w.evaluate((ocultar) => { const menu = document.querySelector("header"); if (menu) menu.style.visibility = ocultar ? "hidden" : ""; }, id !== "hero");
+    await el.screenshot({ path: `out/${D}web-${String(i++).padStart(2, "0")}-${id}.jpg`, type: "jpeg", quality: 86 });
+    console.log("  📸 web", id);
+  }
+  } finally { await wb.close(); }
+});
+
+// ── Bloque de donaciones con cuentas para donar (de ejemplo) ──
+await step("donaciones-web", async () => {
+  const wb = await browser();
+  const ctx = await context(wb, { width: 1440, height: 900 });
+  await conCuentasDeEjemplo(ctx);
   const w = await ctx.newPage();
   try {
     await w.goto(WEB + "/"); await settle(w, 3000);
@@ -173,6 +180,20 @@ await step("donaciones-web", async () => {
     const c = await caja.boundingBox();
     await w.screenshot({ path: `out/${D}web-07b-donaciones.jpg`, type: "jpeg", quality: 86, clip: { x: c.x - 24, y: c.y - 24, width: c.width + 48, height: c.height + 48 } });
     console.log("  📸 web donaciones");
+  } finally { await wb.close(); }
+});
+// ── Foto de un servicio abierta en grande (al tocarla en la página) ──
+await step("visor-web", async () => {
+  const wb = await browser();
+  const ctx = await context(wb, { width: 1440, height: 900 });
+  const w = await ctx.newPage();
+  try {
+    await w.goto(WEB + "/"); await settle(w, 3000);
+    const boton = w.locator("#servicios").getByRole("button", { name: /^Ver en grande/ }).first();
+    await boton.scrollIntoViewIfNeeded(); await w.waitForTimeout(1200);
+    await boton.click(); await w.waitForTimeout(1500);
+    await w.screenshot({ path: `out/${D}web-03b-servicio-foto.jpg`, type: "jpeg", quality: 86 });
+    console.log("  📸 web foto de un servicio en grande");
   } finally { await wb.close(); }
 });
 console.log(fails.length ? "Fallaron: " + fails.join(", ") : "Todo OK");

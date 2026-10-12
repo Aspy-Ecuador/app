@@ -72,7 +72,18 @@
         <li><span class="n">2</span> <strong>Número de citas:</strong> citas por mes, separadas por estado (agendadas, asistidas, canceladas, guardadas).</li>
         <li><span class="n">3</span> <strong>Accesos rápidos:</strong> <em>Agregar Usuario</em> y <em>Agregar Servicio</em>.</li>
       </ul>
-      <p>En el menú de la izquierda tienes: <strong>Usuarios</strong>, <strong>Servicios</strong>, <strong>Citas</strong> y <strong>Datos bancarios</strong>.</p>
+      <p>En el menú de la izquierda tienes: <strong>Avisos</strong>, <strong>Usuarios</strong>, <strong>Servicios</strong>, <strong>Citas</strong>, <strong>Horarios</strong> y <strong>Datos bancarios</strong>.</p>
+      <h3>Avisos: lo que hay por revisar</h3>
+      <p>Debajo del saludo, el sistema dice qué está esperando a la fundación en este momento. Ves lo mismo que Secretaría:</p>
+      <figure class="captura"><div class="marco"><img src="img/administrador/01b-por-revisar.jpg" alt="Avisos de administración en la Vista General: pagos por revisar y horarios por aprobar"></div></figure>
+      <ul>
+        <li><strong>Pagos por revisar:</strong> citas que esperan que alguien apruebe o rechace su comprobante.</li>
+        <li><strong>Horarios por aprobar:</strong> turnos que crearon los/las profesionales y que las familias todavía no ven (capítulo 5).</li>
+        <li><strong>Citas virtuales sin enlace</strong> y <strong>citas sin asistencia marcada</strong>, cuando las hay.</li>
+        <li><strong>Faltan los datos bancarios:</strong> solo te sale a ti, si todavía no cargaste la cuenta de la fundación. Sin ella, las familias no pueden pagar.</li>
+      </ul>
+      <p>Cada tarjeta lleva a la pantalla donde se resuelve. En amarillo está lo que hay que resolver; en gris, lo que solo conviene saber. El <strong>número rosado</strong> junto a <em>Avisos</em>, en el menú, es la suma de lo pendiente, y cuando no queda nada el recuadro desaparece.</p>
+      <div class="aviso consejo"><span class="ico">🔔</span><div><p><strong>Cada persona recibe sus propios avisos.</strong> A las familias, el sistema les cuenta si su comprobante fue aprobado o rechazado (con el motivo) y los cambios en sus citas. Al equipo profesional, cuando alguien reserva o cancela y cuando se aprueban sus horarios. Nadie ve los avisos de otra cuenta, tampoco la administración. Se leen dentro del sistema (no salen por correo) y los ya leídos se borran solos al mes.</p></div></div>
     </section>
 
     <!-- 3 -->
@@ -82,7 +93,7 @@
       <figure class="captura"><div class="marco"><img src="img/administrador/02-usuarios.jpg" alt="Lista de usuarios con botones resaltados"></div></figure>
       <ul>
         <li><span class="n">1</span> <strong>Agregar usuario:</strong> crea una cuenta nueva.</li>
-        <li><span class="n">2</span> <strong>PDF / Excel:</strong> descarga la lista completa.</li>
+        <li><span class="n">2</span> <strong>PDF / Excel:</strong> descargan la lista <strong>tal como la estás viendo</strong> (si pusiste filtros, solo las filas que quedaron). El Excel es un archivo <em>.xlsx</em>, listo para ordenar, filtrar y sumar.</li>
         <li><span class="n">3</span> <strong>Habilitado:</strong> activa o desactiva una cuenta. Una cuenta desactivada no puede iniciar sesión: verá el aviso “Tu cuenta está deshabilitada. Comunícate con la administración de la fundación”. Si tenía la sesión abierta, el sistema la cierra en menos de un minuto (o en cuanto haga algo). Tu propio interruptor aparece bloqueado: nadie puede deshabilitar su propia cuenta. Si junto al interruptor aparece un <strong>escudo rojo</strong>, esa persona <strong>retiró su consentimiento</strong> desde <em>⋮ → Privacidad y mis datos</em> (al pasar el mouse dice la fecha) y su cuenta se deshabilitó sola: la fundación tiene <strong>15 días</strong> para atender el pedido y eliminar los datos que la ley no obligue a conservar. No la vuelvas a habilitar sin hablar con la persona; si la habilitas, el sistema le pedirá aceptar la política de nuevo.</li>
         <li>La columna <strong>Rol</strong> muestra el tipo de cada cuenta con un color.</li>
         <li>La barra de arriba <strong>busca</strong> por nombre, apellido, correo, celular o identificación (sin importar tildes ni mayúsculas) y filtra por <strong>Rol</strong> y por <strong>Cuenta</strong> (habilitadas o deshabilitadas). Debajo dice cuántas cuentas se muestran del total; <strong>Limpiar filtros</strong> vuelve a mostrarlas todas.</li>
@@ -119,7 +130,7 @@
         <li><span class="n">2</span> <strong>Profesional:</strong> elige quién atiende el servicio; el cambio se guarda solo.</li>
         <li><span class="n">3</span> <strong>Disponible:</strong> apágalo para que el servicio deje de ofrecerse al agendar.</li>
         <li><span class="n">4</span> <strong>Lápiz:</strong> cambia el nombre o el precio.</li>
-        <li><strong>PDF / Excel:</strong> descarga la lista.</li>
+        <li><strong>PDF / Excel:</strong> descargan la lista que estás viendo (con los filtros puestos).</li>
         <li>La barra de arriba busca por nombre y filtra por <strong>profesional</strong> asignado (o <em>Sin asignar</em>) y por <strong>disponibilidad</strong>.</li>
       </ul>
       <div class="aviso consejo"><span class="ico">💲</span><div><p>Puedes cambiar un precio cuando haga falta: cada pago guarda el monto que se cobró, así que los recibos y los ingresos anteriores no cambian.</p></div></div>
@@ -145,7 +156,7 @@
             <thead><tr><th>Ajuste</th><th>Qué decide</th></tr></thead>
             <tbody>
               <tr><td><strong>Se pueden crear horarios para</strong></td><td>Con cuánta anticipación se puede planificar: <em>solo el día de hoy</em>, <em>la semana en curso</em> (hasta el domingo), <em>la semana en curso y la siguiente</em>, <em>el mes en curso</em> (lo recomendado; es lo que vale si no eliges nada) o <em>el mes en curso y el siguiente</em>. Debajo se lee hasta qué fecha se puede crear un horario hoy.</td></tr>
-              <tr><td><strong>Secretaría también puede crear y quitar horarios</strong></td><td>Apagado (como viene), cada profesional crea los suyos. Si lo enciendes, en el menú de Secretaría aparece <strong>Horarios</strong> y puede crearlos o quitarlos por cualquier profesional, con el mismo límite de fechas.</td></tr>
+              <tr><td><strong>Secretaría también puede crear y quitar horarios</strong></td><td>Apagado (como viene), cada profesional crea los suyos. Si lo enciendes, Secretaría puede crearlos o quitarlos por cualquier profesional desde su pantalla <strong>Horarios</strong>, con el mismo límite de fechas. <strong>Aprobar</strong> los horarios y cambiar su modalidad no depende de este interruptor: Secretaría siempre puede hacerlo.</td></tr>
             </tbody>
           </table>
           <p>El cambio vale para los horarios que se creen desde ese momento: los que ya existen <strong>no se borran</strong>, aunque queden después del nuevo límite. Así nadie llena la agenda con horarios de fechas lejanas que luego no se cumplen.</p>
@@ -162,8 +173,12 @@
       <p>Con <strong>Mes</strong> tienes una vista general para planificar:</p>
       <figure class="captura"><div class="marco"><img src="img/administrador/08-citas-mes.jpg" alt="Calendario mensual de citas"></div></figure>
       <div class="aviso consejo"><span class="ico">🗂️</span><div><p>La aprobación de pagos y la cancelación de citas las hace <strong>secretaría</strong> desde su cuenta (ver el manual del personal administrativo).</p></div></div>
-      <h3>Citas virtuales</h3>
-      <p>Las citas que se atienden por videollamada llevan el ícono de una <strong>cámara</strong>. Al hacer clic en una cita Guardada o Agendada puedes poner, cambiar o quitar el <strong>enlace de la reunión</strong> (solo de Zoom, Microsoft Teams o Google Meet); normalmente lo hace el/la profesional de la cita o Secretaría. El/la paciente recibe el enlace cuando su pago ya está aprobado.</p>
+      <h3>Citas presenciales y virtuales</h3>
+      <p>Cada cita tiene la modalidad de su horario: la elige el/la profesional al crearlo y la revisa Secretaría. Las virtuales llevan el ícono de una <strong>cámara</strong>. Al hacer clic en una cita Guardada o Agendada puedes <strong>cambiarla a virtual o a presencial</strong> y poner, cambiar o quitar el <strong>enlace de la reunión</strong> (solo de Zoom, Microsoft Teams o Google Meet); normalmente lo hace Secretaría. El/la paciente recibe el enlace cuando su pago ya está aprobado.</p>
+      <h3>Horarios: aprobarlos y revisar su modalidad</h3>
+      <p>Los horarios que crean los/las profesionales <strong>no se ofrecen a las familias hasta que Secretaría o tú los aprueben</strong>. En <strong>Horarios</strong> <span class="n">1</span> está la lista de los que esperan revisión <span class="n">2</span>, con su modalidad: <strong>Aprobar</strong> los publica y el <strong>lápiz</strong> permite cambiar la modalidad o el enlace antes. Más abajo puedes elegir a un/a profesional para ver todos sus horarios, quitarles la aprobación o crearlos en su nombre (los que creas tú quedan aprobados de una vez).</p>
+      <figure class="captura"><div class="marco"><img src="img/administrador/11-horarios.jpg" alt="Pantalla Horarios de profesionales del administrador con los horarios por aprobar"></div></figure>
+      <p>El paso a paso está en el manual del personal administrativo (capítulo <em>Horarios de profesionales</em>).</p>
     </section>
 
     <!-- 6 -->

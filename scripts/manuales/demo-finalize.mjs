@@ -27,4 +27,12 @@ for (const k of ["a1", "a3"]) {
 await call("PUT", "/appointment/appointment-complete", lu, { appointmentId: appts.a11 });
 await call("PUT", "/appointment/appointment-missed", ga, { appointmentId: appts.a4 });
 await call("PUT", "/appointment/appointment-complete", ga, { appointmentId: appts.a7 });
+// Avisos: la carga de la demo genera muchos de golpe (cada reserva, cada pago aprobado…). Para las capturas,
+// las dos cuentas que se muestran quedan como en un día normal: todo leído menos lo más reciente.
+for (const [email, sinLeer] of [["lucia.mendoza@aspy.com", 3], ["sofia.ramirez@gmail.com", 2]]) {
+  const token = await login(email);
+  const { avisos } = (await call("GET", "/avisos", token)).data;
+  const yaVistos = avisos.slice(sinLeer).map((a) => a.aviso_id);
+  if (yaVistos.length) await call("PUT", "/avisos/leidos", token, { ids: yaVistos });
+}
 console.log("finalizado");

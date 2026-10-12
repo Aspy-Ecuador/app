@@ -1,5 +1,5 @@
 // Capturas del manual del CLIENTE (paciente / familia). Requiere la BD de demo recién creada (reset.sh).
-import { browser, context, login, go, settle, shot as rawShot, mark, sel, ASSETS, WEB, fill, ventanaCita, recorteCita, cerrarCita } from "./lib.mjs";
+import { browser, context, login, go, settle, shot as rawShot, mark, sel, ASSETS, WEB, fill, ventanaCita, recorteCita, cerrarCita, citasDe, esFutura, abrirCitaEnMes, calendarioArriba } from "./lib.mjs";
 
 const D = "cliente/";
 const shot = (p, n, o) => rawShot(p, D + n, o);
@@ -40,6 +40,15 @@ try {
     await mark(p, p.locator(".MuiDrawer-root, nav").first(), "");
     await shot(p, "09-menu-lateral", { clip: { x: 0, y: 0, width: 240, height: 900 } });
   });
+  // Avisos: lo que el sistema le cuenta a la familia (comprobante aprobado o rechazado, cambios en una cita…)
+  await step("avisos", async () => {
+    await go(p, "/avisos"); await settle(p, 900);
+    await mark(p, p.getByRole("button", { name: /^Avisos/ }).first(), "1");
+    await mark(p, p.getByRole("list", { name: "Tus avisos" }).getByRole("listitem").first(), "2");
+    await mark(p, p.getByRole("button", { name: "Marcar todos como leídos" }), "3");
+    await shot(p, "08b-avisos");
+    await go(p, "/dashboard"); await settle(p, 900);
+  });
   await step("leyenda", async () => {
     const legend = p.getByText("Estado", { exact: true }).first().locator("xpath=..");
     const box = await legend.boundingBox();
@@ -48,6 +57,7 @@ try {
   await step("cita-detalle", async () => {
     await p.locator(".fc-next-button, button[title*='Next'], button[aria-label*='next' i]").first().click().catch(() => p.locator(".fc-toolbar button").nth(1).click());
     await p.waitForTimeout(800);
+    await calendarioArriba(p);
     await p.locator(".fc-event").filter({ hasText: "Psicología" }).first().click(); await p.waitForTimeout(700);
     await mark(p, p.getByRole("button", { name: "Cancelar cita" }), "");
     await shot(p, "11-cita-detalle-cancelar");
@@ -56,13 +66,14 @@ try {
 
   // Cita virtual: el detalle muestra la modalidad y el botón para entrar a la reunión
   await step("cita-virtual", async () => {
+    // Una cita virtual de Sofía con el pago ya aprobado: ahí aparece el botón para entrar a la reunión
+    const cita = (await citasDe("sofia.ramirez@gmail.com")).find((c) => c.appointment_status?.appointment_status_id === 2 && c.es_virtual && c.enlace_virtual && esFutura(c));
     await go(p, "/dashboard");
-    await p.getByRole("button", { name: "Mes" }).click(); await p.waitForTimeout(800);
-    await p.locator(".fc-event").filter({ has: p.locator('[aria-label="Cita virtual"]') }).last().click(); await p.waitForTimeout(700);
+    await abrirCitaEnMes(p, cita, "virtual");
     await mark(p, ventanaCita(p).getByRole("link", { name: "Entrar a la reunión" }), "");
     await shot(p, "11b-cita-virtual", { clip: await recorteCita(p) });
     await cerrarCita(p);
-    await p.getByRole("button", { name: "Semana" }).click(); await p.waitForTimeout(600);
+    await p.getByRole("button", { name: "Semana", exact: true }).click(); await p.waitForTimeout(600);
   });
 
   // ── Agendar una cita ──
@@ -78,10 +89,11 @@ try {
     await shot(p, "14-agendar-dias");
     await p.getByRole("gridcell", { name: "15" }).click(); await p.waitForTimeout(700);
     await p.getByRole("button", { name: /15:00/ }).first().click(); await p.waitForTimeout(400);
-    await mark(p, p.getByRole("gridcell", { name: "15" }), "1");
-    await mark(p, p.getByRole("button", { name: /15:00/ }).first(), "2");
-    await mark(p, p.getByRole("button", { name: "Proceder a pagar" }), "3");
-    await shot(p, "15-agendar-hora");
+    await mark(p, p.getByRole("group", { name: "Modalidad de la cita" }), "1");
+    await mark(p, p.getByRole("gridcell", { name: "15" }), "2");
+    await mark(p, p.getByRole("button", { name: /15:00/ }).first(), "3");
+    await mark(p, p.getByRole("button", { name: "Proceder a pagar" }), "4");
+    await shot(p, "15-agendar-hora", { fullPage: true });
   });
   await step("pagar", async () => {
     await p.getByRole("button", { name: "Proceder a pagar" }).click(); await settle(p);
@@ -102,6 +114,7 @@ try {
   await step("cita-guardada", async () => {
     await go(p, "/dashboard");
     await p.locator(".fc-toolbar button").nth(1).click().catch(() => {}); await p.waitForTimeout(800);
+    await calendarioArriba(p);
     await p.locator(".fc-event").filter({ hasText: "Psicología" }).last().click(); await p.waitForTimeout(700);
     await shot(p, "20-cita-guardada");
     await p.keyboard.press("Escape");

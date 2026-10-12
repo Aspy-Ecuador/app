@@ -3,7 +3,7 @@ import fs from "node:fs";
 const API = "http://127.0.0.1:8002/api";
 const PASS = "Aspy2026";
 
-async function call(method, path, token, body) {
+async function call(method, path, token, body, intento = 1) {
   const res = await fetch(API + path, {
     method,
     headers: { Accept: "application/json", "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -11,6 +11,11 @@ async function call(method, path, token, body) {
   });
   let data = null;
   try { data = await res.json(); } catch {}
+  // El sistema frena a 120 escrituras por minuto por cuenta y esta carga hace más: se espera y se repite
+  if (res.status === 429 && intento <= 6) {
+    await new Promise((r) => setTimeout(r, 15000));
+    return call(method, path, token, body, intento + 1);
+  }
   if (res.status >= 400) console.log("  !", method, path, res.status, JSON.stringify(data).slice(0, 200));
   return { status: res.status, data };
 }
@@ -86,7 +91,12 @@ const link = [
 ];
 for (const [service_id, p] of link) await call("POST", "/professional-service", admin.token, { service_id, professional_id: p.personId });
 
-// Horarios: próximos 12 días, mañanas y tardes
+// Horarios: próximos 12 días. Los crea cada profesional (quedan "por aprobar") y Secretaría los aprueba;
+// los de la mañana son presenciales y los de la tarde, virtuales (Gabriela todavía no puso su enlace).
+const staff = await login("recepcion@aspy.com");
+const aprobarHorario = (id) => call("PUT", `/worker-schedule/${id}/aprobacion`, staff.token, { aprobado: true });
+const ENLACES = new Map([[lucia, "https://meet.google.com/abc-defg-hij"], [andres, "https://us02web.zoom.us/j/81234567890"]]);
+const modalidadDe = (p, hora) => (+hora.slice(0, 2) >= 15 ? { modalidad: "virtual", ...(ENLACES.has(p) ? { enlace: ENLACES.get(p) } : {}) } : { modalidad: "presencial" });
 const slots = new Map(); // key prof → array of ids
 for (const p of [lucia, andres, gaby]) {
   const ids = [];
@@ -95,8 +105,9 @@ for (const p of [lucia, andres, gaby]) {
     if (dow === 0 || dow === 6) continue;
     for (const h of ["09:00", "10:00", "11:00", "15:00", "16:00"]) {
       const end = String(+h.slice(0, 2) + 1).padStart(2, "0") + ":00";
-      const r = await call("POST", "/professional/create-horario", p.token, { professional_id: p.personId, date: inDays(d), start_time: h, end_time: end, name: "Turno" });
+      const r = await call("POST", "/professional/create-horario", p.token, { professional_id: p.personId, date: inDays(d), start_time: h, end_time: end, name: "Turno", ...modalidadDe(p, h) });
       ids.push(r.data?.worker_schedule?.worker_schedule_id);
+      await aprobarHorario(r.data?.worker_schedule?.worker_schedule_id);
     }
   }
   slots.set(p, ids);
@@ -134,12 +145,14 @@ const appts = {
   a11: await book(valeria, lucia, sid["Psicología"], 3, 11),
   a12: await book(daniel, lucia, sid["Evaluación integral"], 4, 12),
 };
-const staff = await login("recepcion@aspy.com");
 for (const k of ["a1", "a2", "a3", "a4", "a6", "a7", "a8", "a10", "a11", "a12"]) await call("PUT", "/appointment/appointment-approve", staff.token, { appointmentId: appts[k] });
 
-// Citas virtuales: dos citas agendadas llevan el enlace de su reunión (lo pone la profesional de cada una)
-await call("PUT", "/appointment/appointment-enlace", lucia.token, { appointmentId: appts.a10, enlace: "https://meet.google.com/abc-defg-hij" });
-await call("PUT", "/appointment/appointment-enlace", andres.token, { appointmentId: appts.a2, enlace: "https://us02web.zoom.us/j/81234567890" });
+// Citas virtuales: dos citas agendadas quedan virtuales y con el enlace de su reunión (la modalidad es del
+// horario de la cita; con la cita ya reservada la cambia Secretaría)
+const citasHechas = (await call("GET", "/appointment", staff.token)).data ?? [];
+const horarioDeLaCita = (id) => citasHechas.find((c) => c.appointment_id === id)?.worker_schedule?.worker_schedule_id;
+await call("PUT", `/worker-schedule/${horarioDeLaCita(appts.a10)}/modalidad`, staff.token, { modalidad: "virtual", enlace: "https://meet.google.com/abc-defg-hij" });
+await call("PUT", `/worker-schedule/${horarioDeLaCita(appts.a2)}/modalidad`, staff.token, { modalidad: "virtual", enlace: "https://us02web.zoom.us/j/81234567890" });
 
 // Hoy: turnos de los tres profesionales, algunos ocupados, para el panel "Horarios de hoy" de Secretaría.
 // Las citas de hoy las registra Secretaría (puede hacerlo aunque el turno ya haya empezado). Lucía, cuyas
@@ -148,8 +161,9 @@ const hoy = {};
 for (const [p, horas] of [[lucia, ["09:00", "10:00", "11:00", "15:00", "16:00"]], [andres, ["09:00", "10:00", "11:00", "15:00"]], [gaby, ["09:00", "10:00", "16:00"]]]) {
   for (const h of horas) {
     const end = String(+h.slice(0, 2) + 1).padStart(2, "0") + ":00";
-    const r = await call("POST", "/professional/create-horario", p.token, { professional_id: p.personId, date: inDays(0), start_time: h, end_time: end, name: "Turno" });
+    const r = await call("POST", "/professional/create-horario", p.token, { professional_id: p.personId, date: inDays(0), start_time: h, end_time: end, name: "Turno", ...modalidadDe(p, h) });
     hoy[`${p.personId}-${h}`] = r.data?.worker_schedule?.worker_schedule_id;
+    await aprobarHorario(r.data?.worker_schedule?.worker_schedule_id);
   }
 }
 const citaDeHoy = async (client, prof, service, hora, aprobar) => {
@@ -164,6 +178,18 @@ await citaDeHoy(daniel, lucia, sid["Psicología"], "10:00", false);
 await citaDeHoy(valeria, andres, sid["Terapia de lenguaje"], "09:00", true);
 await citaDeHoy(sofia, andres, sid["Evaluación integral"], "15:00", true);
 await citaDeHoy(daniel, gaby, sid["Terapia ocupacional"], "09:00", true);
+// Horarios POR APROBAR (los crearon los profesionales y Secretaría todavía no los revisa): tres ejemplos en
+// el primer día hábil después de los ya publicados, para las pantallas de aprobación
+let diaPendiente = 13;
+while ([0, 6].includes(new Date(Date.now() + diaPendiente * 864e5).getDay())) diaPendiente++;
+for (const [p, h, extra] of [
+  [lucia, "09:00", { modalidad: "virtual", enlace: "https://meet.google.com/abc-defg-hij" }],
+  [andres, "10:00", { modalidad: "presencial" }],
+  [gaby, "15:00", { modalidad: "virtual" }],
+]) {
+  const end = String(+h.slice(0, 2) + 1).padStart(2, "0") + ":00";
+  await call("POST", "/professional/create-horario", p.token, { professional_id: p.personId, date: inDays(diaPendiente), start_time: h, end_time: end, name: "Turno", ...extra });
+}
 // Datos bancarios de EJEMPLO (los configura el Admin); se ven en la pantalla de pago
 await call("PUT", "/bank-account", admin.token, { bank_name: "Banco de Ejemplo", account_type: "Corriente", account_number: "0000012345", holder_name: "Fundación Aspy Ecuador", holder_id: "0990000000001" });
 // La cancelación de Valeria se hace antes de mover fechas (más de 24 h de anticipación)

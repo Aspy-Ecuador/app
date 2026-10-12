@@ -18,10 +18,10 @@ const TAMANOS = {
 };
 const RUTAS = {
   publico: ["/", "/login", "/register"],
-  Client: ["/dashboard", "/agendar-cita", "/recibos", "/consultarServicios", "/reportes", "/perfil", "/manual", "/sobreAspy"],
-  Professional: ["/dashboard", "/pacientes", "/citas", "/seleccionar-horario", "/perfil"],
-  Staff: ["/dashboard", "/profesionales", "/pacientes", "/citas", "/horarios", "/agendar-cita", "/recibos", "/pagos", "/servicios", "/registrarCliente", "/crear-servicio", "/perfil"],
-  Admin: ["/dashboard", "/usuarios", "/servicios", "/nuevo-usuario", "/nuevo-servicio", "/citas", "/datos-bancarios", "/perfil"],
+  Client: ["/dashboard", "/avisos", "/agendar-cita", "/recibos", "/consultarServicios", "/reportes", "/perfil", "/manual", "/sobreAspy"],
+  Professional: ["/dashboard", "/avisos", "/pacientes", "/citas", "/seleccionar-horario", "/perfil"],
+  Staff: ["/dashboard", "/avisos", "/profesionales", "/pacientes", "/citas", "/horarios", "/agendar-cita", "/recibos", "/pagos", "/servicios", "/registrarCliente", "/crear-servicio", "/perfil"],
+  Admin: ["/dashboard", "/avisos", "/usuarios", "/servicios", "/nuevo-usuario", "/nuevo-servicio", "/citas", "/horarios", "/datos-bancarios", "/perfil"],
 };
 const solo = process.env.SOLO?.split(",");
 const tam = process.env.TAM?.split(",");

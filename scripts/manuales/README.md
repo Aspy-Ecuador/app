@@ -44,12 +44,15 @@ node cap-aviso-archivos.mjs   # aviso de archivos subidos sin usar en la pantall
 ```
 
 - `ONLY=nombre1,nombre2 node cap-x.mjs` rehace solo esos pasos.
+- La demo deja horarios presenciales (mañana) y virtuales (tarde) ya aprobados, y tres **por aprobar** para las pantallas de aprobación. `demo-seed.mjs` hace más de 120 escrituras por minuto con una misma cuenta: cuando el sistema la frena (429), espera y repite sola.
+- **Avisos:** la carga de la demo genera muchos de golpe (cada reserva, cada pago aprobado…). `demo-finalize.mjs` deja a Lucía y a Sofía como en un día normal: todo leído menos los 3 y los 2 más recientes. Cada rol tiene su paso `avisos` (la pantalla *Avisos* o el recuadro de la Vista General). Para abrir una cita desde la Vista General, usa `calendarioArriba()` antes (`abrirCitaEnMes` ya lo hace): la agenda va debajo del saludo y de los avisos, y la ventana de la cita los tapaba.
+- En la agenda, los pasos eligen la cita por sus datos (`citasDe`, `abrirCitaEnMes` en `lib.mjs`), no por "la que tiene cámara": ahora hay varias virtuales.
 - Las capturas quedan en `out/<carpeta>/`: `cliente/` → `img/familias/`, `staff/` → `img/personal/`, `profesional/` → `img/profesional/`, `admin/` → `img/administrador/`, `sanity/` y `pagina-web/` → `img/pagina-web/`. Copia las que cambiaron a `aspy/resources/manuales/img/...` con el mismo nombre que usa el HTML.
 - Usuarios de demo: `admin@aspy.com` / `ADMIN` (seeder), `recepcion@aspy.com`, `lucia.mendoza@aspy.com`, `sofia.ramirez@gmail.com`, todos con `Aspy2026`.
 - Los comprobantes y reportes de demo se suben al backend local (archivos privados, tabla `archivo_privado` de la BD de demo). `lib.mjs` deja pasar el contenido real de Sanity (solo lectura).
 - La demo deja el ajuste de horarios en "el mes en curso y el siguiente" (`demo-seed.mjs`), para que los turnos de los próximos 12 días se creen cualquier día del mes; dos citas llevan enlace de reunión (citas virtuales) y hay turnos de **hoy**, libres y ocupados, para el panel "Horarios de hoy" de Secretaría.
 - `cap-staff.mjs` fija el reloj del navegador a las 08:30 de hoy (así "Horarios de hoy" sale igual a cualquier hora) y, para la captura de **Horarios** de Secretaría, habilita ese permiso por el API de demo y lo vuelve a apagar.
-- La captura del bloque de donaciones (`cap-sanity.mjs`, paso `donaciones-web`) muestra dos cuentas **de ejemplo** agregadas solo en la respuesta que recibe ese navegador: no escribe nada en Sanity. El paso `apariencia` tapa el nombre y el correo de la cuenta con un texto genérico.
+- Las capturas de la página pública (`cap-sanity.mjs`, pasos `web` y `donaciones-web`) muestran dos cuentas para donar **de ejemplo**, agregadas solo en la respuesta que recibe ese navegador (`conCuentasDeEjemplo`): no escriben nada en Sanity y nunca muestran las cuentas que estén cargadas ahí. El paso `visor-web` abre en grande la foto de un servicio. En las capturas de cada sección el menú fijo solo se deja en la portada (en una sección alta tapaba el título). El paso `apariencia` tapa el nombre y el correo de la cuenta con un texto genérico.
 - `studio-lib.mjs` entra al Studio local con la sesión del CLI de Sanity de esta máquina (`~/.config/sanity/config.json`; hay que haber hecho `npx sanity login`).
 
 ## Revisar el diseño responsivo

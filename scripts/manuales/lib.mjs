@@ -150,3 +150,31 @@ export async function fill(page, values) {
 export async function dumpFields(page) {
   return page.evaluate(() => [...document.querySelectorAll("input, select, textarea")].filter((e) => e.offsetParent).map((e) => `${e.tagName}:${e.name || e.id}:${e.type}` + (e.tagName === "SELECT" ? "[" + [...e.options].map((o) => o.text).slice(0, 6).join("|") + "]" : "")));
 }
+
+const API_DEMO = "http://127.0.0.1:8002/api";
+/** Las citas que ve una cuenta de la demo, para elegir en la agenda una que cumpla ciertas condiciones. */
+export async function citasDe(email, password = "Aspy2026") {
+  const J = { "Content-Type": "application/json", Accept: "application/json" };
+  const token = (await (await fetch(API_DEMO + "/login", { method: "POST", headers: J, body: JSON.stringify({ email, password }) })).json()).access_token;
+  return (await fetch(API_DEMO + "/appointment", { headers: { ...J, Authorization: "Bearer " + token } })).json();
+}
+/** true si la cita es de un día posterior a hoy (hora de Ecuador). */
+export const esFutura = (cita) => String(cita.worker_schedule?.schedule?.date).slice(0, 10) > new Intl.DateTimeFormat("en-CA", { timeZone: "America/Guayaquil" }).format(new Date());
+/** Sube la agenda al borde de arriba de la pantalla: en la Vista General va debajo del saludo y de los avisos. */
+export async function calendarioArriba(page) {
+  await page.locator(".fc-toolbar").first().evaluate((e) => window.scrollTo(0, e.getBoundingClientRect().top + window.scrollY - 24)).catch(() => {});
+  await page.waitForTimeout(300);
+}
+/**
+ * Abre en la agenda (vista Mes) la cita indicada: la del día de su horario que nombra a esa persona
+ * (`quien`: "client" o "professional") o, con "virtual", la que lleva el ícono de cámara ese día.
+ */
+export async function abrirCitaEnMes(page, cita, quien = "client") {
+  await page.getByRole("button", { name: "Mes", exact: true }).click(); await page.waitForTimeout(800);
+  const dia = String(cita.worker_schedule.schedule.date).slice(0, 10);
+  const delDia = page.locator(`.fc-daygrid-day[data-date="${dia}"] .fc-event`);
+  const evento = (quien === "virtual" ? delDia.filter({ has: page.locator('[aria-label="Cita virtual"]') }) : delDia.filter({ hasText: cita[quien].first_name })).first();
+  for (let i = 0; i < 3 && !(await evento.isVisible().catch(() => false)); i++) { await page.locator(".fc-next-button").click(); await page.waitForTimeout(500); }
+  await calendarioArriba(page);
+  await evento.click(); await page.waitForTimeout(700);
+}
