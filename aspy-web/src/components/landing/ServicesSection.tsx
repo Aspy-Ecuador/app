@@ -1,15 +1,21 @@
 // aspy-web/src/components/landing/ServicesSection.tsx
+import { useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import ZoomOutMapRoundedIcon from "@mui/icons-material/ZoomOutMapRounded";
 import type { LandingContent } from "@/content/landing/types";
 import { responsiveImg } from "@/content/landing/images";
 import { ACCENTS, C, DISPLAY_FONT, SERVICE_ICONS, reducedMotion } from "./constants";
 import { Reveal, Section, SectionHeader } from "./shared";
+import VisorFoto from "./VisorFoto";
 
 export default function ServicesSection({ content }: { content: LandingContent["services"] }) {
+  const [fotoAbierta, setFotoAbierta] = useState<number | null>(null);
   if (content.items.length === 0) return null;
   // Si al menos un servicio tiene foto, todas las tarjetas usan el formato con imagen (cuadrícula pareja)
   const withMedia = content.items.some((s) => Boolean(s.image?.src));
+  // Las fotos se abren en grande al tocarlas (la miniatura las recorta): el visor recorre las de todos los servicios
+  const fotos = content.items.flatMap((s) => (s.image?.src ? [{ src: s.image.src, alt: s.image.alt, titulo: s.title, descripcion: s.description }] : []));
 
   return (
     <Section id="servicios" label="Servicios" sx={{ bgcolor: C.card }}>
@@ -67,6 +73,9 @@ export default function ServicesSection({ content }: { content: LandingContent["
                     },
                     "&:hover::before": { transform: "scaleX(1)" },
                     "&:hover .service-photo": { transform: "scale(1.05)" },
+                    // El distintivo de "ampliar" está siempre a la vista (avisa que la foto se abre) y se resalta con la tarjeta
+                    "& .service-zoom": { opacity: 0.88 },
+                    "&:hover .service-zoom, & button:focus-visible .service-zoom": { opacity: 1, transform: "scale(1.08)" },
                     ...reducedMotion,
                   }}
                 >
@@ -85,6 +94,14 @@ export default function ServicesSection({ content }: { content: LandingContent["
                     >
                       {photo ? (
                         <Box
+                          component="button"
+                          type="button"
+                          onClick={() => setFotoAbierta(fotos.findIndex((f) => f.src === photo.src))}
+                          aria-label={`Ver en grande la foto de ${s.title}`}
+                          title="Ver la foto en grande"
+                          sx={{ position: "absolute", inset: 0, width: "100%", height: "100%", p: 0, m: 0, border: 0, bgcolor: "transparent", cursor: "zoom-in", display: "block", "&:focus-visible": { outline: `3px solid ${C.blue}`, outlineOffset: -4 } }}
+                        >
+                        <Box
                           component="img"
                           className="service-photo"
                           {...responsiveImg(photo.src, "(min-width: 900px) 360px, (min-width: 600px) 45vw, 90vw")}
@@ -101,6 +118,14 @@ export default function ServicesSection({ content }: { content: LandingContent["
                             ...reducedMotion,
                           }}
                         />
+                        <Box
+                          aria-hidden
+                          className="service-zoom"
+                          sx={{ position: "absolute", top: 12, right: 12, width: 36, height: 36, borderRadius: "50%", display: "grid", placeItems: "center", color: "#1A1A2E", bgcolor: "rgba(255,255,255,0.92)", boxShadow: "0 4px 12px rgba(0,0,0,0.25)", transition: "opacity 0.2s, transform 0.2s", ...reducedMotion }}
+                        >
+                          <ZoomOutMapRoundedIcon sx={{ fontSize: 19 }} />
+                        </Box>
+                        </Box>
                       ) : (
                         <Icon aria-hidden sx={{ fontSize: 64, color: accent.dark, opacity: 0.35 }} />
                       )}
@@ -142,6 +167,8 @@ export default function ServicesSection({ content }: { content: LandingContent["
           );
         })}
       </Box>
+
+      <VisorFoto fotos={fotos} indice={fotoAbierta} onCambiar={setFotoAbierta} onCerrar={() => setFotoAbierta(null)} />
     </Section>
   );
 }

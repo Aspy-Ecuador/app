@@ -9,18 +9,19 @@ import { responsiveImg } from "@/content/landing/images";
 import { C, DISPLAY_FONT, focusRing } from "./constants";
 import { Reveal, Section, SectionHeader } from "./shared";
 
-const etiquetaSx = { fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: C.muted } as const;
-const valorSx = { m: 0, fontWeight: 600, color: C.black, overflowWrap: "anywhere" } as const;
+const etiquetaSx = { fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: C.muted, lineHeight: 1.5 } as const;
+const valorSx = { m: 0, fontSize: "0.95rem", fontWeight: 600, lineHeight: 1.4, color: C.black, overflowWrap: "anywhere" } as const;
+// Los datos cortos van en dos o tres columnas (según el ancho de la ficha): la ficha no se alarga ni deja huecos
+const datosSx = { m: 0, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(128px, 1fr))", columnGap: 2, rowGap: 1.25 } as const;
 
 /** Texto limpio de un dato que viene del CMS (puede faltar o no ser texto si no pasó por el Studio). */
 const texto = (valor: unknown): string => (typeof valor === "string" ? valor.trim() : "");
 
-/** Los datos de una cuenta en el orden en que los pide el banco para transferir. */
-function datosDeCuenta(cuenta: DonationAccount): { etiqueta: string; valor: string; enlace?: string }[] {
-  const tipo = cuenta.accountType === "corriente" ? "Corriente" : cuenta.accountType === "ahorros" ? "Ahorros" : "";
+const tipoDeCuenta = (cuenta: DonationAccount): string => (cuenta.accountType === "corriente" ? "Cuenta corriente" : cuenta.accountType === "ahorros" ? "Cuenta de ahorros" : "");
+
+/** Los datos del titular, en el orden en que los pide el banco para transferir (el número y el tipo van destacados aparte). */
+function datosDelTitular(cuenta: DonationAccount): { etiqueta: string; valor: string; enlace?: string }[] {
   return [
-    { etiqueta: "Tipo de cuenta", valor: tipo },
-    { etiqueta: "Número de cuenta", valor: texto(cuenta.accountNumber) },
     { etiqueta: "Titular", valor: texto(cuenta.holderName) },
     { etiqueta: cuenta.holderIdType === "cedula" ? "Cédula" : "RUC", valor: texto(cuenta.holderId) },
     { etiqueta: "Correo", valor: texto(cuenta.email), enlace: texto(cuenta.email) ? `mailto:${texto(cuenta.email)}` : undefined },
@@ -37,7 +38,8 @@ export default function SupportSection({ content }: { content: LandingContent["s
   // Con varias cuentas (o cuentas y otros datos) los datos van debajo, a todo el ancho; con una sola ficha, al lado
   const fichas = cuentas.length + (donation.details.length > 0 ? 1 : 0);
   const alLado = fichas === 1;
-  const tarjetaSx = { m: 0, p: 3, borderRadius: "20px", bgcolor: C.card, border: "1px solid", borderColor: C.border, minWidth: 0 } as const;
+  // Fichas compactas y de ancho contenido: estiradas a todo el ancho quedaban con medio recuadro en blanco
+  const tarjetaSx = { m: 0, p: { xs: 2, sm: 2.25 }, borderRadius: "18px", bgcolor: C.card, border: "1px solid", borderColor: C.border, minWidth: 0, width: "100%", maxWidth: 420 } as const;
 
   return (
     <Section id="aliados" label="Aliados y donaciones" sx={{ bgcolor: C.card }}>
@@ -106,7 +108,7 @@ export default function SupportSection({ content }: { content: LandingContent["s
         <Reveal sx={{ mt: partners.length ? { xs: 6, md: 8 } : 0 }}>
           <Box
             sx={{
-              maxWidth: alLado ? 880 : 1040,
+              maxWidth: alLado ? 900 : 1040,
               mx: "auto",
               p: { xs: 3, sm: 3.5, md: 5 },
               borderRadius: "28px",
@@ -114,8 +116,8 @@ export default function SupportSection({ content }: { content: LandingContent["s
               border: "1px solid",
               borderColor: C.border,
               display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: alLado ? "1.1fr 0.9fr" : "1fr" },
-              gap: { xs: 3, md: alLado ? 5 : 3.5 },
+              gridTemplateColumns: { xs: "1fr", md: alLado ? "minmax(0, 1.2fr) minmax(0, 0.8fr)" : "1fr" },
+              gap: { xs: 3, md: alLado ? 5 : 3 },
               alignItems: "center",
             }}
           >
@@ -153,47 +155,62 @@ export default function SupportSection({ content }: { content: LandingContent["s
               <Box
                 sx={{
                   display: "grid",
-                  // Las fichas se reparten solas: una por línea en el celular, hasta tres en pantallas anchas
-                  gridTemplateColumns: alLado ? "1fr" : { xs: "1fr", sm: "repeat(auto-fit, minmax(250px, 1fr))" },
+                  // Las fichas se reparten solas: una por línea en el celular, hasta tres en pantallas anchas.
+                  // No se estiran: con dos cuentas, cada una ocupaba media pantalla
+                  gridTemplateColumns: alLado ? "1fr" : { xs: "1fr", sm: "repeat(auto-fit, minmax(260px, 340px))" },
+                  justifyContent: { sm: "center", md: alLado ? "end" : "center" },
+                  justifyItems: alLado ? { xs: "start", md: "end" } : "stretch",
                   gap: 2,
                   minWidth: 0,
                 }}
               >
                 {cuentas.map((cuenta, i) => (
                   <Box key={`${cuenta.bank}-${cuenta.accountNumber}-${i}`} component="article" aria-label={`Cuenta para donar: ${cuenta.bank}`} sx={tarjetaSx}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 2 }}>
-                      <Box sx={{ width: 38, height: 38, borderRadius: "12px", display: "grid", placeItems: "center", flex: "none", bgcolor: C.blueLight, color: C.blueDark }}>
-                        <AccountBalanceRoundedIcon sx={{ fontSize: 21 }} />
+                    {/* Banco y, debajo, el tipo de cuenta: así todas las fichas quedan alineadas aunque el nombre sea largo */}
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 1.5 }}>
+                      <Box sx={{ width: 36, height: 36, borderRadius: "10px", display: "grid", placeItems: "center", flex: "none", bgcolor: C.blueLight, color: C.blueDark }}>
+                        <AccountBalanceRoundedIcon sx={{ fontSize: 20 }} />
                       </Box>
-                      <Typography component="h4" sx={{ m: 0, fontFamily: DISPLAY_FONT, fontWeight: 800, fontSize: "1.08rem", lineHeight: 1.25, color: C.black, overflowWrap: "anywhere" }}>
-                        {cuenta.bank}
-                      </Typography>
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography component="h4" sx={{ m: 0, fontFamily: DISPLAY_FONT, fontWeight: 800, fontSize: "1rem", lineHeight: 1.25, color: C.black, overflowWrap: "anywhere" }}>
+                          {cuenta.bank}
+                        </Typography>
+                        {tipoDeCuenta(cuenta) && <Typography sx={{ mt: 0.15, fontSize: "0.8rem", fontWeight: 500, lineHeight: 1.3, color: C.muted }}>{tipoDeCuenta(cuenta)}</Typography>}
+                      </Box>
                     </Box>
-                    <Box component="dl" sx={{ m: 0 }}>
-                      {datosDeCuenta(cuenta).map((d) => (
-                        <Box key={d.etiqueta} sx={{ "&:not(:last-of-type)": { mb: 1.5 } }}>
-                          <Typography component="dt" sx={etiquetaSx}>
-                            {d.etiqueta}
-                          </Typography>
-                          <Typography component="dd" sx={{ ...valorSx, ...(d.etiqueta === "Número de cuenta" ? { fontSize: "1.1rem", letterSpacing: "0.03em" } : {}) }}>
-                            {d.enlace ? (
-                              <Box component="a" href={d.enlace} sx={{ color: C.blueDark, textDecorationThickness: "1px", borderRadius: "4px", ...focusRing }}>
-                                {d.valor}
-                              </Box>
-                            ) : (
-                              d.valor
-                            )}
-                          </Typography>
-                        </Box>
-                      ))}
+                    {/* El número, que es lo que se copia al banco */}
+                    <Box sx={{ px: 1.5, py: 1, mb: 1.5, borderRadius: "12px", bgcolor: C.offWhite, border: "1px solid", borderColor: C.border }}>
+                      <Typography sx={etiquetaSx}>Número de cuenta</Typography>
+                      <Typography sx={{ ...valorSx, fontSize: "1.15rem", fontWeight: 700, letterSpacing: "0.04em", userSelect: "all" }}>{texto(cuenta.accountNumber)}</Typography>
                     </Box>
+                    {datosDelTitular(cuenta).length > 0 && (
+                      <Box component="dl" sx={datosSx}>
+                        {datosDelTitular(cuenta).map((d) => (
+                          // El correo puede ser largo: ocupa toda la línea para no partirse
+                          <Box key={d.etiqueta} sx={{ minWidth: 0, ...(d.enlace ? { gridColumn: "1 / -1" } : {}) }}>
+                            <Typography component="dt" sx={etiquetaSx}>
+                              {d.etiqueta}
+                            </Typography>
+                            <Typography component="dd" sx={valorSx}>
+                              {d.enlace ? (
+                                <Box component="a" href={d.enlace} sx={{ color: C.blueDark, textDecorationThickness: "1px", borderRadius: "4px", ...focusRing }}>
+                                  {d.valor}
+                                </Box>
+                              ) : (
+                                d.valor
+                              )}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
                   </Box>
                 ))}
 
                 {donation.details.length > 0 && (
-                  <Box component="dl" sx={tarjetaSx}>
+                  <Box component="dl" sx={{ ...tarjetaSx, ...datosSx }}>
                     {donation.details.map((d) => (
-                      <Box key={d.label} sx={{ "&:not(:last-of-type)": { mb: 1.75 } }}>
+                      <Box key={d.label} sx={{ minWidth: 0 }}>
                         <Typography component="dt" sx={etiquetaSx}>
                           {d.label}
                         </Typography>
