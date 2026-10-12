@@ -371,7 +371,10 @@ try {
       const bajar = async (boton) => { const [d] = await Promise.all([p.waitForEvent("download"), p.getByRole("button", { name: boton }).click()]); const ruta = path.join(OUT, d.suggestedFilename()); await d.saveAs(ruta); return { nombre: d.suggestedFilename(), bytes: fs.readFileSync(ruta) }; };
       const excel = await bajar(/Excel/);
       const filasDelExcel = excel.bytes.toString("latin1").split("<row r=").length - 1;
-      ok("Secretaría · pagos: «Excel» descarga un .xlsx con las filas filtradas", /^pagos-aspy-[0-9-]+[.]xlsx$/.test(excel.nombre) && excel.bytes.subarray(0, 2).toString() === "PK" && filasDelExcel === deSofia + 1, `${excel.nombre} · filas ${filasDelExcel} (esperadas ${deSofia + 1})`);
+      // Arriba van el membrete (5 filas, con el logo) y los encabezados de la tabla; debajo, una fila por pago
+      ok("Secretaría · pagos: «Excel» descarga un .xlsx con las filas filtradas", /^pagos-aspy-[0-9-]+[.]xlsx$/.test(excel.nombre) && excel.bytes.subarray(0, 2).toString() === "PK" && filasDelExcel === deSofia + 6, `${excel.nombre} · filas ${filasDelExcel} (esperadas ${deSofia + 6})`);
+      const comoTexto = excel.bytes.toString("utf8");
+      ok("Secretaría · pagos: el Excel lleva el logo y el membrete de la fundación", comoTexto.includes("xl/media/image1.png") && comoTexto.includes("Fundación ASPY Ecuador") && comoTexto.includes("<drawing "));
       const pdf = await bajar(/PDF/);
       ok("Secretaría · pagos: «PDF» descarga el reporte", /^pagos-aspy-[0-9-]+[.]pdf$/.test(pdf.nombre) && pdf.bytes.subarray(0, 4).toString() === "%PDF", pdf.nombre);
     }

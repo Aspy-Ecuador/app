@@ -1,5 +1,5 @@
 // Capturas del manual del PERSONAL ADMINISTRATIVO (staff). Correr después de cap-cliente.mjs.
-import { browser, context, login, go, settle, shot as rawShot, mark, sel, WEB, fill, ventanaCita, recorteCita, cerrarCita, citasDe, esFutura, abrirCitaEnMes } from "./lib.mjs";
+import { browser, context, login, go, settle, shot as rawShot, mark, sel, WEB, fill, ventanaCita, recorteCita, cerrarCita, citasDe, esFutura, abrirCitaEnMes, shotPdf } from "./lib.mjs";
 
 const D = "staff/";
 const shot = (p, n, o) => rawShot(p, D + n, o);
@@ -45,6 +45,12 @@ try {
     await mark(p, zona.getByRole("button", { name: "Ver todos" }), "3");
     const c = await zona.boundingBox();
     await shot(p, "01c-por-revisar", { clip: { x: c.x - 28, y: c.y - 28, width: c.width + 56, height: c.height + 56 } });
+  });
+
+  // Cómo sale una lista descargada en PDF: con el logo oficial y los colores de ASPY
+  await step("pagos-pdf", async () => {
+    await go(p, "/pagos"); await settle(p, 800);
+    await shotPdf(p, () => p.getByRole("button", { name: /^Descargar en PDF/ }).first().click(), D + "02c-pagos-pdf");
   });
 
   // ── Pagos ──

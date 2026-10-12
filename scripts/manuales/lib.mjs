@@ -112,6 +112,32 @@ export async function shot(page, name, opts = {}) {
   console.log("  📸", name);
 }
 
+/**
+ * Captura de un PDF que la pantalla descarga: hace el clic, toma el archivo y guarda su primera página como JPEG.
+ * La dibuja pdf.js, que sirve la propia web de demo (solo funciona contra el servidor de desarrollo).
+ */
+export async function shotPdf(page, clic, name, escala = 1.5) {
+  const [descarga] = await Promise.all([page.waitForEvent("download", { timeout: 25000 }), clic()]);
+  const b64 = fs.readFileSync(await descarga.path()).toString("base64");
+  const jpg = await page.evaluate(async ({ b64, escala }) => {
+    const pdfjs = await import("/node_modules/pdfjs-dist/build/pdf.mjs");
+    pdfjs.GlobalWorkerOptions.workerSrc = "/node_modules/pdfjs-dist/build/pdf.worker.mjs";
+    const pdf = await pdfjs.getDocument({ data: Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)) }).promise;
+    const pagina = await pdf.getPage(1);
+    const vista = pagina.getViewport({ scale: escala });
+    const lienzo = document.createElement("canvas");
+    lienzo.width = vista.width; lienzo.height = vista.height;
+    const c = lienzo.getContext("2d");
+    c.fillStyle = "#fff"; c.fillRect(0, 0, lienzo.width, lienzo.height);
+    await pagina.render({ canvasContext: c, viewport: vista }).promise;
+    return lienzo.toDataURL("image/jpeg", 0.88).split(",")[1];
+  }, { b64, escala });
+  const fsPath = path.join(DIR, "out", name + ".jpg");
+  fs.mkdirSync(path.dirname(fsPath), { recursive: true });
+  fs.writeFileSync(fsPath, Buffer.from(jpg, "base64"));
+  console.log("  📸", name);
+}
+
 /** Ventana de detalle de una cita en la agenda (la que se abre al hacer clic en una cita). */
 export function ventanaCita(page) {
   return page.locator(".MuiPaper-root").filter({ hasText: "Modalidad" }).last();

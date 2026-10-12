@@ -1,5 +1,5 @@
 // Capturas del manual del CLIENTE (paciente / familia). Requiere la BD de demo recién creada (reset.sh).
-import { browser, context, login, go, settle, shot as rawShot, mark, sel, ASSETS, WEB, fill, ventanaCita, recorteCita, cerrarCita, citasDe, esFutura, abrirCitaEnMes, calendarioArriba } from "./lib.mjs";
+import { browser, context, login, go, settle, shot as rawShot, mark, sel, ASSETS, WEB, fill, ventanaCita, recorteCita, cerrarCita, citasDe, esFutura, abrirCitaEnMes, calendarioArriba, shotPdf } from "./lib.mjs";
 
 const D = "cliente/";
 const shot = (p, n, o) => rawShot(p, D + n, o);
@@ -125,6 +125,11 @@ try {
     await go(p, "/recibos");
     await mark(p, p.locator('[data-testid="DownloadRoundedIcon"]').first(), "");
     await shot(p, "21-recibos");
+  });
+  // El recibo descargado (PDF): con el logo oficial y los colores de ASPY
+  await step("recibo-pdf", async () => {
+    await go(p, "/recibos"); await settle(p, 800);
+    await shotPdf(p, () => p.locator('[data-testid="DownloadRoundedIcon"]').first().click(), D + "21b-recibo-pdf");
   });
   await step("servicios", async () => { await go(p, "/consultarServicios"); await shot(p, "22-servicios"); });
   await step("reportes", async () => {
