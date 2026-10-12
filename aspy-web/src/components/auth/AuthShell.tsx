@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
+import GlobalStyles from "@mui/material/GlobalStyles";
 import type { SxProps, Theme } from "@mui/material/styles";
 import AppTheme from "@shared-theme/AppTheme";
 import ColorModeToggle from "@shared-theme/ColorModeToggle";
@@ -18,10 +19,23 @@ interface AuthShellProps {
   disableCustomTheme?: boolean;
 }
 
+/** Color de la página detrás del fondo: el tono medio de la imagen con su velo, en claro y en oscuro. */
+const COLOR_DE_PAGINA = { claro: "#FBE2C1", oscuro: "#0B131E" };
+
 export default function AuthShell({ children, disableCustomTheme }: AuthShellProps) {
   return (
     <AppTheme disableCustomTheme={disableCustomTheme}>
       <CssBaseline enableColorScheme />
+      {/* Si en algún momento asoma la página (al rebotar el desplazamiento en el celular, o mientras carga la
+          imagen), se ve del mismo tono que el fondo y no una franja blanca */}
+      <GlobalStyles
+        styles={(theme) => ({
+          "html, body": {
+            backgroundColor: COLOR_DE_PAGINA.claro,
+            ...theme.applyStyles("dark", { backgroundColor: COLOR_DE_PAGINA.oscuro }),
+          },
+        })}
+      />
       <Box
         component="main"
         sx={(theme) => ({
@@ -36,14 +50,20 @@ export default function AuthShell({ children, disableCustomTheme }: AuthShellPro
           pt: { xs: 9.5, md: 5, lg: 2 },
           pb: { xs: 3, md: 5, lg: 2 },
           color: aspy.text,
+          // El fondo va fijo a la pantalla, no al contenido: la cubre entera aunque la tarjeta mida menos (así
+          // salían franjas arriba y abajo en el celular) y no se estira ni se recorta distinto cuando el
+          // contenido es más alto que la pantalla (el registro).
           "&::before": {
             content: '""',
-            position: "absolute",
+            position: "fixed",
             inset: 0,
             zIndex: 0,
             backgroundImage: `linear-gradient(rgba(255,248,241,0.3), rgba(255,248,241,0.3)), url(${fondoAspy})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
+            // En celular y tablet la barra del navegador aparece y desaparece al desplazarse: el fondo mide siempre
+            // la pantalla completa (lvh), para que la imagen no se reacomode en cada movimiento
+            "@media (max-width: 1199.95px)": { bottom: "auto", minHeight: "100vh", height: "100lvh" },
             ...theme.applyStyles("dark", {
               // Velo azul noche con un toque de los colores de ASPY; el fondo apenas se insinúa
               backgroundImage: `radial-gradient(720px 520px at 12% 12%, rgba(91,184,212,0.16), transparent 65%),

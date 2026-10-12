@@ -45,6 +45,10 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  /* En el celular, con la barra del navegador a la vista, 100vh mide más que la pantalla visible: la página
+     quedaba más alta que su contenido y este se centraba dentro, con una franja vacía arriba y otra abajo
+     (se notaba en el inicio de sesión). Con dvh la página mide lo que se ve. */
+  min-height: 100dvh;
 }
 
 button {
