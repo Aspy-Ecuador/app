@@ -153,6 +153,19 @@ export default function PatientsList() {
               que={["paciente", "pacientes"]}
               hayFiltros={hayFiltros}
               onLimpiar={limpiar}
+              exportar={{
+                titulo: "Lista de pacientes",
+                archivo: "mis-pacientes",
+                filas: filtrados,
+                columnas: [
+                  { titulo: "Nombres", valor: (p) => p.first_name },
+                  { titulo: "Apellidos", valor: (p) => p.last_name },
+                  { titulo: "Correo", valor: (p) => p.user_account?.email },
+                  { titulo: "Celular", valor: (p) => p.phone?.number },
+                  { titulo: "Edad", valor: (p) => getAge(p.birthdate) },
+                  { titulo: "Ocupación", valor: (p) => ocupacionDe(p) },
+                ],
+              }}
             />
           </Grid>
         )}

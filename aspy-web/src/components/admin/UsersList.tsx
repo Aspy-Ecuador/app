@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 import type { CardAdmin } from "@/types/CardAdmin";
 import { useRoleData } from "@/observer/RoleDataContext";
 import type { GridColDef, GridRowId } from "@mui/x-data-grid";
-import { translateRol, exportUsersExcel, exportUsersPDF } from "@/utils/utils";
+import { translateRol } from "@/utils/utils";
+import BotonesExportar from "@components/tabla/BotonesExportar";
 import Progress from "@components/Progress";
 import SimpleHeader from "@components/SimpleHeader";
 import Box from "@mui/material/Box";
@@ -24,7 +25,6 @@ import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined
 import AttributionOutlinedIcon from "@mui/icons-material/AttributionOutlined";
 import SupervisedUserCircleOutlinedIcon from "@mui/icons-material/SupervisedUserCircleOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import Switch from "@mui/material/Switch";
 import CircularProgress from "@mui/material/CircularProgress";
 import type { Person } from "@/typesResponse/Person";
@@ -268,49 +268,23 @@ export default function UsersList() {
 
         <Box sx={{ width: "0.5px", height: 36, bgcolor: "divider", mx: 0.5 }} />
 
-        <Button
-          onClick={() => exportUsersPDF(users)}
-          startIcon={
-            <FileDownloadOutlinedIcon sx={{ fontSize: "14px !important" }} />
-          }
-          sx={{
-            fontSize: 12,
-            fontWeight: 500,
-            bgcolor: tone.red.bg,
-            color: tone.red.fg,
-            border: `0.5px solid ${tone.red.border}`,
-            borderRadius: 3,
-            px: 1.75,
-            py: 1.25,
-            height: "auto",
-            textTransform: "none",
-            "&:hover": { bgcolor: tone.red.border },
+        {/* PDF y Excel de los usuarios que se están mostrando */}
+        <BotonesExportar
+          tabla={{
+            titulo: "Lista de usuarios",
+            archivo: "usuarios",
+            filas: filtrados,
+            nota: hayFiltros ? "con los filtros puestos en la pantalla" : undefined,
+            columnas: [
+              { titulo: "Nombre", valor: (u) => u.first_name },
+              { titulo: "Apellido", valor: (u) => u.last_name },
+              { titulo: "Rol", valor: (u) => translateRol(u.user_account?.role?.name ?? "") },
+              { titulo: "Correo", valor: (u) => u.user_account?.email },
+              { titulo: "Celular", valor: (u) => u.phone?.number },
+              { titulo: "Habilitado", valor: (u) => ((u.user_account?.is_available ?? true) ? "Sí" : "No") },
+            ],
           }}
-        >
-          PDF
-        </Button>
-
-        <Button
-          onClick={() => exportUsersExcel(users)}
-          startIcon={
-            <FileDownloadOutlinedIcon sx={{ fontSize: "14px !important" }} />
-          }
-          sx={{
-            fontSize: 12,
-            fontWeight: 500,
-            bgcolor: tone.green.bg,
-            color: tone.green.fg,
-            border: `0.5px solid ${tone.green.border}`,
-            borderRadius: 3,
-            px: 1.75,
-            py: 1.25,
-            height: "auto",
-            textTransform: "none",
-            "&:hover": { bgcolor: tone.green.border },
-          }}
-        >
-          Excel
-        </Button>
+        />
       </Box>
 
       <BarraFiltros

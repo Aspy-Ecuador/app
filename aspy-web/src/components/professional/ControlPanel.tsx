@@ -10,6 +10,7 @@ import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import ShowAppointment from "@professional/ShowAppointment";
 import WelcomePanel from "@components/WelcomePanel";
+import PanelAvisos from "@components/avisos/PanelAvisos";
 
 import Progress from "@components/Progress";
 
@@ -33,6 +34,11 @@ export default function ControlPanel() {
       <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 1, md: 1 }}>
         <Grid size={12}>
           <WelcomePanel user={getAuthenticatedFirstName()} />
+        </Grid>
+
+        {/* Lo nuevo: alguien reservó, se confirmó o se canceló una cita, aprobaron un horario… */}
+        <Grid size={12}>
+          <PanelAvisos />
         </Grid>
 
         <Grid size={12}>

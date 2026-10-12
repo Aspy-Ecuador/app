@@ -1,6 +1,10 @@
 // FINAL
 import { useRoleData } from "@/observer/RoleDataContext";
 import type { Service } from "@typesResponse/Service";
+import type { WorkerProfessional } from "@/typesResponse/WorkerProfessional";
+import { ChipModalidad } from "@components/horarios/modalidad";
+import { modalidadDe } from "@utils/citaVirtual";
+import { horaCorta } from "@utils/utils";
 import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -13,9 +17,11 @@ import MedicalServicesRoundedIcon from "@mui/icons-material/MedicalServicesRound
 
 interface ReviewProps {
   service_id: number;
+  /** Horario elegido: de ahí salen la fecha, la hora y la modalidad de la cita. */
+  worker_schedule_id?: number;
 }
 
-export default function Review({ service_id }: ReviewProps) {
+export default function Review({ service_id, worker_schedule_id }: ReviewProps) {
   const { data, loading } = useRoleData();
 
   if (loading) return <Progress />;
@@ -23,6 +29,7 @@ export default function Review({ service_id }: ReviewProps) {
   const service = data.services?.find(
     (s: Service) => s.service_id === service_id,
   );
+  const horario = (data.workerProfessional as WorkerProfessional[] | undefined)?.find((w) => w.worker_schedule_id === worker_schedule_id);
 
   return (
     <Stack spacing={3}>
@@ -89,6 +96,24 @@ export default function Review({ service_id }: ReviewProps) {
               ${service?.price}
             </Typography>
           </Box>
+
+          {horario && (
+            <>
+              <Divider />
+              {/* Cuándo y cómo será la cita */}
+              <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 1, py: 1.5 }}>
+                <Box>
+                  <Typography variant="caption" sx={{ color: "text.secondary", textTransform: "uppercase", letterSpacing: 0.8 }}>
+                    Fecha y hora
+                  </Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 500, mt: 0.25 }}>
+                    {String(horario.schedule.date).split("T")[0].split("-").reverse().join("/")} · {horaCorta(horario.schedule.start_time)} – {horaCorta(horario.schedule.end_time)}
+                  </Typography>
+                </Box>
+                <ChipModalidad modalidad={modalidadDe(horario)} sinDetalle />
+              </Box>
+            </>
+          )}
 
           <Divider />
 

@@ -9,6 +9,7 @@ import Campo from "@forms/Campo";
 import CampoFecha from "@forms/CampoFecha";
 import { campoSx } from "@forms/estilos";
 import Chip from "@mui/material/Chip";
+import Portal from "@mui/material/Portal";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import Skeleton from "@mui/material/Skeleton";
@@ -19,6 +20,11 @@ import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import IconButton from "@mui/material/IconButton";
 import CircularProgress from "@mui/material/CircularProgress";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import TaskAltRoundedIcon from "@mui/icons-material/TaskAltRounded";
+import { ChipModalidad, ChipPorAprobar, EditorModalidad, SelectorModalidad } from "@components/horarios/modalidad";
+import type { Modalidad } from "@/typesResponse/WorkerSchedule";
+import { AYUDA_ENLACE_VIRTUAL, modalidadDe, plataformaVirtual } from "@utils/citaVirtual";
 import { getAuthenticatedPersonID } from "@store";
 import workerScheduleAPI from "@/API/workerScheduleAPI";
 import professionalAPI, { type ReglasHorario } from "@/API/professionalAPI";
@@ -128,19 +134,29 @@ interface HorarioProfessionalProps {
   professionalId?: number;
   /** Nombre de ese profesional, cuando lo gestiona Secretaría. */
   nombre?: string;
+  /** Sin el formulario ni el botón de quitar: Secretaría sin permiso para crear horarios solo los revisa. */
+  soloRevisar?: boolean;
+  /** Se llama después de crear, quitar, aprobar o cambiar un horario (p. ej., para refrescar otra lista). */
+  onCambio?: () => void;
 }
 
-export default function HorarioProfessional({ professionalId: idIndicado, nombre }: HorarioProfessionalProps = {}) {
+export default function HorarioProfessional({ professionalId: idIndicado, nombre, soloRevisar = false, onCambio }: HorarioProfessionalProps = {}) {
   const professionalId = idIndicado ?? getAuthenticatedPersonID();
+  // Quien gestiona los horarios de otra persona es Secretaría o el Admin: aprueban y cambian la modalidad
   const ajeno = idIndicado !== undefined;
   // Agendar cita y el panel de Secretaría leen los horarios del contexto: se refrescan al cambiar alguno
-  const { refreshWorkerProfessional } = useRoleData();
+  const { refreshWorkerProfessional, refreshAppointments } = useRoleData();
   // Hasta cuándo se puede planificar lo decide el Admin; el servidor lo vuelve a comprobar al guardar
   const [reglas, setReglas] = useState<ReglasHorario | null>(null);
 
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  // La modalidad no viene elegida: quien crea el horario tiene que decir si es presencial o virtual
+  const [modalidad, setModalidad] = useState<Modalidad | "">("");
+  const [enlace, setEnlace] = useState("");
+  const [editando, setEditando] = useState<number | null>(null);
+  const [aprobandoMap, setAprobandoMap] = useState<Record<number, boolean>>({});
   const [submitting, setSubmitting] = useState(false);
   const [schedules, setSchedules] = useState<WorkerProfessional[]>([]);
   const [loadingList, setLoadingList] = useState(true);
@@ -217,31 +233,46 @@ export default function HorarioProfessional({ professionalId: idIndicado, nombre
       setSnackbar({ open: true, message: avisoDelLimite(reglas) ?? "Esa fecha está fuera del límite permitido.", severity: "error" });
       return;
     }
+    if (!modalidad) {
+      setSnackbar({ open: true, message: "Elige si el horario es presencial o virtual.", severity: "error" });
+      return;
+    }
+    const enlaceLimpio = modalidad === "virtual" ? enlace.trim() : "";
+    if (enlaceLimpio && plataformaVirtual(enlaceLimpio) === null) {
+      setSnackbar({ open: true, message: AYUDA_ENLACE_VIRTUAL, severity: "error" });
+      return;
+    }
     try {
       setSubmitting(true);
-      await professionalAPI.crearHorario({
+      const respuesta = await professionalAPI.crearHorario({
         professional_id: professionalId,
         date,
         start_time: startTime + ":00",
         end_time: endTime + ":00",
         name: turno,
+        modalidad,
+        ...(enlaceLimpio ? { enlace: enlaceLimpio } : {}),
       });
       setSnackbar({
         open: true,
-        message: "Horario creado correctamente.",
+        // El que crea un profesional queda por aprobar: el servidor lo avisa en su mensaje
+        message: respuesta.data?.worker_schedule?.aprobado === false ? "Horario creado. Secretaría lo revisará antes de publicarlo." : "Horario creado correctamente.",
         severity: "success",
       });
       setDate("");
       setStartTime("");
       setEndTime("");
+      setModalidad("");
+      setEnlace("");
       fetchSchedules();
       refreshWorkerProfessional();
+      onCambio?.();
     } catch (error: any) {
       const datos = error?.response?.data;
       setSnackbar({
         open: true,
         // El motivo exacto (p. ej., el límite de fechas) viene en el error del campo
-        message: datos?.errors?.date?.[0] || datos?.errors?.end_time?.[0] || datos?.message || "Error al crear el horario.",
+        message: datos?.errors?.date?.[0] || datos?.errors?.end_time?.[0] || datos?.errors?.enlace?.[0] || datos?.errors?.modalidad?.[0] || datos?.message || "Error al crear el horario.",
         severity: "error",
       });
     } finally {
@@ -255,6 +286,7 @@ export default function HorarioProfessional({ professionalId: idIndicado, nombre
       await workerScheduleAPI.deleteWorkerSchedule(workerScheduleId);
       await fetchSchedules();
       refreshWorkerProfessional();
+      onCambio?.();
     } catch (error: any) {
       setSnackbar({
         open: true,
@@ -267,6 +299,23 @@ export default function HorarioProfessional({ professionalId: idIndicado, nombre
     }
   };
 
+  // Secretaría o el Admin aprueban el horario (se ofrece a las familias) o le quitan la aprobación
+  const handleAprobar = async (workerScheduleId: number, aprobado: boolean) => {
+    setAprobandoMap((prev) => ({ ...prev, [workerScheduleId]: true }));
+    try {
+      const estado = await workerScheduleAPI.aprobar(workerScheduleId, aprobado);
+      setSnackbar({ open: true, message: estado.message, severity: "success" });
+      await fetchSchedules();
+      refreshWorkerProfessional();
+      onCambio?.();
+    } catch (error) {
+      const mensaje = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setSnackbar({ open: true, message: mensaje || "No se pudo cambiar la aprobación del horario.", severity: "error" });
+    } finally {
+      setAprobandoMap((prev) => ({ ...prev, [workerScheduleId]: false }));
+    }
+  };
+
   const today = todayStr();
 
   return (
@@ -274,15 +323,18 @@ export default function HorarioProfessional({ professionalId: idIndicado, nombre
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr",
-            md: "minmax(300px, 36%) minmax(0,1fr)",
-          },
+          gridTemplateColumns: soloRevisar
+            ? "1fr"
+            : {
+                xs: "1fr",
+                md: "minmax(300px, 36%) minmax(0,1fr)",
+              },
           gap: { xs: 1.5, md: 2 },
           alignItems: "start",
         }}
       >
         {/* ── Formulario ── */}
+        {!soloRevisar && (
         <SectionPanel label="Nuevo horario">
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.75 }}>
             <Campo etiqueta="Fecha" htmlFor="horario-fecha" ayuda={avisoDelLimite(reglas)}>
@@ -318,6 +370,30 @@ export default function HorarioProfessional({ professionalId: idIndicado, nombre
                 />
               </Campo>
             </Box>
+
+            {/* Presencial o virtual: no viene elegida, hay que decidirla */}
+            <Campo
+              etiqueta="Modalidad"
+              idEtiqueta="horario-modalidad-etiqueta"
+              ayuda={ajeno ? undefined : "Secretaría revisa el horario antes de que las familias puedan agendarlo."}
+            >
+              <SelectorModalidad id="horario-modalidad" value={modalidad} onChange={setModalidad} disabled={submitting} />
+            </Campo>
+            {modalidad === "virtual" && (
+              <Campo etiqueta="Enlace de la reunión (opcional)" htmlFor="horario-enlace" ayuda="De Zoom, Microsoft Teams o Google Meet. Si todavía no lo tienes, podrás ponerlo después.">
+                <TextField
+                  id="horario-enlace"
+                  fullWidth
+                  value={enlace}
+                  onChange={(e) => setEnlace(e.target.value)}
+                  placeholder="https://meet.google.com/abc-defg-hij"
+                  autoComplete="off"
+                  error={enlace.trim() !== "" && plataformaVirtual(enlace) === null}
+                  sx={campoSx}
+                  slotProps={{ htmlInput: { inputMode: "url", maxLength: 500 } }}
+                />
+              </Campo>
+            )}
 
             {/* Turno detectado automáticamente */}
             {startTime && (
@@ -404,6 +480,7 @@ export default function HorarioProfessional({ professionalId: idIndicado, nombre
             </Button>
           </Box>
         </SectionPanel>
+        )}
 
         {/* ── Lista de horarios ── */}
         <SectionPanel
@@ -543,20 +620,35 @@ export default function HorarioProfessional({ professionalId: idIndicado, nombre
                           const endStr = ws.schedule
                             .end_time as unknown as string;
 
+                          const pendiente = ws.aprobado === false;
+                          const modalidadWs = modalidadDe(ws);
+                          // El profesional elige la modalidad mientras nadie reservó el horario, y el enlace de uno
+                          // virtual, siempre. Secretaría y el Admin cambian las dos cosas cuando haga falta.
+                          const puedeModalidad = ajeno || available;
+                          const puedeEditar = puedeModalidad || modalidadWs === "virtual";
+                          const abierto = editando === ws.worker_schedule_id;
+                          const horas = `${fmt(startStr)} a ${fmt(endStr)}`;
+
                           return (
                             <Box
                               key={ws.worker_schedule_id}
                               sx={{
+                                border: "0.5px solid",
+                                borderColor: pendiente ? tone.amber.border : available ? tone.green.border : "divider",
+                                borderRadius: 2,
+                                bgcolor: pendiente ? tone.amber.bg : available ? tone.green.bg : "action.hover",
+                                overflow: "hidden",
+                              }}
+                            >
+                            <Box
+                              sx={{
                                 display: "flex",
+                                flexWrap: "wrap",
                                 alignItems: "center",
-                                gap: 1.5,
+                                columnGap: 1.5,
+                                rowGap: 0.75,
                                 px: 1.5,
                                 py: 1,
-                                border: "0.5px solid",
-                                borderColor: available ? tone.green.border : "divider",
-                                borderRadius: 2,
-                                bgcolor: available ? tone.green.bg : "action.hover",
-                                transition: "background 0.15s",
                               }}
                             >
                               {/* Pill de hora */}
@@ -604,7 +696,12 @@ export default function HorarioProfessional({ professionalId: idIndicado, nombre
                                 {(ws.schedule as Schedule).name ?? "Sin nombre"}
                               </Typography>
 
+                              {/* Modalidad y, si falta, la aprobación de Secretaría */}
+                              <ChipModalidad modalidad={modalidadWs} enlace={ws.enlace_virtual} />
+                              {pendiente && <ChipPorAprobar />}
+
                               {/* Estado */}
+                              {!pendiente && (
                               <Chip
                                 icon={
                                   available ? (
@@ -640,7 +737,44 @@ export default function HorarioProfessional({ professionalId: idIndicado, nombre
                                   "& .MuiChip-label": { px: 0.875 },
                                 }}
                               />
-                              {available && (
+                              )}
+                              {ajeno && pendiente && (
+                                <Button
+                                  size="small"
+                                  disabled={aprobandoMap[ws.worker_schedule_id] ?? false}
+                                  onClick={() => handleAprobar(ws.worker_schedule_id, true)}
+                                  startIcon={<TaskAltRoundedIcon sx={{ fontSize: "14px !important" }} />}
+                                  aria-label={`Aprobar el horario de ${horas}`}
+                                  sx={{ minHeight: 26, px: 1.25, borderRadius: 1.5, textTransform: "none", fontSize: 11, fontWeight: 600, bgcolor: "#1D9E75", color: "#fff", "&:hover": { bgcolor: "#0F6E56" }, "&.Mui-disabled": { bgcolor: tone.green.border, color: "#fff" } }}
+                                >
+                                  Aprobar
+                                </Button>
+                              )}
+                              {ajeno && !pendiente && available && (
+                                <Button
+                                  size="small"
+                                  disabled={aprobandoMap[ws.worker_schedule_id] ?? false}
+                                  onClick={() => handleAprobar(ws.worker_schedule_id, false)}
+                                  aria-label={`Quitar la aprobación del horario de ${horas}`}
+                                  title="Deja de ofrecerse a las familias hasta aprobarlo otra vez"
+                                  sx={{ minHeight: 26, px: 1, borderRadius: 1.5, textTransform: "none", fontSize: 10.5, fontWeight: 600, color: "text.secondary", border: "0.5px solid", borderColor: "divider" }}
+                                >
+                                  Quitar aprobación
+                                </Button>
+                              )}
+                              {puedeEditar && (
+                                <IconButton
+                                  size="small"
+                                  aria-label={`${puedeModalidad ? "Cambiar la modalidad o el enlace" : "Poner o cambiar el enlace"} del horario de ${horas}`}
+                                  title={puedeModalidad ? "Cambiar la modalidad o el enlace" : "Poner o cambiar el enlace de la reunión"}
+                                  aria-expanded={abierto}
+                                  onClick={() => setEditando(abierto ? null : ws.worker_schedule_id)}
+                                  sx={{ width: 26, height: 26, border: "0.5px solid", borderColor: "divider", bgcolor: "action.hover", borderRadius: 1.5, flexShrink: 0 }}
+                                >
+                                  <EditRoundedIcon sx={{ fontSize: 13 }} />
+                                </IconButton>
+                              )}
+                              {available && !soloRevisar && (
                                 <IconButton
                                   size="small"
                                   aria-label={`Quitar el horario de ${fmt(startStr)} a ${fmt(endStr)}`}
@@ -680,6 +814,29 @@ export default function HorarioProfessional({ professionalId: idIndicado, nombre
                                 </IconButton>
                               )}
                             </Box>
+                            {abierto && (
+                              <Box sx={{ px: 1.5, py: 1.5, borderTop: "0.5px solid", borderColor: "divider", bgcolor: "background.paper" }}>
+                                <EditorModalidad
+                                  id={`horario-${ws.worker_schedule_id}`}
+                                  horarioId={ws.worker_schedule_id}
+                                  modalidad={modalidadWs}
+                                  enlace={ws.enlace_virtual ?? null}
+                                  puedeCambiarModalidad={puedeModalidad}
+                                  avisoAlCambiar={!ajeno && !pendiente ? "Si cambias la modalidad, Secretaría tendrá que aprobar el horario otra vez." : undefined}
+                                  onGuardado={(estado) => {
+                                    setEditando(null);
+                                    setSnackbar({ open: true, message: estado.message, severity: "success" });
+                                    fetchSchedules();
+                                    refreshWorkerProfessional();
+                                    onCambio?.();
+                                    // La cita de ese horario toma su modalidad y su enlace: la agenda se pone al día
+                                    refreshAppointments();
+                                  }}
+                                  onCancelar={() => setEditando(null)}
+                                />
+                              </Box>
+                            )}
+                            </Box>
                           );
                         })}
                     </Box>
@@ -691,21 +848,24 @@ export default function HorarioProfessional({ professionalId: idIndicado, nombre
         </SectionPanel>
       </Box>
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={closeSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          severity={snackbar.severity}
-          variant="filled"
+      {/* En un Portal: fuera del contenedor con zoom de los televisores (si no, el globo se agranda dos veces) */}
+      <Portal>
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={4000}
           onClose={closeSnackbar}
-          sx={{ borderRadius: 2, fontSize: 12 }}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+          <Alert
+            severity={snackbar.severity}
+            variant="filled"
+            onClose={closeSnackbar}
+            sx={{ borderRadius: 2, fontSize: 12 }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </Portal>
     </>
   );
 }

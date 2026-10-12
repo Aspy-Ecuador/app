@@ -2,6 +2,7 @@
 import { useState, useMemo, useRef, useLayoutEffect, useEffect } from "react";
 import { getAuthenticatedUserIdRole } from "@/utils/store";
 import FullCalendar from "@fullcalendar/react";
+import { useSearchParams } from "react-router-dom";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -25,6 +26,7 @@ import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
 import TextField from "@mui/material/TextField";
 import { useTheme } from "@mui/material/styles";
 import type { Appointment } from "@/typesResponse/Appointment";
+import workerScheduleAPI from "@/API/workerScheduleAPI";
 import appointmentAPI from "@/API/appointmentAPI";
 import { paletteVar, tone } from "@shared-theme/themePrimitives";
 import { vh, zoomActual, zoomSoloEn } from "@shared-theme/pantallaGrande";
@@ -49,6 +51,8 @@ interface DetailInfo {
   rawDate: string;
   rawStart: string;
   /** Cita virtual: tiene un enlace de reunión (al paciente le llega cuando la cita está Agendada). */
+  /** Horario de la cita: guarda la modalidad y el enlace de la reunión. */
+  horarioId: number;
   esVirtual: boolean;
   enlaceVirtual: string | null;
 }
@@ -298,7 +302,7 @@ const DetailPopover = ({
   detail: DetailInfo;
   onClose: () => void;
   onCancelled: () => void;
-  onEnlaceGuardado: (appointmentId: number, enlace: string | null) => void;
+  onEnlaceGuardado: (appointmentId: number, esVirtual: boolean, enlace: string | null) => void;
 }) => {
   const st = statusStyle(detail.statusId);
   // x, y vienen en píxeles de pantalla; dentro del panel con zoom (pantallas grandes) se dividen
@@ -352,10 +356,14 @@ const DetailPopover = ({
   // Solo se ofrece como enlace lo que es https y de Zoom, Teams o Meet (el servidor guarda con esa misma regla)
   const plataforma = plataformaVirtual(detail.enlaceVirtual);
   const citaVigente = CANCELLABLE_STATUS_IDS.has(detail.statusId);
-  const puedePonerEnlace = citaVigente && ROLES_QUE_PONEN_ENLACE.has(Number(role));
+  // La modalidad la cambian Secretaría y el Admin. El profesional de la cita pone o edita el enlace
+  // cuando la cita es virtual (él eligió la modalidad al crear el horario).
+  const esPersonal = Number(role) === 1 || Number(role) === 4;
+  const puedePonerEnlace = citaVigente && ROLES_QUE_PONEN_ENLACE.has(Number(role)) && (esPersonal || detail.esVirtual);
 
-  const guardarEnlace = async (valor: string) => {
-    const limpio = valor.trim();
+  /** Solo se cambia lo que se manda: sin `modalidad` no cambia la modalidad y sin `enlace` no cambia el enlace. */
+  const guardarModalidad = async (cambios: { modalidad?: "presencial" | "virtual"; enlace?: string }) => {
+    const limpio = (cambios.enlace ?? "").trim();
     if (limpio && !plataformaVirtual(limpio)) {
       setErrorEnlace(AYUDA_ENLACE_VIRTUAL);
       return;
@@ -363,13 +371,13 @@ const DetailPopover = ({
     setGuardandoEnlace(true);
     setErrorEnlace("");
     try {
-      const guardado = await appointmentAPI.guardarEnlaceVirtual(detail.appointmentId, limpio);
-      onEnlaceGuardado(detail.appointmentId, guardado.enlace_virtual ?? null);
+      const guardado = await workerScheduleAPI.cambiarModalidad(detail.horarioId, cambios.enlace === undefined ? cambios : { ...cambios, enlace: limpio });
+      onEnlaceGuardado(detail.appointmentId, guardado.es_virtual, guardado.enlace_virtual ?? null);
       setEnlace(guardado.enlace_virtual ?? "");
       setEditandoEnlace(false);
     } catch (error) {
       const datos = (error as { response?: { data?: { message?: string; errors?: { enlace?: string[] } } } })?.response?.data;
-      setErrorEnlace(datos?.errors?.enlace?.[0] ?? datos?.message ?? "No se pudo guardar el enlace. Inténtalo de nuevo.");
+      setErrorEnlace(datos?.errors?.enlace?.[0] ?? datos?.message ?? "No se pudo guardar. Inténtalo de nuevo.");
     } finally {
       setGuardandoEnlace(false);
     }
@@ -502,7 +510,7 @@ const DetailPopover = ({
           <DetailField
             icon={detail.esVirtual ? <VideocamRoundedIcon /> : <PlaceRoundedIcon />}
             label="Modalidad"
-            value={detail.esVirtual ? `Virtual${plataforma ? ` · ${plataforma}` : ""}` : "Presencial"}
+            value={detail.esVirtual ? `Virtual${plataforma ? ` · ${plataforma}` : detail.enlaceVirtual === null && puedePonerEnlace ? " · falta el enlace" : ""}` : "Presencial"}
           />
 
           {/* Entrar a la reunión: mientras la cita esté vigente y haya un enlace de un servicio aceptado */}
@@ -548,8 +556,14 @@ const DetailPopover = ({
               }}
               sx={{ fontSize: 11, fontWeight: 600, borderRadius: "8px", textTransform: "none", py: 0.5 }}
             >
-              {detail.esVirtual ? "Cambiar el enlace" : "Es virtual: poner el enlace"}
+              {!detail.esVirtual ? "Cambiar a virtual" : detail.enlaceVirtual ? "Cambiar el enlace" : "Poner el enlace"}
             </Button>
+          )}
+          {/* El profesional eligió la modalidad al crear el horario; con la cita ya reservada la cambia Secretaría */}
+          {citaVigente && Number(role) === 2 && !detail.esVirtual && (
+            <Typography sx={{ fontSize: 11, lineHeight: 1.4, color: "text.secondary" }}>
+              Si esta cita tiene que ser virtual, pide a Secretaría que cambie la modalidad.
+            </Typography>
           )}
           {puedePonerEnlace && editandoEnlace && (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
@@ -571,13 +585,13 @@ const DetailPopover = ({
                 }}
                 onKeyDown={(e) => {
                   // Enter con el campo vacío no hace nada: quitar el enlace tiene su propio botón
-                  if (e.key === "Enter" && enlace.trim() && !guardandoEnlace) guardarEnlace(enlace);
+                  if (e.key === "Enter" && !guardandoEnlace && (enlace.trim() || !detail.esVirtual)) guardarModalidad(detail.esVirtual ? { enlace } : { modalidad: "virtual", enlace });
                 }}
                 slotProps={{ htmlInput: { inputMode: "url", maxLength: 500, autoComplete: "off", "aria-describedby": "cita-enlace-ayuda" } }}
                 sx={{ "& .MuiOutlinedInput-root": { height: 36, fontSize: 12, borderRadius: "8px" } }}
               />
               <Typography id="cita-enlace-ayuda" role={errorEnlace ? "alert" : undefined} sx={{ fontSize: 10.5, lineHeight: 1.35, color: errorEnlace ? tone.red.fg : "text.secondary" }}>
-                {errorEnlace || `${AYUDA_ENLACE_VIRTUAL} Quien tiene la cita lo verá cuando su pago esté aprobado.`}
+                {errorEnlace || `${AYUDA_ENLACE_VIRTUAL} ${detail.esVirtual ? "" : "Puedes dejarlo vacío y ponerlo después. "}Quien tiene la cita lo verá cuando su pago esté aprobado.`}
               </Typography>
               <Box sx={{ display: "flex", gap: 0.75 }}>
                 <Button
@@ -591,8 +605,8 @@ const DetailPopover = ({
                 </Button>
                 <Button
                   size="small"
-                  disabled={guardandoEnlace || !enlace.trim()}
-                  onClick={() => guardarEnlace(enlace)}
+                  disabled={guardandoEnlace || (detail.esVirtual && !enlace.trim())}
+                  onClick={() => guardarModalidad(detail.esVirtual ? { enlace } : { modalidad: "virtual", enlace })}
                   sx={{
                     flex: 1.4,
                     fontSize: 11,
@@ -608,17 +622,27 @@ const DetailPopover = ({
                     "&.Mui-disabled": { opacity: 0.6, color: "#fff" },
                   }}
                 >
-                  {guardandoEnlace ? <CircularProgress size={14} sx={{ color: "#fff" }} /> : "Guardar enlace"}
+                  {guardandoEnlace ? <CircularProgress size={14} sx={{ color: "#fff" }} /> : detail.esVirtual ? "Guardar enlace" : "Pasar a virtual"}
                 </Button>
               </Box>
-              {detail.esVirtual && (
+              {detail.esVirtual && detail.enlaceVirtual && (
                 <Button
                   size="small"
                   disabled={guardandoEnlace}
-                  onClick={() => guardarEnlace("")}
+                  onClick={() => guardarModalidad({ enlace: "" })}
                   sx={{ fontSize: 11, fontWeight: 600, borderRadius: "8px", textTransform: "none", py: 0.25, color: tone.red.fg }}
                 >
-                  Quitar el enlace (la cita es presencial)
+                  Quitar el enlace
+                </Button>
+              )}
+              {detail.esVirtual && esPersonal && (
+                <Button
+                  size="small"
+                  disabled={guardandoEnlace}
+                  onClick={() => guardarModalidad({ modalidad: "presencial" })}
+                  sx={{ fontSize: 11, fontWeight: 600, borderRadius: "8px", textTransform: "none", py: 0.25, color: "text.secondary" }}
+                >
+                  Pasar a presencial
                 </Button>
               )}
             </Box>
@@ -719,11 +743,61 @@ export default function Agenda({
 
   const handleSuccessClose = () => setOpen(false);
 
+  // Llegó desde un aviso ("/dashboard?cita=12"): el calendario va a la semana de esa cita y abre su detalle.
+  const [params, setParams] = useSearchParams();
+  const citaPedida = Number(params.get("cita")) || null;
+  const calendario = useRef<FullCalendar>(null);
+  const refrescarCitas = useRef(refreshAppointments);
+  useEffect(() => {
+    refrescarCitas.current = refreshAppointments;
+  });
+  const pidiendo = useRef<number | null>(null);
+  const [yaRefrescada, setYaRefrescada] = useState<number | null>(null);
+  useEffect(() => {
+    if (!citaPedida || loading) return;
+    const quitarDeLaDireccion = () =>
+      setParams(
+        (p) => {
+          const sinCita = new URLSearchParams(p);
+          sinCita.delete("cita");
+          return sinCita;
+        },
+        { replace: true },
+      );
+
+    const cita = appointments.find((a) => a.appointment_id === citaPedida);
+    const fecha = cita?.worker_schedule?.schedule ? String(cita.worker_schedule.schedule.date).split("T")[0] : null;
+    if (!fecha) {
+      // Puede ser una cita recién creada que todavía no cargó: se piden las citas una vez. Si sigue sin
+      // estar, ya no existe (un pago rechazado la elimina) y no hay nada que abrir.
+      if (yaRefrescada === citaPedida) quitarDeLaDireccion();
+      else if (pidiendo.current !== citaPedida) {
+        pidiendo.current = citaPedida;
+        void refrescarCitas.current().then(() => setYaRefrescada(citaPedida));
+      }
+      return;
+    }
+
+    calendario.current?.getApi().gotoDate(fecha);
+    // El calendario dibuja la semana nueva y recién entonces existe el recuadro de la cita
+    const espera = window.setTimeout(() => {
+      const recuadro = document.querySelector<HTMLElement>(`[data-cita="${citaPedida}"]`);
+      if (recuadro) {
+        recuadro.scrollIntoView({ block: "center" });
+        recuadro.click();
+      }
+      quitarDeLaDireccion();
+    }, 400);
+    return () => window.clearTimeout(espera);
+  }, [citaPedida, loading, appointments, yaRefrescada, setParams]);
+
   // Al guardar el enlace de una cita virtual: la ventana lo muestra de inmediato y la agenda se refresca
-  const handleEnlaceGuardado = (appointmentId: number, enlace: string | null) => {
+  const handleEnlaceGuardado = (appointmentId: number, esVirtual: boolean, enlace: string | null) => {
     // Solo si la ventana sigue mostrando esa misma cita (pudo abrirse otra mientras respondía el servidor)
-    setDetail((d) => (d?.appointmentId === appointmentId ? { ...d, esVirtual: enlace !== null, enlaceVirtual: enlace } : d));
+    setDetail((d) => (d?.appointmentId === appointmentId ? { ...d, esVirtual, enlaceVirtual: enlace } : d));
     refreshAppointments();
+    // La modalidad es del horario: las listas de horarios también se ponen al día
+    refreshWorkerProfessional();
   };
 
   // ← NUEVO: mientras refresca muestra el spinner
@@ -759,6 +833,7 @@ export default function Agenda({
           }),
           rawDate: baseDate,
           rawStart: startStr,
+          horarioId: a.worker_schedule?.worker_schedule_id,
           esVirtual: Boolean(a.es_virtual),
           enlaceVirtual: a.enlace_virtual ?? null,
         },
@@ -782,6 +857,7 @@ export default function Agenda({
       y: rect.top,
       rawDate: ep.rawDate,
       rawStart: ep.rawStart,
+      horarioId: ep.horarioId,
       esVirtual: ep.esVirtual,
       enlaceVirtual: ep.enlaceVirtual,
     });
@@ -902,6 +978,7 @@ export default function Agenda({
         }}
       >
         <FullCalendar
+          ref={calendario}
           plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
           initialView="timeGridWeek"
           locale={esLocale}
@@ -930,6 +1007,8 @@ export default function Agenda({
           height="auto"
           eventContent={(info) => <EventContent info={info} />}
           eventClick={handleEventClick}
+          // Para ubicar el recuadro de una cita cuando se llega desde un aviso
+          eventDidMount={(info) => info.el.setAttribute("data-cita", info.event.id)}
           events={events}
         />
       </Box>

@@ -2,6 +2,7 @@
 import type { AxiosResponse } from "axios";
 import api from "@API/api";
 import type { AlcanceHorario } from "@API/ajustesAPI";
+import type { Modalidad } from "@/typesResponse/WorkerSchedule";
 
 /** Reglas para crear horarios según quien pregunta (las decide el Admin; ver `PUT /ajustes`). */
 export interface ReglasHorario {
@@ -27,6 +28,9 @@ const professionalAPI = {
     start_time: string;
     end_time: string;
     name: string;
+    /** Presencial o virtual; el enlace de la reunión es opcional (solo virtual) y puede ponerse después. */
+    modalidad: Modalidad;
+    enlace?: string;
   }): Promise<AxiosResponse> =>
     api.post(`/professional/create-horario`, data),
 

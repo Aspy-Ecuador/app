@@ -12,12 +12,31 @@ import ButtonBase from "@mui/material/ButtonBase";
 import type { WorkerProfessional } from "@/typesResponse/WorkerProfessional";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { tone } from "@shared-theme/themePrimitives";
+import PlaceRoundedIcon from "@mui/icons-material/PlaceRounded";
+import VideocamRoundedIcon from "@mui/icons-material/VideocamRounded";
+import { modalidadDe } from "@utils/citaVirtual";
+import type { Modalidad } from "@/typesResponse/WorkerSchedule";
 import { interiorCalendario, medidasCalendario, seleccionVerde } from "@forms/estilosCalendario";
 
 interface DateCalendarValueProps {
   availableSchedules: WorkerProfessional[];
-  onScheduleSelect: (id: number) => void;
+  /** null = se quitó la hora elegida (al cambiar de día o de modalidad). */
+  onScheduleSelect: (id: number | null) => void;
 }
+
+type Filtro = "todas" | Modalidad;
+
+const FILTROS: [Filtro, string][] = [
+  ["todas", "Todas"],
+  ["presencial", "Presenciales"],
+  ["virtual", "Virtuales"],
+];
+
+/** Los dos apartados en que se muestran las horas de un día. */
+const APARTADOS: { modalidad: Modalidad; titulo: string; icono: React.ReactNode }[] = [
+  { modalidad: "presencial", titulo: "Citas presenciales", icono: <PlaceRoundedIcon sx={{ fontSize: 14 }} /> },
+  { modalidad: "virtual", titulo: "Citas virtuales", icono: <VideocamRoundedIcon sx={{ fontSize: 14 }} /> },
+];
 
 export default function DateCalendarValue({
   availableSchedules,
@@ -27,17 +46,21 @@ export default function DateCalendarValue({
   const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(
     null,
   );
+  // Presencial o virtual: la elige el profesional al crear cada horario y la revisa Secretaría
+  const [filtro, setFiltro] = useState<Filtro>("todas");
+  const ofrecidos = filtro === "todas" ? availableSchedules : availableSchedules.filter((wp) => modalidadDe(wp) === filtro);
+  const cuantos = (m: Filtro) => (m === "todas" ? availableSchedules.length : availableSchedules.filter((wp) => modalidadDe(wp) === m).length);
 
   // Igual que CampoFecha: botones más grandes cuando se usa con el dedo
   const tactil = useMediaQuery("(pointer: coarse)");
   const { alto } = medidasCalendario(tactil);
 
   const enabledDates = [
-    ...new Set(availableSchedules.map((wp) => wp.schedule.date.split("T")[0])),
+    ...new Set(ofrecidos.map((wp) => wp.schedule.date.split("T")[0])),
   ];
 
   const schedulesForDate = selectedDate
-    ? availableSchedules
+    ? ofrecidos
         .filter(
           (wp) =>
             wp.schedule.date.split("T")[0] ===
@@ -51,9 +74,25 @@ export default function DateCalendarValue({
   const shouldDisableDate = (day: Dayjs) =>
     !enabledDates.includes(day.format("YYYY-MM-DD"));
 
+  // Al cambiar de día o de modalidad se suelta la hora elegida: si no, se podía seguir al pago con una
+  // hora que ya no está a la vista
+  const soltarHora = () => {
+    setSelectedScheduleId(null);
+    onScheduleSelect(null);
+  };
+
   const handleDateChange = (newValue: Dayjs | null) => {
     setSelectedDate(newValue);
-    setSelectedScheduleId(null);
+    soltarHora();
+  };
+
+  const handleFiltro = (nuevo: Filtro) => {
+    setFiltro(nuevo);
+    soltarHora();
+    // Si el día elegido no tiene horarios de esa modalidad, se vuelve a elegir el día
+    const dia = selectedDate?.format("YYYY-MM-DD");
+    const quedan = nuevo === "todas" ? availableSchedules : availableSchedules.filter((wp) => modalidadDe(wp) === nuevo);
+    if (dia && !quedan.some((wp) => wp.schedule.date.split("T")[0] === dia)) setSelectedDate(null);
   };
 
   const handleHourSelect = (id: number) => {
@@ -70,6 +109,41 @@ export default function DateCalendarValue({
         gap: 1.5,
       }}
     >
+      {/* Modalidad: qué horarios se ven en el calendario */}
+      <Box sx={{ width: "100%" }}>
+        <Typography id="cita-modalidad-etiqueta" sx={{ fontSize: 10, fontWeight: 500, letterSpacing: "0.06em", textTransform: "uppercase", color: "text.disabled", mb: 0.75, textAlign: "center" }}>
+          Modalidad de la cita
+        </Typography>
+        <Box role="group" aria-labelledby="cita-modalidad-etiqueta" sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, justifyContent: "center" }}>
+          {FILTROS.map(([valor, texto]) => {
+            const activo = filtro === valor;
+            const n = cuantos(valor);
+            return (
+              <ButtonBase
+                key={valor}
+                aria-pressed={activo}
+                disabled={n === 0 && !activo}
+                onClick={() => handleFiltro(valor)}
+                sx={{
+                  px: 1.5,
+                  minHeight: 32,
+                  borderRadius: "999px",
+                  border: "0.5px solid",
+                  borderColor: activo ? tone.blue.fg : "divider",
+                  bgcolor: activo ? tone.blue.fg : "transparent",
+                  color: activo ? "background.paper" : "text.secondary",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  "&.Mui-disabled": { opacity: 0.5 },
+                }}
+              >
+                {texto} ({n})
+              </ButtonBase>
+            );
+          })}
+        </Box>
+      </Box>
+
       {/* Calendario en español: meses, días y botones */}
       <LocalizationProvider
         dateAdapter={AdapterDayjs}
@@ -116,6 +190,17 @@ export default function DateCalendarValue({
 
         {selectedDate ? (
           schedulesForDate.length > 0 ? (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+            {APARTADOS.map(({ modalidad, titulo, icono }) => {
+              const delApartado = schedulesForDate.filter((wp) => modalidadDe(wp) === modalidad);
+              if (delApartado.length === 0) return null;
+              const color = modalidad === "virtual" ? tone.blue : tone.green;
+              return (
+            <Box key={modalidad} component="section" aria-label={titulo}>
+              <Typography component="h3" sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5, fontSize: 12, fontWeight: 600, color: color.fg, mb: 0.75 }}>
+                {icono}
+                {titulo}
+              </Typography>
             <Box
               sx={{
                 display: "flex",
@@ -124,7 +209,7 @@ export default function DateCalendarValue({
                 justifyContent: "center",
               }}
             >
-              {schedulesForDate.map((wp) => {
+              {delApartado.map((wp) => {
                 const label = `${wp.schedule.start_time.slice(0, 5)} — ${wp.schedule.end_time.slice(0, 5)}`;
                 const isSelected = selectedScheduleId === wp.worker_schedule_id;
                 return (
@@ -154,6 +239,10 @@ export default function DateCalendarValue({
                   </ButtonBase>
                 );
               })}
+            </Box>
+            </Box>
+              );
+            })}
             </Box>
           ) : (
             <Typography

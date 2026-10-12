@@ -20,6 +20,8 @@ import CampoFecha from "@forms/CampoFecha";
 import { campoSx } from "@forms/estilos";
 import { tone } from "@shared-theme/themePrimitives";
 import { PERIODOS_RAPIDOS } from "./filtros";
+import BotonesExportar from "./BotonesExportar";
+import type { ColumnaExportable } from "@utils/utils";
 
 export interface FiltroLista {
   /** Identificador único en la página (se usa para enlazar la etiqueta). */
@@ -32,7 +34,7 @@ export interface FiltroLista {
   todos?: string;
 }
 
-interface BarraFiltrosProps {
+interface BarraFiltrosProps<T> {
   /** Identificador único en la página (prefijo de los campos). */
   id: string;
   busqueda?: { value: string; onChange: (valor: string) => void; etiqueta?: string; placeholder: string };
@@ -46,6 +48,11 @@ interface BarraFiltrosProps {
   que: [singular: string, plural: string];
   hayFiltros: boolean;
   onLimpiar: () => void;
+  /**
+   * Descargar la tabla en PDF y en Excel: las filas que se están mostrando (ya filtradas) y qué columnas lleva
+   * el archivo. Las tablas que tienen sus propios botones arriba (usuarios, servicios) no lo pasan.
+   */
+  exportar?: { titulo: string; archivo: string; columnas: ColumnaExportable<T>[]; filas: T[] };
 }
 
 const chipPeriodoSx = {
@@ -62,7 +69,7 @@ const chipPeriodoSx = {
   "&:hover": { bgcolor: tone.blue.border },
 } as const;
 
-export default function BarraFiltros({ id, busqueda, listas = [], periodo, total, mostrados, que, hayFiltros, onLimpiar }: BarraFiltrosProps) {
+export default function BarraFiltros<T = unknown>({ id, busqueda, listas = [], periodo, total, mostrados, que, hayFiltros, onLimpiar, exportar }: BarraFiltrosProps<T>) {
   const [singular, plural] = que;
   const etiquetaPeriodo = periodo?.etiqueta ?? "Fecha";
   // "Limpiar filtros" también borra una fecha a medio escribir (que todavía no es un filtro): se rehacen los campos
@@ -204,6 +211,7 @@ export default function BarraFiltros({ id, busqueda, listas = [], periodo, total
             </>
           )}
         </Typography>
+        <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 0.75 }}>
         {hayFiltros && (
           <Button
             size="small"
@@ -217,6 +225,8 @@ export default function BarraFiltros({ id, busqueda, listas = [], periodo, total
             Limpiar filtros
           </Button>
         )}
+        {exportar && <BotonesExportar compactos tabla={{ ...exportar, nota: hayFiltros ? "con los filtros puestos en la pantalla" : undefined }} />}
+        </Box>
       </Box>
     </Paper>
   );

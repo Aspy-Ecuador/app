@@ -21,7 +21,9 @@ export interface Appointment {
   creation_date: string;
   modification_date: string;
 
-  /** true si la cita es virtual (tiene un enlace de reunión guardado). */
+  /** Modalidad de la cita: la de su horario (la elige el profesional y la revisa Secretaría). */
+  modalidad?: "presencial" | "virtual";
+  /** true si la cita es virtual (puede que todavía no tenga el enlace de la reunión). */
   es_virtual?: boolean;
   /**
    * Enlace de la reunión (Zoom, Teams o Meet). Al paciente le llega solo cuando su cita está Agendada;

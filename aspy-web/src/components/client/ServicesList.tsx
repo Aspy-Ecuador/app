@@ -76,6 +76,16 @@ export default function ServicesList() {
             que={["servicio", "servicios"]}
             hayFiltros={hayFiltros}
             onLimpiar={limpiar}
+            exportar={{
+              titulo: "Servicios",
+              archivo: "servicios",
+              filas: filtrados,
+              columnas: [
+                { titulo: "ID", valor: (s) => s.service_id },
+                { titulo: "Nombre", valor: (s) => s.name },
+                { titulo: "Costo", valor: (s) => Number(s.price), dinero: true },
+              ],
+            }}
           />
         </Grid>
 

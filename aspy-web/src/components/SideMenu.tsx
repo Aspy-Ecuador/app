@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { styled } from "@mui/material/styles";
 import type { Theme } from "@mui/material/styles";
 import MuiDrawer, { drawerClasses } from "@mui/material/Drawer";
@@ -7,10 +8,14 @@ import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
+import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
+import Badge from "@mui/material/Badge";
 import MenuContent from "./MenuContent";
 import OptionsMenu from "./OptionsMenu";
 import ColorModeToggle from "../shared-theme/ColorModeToggle";
 import CreditoDesarrollador from "./CreditoDesarrollador";
+import GloboDeAviso from "./avisos/GloboDeAviso";
+import { useAvisos } from "@/observer/AvisosContext";
 import {
   getAuthenticatedUserName,
   getAuthenticatedUserEmail,
@@ -186,6 +191,8 @@ const botonMovilSx = {
 
 export default function SideMenu() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const navigate = useNavigate();
+  const { porAtender } = useAvisos();
   const name = getAuthenticatedUserName();
   const email = getAuthenticatedUserEmail();
 
@@ -206,10 +213,18 @@ export default function SideMenu() {
         </IconButton>
       </Box>
 
-      {/* Modo claro / oscuro — solo móvil. Con el menú abierto se oculta: ahí ya está el del menú y se verían dos */}
-      <Box sx={{ display: mobileOpen ? "none" : { xs: "flex", md: "none" }, position: "fixed", top: 12, right: 12, zIndex: 1100 }}>
+      {/* Avisos y modo claro / oscuro — solo móvil. Con el menú abierto se ocultan: el menú ya trae los suyos */}
+      <Box sx={{ display: mobileOpen ? "none" : { xs: "flex", md: "none" }, gap: 1, position: "fixed", top: 12, right: 12, zIndex: 1100 }}>
+        <IconButton onClick={() => navigate("/avisos")} aria-label={porAtender > 0 ? `Avisos: ${porAtender > 99 ? "99+" : porAtender} por atender` : "Avisos"} sx={botonMovilSx}>
+          <Badge badgeContent={porAtender} max={99} overlap="circular" sx={{ "& .MuiBadge-badge": { bgcolor: "#F0919E", color: "#1D2D44", fontWeight: 700, fontSize: 10.5, minWidth: 17, height: 17 } }}>
+            <NotificationsRoundedIcon sx={{ fontSize: 20 }} />
+          </Badge>
+        </IconButton>
         <ColorModeToggle sx={botonMovilSx} />
       </Box>
+
+      {/* Globo de "llegó un aviso" (una sola vez por pantalla: el menú está en los cuatro layouts) */}
+      <GloboDeAviso />
 
       {/* Drawer temporal — móvil */}
       <MuiDrawer

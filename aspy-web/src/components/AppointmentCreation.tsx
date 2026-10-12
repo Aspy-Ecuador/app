@@ -150,6 +150,8 @@ export default function AppointmentCreation({
       (wp) =>
         wp.professional?.person_id === professionalId &&
         wp.is_available &&
+        // Un horario que Secretaría todavía no aprobó no se ofrece (a Secretaría sí le llega en la lista)
+        wp.aprobado !== false &&
         (isClient ? !turnoYaEmpezo(wp.schedule) : !turnoYaTermino(wp.schedule)),
     );
   }, [professionalId, workerProfessional, isClient]);

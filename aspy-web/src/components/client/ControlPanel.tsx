@@ -9,6 +9,7 @@ import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Progress from "@components/Progress";
 import PagosRechazados from "@client/PagosRechazados";
+import PanelAvisos from "@components/avisos/PanelAvisos";
 
 export default function ControlPanel() {
   const { data, loading } = useRoleData();
@@ -25,6 +26,11 @@ export default function ControlPanel() {
       <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 1, md: 1 }}>
         <Grid size={12} sx={{ padding: 5 }}>
           <WelcomePanel user={getAuthenticatedFirstName()} />
+        </Grid>
+
+        {/* Lo nuevo: comprobante aprobado o rechazado, cambios en una cita… (no ocupa lugar si no hay nada) */}
+        <Grid size={12}>
+          <PanelAvisos />
         </Grid>
 
         <Grid size={12}>

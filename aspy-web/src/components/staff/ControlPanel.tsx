@@ -23,6 +23,7 @@ import Progress from "@components/Progress";
 import ButtonList from "@components/ButtonList";
 import ShowAppointment from "@staff/ShowAppointment";
 import WelcomePanel from "@components/WelcomePanel";
+import PanelAvisos from "@components/avisos/PanelAvisos";
 import HorariosDelDia from "@staff/HorariosDelDia";
 
 export default function ControlPanel() {
@@ -105,6 +106,9 @@ export default function ControlPanel() {
   return (
     <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2 }}>
       <WelcomePanel user={getAuthenticatedFirstName()} />
+
+      {/* Lo que hay por revisar: pagos, horarios por aprobar, citas virtuales sin enlace… */}
+      <PanelAvisos />
 
       {/* De un vistazo: turnos libres y ocupados de hoy, de todos los profesionales */}
       <HorariosDelDia />

@@ -29,7 +29,7 @@ export const StaffRoutes = [
   { path: "/recibos", element: <ReceiptList /> },
   { path: "/pagos", element: <PaymentsList /> },
   { path: "/citas", element: <Appointments /> },
-  // Solo sirve si el Admin habilitó que Secretaría gestione horarios (si no, la pantalla lo explica)
+  // Aprobar los horarios de los profesionales y revisar su modalidad; crearlos por ellos, solo si el Admin lo habilitó
   { path: "/horarios", element: <HorariosProfesionales /> },
   { path: "/servicios", element: <Services /> },
   { path: "/agendar-cita", element: <AppointmentView isClient={false} /> },

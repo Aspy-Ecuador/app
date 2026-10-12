@@ -9,6 +9,7 @@ import CreateUserAdmin from "@admin/CreateUserAdmin";
 import Appointment from "@/components/admin/Appointments";
 import EditUser from "@staff/EditUser";
 import DatosBancarios from "@/components/admin/DatosBancarios";
+import HorariosProfesionales from "@/components/staff/HorariosProfesionales";
 
 export const AdminRoutes = [
   { path: "/dashboard", element: <ControlPanel /> },
@@ -23,6 +24,8 @@ export const AdminRoutes = [
   { path: "/nuevo-servicio", element: <CreateService /> },
   { path: "/nuevo-usuario", element: <CreateUserAdmin /> },
   { path: "/citas", element: <Appointment /> },
+  // Aprobar los horarios que crean los profesionales, revisar su modalidad y crearlos por ellos
+  { path: "/horarios", element: <HorariosProfesionales /> },
   { path: "/datos-bancarios", element: <DatosBancarios /> },
   ...SharedRoutes,
 ];

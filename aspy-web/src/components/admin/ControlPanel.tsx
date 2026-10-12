@@ -8,6 +8,7 @@ import Box from "@mui/material/Box";
 import Overview from "@admin/Overview";
 import ButtonList from "@components/ButtonList";
 import WelcomePanel from "@components/WelcomePanel";
+import PanelAvisos from "@components/avisos/PanelAvisos";
 import Progress from "@components/Progress";
 
 import PostAddOutlinedIcon from "@mui/icons-material/PostAddOutlined";
@@ -38,6 +39,9 @@ export default function ControlPanel() {
   return (
     <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.75 }}>
       <WelcomePanel user={getAuthenticatedFirstName()} />
+
+      {/* Lo que hay por revisar: pagos, horarios por aprobar, datos bancarios sin cargar… */}
+      <PanelAvisos />
 
       <Grid container spacing={1.5} alignItems="flex-start">
         {/* Overview:

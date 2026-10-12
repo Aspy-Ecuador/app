@@ -208,6 +208,20 @@ export default function PaymentsList() {
             que={["pago", "pagos"]}
             hayFiltros={hayFiltros}
             onLimpiar={limpiar}
+            exportar={{
+              titulo: "Lista de pagos",
+              archivo: "pagos",
+              filas: filtrados,
+              columnas: [
+                { titulo: "N.º de pago", valor: (p) => p.payment_id },
+                { titulo: "Cliente", valor: (p) => `${p.client?.first_name ?? ""} ${p.client?.last_name ?? ""}`.trim() },
+                { titulo: "Servicio", valor: (p) => p.service?.name },
+                { titulo: "Fecha de emisión", valor: (p) => fechaLocal(p.creation_date) },
+                { titulo: "Total", valor: (p) => montoPago(p), dinero: true },
+                { titulo: "Aprobación", valor: (p) => ESTADOS_DE_PAGO.find((e) => e.value === String(p.payment_status?.payment_status_id))?.texto ?? "" },
+                { titulo: "Motivo del rechazo", valor: (p) => p.motivo_rechazo ?? "" },
+              ],
+            }}
           />
         </Grid>
 

@@ -247,6 +247,19 @@ export default function ReceiptList() {
             que={["recibo", "recibos"]}
             hayFiltros={hayFiltros}
             onLimpiar={limpiar}
+            exportar={{
+              titulo: "Comprobantes de pago",
+              archivo: "recibos",
+              filas: filtrados,
+              columnas: [
+                { titulo: "N.º de recibo", valor: (r) => r.id },
+                { titulo: "Cliente", valor: (r) => r.client },
+                { titulo: "Servicio", valor: (r) => r.service },
+                { titulo: "Fecha de emisión", valor: (r) => r.date },
+                { titulo: "Total", valor: (r) => Number(r.price), dinero: true },
+                { titulo: "Estado", valor: (r) => r.receipt.receipt_status?.name ?? "" },
+              ],
+            }}
           />
         </Grid>
 

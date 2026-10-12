@@ -225,6 +225,20 @@ export default function ProffesionalList() {
             que={["profesional", "profesionales"]}
             hayFiltros={hayFiltros}
             onLimpiar={limpiar}
+            exportar={{
+              titulo: "Lista de profesionales",
+              archivo: "profesionales",
+              filas: filtrados,
+              columnas: [
+                { titulo: "Nombres", valor: (p) => p.first_name },
+                { titulo: "Apellidos", valor: (p) => p.last_name },
+                { titulo: "Correo", valor: (p) => p.user_account?.email },
+                { titulo: "Celular", valor: (p) => p.phone?.number },
+                { titulo: "Título", valor: (p) => p.professional?.title },
+                { titulo: "Especialidad", valor: (p) => p.professional?.specialty },
+                { titulo: "Habilitado", valor: (p) => ((p.user_account?.is_available ?? true) ? "Sí" : "No") },
+              ],
+            }}
           />
         </Grid>
 

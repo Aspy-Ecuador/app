@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getAuthenticatedUserRole } from "@store";
 import Box from "@mui/material/Box";
@@ -16,7 +16,8 @@ import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
 import ReceiptLongRoundedIcon from "@mui/icons-material/ReceiptLongRounded";
 import ArticleRoundedIcon from "@mui/icons-material/ArticleRounded";
 import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
-import professionalAPI from "@API/professionalAPI";
+import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
+import { useAvisos } from "@/observer/AvisosContext";
 
 interface MenuContentProps {
   onNavigate?: () => void;
@@ -54,8 +55,12 @@ const staffListItems: NavItem[] = [
   { text: "Servicios", route: "/servicios", icon: <AssignmentRoundedIcon /> },
 ];
 
-// Solo aparece en el menú de Secretaría si el Admin le habilitó gestionar horarios (ajuste `horario_secretaria`)
-const horariosDeSecretaria: NavItem = { text: "Horarios", route: "/horarios", icon: <EditCalendarRoundedIcon /> };
+// Los cuatro roles tienen "Avisos" justo después de la Vista General, con el contador de lo que falta atender
+const avisosItem: NavItem = { text: "Avisos", route: "/avisos", icon: <NotificationsRoundedIcon /> };
+
+// Secretaría y el Admin aprueban los horarios que crean los profesionales y revisan su modalidad: siempre lo
+// tienen en el menú. (Crear o quitar horarios por otra persona sí depende del ajuste `horario_secretaria`.)
+const horariosDelPersonal: NavItem = { text: "Horarios", route: "/horarios", icon: <EditCalendarRoundedIcon /> };
 
 const professionalListItems: NavItem[] = [
   { text: "Vista General", route: "/dashboard", icon: <HomeRoundedIcon /> },
@@ -99,26 +104,15 @@ export default function MenuContent({ onNavigate }: MenuContentProps) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const role = getAuthenticatedUserRole();
-  const [conHorarios, setConHorarios] = useState(false);
-
-  useEffect(() => {
-    if (role !== "Staff") return;
-    let vigente = true;
-    professionalAPI
-      .reglasHorario()
-      .then((reglas) => vigente && setConHorarios(reglas.puede_gestionar))
-      .catch(() => {});
-    return () => {
-      vigente = false;
-    };
-    // Se vuelve a preguntar al cambiar de pantalla (la respuesta se recuerda un minuto)
-  }, [role, pathname]);
+  const { porAtender } = useAvisos();
 
   const base: NavItem[] =
     typeof role === 'string' && role in ROLE_MAP ? ROLE_MAP[role as keyof typeof ROLE_MAP] : [];
-  // "Horarios" va justo después de "Citas"
-  const items: NavItem[] =
-    role === "Staff" && conHorarios ? base.flatMap((item) => (item.route === "/citas" ? [item, horariosDeSecretaria] : [item])) : base;
+  // "Avisos" va después de la Vista General y "Horarios", justo después de "Citas"
+  const conHorarios = role === "Staff" || role === "Admin";
+  const items: NavItem[] = base.flatMap((item) =>
+    item.route === "/dashboard" ? [item, avisosItem] : item.route === "/citas" && conHorarios ? [item, horariosDelPersonal] : [item],
+  );
 
   const handleNav = (route: string) => {
     navigate(route.trim());
@@ -147,11 +141,13 @@ export default function MenuContent({ onNavigate }: MenuContentProps) {
           item.route === "/"
             ? pathname === "/"
             : pathname.startsWith(item.route.trim());
+        const contador = item.route === "/avisos" && porAtender > 0 ? (porAtender > 99 ? "99+" : String(porAtender)) : null;
 
         return (
           <ButtonBase
             key={index}
             onClick={() => handleNav(item.route)}
+            aria-label={contador ? `${item.text}: ${contador} por atender` : undefined}
             sx={{
               display: "flex",
               alignItems: "center",
@@ -200,6 +196,29 @@ export default function MenuContent({ onNavigate }: MenuContentProps) {
             >
               {item.text}
             </Typography>
+
+            {/* Contador de avisos por atender */}
+            {contador && (
+              <Box
+                component="span"
+                sx={{
+                  flexShrink: 0,
+                  minWidth: 20,
+                  height: 20,
+                  px: 0.75,
+                  borderRadius: "999px",
+                  display: "grid",
+                  placeItems: "center",
+                  bgcolor: "#F0919E",
+                  color: "#1D2D44",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  lineHeight: 1,
+                }}
+              >
+                {contador}
+              </Box>
+            )}
 
             {/* Barra activa */}
             {isActive && (

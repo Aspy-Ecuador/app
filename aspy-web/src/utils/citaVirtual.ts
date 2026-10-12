@@ -2,6 +2,14 @@
 // Solo se aceptan enlaces https de una reunión de estos servicios; el servidor aplica la misma regla al
 // guardar (Appointment::PLATAFORMAS_VIRTUALES y plataformaVirtual en aspy/app/Models/Appointment.php).
 // Si cambias una lista, cambia las dos.
+import type { Modalidad } from "@/typesResponse/WorkerSchedule";
+
+/** Cómo se lee cada modalidad en pantalla. */
+export const NOMBRE_MODALIDAD: Record<Modalidad, string> = { presencial: "Presencial", virtual: "Virtual" };
+
+/** La modalidad de un horario tal como llega del servidor (los anteriores al cambio son presenciales). */
+export const modalidadDe = (horario: { modalidad?: Modalidad | null }): Modalidad => (horario.modalidad === "virtual" ? "virtual" : "presencial");
+
 const PLATAFORMAS: { dominio: string; nombre: string; subdominios: boolean; rutas: string[] }[] = [
   // Zoom usa subdominios (us02web.zoom.us…); los demás, solo su dominio exacto
   { dominio: "zoom.us", nombre: "Zoom", subdominios: true, rutas: ["/j/", "/my/", "/s/", "/w/", "/wc/", "/meeting/"] },

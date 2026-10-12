@@ -19,11 +19,10 @@ import Table from "@components/Table";
 import professionalServiceAPI from "@API/professionalServiceAPI";
 import Switch from "@mui/material/Switch";
 import Progress from "@components/Progress";
-import { exportServicesPDF, exportServicesCSV } from "@/utils/utils";
+import BotonesExportar from "@components/tabla/BotonesExportar";
 import AssignmentTurnedInRoundedIcon from "@mui/icons-material/AssignmentTurnedInRounded";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import { tone } from "@shared-theme/themePrimitives";
 import BarraFiltros from "@components/tabla/BarraFiltros";
 import { coincide, useFiltros } from "@components/tabla/filtros";
@@ -379,55 +378,29 @@ export default function ServicesList() {
 
         <Box sx={{ width: "0.5px", height: 36, bgcolor: "divider", mx: 0.5 }} />
 
-        {/* Exportar PDF */}
-        <Button
-          onClick={() =>
-            exportServicesPDF(services, proServices, professionals)
-          }
-          startIcon={
-            <FileDownloadOutlinedIcon sx={{ fontSize: "14px !important" }} />
-          }
-          sx={{
-            fontSize: 12,
-            fontWeight: 500,
-            bgcolor: tone.red.bg,
-            color: tone.red.fg,
-            border: `0.5px solid ${tone.red.border}`,
-            borderRadius: 3,
-            px: 1.75,
-            py: 1.25,
-            height: "auto",
-            textTransform: "none",
-            "&:hover": { bgcolor: tone.red.border },
+        {/* PDF y Excel de los servicios que se están mostrando */}
+        <BotonesExportar
+          tabla={{
+            titulo: "Lista de servicios",
+            archivo: "servicios",
+            filas: filtrados,
+            nota: hayFiltros ? "con los filtros puestos en la pantalla" : undefined,
+            columnas: [
+              { titulo: "ID", valor: (s) => s.service_id },
+              { titulo: "Nombre", valor: (s) => s.name },
+              { titulo: "Costo", valor: (s) => Number(s.price), dinero: true },
+              {
+                titulo: "Profesional asignado",
+                valor: (s) => {
+                  const asignado = proServices.find((ps) => ps.service_id === s.service_id)?.professional?.person_id;
+                  const persona = professionals.find((p: Person) => p.person_id === asignado);
+                  return persona ? `${persona.first_name} ${persona.last_name}` : "Sin asignar";
+                },
+              },
+              { titulo: "Disponible", valor: (s) => (s.is_available ? "Sí" : "No") },
+            ],
           }}
-        >
-          PDF
-        </Button>
-
-        {/* Exportar CSV */}
-        <Button
-          onClick={() =>
-            exportServicesCSV(services, proServices, professionals)
-          }
-          startIcon={
-            <FileDownloadOutlinedIcon sx={{ fontSize: "14px !important" }} />
-          }
-          sx={{
-            fontSize: 12,
-            fontWeight: 500,
-            bgcolor: tone.green.bg,
-            color: tone.green.fg,
-            border: `0.5px solid ${tone.green.border}`,
-            borderRadius: 3,
-            px: 1.75,
-            py: 1.25,
-            height: "auto",
-            textTransform: "none",
-            "&:hover": { bgcolor: tone.green.border },
-          }}
-        >
-          Excel
-        </Button>
+        />
       </Box>
 
       {services.length > 0 && (

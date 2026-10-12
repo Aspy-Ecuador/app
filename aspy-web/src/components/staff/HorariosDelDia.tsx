@@ -10,6 +10,7 @@ import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
 import RefreshRoundedIcon from "@mui/icons-material/RefreshRounded";
+import VideocamRoundedIcon from "@mui/icons-material/VideocamRounded";
 import Campo from "@forms/Campo";
 import CampoFecha from "@forms/CampoFecha";
 import { campoSx } from "@forms/estilos";
@@ -27,8 +28,12 @@ interface Turno {
   id: number;
   inicio: string;
   fin: string;
-  /** libre = se puede agendar; ocupado = tiene cita; pasado = quedó libre y ya terminó. */
-  estado: "libre" | "ocupado" | "pasado";
+  /**
+   * libre = se puede agendar; ocupado = tiene cita; pasado = quedó libre y ya terminó;
+   * pendiente = lo creó un profesional y falta aprobarlo (todavía no se ofrece a las familias).
+   */
+  estado: "libre" | "ocupado" | "pasado" | "pendiente";
+  virtual: boolean;
   /** Libre y ya empezó: Secretaría todavía puede registrar ahí a alguien que llegó sin agendar. */
   enCurso: boolean;
   cita?: Appointment;
@@ -115,8 +120,9 @@ export default function HorariosDelDia() {
         id: h.worker_schedule_id,
         inicio: horaCorta(h.schedule.start_time),
         fin: horaCorta(h.schedule.end_time),
-        estado: !h.is_available ? "ocupado" : termino ? "pasado" : "libre",
-        enCurso: Boolean(h.is_available) && !termino && instanteEcuador(fecha, h.schedule.start_time) <= ahora,
+        estado: !h.is_available ? "ocupado" : termino ? "pasado" : h.aprobado === false ? "pendiente" : "libre",
+        virtual: h.modalidad === "virtual",
+        enCurso: Boolean(h.is_available) && h.aprobado !== false && !termino && instanteEcuador(fecha, h.schedule.start_time) <= ahora,
         cita: h.is_available ? undefined : citaDelTurno.get(h.worker_schedule_id),
       };
       porProfesional.set(profesional, [...(porProfesional.get(profesional) ?? []), turno]);
@@ -245,6 +251,8 @@ export default function HorariosDelDia() {
                 const colores =
                   t.estado === "libre"
                     ? { bg: tone.green.bg, borde: tone.green.border, texto: tone.green.fg }
+                    : t.estado === "pendiente"
+                      ? { bg: tone.amber.bg, borde: tone.amber.border, texto: tone.amber.fg }
                     : t.estado === "ocupado"
                       ? { bg: "action.hover", borde: "divider", texto: "text.primary" }
                       : { bg: "transparent", borde: "divider", texto: "text.disabled" };
@@ -252,12 +260,14 @@ export default function HorariosDelDia() {
                   <Box
                     component="li"
                     key={t.id}
-                    sx={{ minWidth: 0, px: 1.25, py: 0.875, borderRadius: 2, border: "0.5px solid", borderColor: colores.borde, bgcolor: colores.bg, borderLeft: `3px solid ${t.estado === "libre" ? tone.green.main : estado?.main ?? tone.gray.main}` }}
+                    sx={{ minWidth: 0, px: 1.25, py: 0.875, borderRadius: 2, border: "0.5px solid", borderColor: colores.borde, bgcolor: colores.bg, borderLeft: `3px solid ${t.estado === "libre" ? tone.green.main : t.estado === "pendiente" ? tone.amber.main : estado?.main ?? tone.gray.main}` }}
                   >
                     <Typography sx={{ fontSize: 12.5, fontWeight: 700, fontFamily: "monospace", color: colores.texto, lineHeight: 1.3 }}>
                       {t.inicio} – {t.fin}
+                      {t.virtual && <VideocamRoundedIcon titleAccess="Virtual" aria-label="Virtual" sx={{ fontSize: 14, ml: 0.75, verticalAlign: "-2px" }} />}
                     </Typography>
                     {t.estado === "libre" && <Typography sx={{ fontSize: 11.5, fontWeight: 600, color: tone.green.fg, lineHeight: 1.35 }}>{t.enCurso ? "Disponible · en curso" : "Disponible"}</Typography>}
+                    {t.estado === "pendiente" && <Typography sx={{ fontSize: 11.5, fontWeight: 600, color: tone.amber.fg, lineHeight: 1.35 }}>Por aprobar</Typography>}
                     {t.estado === "pasado" && <Typography sx={{ fontSize: 11.5, color: "text.secondary", lineHeight: 1.35 }}>Quedó libre (ya pasó)</Typography>}
                     {t.estado === "ocupado" && (
                       <>

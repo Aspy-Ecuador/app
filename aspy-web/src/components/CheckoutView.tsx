@@ -106,7 +106,7 @@ export default function CheckoutView({ isClient }: CheckoutViewProp) {
           />
         );
       case 1:
-        return <Review service_id={parsedServiceId} />;
+        return <Review service_id={parsedServiceId} worker_schedule_id={parsedWorkerId} />;
       default:
         throw new Error("Unknown step");
     }
