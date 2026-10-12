@@ -38,7 +38,7 @@ export default function BotonesExportar<T>({ tabla, compactos = false }: Botones
       <Button onClick={() => exportarTablaPDF(tabla)} disabled={vacia} startIcon={icono} aria-label={`Descargar en PDF: ${que}`} sx={boton(tone.red)}>
         PDF
       </Button>
-      <Button onClick={() => exportarTablaExcel(tabla)} disabled={vacia} startIcon={icono} aria-label={`Descargar en Excel: ${que}`} sx={boton(tone.green)}>
+      <Button onClick={() => void exportarTablaExcel(tabla)} disabled={vacia} startIcon={icono} aria-label={`Descargar en Excel: ${que}`} sx={boton(tone.green)}>
         Excel
       </Button>
     </Box>

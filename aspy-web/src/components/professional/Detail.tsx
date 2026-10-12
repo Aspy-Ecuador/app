@@ -12,7 +12,7 @@ import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
 import Progress from "@components/Progress";
-import LogoClaro from "@assets/logo mediano.png";
+import logoAspy from "@assets/landing/logo-aspy.webp";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
@@ -138,9 +138,9 @@ export default function AppointmentDetail() {
                 Fundación ASPY
               </Typography>
               <img
-                src={LogoClaro}
-                alt="Logo"
-                style={{ height: 28, objectFit: "contain" }}
+                src={logoAspy}
+                alt="Fundación ASPY Ecuador"
+                style={{ height: 38, objectFit: "contain" }}
               />
             </Box>
 

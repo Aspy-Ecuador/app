@@ -4,7 +4,8 @@ import type { Service } from "@/typesResponse/Service";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import autoTable from "jspdf-autotable";
-import logoBase64 from "@assets/logo mediano.png";
+// Logo oficial de ASPY (el mismo del sitio), en PNG para los PDF y el Excel
+import logoDocumentos from "@assets/landing/logo-aspy-documentos.png";
 import { crearXlsx } from "./xlsx";
 import type { PageViewsBarChartProps } from "@/components/admin/PageViewsBarChart";
 import type { StatCardProps } from "@/components/admin/StatCard";
@@ -449,16 +450,16 @@ export function getClient(data: Person[]) {
 }
 
 // -------------------------------------------------------------------------
-// ─── Paleta de colores (logo ASPY) ────────────────────────────────
+// ─── Colores de ASPY en los documentos (los mismos del sitio: components/landing/constants.tsx) ───
 const COLOR = {
   blue: [91, 184, 212] as [number, number, number], // #5BB8D4
   blueDark: [58, 154, 184] as [number, number, number], // #3A9AB8
   blueLight: [214, 240, 248] as [number, number, number], // #D6F0F8
   pink: [232, 160, 176] as [number, number, number], // #E8A0B0
   yellow: [240, 200, 74] as [number, number, number], // #F0C84A
-  black: [26, 26, 46] as [number, number, number], // #1A1A2E
+  tinta: [18, 38, 58] as [number, number, number], // #12263A, el azul oscuro de los títulos
   gray: [94, 110, 122] as [number, number, number], // #5E6E7A
-  lightGray: [245, 247, 249] as [number, number, number], // #F5F7F9
+  crema: [255, 248, 241] as [number, number, number], // #FFF8F1, el fondo claro del sitio
   white: [255, 255, 255] as [number, number, number],
   border: [226, 235, 240] as [number, number, number], // #E2EBF0
 };
@@ -474,7 +475,56 @@ function setColor(
   else doc.setTextColor(...rgb);
 }
 
-// ─── Función principal ────────────────────────────────────────────
+// ─── Encabezado y pie de los documentos de la fundación ───────────
+const DIRECCION_EN_REPORTES = "Av. Miguel H. Alcivar y Av. Alberto Borges, Guayaquil";
+const CONTACTO_EN_REPORTES = "Tel: 0999616051  |  fundacionaspyecuador@gmail.com";
+/** El logo mide 520 × 330: en la hoja va de 44 mm de ancho. */
+const LOGO_MM = { ancho: 44, alto: 27.9 };
+
+/** Franja de los tres colores de ASPY (azul, rosa y amarillo) a todo el ancho. */
+function franjaAspy(doc: jsPDFWithAutoTable, W: number, y: number, alto: number) {
+  setColor(doc, COLOR.blue, "fill");
+  doc.rect(0, y, W * 0.5, alto, "F");
+  setColor(doc, COLOR.pink, "fill");
+  doc.rect(W * 0.5, y, W * 0.25, alto, "F");
+  setColor(doc, COLOR.yellow, "fill");
+  doc.rect(W * 0.75, y, W * 0.25, alto, "F");
+}
+
+/**
+ * Encabezado (ocupa los primeros 43 mm): el logo oficial sobre fondo blanco, como en el menú del sitio,
+ * los datos de la fundación a la derecha y la franja de colores debajo.
+ */
+function encabezadoAspy(doc: jsPDFWithAutoTable, W: number, M: number) {
+  doc.addImage(logoDocumentos, "PNG", M, 6, LOGO_MM.ancho, LOGO_MM.alto, "logo-aspy", "FAST");
+
+  setColor(doc, COLOR.tinta, "text");
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  doc.text("Fundación ASPY Ecuador", W - M, 17, { align: "right" });
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  setColor(doc, COLOR.gray, "text");
+  doc.text(DIRECCION_EN_REPORTES, W - M, 24, { align: "right" });
+  doc.text(CONTACTO_EN_REPORTES, W - M, 30, { align: "right" });
+
+  franjaAspy(doc, W, 40, 3);
+}
+
+/** Pie (los últimos 17 mm de la hoja): la franja de colores y una banda azul oscuro con el contacto. */
+function pieAspy(doc: jsPDFWithAutoTable, W: number, H: number, segundaLinea: string) {
+  franjaAspy(doc, W, H - 17, 2);
+  setColor(doc, COLOR.tinta, "fill");
+  doc.rect(0, H - 15, W, 15, "F");
+  setColor(doc, [200, 215, 228], "text");
+  doc.setFontSize(7.5);
+  doc.setFont("helvetica", "normal");
+  doc.text("Fundación ASPY Ecuador  |  fundacionaspyecuador@gmail.com  |  Tel: 0999616051", W / 2, H - 8, { align: "center" });
+  setColor(doc, COLOR.blue, "text");
+  doc.text(segundaLinea, W / 2, H - 3, { align: "center" });
+}
+
+// ─── Recibo de un pago ────────────────────────────────────────────
 export function handleDownloadInvoice(invoice: FlattenedReceipt) {
   const doc = new jsPDF("p", "mm", "a4") as jsPDFWithAutoTable;
   const W = 210; // ancho A4
@@ -493,47 +543,15 @@ export function handleDownloadInvoice(invoice: FlattenedReceipt) {
     (p) => p.payment_id === invoice.receipt.payment_id,
   );
 
-  // ══════════════════════════════════════════════════════════════
-  // HEADER — banda azul superior
-  // ══════════════════════════════════════════════════════════════
-  setColor(doc, COLOR.black, "fill");
-  doc.rect(0, 0, W, 40, "F");
-
-  // Barra decorativa de colores (azul | rosa | amarillo)
-  setColor(doc, COLOR.blue, "fill");
-  doc.rect(0, 40, W * 0.5, 3, "F");
-  setColor(doc, COLOR.pink, "fill");
-  doc.rect(W * 0.5, 40, W * 0.25, 3, "F");
-  setColor(doc, COLOR.yellow, "fill");
-  doc.rect(W * 0.75, 40, W * 0.25, 3, "F");
-
-  // Logo
-  doc.addImage(logoBase64, "PNG", M, 5, 45, 30);
-
-  // Nombre fundación
-  setColor(doc, COLOR.white, "text");
-  doc.setFontSize(16);
-  doc.setFont("helvetica", "bold");
-  doc.text("Fundación ASPY Ecuador", W - M, 17, { align: "right" });
-
-  // Info contacto
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "normal");
-  setColor(doc, [200, 220, 235], "text");
-  doc.text("Av. Miguel H. Alcivar y Av. Alberto Borges, Guayaquil", W - M, 24, {
-    align: "right",
-  });
-  doc.text("Tel: 0999616051  |  fundacionaspyecuador@gmail.com", W - M, 30, {
-    align: "right",
-  });
+  encabezadoAspy(doc, W, M);
 
   // ══════════════════════════════════════════════════════════════
   // TÍTULO DOCUMENTO
   // ══════════════════════════════════════════════════════════════
-  setColor(doc, COLOR.lightGray, "fill");
+  setColor(doc, COLOR.crema, "fill");
   doc.rect(0, 43, W, 18, "F");
 
-  setColor(doc, COLOR.black, "text");
+  setColor(doc, COLOR.tinta, "text");
   doc.setFontSize(13);
   doc.setFont("helvetica", "bold");
   doc.text("COMPROBANTE DE PAGO", W / 2, 54, { align: "center" });
@@ -579,7 +597,7 @@ export function handleDownloadInvoice(invoice: FlattenedReceipt) {
   doc.text("Email:", M + 4, y + 20);
   doc.text("Teléfono:", M + 4, y + 27);
 
-  setColor(doc, COLOR.black, "text");
+  setColor(doc, COLOR.tinta, "text");
   doc.setFont("helvetica", "bold");
   doc.text(invoice.client || "N/A", M + 24, y + 13);
   doc.setFont("helvetica", "normal");
@@ -602,7 +620,7 @@ export function handleDownloadInvoice(invoice: FlattenedReceipt) {
   doc.text("Estado:", rx + 4, y + 20);
   doc.text("Método de pago:", rx + 4, y + 27);
 
-  setColor(doc, COLOR.black, "text");
+  setColor(doc, COLOR.tinta, "text");
   doc.setFont("helvetica", "bold");
   doc.text(fechaLocal(invoice.receipt.creation_date), rx + 36, y + 13);
   doc.setFont("helvetica", "normal");
@@ -615,7 +633,7 @@ export function handleDownloadInvoice(invoice: FlattenedReceipt) {
   y += 44;
 
   // Etiqueta sección
-  setColor(doc, COLOR.black, "text");
+  setColor(doc, COLOR.tinta, "text");
   doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
   doc.text("DETALLE DEL SERVICIO", M, y);
@@ -634,7 +652,7 @@ export function handleDownloadInvoice(invoice: FlattenedReceipt) {
     body: [["1", invoice.service, `$${invoice.price}`, `$${invoice.price}`]],
     theme: "plain",
     headStyles: {
-      fillColor: COLOR.black,
+      fillColor: COLOR.tinta,
       textColor: COLOR.white,
       fontSize: 8.5,
       fontStyle: "bold",
@@ -642,11 +660,11 @@ export function handleDownloadInvoice(invoice: FlattenedReceipt) {
     },
     bodyStyles: {
       fontSize: 9,
-      textColor: COLOR.black,
+      textColor: COLOR.tinta,
       cellPadding: { top: 5, bottom: 5, left: 5, right: 5 },
     },
     alternateRowStyles: {
-      fillColor: COLOR.lightGray,
+      fillColor: COLOR.crema,
     },
     columnStyles: {
       0: { halign: "center", cellWidth: 12 },
@@ -667,7 +685,7 @@ export function handleDownloadInvoice(invoice: FlattenedReceipt) {
   const tw = 80; // ancho
   const tx = W - M - tw;
 
-  setColor(doc, COLOR.lightGray, "fill");
+  setColor(doc, COLOR.crema, "fill");
   setColor(doc, COLOR.border, "draw");
   doc.setLineWidth(0.3);
   doc.roundedRect(tx, afterTable, tw, 36, 2, 2, "FD");
@@ -718,39 +736,14 @@ export function handleDownloadInvoice(invoice: FlattenedReceipt) {
   doc.setFont("helvetica", "bold");
   doc.text("Nota:", M + 7, noteY + 7);
   doc.setFont("helvetica", "normal");
-  setColor(doc, COLOR.black, "text");
+  setColor(doc, COLOR.tinta, "text");
   doc.text(
     "Este comprobante es válido como constancia de pago. Para consultas, contáctenos a nuestro correo o teléfono.",
     M + 7,
     noteY + 13,
   );
 
-  // ══════════════════════════════════════════════════════════════
-  // FOOTER
-  // ══════════════════════════════════════════════════════════════
-  // Barra de colores inferior
-  setColor(doc, COLOR.blue, "fill");
-  doc.rect(0, 280, W * 0.5, 2, "F");
-  setColor(doc, COLOR.pink, "fill");
-  doc.rect(W * 0.5, 280, W * 0.25, 2, "F");
-  setColor(doc, COLOR.yellow, "fill");
-  doc.rect(W * 0.75, 280, W * 0.25, 2, "F");
-
-  // Fondo footer
-  setColor(doc, COLOR.black, "fill");
-  doc.rect(0, 282, W, 15, "F");
-
-  setColor(doc, [180, 200, 215], "text");
-  doc.setFontSize(7.5);
-  doc.setFont("helvetica", "normal");
-  doc.text(
-    "Fundación ASPY Ecuador  |  fundacionaspyecuador@gmail.com  |  Tel: 0999616051",
-    W / 2,
-    289,
-    { align: "center" },
-  );
-  setColor(doc, COLOR.blue, "text");
-  doc.text("Gracias por confiar en nosotros.", W / 2, 294, { align: "center" });
+  pieAspy(doc, W, 297, "Gracias por confiar en nosotros.");
 
   // ── Guardar ─────────────────────────────────────────────────
   doc.save(
@@ -781,9 +774,6 @@ export interface TablaExportable<T> {
   nota?: string;
 }
 
-const DIRECCION_EN_REPORTES = "Av. Miguel H. Alcivar y Av. Alberto Borges, Guayaquil";
-const CONTACTO_EN_REPORTES = "Tel: 0999616051  |  fundacionaspyecuador@gmail.com";
-
 function descargarArchivoGenerado(blob: Blob, nombre: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -793,18 +783,47 @@ function descargarArchivoGenerado(blob: Blob, nombre: string) {
   URL.revokeObjectURL(url);
 }
 
-/** Excel de verdad (.xlsx): los números van como números y la primera fila trae el filtro de Excel puesto. */
-export function exportarTablaExcel<T>(tabla: TablaExportable<T>) {
+/** El logo, una sola vez por sesión. Si no se puede leer, el Excel sale sin él (nunca deja de descargarse). */
+let logoEnBytes: Promise<Uint8Array | null> | null = null;
+const bytesDelLogo = () =>
+  (logoEnBytes ??= fetch(logoDocumentos)
+    .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(String(r.status)))))
+    .then((b) => new Uint8Array(b))
+    .catch(() => {
+      logoEnBytes = null;
+      return null;
+    }));
+
+/**
+ * Excel de verdad (.xlsx): arriba, el logo de ASPY y los datos de la lista; debajo, la tabla, con los números
+ * como números y el filtro de Excel puesto en sus encabezados (fila 6).
+ */
+export async function exportarTablaExcel<T>(tabla: TablaExportable<T>) {
   const filas = tabla.filas.map((fila) =>
     tabla.columnas.map((columna) => {
       const valor = columna.valor(fila);
       return columna.dinero ? Number(valor) || 0 : valor;
     }),
   );
+  const logo = await bytesDelLogo();
+  const cuantos = tabla.filas.length === 1 ? "1 registro" : `${tabla.filas.length} registros`;
   const bytes = crearXlsx(
     tabla.columnas.map((columna) => columna.titulo),
     filas,
-    { hoja: tabla.titulo, conDecimales: tabla.columnas.flatMap((columna, i) => (columna.dinero ? [i] : [])) },
+    {
+      hoja: tabla.titulo,
+      conDecimales: tabla.columnas.flatMap((columna, i) => (columna.dinero ? [i] : [])),
+      membrete: {
+        // 150 × 95 px en la hoja (el archivo trae más resolución, para que se vea nítido al agrandar o imprimir)
+        logo: logo ? { png: logo, ancho: 150, alto: 95, descripcion: "Logo de la Fundación ASPY Ecuador" } : undefined,
+        lineas: [
+          "Fundación ASPY Ecuador",
+          tabla.titulo,
+          `Generado el ${hoyEcuador().split("-").reverse().join("/")}  ·  ${tabla.nota ? `${cuantos} · ${tabla.nota}` : cuantos}`,
+          `${DIRECCION_EN_REPORTES}  |  ${CONTACTO_EN_REPORTES}`,
+        ],
+      },
+    },
   );
   descargarArchivoGenerado(
     new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }),
@@ -820,31 +839,12 @@ export function exportarTablaPDF<T>(tabla: TablaExportable<T>) {
   const H = acostada ? 210 : 297;
   const M = 14;
 
-  // ── Encabezado (primera página) ──
-  setColor(doc, COLOR.black, "fill");
-  doc.rect(0, 0, W, 40, "F");
-  setColor(doc, COLOR.blue, "fill");
-  doc.rect(0, 40, W * 0.5, 3, "F");
-  setColor(doc, COLOR.pink, "fill");
-  doc.rect(W * 0.5, 40, W * 0.25, 3, "F");
-  setColor(doc, COLOR.yellow, "fill");
-  doc.rect(W * 0.75, 40, W * 0.25, 3, "F");
-  doc.addImage(logoBase64, "PNG", M, 5, 45, 30);
-
-  setColor(doc, COLOR.white, "text");
-  doc.setFontSize(16);
-  doc.setFont("helvetica", "bold");
-  doc.text("Fundación ASPY Ecuador", W - M, 17, { align: "right" });
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "normal");
-  setColor(doc, [200, 220, 235], "text");
-  doc.text(DIRECCION_EN_REPORTES, W - M, 24, { align: "right" });
-  doc.text(CONTACTO_EN_REPORTES, W - M, 30, { align: "right" });
+  encabezadoAspy(doc, W, M);
 
   // ── Título, fecha y cuántos registros trae ──
-  setColor(doc, COLOR.lightGray, "fill");
+  setColor(doc, COLOR.crema, "fill");
   doc.rect(0, 43, W, 18, "F");
-  setColor(doc, COLOR.black, "text");
+  setColor(doc, COLOR.tinta, "text");
   doc.setFontSize(13);
   doc.setFont("helvetica", "bold");
   doc.text(tabla.titulo.toUpperCase(), W / 2, 54, { align: "center" });
@@ -860,22 +860,7 @@ export function exportarTablaPDF<T>(tabla: TablaExportable<T>) {
   const cuantos = tabla.filas.length === 1 ? "1 registro" : `${tabla.filas.length} registros`;
   doc.text(tabla.nota ? `${cuantos} · ${tabla.nota}` : cuantos, M, 70);
 
-  const pie = (pagina: number) => {
-    setColor(doc, COLOR.blue, "fill");
-    doc.rect(0, H - 17, W * 0.5, 2, "F");
-    setColor(doc, COLOR.pink, "fill");
-    doc.rect(W * 0.5, H - 17, W * 0.25, 2, "F");
-    setColor(doc, COLOR.yellow, "fill");
-    doc.rect(W * 0.75, H - 17, W * 0.25, 2, "F");
-    setColor(doc, COLOR.black, "fill");
-    doc.rect(0, H - 15, W, 15, "F");
-    setColor(doc, [180, 200, 215], "text");
-    doc.setFontSize(7.5);
-    doc.setFont("helvetica", "normal");
-    doc.text("Fundación ASPY Ecuador  |  fundacionaspyecuador@gmail.com  |  Tel: 0999616051", W / 2, H - 8, { align: "center" });
-    setColor(doc, COLOR.blue, "text");
-    doc.text(`Reporte generado automáticamente.  ·  Página ${pagina}`, W / 2, H - 3, { align: "center" });
-  };
+  const pie = (pagina: number) => pieAspy(doc, W, H, `Reporte generado automáticamente.  ·  Página ${pagina}`);
 
   autoTable(doc, {
     startY: 75,
@@ -888,9 +873,9 @@ export function exportarTablaPDF<T>(tabla: TablaExportable<T>) {
       }),
     ),
     theme: "plain",
-    headStyles: { fillColor: COLOR.black, textColor: COLOR.white, fontSize: 8, fontStyle: "bold", cellPadding: { top: 4, bottom: 4, left: 4, right: 4 } },
-    bodyStyles: { fontSize: 8, textColor: COLOR.black, cellPadding: { top: 3.5, bottom: 3.5, left: 4, right: 4 } },
-    alternateRowStyles: { fillColor: COLOR.lightGray },
+    headStyles: { fillColor: COLOR.tinta, textColor: COLOR.white, fontSize: 8, fontStyle: "bold", cellPadding: { top: 4, bottom: 4, left: 4, right: 4 } },
+    bodyStyles: { fontSize: 8, textColor: COLOR.tinta, cellPadding: { top: 3.5, bottom: 3.5, left: 4, right: 4 } },
+    alternateRowStyles: { fillColor: COLOR.crema },
     columnStyles: Object.fromEntries(tabla.columnas.flatMap((columna, i) => (columna.dinero ? [[i, { halign: "right" as const }]] : []))),
     // El pie ocupa los últimos 17 mm de cada página
     margin: { left: M, right: M, top: 14, bottom: 22 },

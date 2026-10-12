@@ -1,15 +1,25 @@
-// Libro de Excel (.xlsx) mínimo y sin dependencias: una hoja con encabezados, textos y números.
+// Libro de Excel (.xlsx) mínimo y sin dependencias: una hoja con encabezados, textos y números y,
+// si se pide, un membrete con el logo arriba.
 // Un .xlsx es un ZIP con unos pocos archivos XML; aquí se arma sin comprimir (los listados del sistema
 // son pequeños). Reemplaza al .csv que se descargaba antes: en un Excel en español, un .csv separado
 // por comas se abre todo en una sola columna.
 
 export type CeldaXlsx = string | number | null | undefined;
 
+/** Lo que va arriba de la tabla: el logo y hasta cuatro renglones (organización, título de la lista y dos más). */
+export interface MembreteXlsx {
+  /** Logo en PNG y el tamaño con que se dibuja, en píxeles de pantalla. */
+  logo?: { png: Uint8Array; ancho: number; alto: number; descripcion?: string };
+  lineas: string[];
+}
+
 export interface OpcionesXlsx {
   /** Nombre de la hoja (hasta 31 caracteres, sin : / ? * [ ]). */
   hoja?: string;
   /** Índices de las columnas con montos: sus números se muestran con dos decimales. */
   conDecimales?: number[];
+  /** Con membrete, la tabla empieza en la fila 6 (los encabezados) y los datos, en la 7. */
+  membrete?: MembreteXlsx;
 }
 
 const CABECERA = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
@@ -124,14 +134,28 @@ function letraDeColumna(indice: number): string {
   return letras;
 }
 
+/** Filas que ocupa el membrete encima de la tabla: cuatro renglones y uno de aire. */
+const FILAS_DEL_MEMBRETE = 5;
+
+/** Ancho aproximado, en píxeles, de una columna de Excel de `caracteres` de ancho (Calibri 11). */
+const pixelesDeColumna = (caracteres: number) => Math.round(caracteres * 7 + 5);
+
+/** Un píxel de pantalla en las unidades de los dibujos de Office (EMU). */
+const EMU_POR_PIXEL = 9525;
+
 /**
- * Arma el .xlsx: la primera fila son los encabezados (en negrita, fija al desplazarse y con el filtro de
- * Excel puesto). Los números van como números, para poder sumarlos y ordenarlos; lo demás, como texto.
+ * Arma el .xlsx. Los encabezados van en negrita sobre el azul oscuro de ASPY, fijos al desplazarse y con el
+ * filtro de Excel puesto; los números van como números, para poder sumarlos y ordenarlos, y lo demás como texto.
+ * Con `membrete`, arriba van el logo y los datos de la lista, y la tabla empieza más abajo (fila 6).
  */
 export function crearXlsx(encabezados: string[], filas: CeldaXlsx[][], opciones: OpcionesXlsx = {}) {
   const conDecimales = new Set(opciones.conDecimales ?? []);
   const hoja = (opciones.hoja ?? "Datos").replace(/[:/?*[\]]/g, " ").slice(0, 31) || "Datos";
   const columnas = encabezados.length;
+  const membrete = opciones.membrete;
+  const logo = membrete?.logo;
+  /** Fila de los encabezados de la tabla (1 sin membrete). */
+  const filaTitulos = membrete ? FILAS_DEL_MEMBRETE + 1 : 1;
 
   const celda = (valor: CeldaXlsx, fila: number, columna: number, estilo: number): string => {
     const referencia = `${letraDeColumna(columna)}${fila}`;
@@ -141,36 +165,66 @@ export function crearXlsx(encabezados: string[], filas: CeldaXlsx[][], opciones:
     return `<c r="${referencia}" s="${estilo}" t="inlineStr"><is><t xml:space="preserve">${escapar(texto)}</t></is></c>`;
   };
 
-  const filasXml = [
-    `<row r="1">${encabezados.map((titulo, c) => celda(titulo, 1, c, 1)).join("")}</row>`,
-    ...filas.map((fila, f) => `<row r="${f + 2}">${Array.from({ length: columnas }, (_, c) => celda(fila[c], f + 2, c, conDecimales.has(c) && typeof fila[c] === "number" ? 2 : 0)).join("")}</row>`),
-  ].join("");
-
   // Ancho de cada columna según su texto más largo (entre 8 y 50 caracteres)
   const anchos = encabezados.map((titulo, c) => {
     const largo = Math.max(titulo.length, ...filas.map((fila) => String(fila[c] ?? "").length));
     return Math.min(50, Math.max(8, largo + 2));
   });
-  const ultima = `${letraDeColumna(Math.max(0, columnas - 1))}${filas.length + 1}`;
+
+  // El texto del membrete va en la primera columna que queda a la derecha del logo
+  let columnaDelTexto = 0;
+  if (logo) {
+    let recorrido = 0;
+    while (columnaDelTexto < columnas && recorrido < logo.ancho + 16) recorrido += pixelesDeColumna(anchos[columnaDelTexto++]);
+  }
+  // Estilos: 3 = nombre de la organización, 4 = título de la lista, 5 = lo demás
+  const filasDelMembrete = membrete
+    ? Array.from({ length: FILAS_DEL_MEMBRETE }, (_, i) => {
+        const texto = i < 4 ? membrete.lineas[i] : undefined;
+        const alto = i === 4 ? 8 : 21;
+        return `<row r="${i + 1}" ht="${alto}" customHeight="1">${texto ? celda(texto, i + 1, columnaDelTexto, Math.min(i, 2) + 3) : ""}</row>`;
+      })
+    : [];
+
+  const filasXml = [
+    ...filasDelMembrete,
+    `<row r="${filaTitulos}" ht="20" customHeight="1">${encabezados.map((titulo, c) => celda(titulo, filaTitulos, c, 1)).join("")}</row>`,
+    ...filas.map((fila, f) => {
+      const r = filaTitulos + 1 + f;
+      return `<row r="${r}">${Array.from({ length: columnas }, (_, c) => celda(fila[c], r, c, conDecimales.has(c) && typeof fila[c] === "number" ? 2 : 0)).join("")}</row>`;
+    }),
+  ].join("");
+  const ultima = `${letraDeColumna(Math.max(0, columnas - 1))}${filaTitulos + filas.length}`;
 
   const hojaXml =
-    `${CABECERA}<worksheet xmlns="${NS}/spreadsheetml/2006/main">` +
-    `<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>` +
+    `${CABECERA}<worksheet xmlns="${NS}/spreadsheetml/2006/main" xmlns:r="${NS}/officeDocument/2006/relationships">` +
+    `<sheetViews><sheetView workbookViewId="0"><pane ySplit="${filaTitulos}" topLeftCell="A${filaTitulos + 1}" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>` +
     `<cols>${anchos.map((ancho, c) => `<col min="${c + 1}" max="${c + 1}" width="${ancho}" customWidth="1"/>`).join("")}</cols>` +
     `<sheetData>${filasXml}</sheetData>` +
-    (columnas > 0 ? `<autoFilter ref="A1:${ultima}"/>` : "") +
+    (columnas > 0 ? `<autoFilter ref="A${filaTitulos}:${ultima}"/>` : "") +
+    (logo ? `<drawing r:id="rId1"/>` : "") +
     `</worksheet>`;
 
   const estilos =
     `${CABECERA}<styleSheet xmlns="${NS}/spreadsheetml/2006/main">` +
-    `<fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts>` +
-    `<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE8F5FA"/><bgColor indexed="64"/></patternFill></fill></fills>` +
+    `<fonts count="5">` +
+    `<font><sz val="11"/><name val="Calibri"/></font>` +
+    `<font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font>` +
+    `<font><b/><sz val="14"/><color rgb="FF12263A"/><name val="Calibri"/></font>` +
+    `<font><b/><sz val="12"/><color rgb="FF3A9AB8"/><name val="Calibri"/></font>` +
+    `<font><sz val="9"/><color rgb="FF5D6B7C"/><name val="Calibri"/></font>` +
+    `</fonts>` +
+    // Encabezados de la tabla: el azul oscuro de ASPY (#12263A) con letra blanca
+    `<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF12263A"/><bgColor indexed="64"/></patternFill></fill></fills>` +
     `<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>` +
     `<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>` +
-    `<cellXfs count="3">` +
+    `<cellXfs count="6">` +
     `<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>` +
-    `<xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/>` +
+    `<xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment vertical="center"/></xf>` +
     `<xf numFmtId="2" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>` +
+    `<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="center"/></xf>` +
+    `<xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="center"/></xf>` +
+    `<xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="center"/></xf>` +
     `</cellXfs></styleSheet>`;
 
   const libro =
@@ -181,9 +235,11 @@ export function crearXlsx(encabezados: string[], filas: CeldaXlsx[][], opciones:
     `${CABECERA}<Types xmlns="${NS}/package/2006/content-types">` +
     `<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>` +
     `<Default Extension="xml" ContentType="application/xml"/>` +
+    (logo ? `<Default Extension="png" ContentType="image/png"/>` : "") +
     `<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>` +
     `<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>` +
     `<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>` +
+    (logo ? `<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>` : "") +
     `</Types>`;
 
   const relaciones =
@@ -196,14 +252,41 @@ export function crearXlsx(encabezados: string[], filas: CeldaXlsx[][], opciones:
     `<Relationship Id="rId2" Type="${NS}/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
 
   const codificar = new TextEncoder();
-  return zip(
-    [
-      ["[Content_Types].xml", tipos],
-      ["_rels/.rels", relaciones],
-      ["xl/workbook.xml", libro],
-      ["xl/_rels/workbook.xml.rels", relacionesDelLibro],
-      ["xl/styles.xml", estilos],
-      ["xl/worksheets/sheet1.xml", hojaXml],
-    ].map(([nombre, xml]) => ({ nombre, datos: codificar.encode(xml) })),
-  );
+  const archivos: { nombre: string; datos: Uint8Array }[] = [
+    ["[Content_Types].xml", tipos],
+    ["_rels/.rels", relaciones],
+    ["xl/workbook.xml", libro],
+    ["xl/_rels/workbook.xml.rels", relacionesDelLibro],
+    ["xl/styles.xml", estilos],
+    ["xl/worksheets/sheet1.xml", hojaXml],
+  ].map(([nombre, xml]) => ({ nombre, datos: codificar.encode(xml) }));
+
+  if (logo) {
+    // El logo es un dibujo anclado a la celda A1: la hoja apunta al dibujo y el dibujo, a la imagen
+    const cx = Math.round(logo.ancho * EMU_POR_PIXEL);
+    const cy = Math.round(logo.alto * EMU_POR_PIXEL);
+    const DIBUJO = `${NS}/drawingml/2006`;
+    const dibujo =
+      `${CABECERA}<xdr:wsDr xmlns:xdr="${DIBUJO}/spreadsheetDrawing" xmlns:a="${DIBUJO}/main">` +
+      `<xdr:oneCellAnchor><xdr:from><xdr:col>0</xdr:col><xdr:colOff>${6 * EMU_POR_PIXEL}</xdr:colOff><xdr:row>0</xdr:row><xdr:rowOff>${6 * EMU_POR_PIXEL}</xdr:rowOff></xdr:from>` +
+      `<xdr:ext cx="${cx}" cy="${cy}"/>` +
+      `<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="Logo" descr="${escapar(logo.descripcion ?? "Logo")}"/><xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr>` +
+      `<xdr:blipFill><a:blip xmlns:r="${NS}/officeDocument/2006/relationships" r:embed="rId1"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill>` +
+      `<xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic>` +
+      `<xdr:clientData/></xdr:oneCellAnchor></xdr:wsDr>`;
+    const relacionesDeLaHoja =
+      `${CABECERA}<Relationships xmlns="${NS}/package/2006/relationships">` +
+      `<Relationship Id="rId1" Type="${NS}/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/></Relationships>`;
+    const relacionesDelDibujo =
+      `${CABECERA}<Relationships xmlns="${NS}/package/2006/relationships">` +
+      `<Relationship Id="rId1" Type="${NS}/officeDocument/2006/relationships/image" Target="../media/image1.png"/></Relationships>`;
+    archivos.push(
+      { nombre: "xl/worksheets/_rels/sheet1.xml.rels", datos: codificar.encode(relacionesDeLaHoja) },
+      { nombre: "xl/drawings/drawing1.xml", datos: codificar.encode(dibujo) },
+      { nombre: "xl/drawings/_rels/drawing1.xml.rels", datos: codificar.encode(relacionesDelDibujo) },
+      { nombre: "xl/media/image1.png", datos: logo.png },
+    );
+  }
+
+  return zip(archivos);
 }
